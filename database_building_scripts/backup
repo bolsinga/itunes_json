@@ -54,5 +54,8 @@ hdiutil create -ov -srcfolder /cvs/repository $UNIQUESCRATCH/backup-cvs-$DATE.dm
 # Create a dmg of all the archived files
 hdiutil create -ov -srcfolder $UNIQUESCRATCH $BACKUP/backup-$DATE.dmg
 
+# Remove the spare . files
+rm $BACKUP/._*.dmg
+
 # Clean up
 rm -rf $UNIQUESCRATCH
