@@ -1,0 +1,4 @@
+#/bin/sh
+
+sudo mount -v homer:/vol/vol2/home2 /home
+sudo mount -v fat-tony:/shares/buildmaster /home/buildmaster
