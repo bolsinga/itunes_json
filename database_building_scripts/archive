@@ -29,7 +29,7 @@ fi
 
 mkdir -p $TRASH
 
-CURDAY=`date "+%d"`
+CURDAY=`date "+%e"`
 
 # This is going to be cutting into the previous month
 #  and perhaps the previous year.
@@ -68,13 +68,21 @@ then
   fi
  done
 else
- CUTOFFDAY=$(($CURDAY - 7))
+ CUT=$(($CURDAY - 7))
+ if [ $CUT -le 9 ]
+ then
+  CUTOFFDAY="0$CUT"
+ else
+  CUTOFFDAY=$CUT
+ fi
  CUTOFFMONTH=`date "+%m"`
  CUTOFFYEAR=`date "+%Y"`
 fi
 
 # Find the oldest file matching the cutoff date
 cd $BACKUP
+
+echo Archive cut-off date: $CUTOFFYEAR-$CUTOFFMONTH-$CUTOFFDAY
 
 while [ ! -e backup-$CUTOFFYEAR-$CUTOFFMONTH-$CUTOFFDAY.dmg ]
 do
@@ -102,10 +110,8 @@ done
 
 CUTOFFDATE=$CUTOFFYEAR-$CUTOFFMONTH-$CUTOFFDAY
 
-OLDESTCUTOFF=`ls -1t backup-$CUTOFFDATE.dmg | tail -1`
-
 # Find the files older than the cutoff date and clean them up
-FILESTOCLEANUP=`find $BACKUP -not -newer $OLDESTCUTOFF -and -not -name $OLDESTCUTOFF`
+FILESTOCLEANUP=`find $BACKUP -not -newer backup-$CUTOFFDATE.dmg -and -not -name backup-$CUTOFFDATE.dmg`
 
 echo These files would be trashed: $FILESTOCLEANUP
 mv $FILESTOCLEANUP $TRASH
