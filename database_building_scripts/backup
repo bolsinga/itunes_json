@@ -1,5 +1,17 @@
 #!/bin/sh
 
+BACKUP=$1
+if [ -z $BACKUP ]
+then
+ echo Need to supply a backup directory.
+ exit 1
+fi
+if [ ! -d $BACKUP ]
+then
+ echo $BACKUP does not exist.
+ exit 1
+fi
+
 # Quit iPhoto if it is running
 c=`ps -wwwaux | grep iPhoto\.app | grep -v grep`
 if [ "$c" ]
@@ -15,14 +27,10 @@ fi
 IPHOTO="iPhoto Library"
 DATE=`date "+%Y-%m-%d"`
 
-DEST=$1
-
-mkdir -p $DEST
-
 # Move the iPhoto Library out of the way while backing up $HOME
 mv "$HOME/Pictures/$IPHOTO" "$HOME/.."
-hdiutil create -ov -srcfolder $HOME $DEST/backup-home-$DATE.dmg
+hdiutil create -ov -srcfolder $HOME $BACKUP/backup-home-$DATE.dmg
 mv "$HOME/../$IPHOTO" "$HOME/Pictures/"
 
 # Back up CVS
-hdiutil create -ov -srcfolder /cvs/repository $DEST/backup-cvs-$DATE.dmg
+hdiutil create -ov -srcfolder /cvs/repository $BACKUP/backup-cvs-$DATE.dmg
