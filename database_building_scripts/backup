@@ -15,12 +15,14 @@ fi
 IPHOTO="iPhoto Library"
 DATE=`date "+%Y-%m-%d"`
 
-DEST="/tmp"
+DEST=$1
 
+mkdir -p $DEST
+
+# Move the iPhoto Library out of the way while backing up $HOME
 mv "$HOME/Pictures/$IPHOTO" "$HOME/.."
-
 hdiutil create -ov -srcfolder $HOME $DEST/backup-home-$DATE.dmg
-
 mv "$HOME/../$IPHOTO" "$HOME/Pictures/"
 
+# Back up CVS
 hdiutil create -ov -srcfolder /cvs/repository $DEST/backup-cvs-$DATE.dmg
