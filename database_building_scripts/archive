@@ -43,6 +43,11 @@ then
   CUTOFFYEAR=$(($CUTOFFYEAR - 1))
  else
   CUTOFFMONTH=$(($CUTOFFMONTH - 1))
+  if [ $CUTOFFMONTH -le 9 ]
+  then
+   CUTMONTH="0$CUTOFFMONTH"
+   CUTOFFMONTH=$CUTMONTH
+  fi
  fi
 
  # See if date 31 - (7 - CURDAY) exists. then increase up to 31.
