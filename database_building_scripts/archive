@@ -1,10 +1,32 @@
 #!/bin/sh
 
-BACKUP=/tmp/backup
-DEST=$BACKUP/archive/
-TRASH=$BACKUP/archive/
+BACKUP=~/Documents/backup
+ARCHIVE=$BACKUP/archive/
 
-mkdir -p $DEST
+TRASH=$BACKUP/trash/
+
+if [ -z $BACKUP ]
+then
+ echo Need to supply a backup directory to archive.
+ exit 1
+fi
+if [ ! -d $BACKUP ]
+then
+ echo $BACKUP does not exist.
+ exit 1
+fi
+
+if [ -z $ARCHIVE ]
+then
+ echo Need to supply a archive directory.
+ exit 1
+fi
+if [ ! -d $ARCHIVE ]
+then
+ echo $ARCHIVE does not exist.
+ exit 1
+fi
+
 mkdir -p $TRASH
 
 CURDAY=`date "+%d"`
@@ -68,7 +90,7 @@ then
 fi
 
 # Copy the cutoff date files to the archive location
-cp $BACKUP/backup-*-$CUTOFFDATE.dmg $DEST
+cp $BACKUP/backup-*-$CUTOFFDATE.dmg $ARCHIVE
 
 echo These files should be archived:
-echo `ls -1t $DEST`
+echo `ls -1t $ARCHIVE`
