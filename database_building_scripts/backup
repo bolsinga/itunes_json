@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# Quit iPhoto if it is running
+c=`ps -wwwaux | grep iPhoto\.app | grep -v grep`
+if [ "$c" ]
+then
+/usr/bin/osascript <<EOF
+tell application "iPhoto"
+quit
+end tell
+EOF
+sleep 10
+fi
+
+IPHOTO="iPhoto Library"
+DATE=`date "+%Y-%m-%d"`
+
+DEST="/tmp"
+
+mv "$HOME/Pictures/$IPHOTO" "$HOME/.."
+
+hdiutil create -ov -srcfolder $HOME $DEST/backup-home-$DATE.dmg
+
+mv "$HOME/../$IPHOTO" "$HOME/Pictures/"
+
+hdiutil create -ov -srcfolder /cvs/repository $DEST/backup-cvs-$DATE.dmg
