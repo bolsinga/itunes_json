@@ -1,6 +1,8 @@
 #!/bin/sh
 
 BACKUP=$1
+SCRATCH=$2
+
 if [ -z $BACKUP ]
 then
  echo Need to supply a backup directory.
@@ -9,6 +11,17 @@ fi
 if [ ! -d $BACKUP ]
 then
  echo $BACKUP does not exist.
+ exit 1
+fi
+
+if [ -z $SCRATCH ]
+then
+ echo Need to supply a scratch directory.
+ exit 1
+fi
+if [ ! -d $SCRATCH ]
+then
+ echo $SCRATCH does not exist.
  exit 1
 fi
 
@@ -27,10 +40,19 @@ fi
 IPHOTO="iPhoto Library"
 DATE=`date "+%Y-%m-%d"`
 
+UNIQUESCRATCH=$SCRATCH/$USER/backup-$DATE
+mkdir -p $UNIQUESCRATCH
+
 # Move the iPhoto Library out of the way while backing up $HOME
 mv "$HOME/Pictures/$IPHOTO" "$HOME/.."
-hdiutil create -ov -srcfolder $HOME $BACKUP/backup-home-$DATE.dmg
+hdiutil create -ov -srcfolder $HOME $UNIQUESCRATCH/backup-home-$DATE.dmg
 mv "$HOME/../$IPHOTO" "$HOME/Pictures/"
 
 # Back up CVS
-hdiutil create -ov -srcfolder /cvs/repository $BACKUP/backup-cvs-$DATE.dmg
+hdiutil create -ov -srcfolder /cvs/repository $UNIQUESCRATCH/backup-cvs-$DATE.dmg
+
+# Create a dmg of all the archived files
+hdiutil create -ov -srcfolder $UNIQUESCRATCH $BACKUP/backup-$DATE.dmg
+
+# Clean up
+rm -rf $UNIQUESCRATCH

@@ -61,7 +61,7 @@ then
  do
   if [ -z $CUTOFFDAY ]
   then
-   if test -e $BACKUP/backup-cvs-$CUTOFFYEAR-$CUTOFFMONTH-$LASTDAY.dmg
+   if test -e $BACKUP/backup-$CUTOFFYEAR-$CUTOFFMONTH-$LASTDAY.dmg
    then
     CUTOFFDAY=$LASTDAY
    fi
@@ -76,7 +76,7 @@ fi
 # Find the oldest file matching the cutoff date
 cd $BACKUP
 
-while [ ! -e backup-cvs-$CUTOFFYEAR-$CUTOFFMONTH-$CUTOFFDAY.dmg ]
+while [ ! -e backup-$CUTOFFYEAR-$CUTOFFMONTH-$CUTOFFDAY.dmg ]
 do
  if [ $CUTOFFDAY -eq 1 ]
  then
@@ -102,7 +102,7 @@ done
 
 CUTOFFDATE=$CUTOFFYEAR-$CUTOFFMONTH-$CUTOFFDAY
 
-OLDESTCUTOFF=`ls -1t backup-*-$CUTOFFDATE.dmg | tail -1`
+OLDESTCUTOFF=`ls -1t backup-$CUTOFFDATE.dmg | tail -1`
 
 # Find the files older than the cutoff date and clean them up
 FILESTOCLEANUP=`find $BACKUP -not -newer $OLDESTCUTOFF -and -not -name $OLDESTCUTOFF`
@@ -112,7 +112,7 @@ mv $FILESTOCLEANUP $TRASH
 #rm $FILESTOCLEANUP
 
 # Copy the cutoff date files to the archive location
-cp $BACKUP/backup-*-$CUTOFFDATE.dmg $ARCHIVE
+cp $BACKUP/backup-$CUTOFFDATE.dmg $ARCHIVE
 
 echo These files should be archived:
 echo `ls -1t $ARCHIVE`
