@@ -32,7 +32,7 @@ mkdir -p $TRASH
 CURDAY=`date "+%d"`
 
 # This is going to be cutting into the previous month
-#  perhaps the previous year.
+#  and perhaps the previous year.
 if [ $CURDAY -le 7 ]
 then
  CUTOFFMONTH=`date "+%m"`
@@ -71,8 +71,13 @@ then
  CUTOFFDATE=$CUTOFFYEAR-$CUTOFFMONTH-$CUTOFFDAY
 else
  CUTOFFDAY=$(($CURDAY - 7))
- CUTOFFDATE=`date "+%Y-%m-"`$CUTOFFDAY
+# CUTOFFDATE=`date "+%Y-%m-"`$CUTOFFDAY
+ CUTOFFMONTH=12
+ CUTOFFDATE=`date "+%Y-"`$CUTOFFMONTH-$CUTOFFDAY
 fi
+
+echo $CUTOFFDATE
+exit 0
 
 # Find the oldest file matching the cutoff date
 cd $BACKUP
@@ -85,7 +90,7 @@ echo These files would be trashed:
 if [ -z $FILESTOCLEANUP ]
 then
  echo $FILESTOCLEANUP
- mv $FILESTOCLEANUP $TRASH
+ cp $FILESTOCLEANUP $TRASH
 #rm $FILESTOCLEANUP
 fi
 
