@@ -3,5 +3,5 @@ MAILTO=bolsinga@azulsystems.com
 # run backup at 2:15 PM every weekday
 15 14 * * 1-5 $HOME/bin/backup /home/bolsinga/backups/
 
-# run archive at 3:15 PM every weekday
-15 15 * * 1-5 $HOME/bin/archive /home/bolsinga/backups/ /Volumes/Data/Archives
+# run archive at 3:15 PM every Monday
+15 15 * * 1 $HOME/bin/archive /home/bolsinga/backups/ /Volumes/Data/Archives
