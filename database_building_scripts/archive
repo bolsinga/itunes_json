@@ -3,8 +3,6 @@
 BACKUP=$1
 ARCHIVE=$2
 
-TRASH=$BACKUP/trash/
-
 if [ -z $BACKUP ]
 then
  echo Need to supply a backup directory to archive.
@@ -26,8 +24,6 @@ then
  echo $ARCHIVE does not exist.
  exit 1
 fi
-
-mkdir -p $TRASH
 
 CURDAY=`date "+%e"`
 
@@ -114,9 +110,8 @@ CUTOFFDATE=$CUTOFFYEAR-$CUTOFFMONTH-$CUTOFFDAY
 # Find the files older than the cutoff date and clean them up
 FILESTOCLEANUP=`find $BACKUP -not -newer backup-$CUTOFFDATE.dmg -and -not -name backup-$CUTOFFDATE.dmg`
 
-echo These files would be trashed: $FILESTOCLEANUP
-mv $FILESTOCLEANUP $TRASH
-#rm $FILESTOCLEANUP
+echo These files are being trashed: $FILESTOCLEANUP
+rm $FILESTOCLEANUP
 
 # Copy the cutoff date files to the archive location
 cp $BACKUP/backup-$CUTOFFDATE.dmg $ARCHIVE
