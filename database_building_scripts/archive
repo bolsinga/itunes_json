@@ -1,7 +1,7 @@
 #!/bin/sh
 
-BACKUP=~/Documents/backup
-ARCHIVE=$BACKUP/archive/
+BACKUP=$1
+ARCHIVE=$2
 
 TRASH=$BACKUP/trash/
 
@@ -32,7 +32,7 @@ mkdir -p $TRASH
 CURDAY=`date "+%d"`
 
 # This is going to be cutting into the previous month
-#  perhaps the previous year.
+#  and perhaps the previous year.
 if [ $CURDAY -le 7 ]
 then
  CUTOFFMONTH=`date "+%m"`
@@ -44,7 +44,7 @@ then
  fi
  
  CUTOFFYEAR=`date "+%Y"`
- if [ $CUTOFFMONTH -eq 12 ]
+ if [ $CUTOFFMONTH -eq 1 ]
  then
   CUTOFFYEAR=$(($CUTOFFYEAR - 1))
  fi
@@ -67,27 +67,49 @@ then
    fi
   fi
  done
-
- CUTOFFDATE=$CUTOFFYEAR-$CUTOFFMONTH-$CUTOFFDAY
 else
  CUTOFFDAY=$(($CURDAY - 7))
- CUTOFFDATE=`date "+%Y-%m-"`$CUTOFFDAY
+ CUTOFFMONTH=`date "+%m"`
+ CUTOFFYEAR=`date "+%Y"`
 fi
 
 # Find the oldest file matching the cutoff date
 cd $BACKUP
+
+while [ ! -e backup-cvs-$CUTOFFYEAR-$CUTOFFMONTH-$CUTOFFDAY.dmg ]
+do
+ if [ $CUTOFFDAY -eq 1 ]
+ then
+  if [ $CUTOFFMONTH -eq 1 ]
+  then
+   CUTOFFDAY=31
+   CUTOFFMONTH=12
+   CUTOFFYEAR=$(($CUTOFFYEAR - 1))
+  else
+   CUTOFFDAY=31
+   CUTOFFMONTH=$(($CUTOFFMONTH - 1))
+  fi
+ else
+  CUTOFFDAY=$(($CUTOFFDAY - 1))
+ fi
+
+ if [ $CUTOFFYEAR -eq $((`date "+%Y"`- 2)) ]
+ then
+  echo Nothing to archive.
+  exit 1
+ fi
+done
+
+CUTOFFDATE=$CUTOFFYEAR-$CUTOFFMONTH-$CUTOFFDAY
+
 OLDESTCUTOFF=`ls -1t backup-*-$CUTOFFDATE.dmg | tail -1`
 
 # Find the files older than the cutoff date and clean them up
 FILESTOCLEANUP=`find $BACKUP -not -newer $OLDESTCUTOFF -and -not -name $OLDESTCUTOFF`
 
-echo These files would be trashed:
-if [ -z $FILESTOCLEANUP ]
-then
- echo $FILESTOCLEANUP
- mv $FILESTOCLEANUP $TRASH
+echo These files would be trashed: $FILESTOCLEANUP
+mv $FILESTOCLEANUP $TRASH
 #rm $FILESTOCLEANUP
-fi
 
 # Copy the cutoff date files to the archive location
 cp $BACKUP/backup-*-$CUTOFFDATE.dmg $ARCHIVE
