@@ -1,0 +1,7 @@
+MAILTO=bolsinga@azulsystems.com
+
+# run backup at 2:15 PM everyday
+15 14 * * 1-5 $HOME/bin/backup /home/bolsinga/backups/
+
+# remind to burn CDs every 2 weeks
+0 10 1,15 * * mail -s "Burn Backup CDs!"
