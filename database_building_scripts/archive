@@ -35,22 +35,18 @@ CURDAY=`date "+%e"`
 #  and perhaps the previous year.
 if [ $CURDAY -le 7 ]
 then
+ CUTOFFYEAR=`date "+%Y"`
  CUTOFFMONTH=`date "+%m"`
  if [ $CUTOFFMONTH -eq 1 ]
  then
   CUTOFFMONTH=12
+  CUTOFFYEAR=$(($CUTOFFYEAR - 1))
  else
   CUTOFFMONTH=$(($CUTOFFMONTH - 1))
  fi
- 
- CUTOFFYEAR=`date "+%Y"`
- if [ $CUTOFFMONTH -eq 1 ]
- then
-  CUTOFFYEAR=$(($CUTOFFYEAR - 1))
- fi
 
- # See if date 28 - (7 - CURDAY) exists. then increase 28 up to 31.
- for (( CHECKDATE=$((28 - (7 - $CURDAY)));
+ # See if date 31 - (7 - CURDAY) exists. then increase up to 31.
+ for (( CHECKDATE=$((31 - (7 - $CURDAY)));
         $CHECKDATE <= 31;
         CHECKDATE=$(($CHECKDATE + 1)) ))
  do
