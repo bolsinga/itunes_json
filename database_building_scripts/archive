@@ -1,25 +1,18 @@
 #!/bin/sh
 
 BACKUP=/tmp/backup
-DEST=/tmp/backup/archive/
+DEST=$BACKUP/archive/
+TRASH=$BACKUP/archive/
 
 mkdir -p $DEST
+mkdir -p $TRASH
 
 CURDAY=`date "+%d"`
 
-# On the 1st of the month, clean up everything prior to
-#  the 15th of the previous month. Copy the data from the
-#  15th of the previous month to the archive location and
-#  send an email reminder.
-
-# On the 15th of the month, clean up everything prior to
-#  the 1st of the current month. Copy the data from the
-#  1st of the current month to the archive location and 
-#  send an email reminder.
-
-if [ $CURDAY -eq 1 ]
+# This is going to be cutting into the previous month
+#  perhaps the previous year.
+if [ $CURDAY -le 7 ]
 then
- CUTOFFDAY=15
  CUTOFFMONTH=`date "+%m"`
  if [ $CUTOFFMONTH -eq 1 ]
  then
@@ -33,20 +26,31 @@ then
  then
   CUTOFFYEAR=$(($CUTOFFYEAR - 1))
  fi
-elif [ $CURDAY -eq 15 ]
-then
- CUTOFFDAY=1
- CUTOFFMONTH=`date "+%m"`
- CUTOFFYEAR=`date "+%Y"`
-else
- echo Fake Day!
- # Fake out cutoff date with a 2 day older test
- CUTOFFDAY=$(($CURDAY - 2))
- CUTOFFMONTH=`date "+%m"`
- CUTOFFYEAR=`date "+%Y"`
-fi
 
-CUTOFFDATE=$CUTOFFYEAR-$CUTOFFMONTH-$CUTOFFDAY
+ # See if date 28 - (7 - CURDAY) exists. then increase 28 up to 31.
+ for (( CHECKDATE=$((28 - (7 - $CURDAY)));
+        $CHECKDATE <= 31;
+        CHECKDATE=$(($CHECKDATE + 1)) ))
+ do
+  CHECKDATES="$CHECKDATES $CHECKDATE"
+ done
+
+ for LASTDAY in $CHECKDATES
+ do
+  if [ -z $CUTOFFDAY ]
+  then
+   if test -e $BACKUP/backup-cvs-$CUTOFFYEAR-$CUTOFFMONTH-$LASTDAY.dmg
+   then
+    CUTOFFDAY=$LASTDAY
+   fi
+  fi
+ done
+
+ CUTOFFDATE=$CUTOFFYEAR-$CUTOFFMONTH-$CUTOFFDAY
+else
+ CUTOFFDAY=$(($CURDAY - 7))
+ CUTOFFDATE=`date "+%Y-%m-"`$CUTOFFDAY
+fi
 
 # Find the oldest file matching the cutoff date
 cd $BACKUP
@@ -55,7 +59,16 @@ OLDESTCUTOFF=`ls -1t backup-*-$CUTOFFDATE.dmg | tail -1`
 # Find the files older than the cutoff date and clean them up
 FILESTOCLEANUP=`find $BACKUP -not -newer $OLDESTCUTOFF -and -not -name $OLDESTCUTOFF`
 
-rm $FILESTOCLEANUP
+echo These files would be trashed:
+if [ -z $FILESTOCLEANUP ]
+then
+ echo $FILESTOCLEANUP
+ mv $FILESTOCLEANUP $TRASH
+#rm $FILESTOCLEANUP
+fi
 
 # Copy the cutoff date files to the archive location
 cp $BACKUP/backup-*-$CUTOFFDATE.dmg $DEST
+
+echo These files should be archived:
+echo `ls -1t $DEST`
