@@ -1,0 +1,48 @@
+#!/bin/sh
+
+BACKUP=$1
+SCRATCH=$2
+
+if [ -z $BACKUP ]
+then
+ echo Need to supply a backup directory to convert.
+ exit 1
+fi
+if [ ! -d $BACKUP ]
+then
+ echo $BACKUP does not exist.
+ exit 1
+fi
+
+if [ -z $SCRATCH ]
+then
+ echo Need to supply a scratch directory.
+ exit 1
+fi
+if [ ! -d $SCRATCH ]
+then
+ echo $SCRATCH does not exist.
+ exit 1
+fi
+
+# Find all pairs of backup files - Create a list of dates
+
+# For each list of dates, create a single "backup-$DATE" file.
+
+cd $BACKUP
+
+CONVERTDATES=`ls -1t backup-cvs-*.dmg | sed -e"s|backup-cvs-||" | sed -e"s|.dmg||"`
+
+for DATE in $CONVERTDATES
+do
+ echo Converting $DATE
+
+ UNIQUESCRATCH=$SCRATCH/$USER/backup-$DATE
+ mkdir -p $UNIQUESCRATCH
+
+ mv backup-*-$DATE.dmg $UNIQUESCRATCH
+
+ hdiutil create -ov -srcfolder $UNIQUESCRATCH $BACKUP/backup-$DATE.dmg
+
+ echo rm -rf $UNIQUESCRATCH
+done
