@@ -112,11 +112,13 @@ CUTOFFDATE=$CUTOFFYEAR-$CUTOFFMONTH-$CUTOFFDAY
 # Find the files older than the cutoff date and clean them up
 FILESTOCLEANUP=`find $BACKUP -not -newer backup-$CUTOFFDATE.dmg -and -not -name backup-$CUTOFFDATE.dmg`
 
+# Copy the cutoff date files to the archive location
+# Copy it before removing the trashed ones, just in case
+#  it is symlink to one of the trash items.
+cp $BACKUP/backup-$CUTOFFDATE.dmg $ARCHIVE
+
 echo These files are being trashed: $FILESTOCLEANUP
 rm $FILESTOCLEANUP
-
-# Copy the cutoff date files to the archive location
-cp $BACKUP/backup-$CUTOFFDATE.dmg $ARCHIVE
 
 echo These files should be archived:
 echo `ls -1t $ARCHIVE`
