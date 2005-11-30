@@ -1,6 +1,0 @@
-#!/bin/sh
-
-DIRS=`ls | grep -v sandbox`
-
-grep -r $1 $DIRS
-
