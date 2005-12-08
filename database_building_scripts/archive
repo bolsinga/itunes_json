@@ -35,22 +35,35 @@ if [ $CURDAY -le 7 ]
 then
  CUTOFFYEAR=`date "+%Y"`
  CUTOFFMONTH=`date "+%m"`
+ LASTDAY=31
  if [ $CUTOFFMONTH -eq 1 ]
  then
   CUTOFFMONTH=12
   CUTOFFYEAR=$(($CUTOFFYEAR - 1))
  else
   CUTOFFMONTH=$(($CUTOFFMONTH - 1))
-  if [ $CUTOFFMONTH -le 9 ]
+ fi
+
+ # Handle less than 31 days months
+ if [ $CUTOFFMONTH -eq 2 ]
+ then
+  LASTDAY=28
+ else
+  if [ $CUTOFFMONTH -eq 4 -o $CUTOFFMONTH -eq 6 -o $CUTOFFMONTH -eq 9 -o $CUTOFFMONTH -eq 11 ]
   then
-   CUTMONTH="0$CUTOFFMONTH"
-   CUTOFFMONTH=$CUTMONTH
+   LASTDAY=30
   fi
  fi
 
- # See if date 31 - (7 - CURDAY) exists. then increase up to 31.
- for (( CHECKDATE=$((31 - (7 - $CURDAY)));
-        $CHECKDATE <= 31;
+ if [ $CUTOFFMONTH -le 9 ]
+ then
+  CUTMONTH="0$CUTOFFMONTH"
+  CUTOFFMONTH=$CUTMONTH
+ fi
+
+ # See if date LASTDAY - (7 - CURDAY) exists. then increase up to LASTDAY.
+ for (( CHECKDATE=$(($LASTDAY - (7 - $CURDAY)));
+        $CHECKDATE <= $LASTDAY;
         CHECKDATE=$(($CHECKDATE + 1)) ))
  do
   CHECKDATES="$CHECKDATES $CHECKDATE"
