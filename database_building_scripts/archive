@@ -128,7 +128,10 @@ FILESTOCLEANUP=`find $BACKUP -not -newer backup-$CUTOFFDATE.dmg -and -not -name 
 # Copy the cutoff date files to the archive location
 # Copy it before removing the trashed ones, just in case
 #  it is symlink to one of the trash items.
-split $BACKUP/backup-$CUTOFFDATE.dmg
+PRG="$0"
+PROG_HOME=`dirname "$PRG"`
+PROG_HOME=`cd "$PROG_HOME" && pwd`
+$PROG_HOME/split $BACKUP/backup-$CUTOFFDATE.dmg
 cp $BACKUP/backup-$CUTOFFDATE* $ARCHIVE
 
 echo These files are being trashed: $FILESTOCLEANUP
