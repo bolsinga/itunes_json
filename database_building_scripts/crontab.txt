@@ -5,3 +5,6 @@ MAILTO=bolsinga@azulsystems.com
 
 # run archive at 3:15 PM every Weds
 15 15 * * 3 $HOME/bin/archive /home/bolsinga/backups/ /Volumes/Data/Archives
+
+# copy itunes file monthly for posterity
+@monthly MDATE=`date "+%Y-%m-%d"`; cp $HOME/Music/iTunes/iTunes\ Music\ Library.xml $HOME/Documents/sources/data/iTunes-$MDATE.xml
