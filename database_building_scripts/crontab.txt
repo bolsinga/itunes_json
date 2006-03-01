@@ -4,7 +4,7 @@ MAILTO=bolsinga@azulsystems.com
 15 14 * * 1-5 $HOME/bin/backup /home/bolsinga/backups/ /tmp
 
 # run archive at 3:15 PM every Weds
-15 15 * * 3 $HOME/bin/archive /home/bolsinga/backups/ /Volumes/Data/Archives
+15 15 * * 3 $HOME/bin/archive /home/bolsinga/backups/ /Data/Archives
 
 # copy itunes file monthly for posterity
 @monthly $HOME/bin/backup_itunes.sh
