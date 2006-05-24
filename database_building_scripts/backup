@@ -32,13 +32,13 @@ PROG_HOME=`cd "$PROG_HOME" && pwd`
 # Quit iPhoto if it is runnnig
 $PROG_HOME/quit_app.sh iPhoto
 
-IPHOTO="iPhoto Library"
 DATE=`date "+%Y-%m-%d"`
 
 UNIQUESCRATCH=$SCRATCH/$USER/backup-$DATE
 mkdir -p $UNIQUESCRATCH
 
 # Move the iPhoto Library out of the way while backing up $HOME
+IPHOTO="iPhoto Library"
 mv "$HOME/Pictures/$IPHOTO" "$HOME/.."
 hdiutil create -ov -srcfolder $HOME $UNIQUESCRATCH/backup-home-$DATE.dmg
 mv "$HOME/../$IPHOTO" "$HOME/Pictures/"
