@@ -25,17 +25,12 @@ then
  exit 1
 fi
 
-# Quit iPhoto if it is running
-c=`ps -wwwaux | grep iPhoto\.app | grep -v grep`
-if [ "$c" ]
-then
-/usr/bin/osascript <<EOF
-tell application "iPhoto"
-quit
-end tell
-EOF
-sleep 10
-fi
+PRG="$0"
+PROG_HOME=`dirname "$PRG"`
+PROG_HOME=`cd "$PROG_HOME" && pwd`
+
+# Quit iPhoto if it is runnnig
+$PROG_HOME/quit_app.sh iPhoto
 
 IPHOTO="iPhoto Library"
 DATE=`date "+%Y-%m-%d"`
