@@ -35,13 +35,14 @@ if [ $CURDAY -le 7 ]
 then
  CUTOFFYEAR=`date "+%Y"`
  CUTOFFMONTH=`date "+%m"`
+ CUTOFFMONTH=`echo $CUTOFFMONTH | sed -e "s|^0||"`
  LASTDAY=31
  if [ $CUTOFFMONTH -eq 1 ]
  then
   CUTOFFMONTH=12
-  CUTOFFYEAR=$(($CUTOFFYEAR - 1))
+  CUTOFFYEAR=$(( $CUTOFFYEAR - 1 ))
  else
-  CUTOFFMONTH=$(($CUTOFFMONTH - 1))
+  CUTOFFMONTH=$(( $CUTOFFMONTH - 1 ))
  fi
 
  # Handle less than 31 days months
@@ -62,9 +63,9 @@ then
  fi
 
  # See if date LASTDAY - (7 - CURDAY) exists. then increase up to LASTDAY.
- for (( CHECKDATE=$(($LASTDAY - (7 - $CURDAY)));
+ for (( CHECKDATE=$(( $LASTDAY - (7 - $CURDAY) ));
         $CHECKDATE <= $LASTDAY;
-        CHECKDATE=$(($CHECKDATE + 1)) ))
+        CHECKDATE=$(( $CHECKDATE + 1 )) ))
  do
   CHECKDATES="$CHECKDATES $CHECKDATE"
  done
@@ -80,7 +81,7 @@ then
   fi
  done
 else
- CUT=$(($CURDAY - 7))
+ CUT=$(( $CURDAY - 7 ))
  if [ $CUT -le 9 ]
  then
   CUTOFFDAY="0$CUT"
@@ -104,16 +105,16 @@ do
   then
    CUTOFFDAY=31
    CUTOFFMONTH=12
-   CUTOFFYEAR=$(($CUTOFFYEAR - 1))
+   CUTOFFYEAR=$(( $CUTOFFYEAR - 1 ))
   else
    CUTOFFDAY=31
-   CUTOFFMONTH=$(($CUTOFFMONTH - 1))
+   CUTOFFMONTH=$(( $CUTOFFMONTH - 1 ))
   fi
  else
-  CUTOFFDAY=$(($CUTOFFDAY - 1))
+  CUTOFFDAY=$(( $CUTOFFDAY - 1 ))
  fi
 
- if [ $CUTOFFYEAR -eq $((`date "+%Y"`- 2)) ]
+ if [ $CUTOFFYEAR -eq $(( `date "+%Y"`- 2 )) ]
  then
   echo Nothing to archive.
   exit 1
