@@ -19,7 +19,8 @@ ORIGINAL_NAME=`basename -s .dmg $FULL_ARCHIVE`
 
 # Split the archive into chunks if too big
 ARCHIVE_SIZE=`du -k $FULL_ARCHIVE | cut -f1`
-CUTOFF_SIZE=$((650 * 1024))
+# DVD - 4.7GB == 4.7 * 1024 * 1024 == 4812.8 * 1024 ~= 4700 * 1024 KB
+CUTOFF_SIZE=$((4700 * 1024))
 if [ $ARCHIVE_SIZE -ge $CUTOFF_SIZE ]
 then
   NUM_SEGS=$(($ARCHIVE_SIZE / $CUTOFF_SIZE))
