@@ -9,6 +9,9 @@ if ($OSTYPE == linux) then
 else if ($OSTYPE == solaris) then
     setenv SYSPATH /usr/local/bin/:/usr/bin/:/bin:/usr/sbin/:/sbin/:/usr/X/bin:/usr/openwin/bin
 
+    # Get dbx
+    setenv SYSPATH $SYSPATH:/usr/local/s1s7ee/SUNWspro/bin
+
     setenv JAVA_HOME /usr/local/java
     setenv ANT_HOME /home/bolsinga/ant/apache-ant-1.6.2
     setenv JAVAPATH $JAVA_HOME/bin/:$ANT_HOME/bin/
@@ -24,8 +27,8 @@ else if ($OSTYPE == darwin) then
 #    setenv CVSROOT /cvs/repository
 
     # Set perforce up for visual work on MacOSX
-#    setenv P4DIFF /usr/local/bin/p4diff
-#    setenv P4MERGE /usr/local/bin/p4merge
+    setenv P4DIFF /usr/local/bin/p4diff
+    setenv P4MERGE /usr/local/bin/p4merge
 
     setenv DISPLAY :0.0
     
