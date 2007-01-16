@@ -1,4 +1,0 @@
-#/bin/sh
-
-sudo mount -v homer:/vol/vol2/home2 /home
-sudo mount -v barney:/vol/vol1/home/buildmaster /home/buildmaster

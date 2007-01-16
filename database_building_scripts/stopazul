@@ -1,4 +1,0 @@
-#/bin/sh
-
-sudo umount -v /home/buildmaster
-sudo umount -v /home
