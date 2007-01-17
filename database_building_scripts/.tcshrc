@@ -61,6 +61,9 @@ setenv PATH .:$HOME/bin/:$HOME/bin/$OSTYPE/:"$JAVAPATH":"$SYSPATH":/usr/local/sc
 set autolist
 set autologout=0
 
+set history=1000
+set savehist=1000
+
 # Set the prompt
 alias setprompt 'set prompt = "[%m:(`uname`):%c3] %n% "'
 setprompt
