@@ -26,10 +26,6 @@ else if ($OSTYPE == darwin) then
     # Set CVSROOT for personal MacOSX development
 #    setenv CVSROOT /cvs/repository
 
-    # Set perforce up for visual work on MacOSX
-    setenv P4DIFF /usr/local/bin/p4diff
-    setenv P4MERGE /usr/local/bin/p4merge
-
     setenv DISPLAY :0.0
     
     # Training!
@@ -71,11 +67,5 @@ setprompt
 alias cd 'cd \!*;setprompt'
 alias pushd 'pushd \!*;setprompt'
 alias popd 'popd \!*;setprompt'
-
-# Set up perforce
-setenv P4PORT perforce:1666
-setenv P4CONFIG .p4rc
-setenv P4USER $USER
-setenv P4DIFF 'diff -uw'
 
 setenv EDITOR emacs

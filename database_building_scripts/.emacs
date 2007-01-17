@@ -18,6 +18,3 @@
 (setq auto-mode-alist
       (cons '("\\.\\(xml\\|xsl\\|rng\\|xhtml\\|xsd\\)\\'" . nxml-mode)
             auto-mode-alist))
-
-;; Get perforce suport
-;; (load-library "p4")
