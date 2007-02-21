@@ -1,4 +1,4 @@
-# Set the path
+OB# Set the path
 if ($OSTYPE == linux) then
     setenv SYSPATH /bin/:/usr/bin/:/usr/X11R6/bin/:/usr/sbin/:/sbin/:/usr/local/bin/:$HOME/valgrind/bin/
 
@@ -30,6 +30,8 @@ else if ($OSTYPE == darwin) then
     
     # Training!
     alias cvs "echo no CVS!"
+
+    setenv BUILD_DIR /Data/Applications/BUILDS
 else if ($OSTYPE == aix) then
     setenv SYSPATH /usr/local/bin/:/usr/bin/:/bin:/usr/sbin/:/sbin/:/usr/X11R6/bin
     
