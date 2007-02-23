@@ -1,4 +1,4 @@
-OB# Set the path
+# Set the path
 if ($OSTYPE == linux) then
     setenv SYSPATH /bin/:/usr/bin/:/usr/X11R6/bin/:/usr/sbin/:/sbin/:/usr/local/bin/:$HOME/valgrind/bin/
 
