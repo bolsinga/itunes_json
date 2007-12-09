@@ -39,9 +39,9 @@ mkdir -p $UNIQUESCRATCH
 
 # Move the iPhoto Library out of the way while backing up $HOME
 IPHOTO="iPhoto Library"
-mv "$HOME/Pictures/$IPHOTO" "$HOME/.."
+mv "$HOME/Pictures/$IPHOTO" "/tmp"
 hdiutil create -ov -srcfolder $HOME $UNIQUESCRATCH/backup-home-$DATE.dmg
-mv "$HOME/../$IPHOTO" "$HOME/Pictures/"
+mv "/tmp/$IPHOTO" "$HOME/Pictures/"
 
 # Back up SVN
 hdiutil create -ov -srcfolder /svn/repository $UNIQUESCRATCH/backup-svn-$DATE.dmg
