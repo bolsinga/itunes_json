@@ -2,7 +2,7 @@
 
 # Quit app if it is running
 appname=$1
-app=`ps -wwwaux | grep $appname\.app | grep -v grep`
+app=`ps wwwaux | grep $appname\.app | grep -v grep`
 if [ "$app" ]
 then
 /usr/bin/osascript <<EOF
