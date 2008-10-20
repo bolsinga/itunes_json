@@ -18,3 +18,5 @@
 (setq auto-mode-alist
       (cons '("\\.\\(xml\\|xsl\\|rng\\|xhtml\\|xsd\\)\\'" . nxml-mode)
             auto-mode-alist))
+
+(put 'upcase-region 'disabled nil)
