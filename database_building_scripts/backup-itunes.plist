@@ -6,7 +6,7 @@
 	<string>com.bolsinga.backupitunes</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/Users/bolsinga/bin/backup_itunes.sh</string>
+		<string>/Users/bolsinga/Documents/code/git/bin_utils/backup_itunes.sh</string>
 	</array>
 	<key>LowPriorityIO</key>
 	<true/>
