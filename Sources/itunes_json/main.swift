@@ -211,8 +211,16 @@ func save(jsonData : Data) throws {
     }
 }
 
-guard let itunes = try? ITLibrary(apiVersion: "1.0") else {
-    print("Cannot open the library")
+let itunesLib: ITLibrary?
+do {
+    itunesLib = try ITLibrary(apiVersion: "1.0")
+} catch {
+    print("Cannot open the library: \(error).")
+    exit(1)
+}
+
+guard let itunes = itunesLib else {
+    print("No library")
     exit(1)
 }
 
