@@ -3,6 +3,7 @@ name: Swift
 on:
   release:
     branches: [ master ]
+    types: [ published ]
 
 jobs:
   build:
