@@ -215,12 +215,12 @@ let itunesLib: ITLibrary?
 do {
     itunesLib = try ITLibrary(apiVersion: "1.0")
 } catch {
-    print("Cannot open the library: \(error).")
+    logger.error("Cannot open the library: \(error).")
     exit(1)
 }
 
 guard let itunes = itunesLib else {
-    print("No library")
+    logger.error("No library")
     exit(1)
 }
 
@@ -232,7 +232,7 @@ for mediaItem in itunes.allMediaItems {
 }
 
 guard tracks.count > 0 else {
-    logger.info("No JSON to record")
+    logger.notice("No JSON to record")
     exit(1)
 }
 
@@ -241,12 +241,12 @@ encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
 encoder.dateEncodingStrategy = .iso8601
 
 guard let jsonData = try? encoder.encode(tracks) else {
-    logger.debug("Unable to create JSON for \(tracks)")
+    logger.error("Unable to create JSON for \(tracks)")
     exit(1)
 }
 
 do {
     try save(jsonData: jsonData)
 } catch {
-    logger.debug("Error Creating JSON: \(error) for: \(tracks)")
+    logger.error("Error Creating JSON: \(error) for: \(tracks)")
 }
