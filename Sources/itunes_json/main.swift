@@ -181,35 +181,9 @@ extension Track {
     }
 }
 
-if CommandLine.arguments.count < 2 {
-    print("Must provide a destination directory")
-    exit(1)
-}
-
-let destinationDirectoryPath = CommandLine.arguments[1]
-let destinationDirectoryURL = URL(fileURLWithPath: destinationDirectoryPath, isDirectory: true)
-
 LoggingSystem.bootstrap(StreamLogHandler.standardError)
 var logger = Logger(label: "com.bolsinga.itunes_json")
 logger.logLevel = .debug
-
-func save(jsonData : Data) throws {
-    let fm = FileManager.default;
-
-    let filename = "itunes-music-library.json"
-    let temporaryURL = URL(fileURLWithPath: filename, relativeTo: fm.temporaryDirectory)
-    let destinationURL = URL(fileURLWithPath: filename, relativeTo: destinationDirectoryURL)
-
-    try jsonData.write(to: temporaryURL, options: .atomic)
-    if (!fm.contentsEqual(atPath: destinationURL.path, andPath: temporaryURL.path)) {
-        do {
-            try fm.removeItem(at: destinationURL)
-        } catch {}
-        try fm.moveItem(at: temporaryURL, to: destinationURL)
-    } else {
-        try fm.removeItem(at: temporaryURL)
-    }
-}
 
 let itunesLib: ITLibrary?
 do {
@@ -245,8 +219,9 @@ guard let jsonData = try? encoder.encode(tracks) else {
     exit(1)
 }
 
-do {
-    try save(jsonData: jsonData)
-} catch {
-    logger.error("Error Creating JSON: \(error) for: \(tracks)")
+guard let jsonString = String(data: jsonData, encoding: .utf8) else {
+    logger.error("Unable to create JSON string for \(tracks)")
+    exit(1)
 }
+
+print("\(jsonString)")
