@@ -1,6 +1,7 @@
 import Foundation
 import iTunesLibrary
-import Logging
+import func Darwin.fputs
+import var Darwin.stderr
 
 extension Track {
     init(mediaItem: ITLibMediaItem) {
@@ -181,20 +182,23 @@ extension Track {
     }
 }
 
-LoggingSystem.bootstrap(StreamLogHandler.standardError)
-var logger = Logger(label: "com.bolsinga.itunes_json")
-logger.logLevel = .debug
+struct StderrOutputStream: TextOutputStream {
+    mutating func write(_ string: String) {
+        fputs(string, stderr)
+    }
+}
+var standardError = StderrOutputStream()
 
 let itunesLib: ITLibrary?
 do {
     itunesLib = try ITLibrary(apiVersion: "1.0")
 } catch {
-    logger.error("Cannot open the library: \(error).")
+    print("Cannot open the library: \(error).", to: &standardError)
     exit(1)
 }
 
 guard let itunes = itunesLib else {
-    logger.error("No library")
+    print("No library", to: &standardError)
     exit(1)
 }
 
@@ -206,7 +210,7 @@ for mediaItem in itunes.allMediaItems {
 }
 
 guard tracks.count > 0 else {
-    logger.notice("No JSON to record")
+    print("No JSON to record", to: &standardError)
     exit(1)
 }
 
@@ -215,12 +219,12 @@ encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
 encoder.dateEncodingStrategy = .iso8601
 
 guard let jsonData = try? encoder.encode(tracks) else {
-    logger.error("Unable to create JSON for \(tracks)")
+    print("Unable to create JSON for \(tracks)", to: &standardError)
     exit(1)
 }
 
 guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-    logger.error("Unable to create JSON string for \(tracks)")
+    print("Unable to create JSON string for \(tracks)", to: &standardError)
     exit(1)
 }
 
