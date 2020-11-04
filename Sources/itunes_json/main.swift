@@ -8,7 +8,7 @@ extension Track {
         let artist = mediaItem.artist
         let album = mediaItem.album
 
-        if let name = album.title {
+        if let name = album.title, name.count > 0 {
             self.album = name
         }
         if let name = album.albumArtist {
