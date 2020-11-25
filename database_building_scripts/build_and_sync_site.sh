@@ -8,6 +8,8 @@ if_failure ()
   fi
 }
 
+rm /tmp/itunes-*.json
+
 MDATE=`date "+%Y-%m-%d-%H:%M:%S"`
 ITUNES_JSON_FILE=/tmp/itunes-$MDATE.json
 
