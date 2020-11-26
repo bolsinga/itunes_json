@@ -16,5 +16,5 @@ SITE_DIR=$HOME/Sites
 
 $PROG_HOME/build_site.sh $SITE_DIR
 
-rsync -avzr $SITE_DIR/* mink.he.net:/home/bolsinga/public_html
+rsync -avzr --delete $SITE_DIR/* mink.he.net:/home/bolsinga/public_html
 if_failure "Cannot update web site"
