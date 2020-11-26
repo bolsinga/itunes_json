@@ -8,16 +8,13 @@ if_failure ()
   fi
 }
 
-rm /tmp/itunes-*.json
+PRG="$0"
+PROG_HOME=`dirname "$PRG"`
+PROG_HOME=`cd "$PROG_HOME" && pwd`
 
-MDATE=`date "+%Y-%m-%d-%H:%M:%S"`
-ITUNES_JSON_FILE=/tmp/itunes-$MDATE.json
+SITE_DIR=$HOME/Sites
 
-$HOME/Applications/itunes_json/Products/usr/local/bin/itunes_json > $ITUNES_JSON_FILE
-if_failure "Cannot create itunes json file: $ITUNES_JSON_FILE"
+$PROG_HOME/build_site.sh $SITE_DIR
 
-$HOME/Applications/web_generator/site $HOME/Documents/code/git/web_data $HOME/Sites site $ITUNES_JSON_FILE
-if_failure "Cannot create site locally"
-
-rsync -avzr $HOME/Sites/* mink.he.net:/home/bolsinga/public_html
+rsync -avzr $SITE_DIR/* mink.he.net:/home/bolsinga/public_html
 if_failure "Cannot update web site"
