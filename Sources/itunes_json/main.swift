@@ -182,6 +182,36 @@ extension Track {
     }
 }
 
+struct FileHandlerOutputStream: TextOutputStream {
+    private let fileHandle: FileHandle
+    let encoding: String.Encoding
+
+    init(_ fileHandle: FileHandle, encoding: String.Encoding = .utf8) {
+        self.fileHandle = fileHandle
+        self.encoding = encoding
+    }
+
+    mutating func write(_ string: String) {
+        if let data = string.data(using: encoding) {
+            fileHandle.write(data)
+        }
+    }
+}
+
+var fileHandle : FileHandle?
+if (CommandLine.arguments.count > 1) {
+    let destinationDirectoryPath = CommandLine.arguments[1]
+    var destinationURL = URL(fileURLWithPath: destinationDirectoryPath, isDirectory: true)
+
+    let dateFormatter = DateFormatter();
+    dateFormatter.dateFormat = "yyyy-MM-dd"
+    let dateString = dateFormatter.string(from: Date())
+
+    destinationURL.appendPathComponent("iTunes-\(dateString).json")
+    FileManager.default.createFile(atPath: destinationURL.path, contents: nil, attributes: nil)
+    fileHandle = try FileHandle(forWritingTo: destinationURL)
+}
+
 struct StderrOutputStream: TextOutputStream {
     mutating func write(_ string: String) {
         fputs(string, stderr)
@@ -228,4 +258,9 @@ guard let jsonString = String(data: jsonData, encoding: .utf8) else {
     exit(1)
 }
 
-print("\(jsonString)")
+if let outputFileHandle = fileHandle {
+    var standardOutput = FileHandlerOutputStream(outputFileHandle)
+    print("\(jsonString)", to: &standardOutput)
+} else {
+    print("\(jsonString)")
+}
