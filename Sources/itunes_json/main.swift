@@ -4,7 +4,7 @@ import func Darwin.fputs
 import var Darwin.stderr
 
 extension Track {
-    init(mediaItem: ITLibMediaItem) {
+    init(_ mediaItem: ITLibMediaItem) {
         let artist = mediaItem.artist
         let album = mediaItem.album
 
@@ -235,12 +235,7 @@ guard let itunes = itunesLib else {
     exit(1)
 }
 
-var tracks = [Track]()
-
-for mediaItem in itunes.allMediaItems {
-    let track = Track(mediaItem: mediaItem)
-    tracks.append(track)
-}
+var tracks = itunes.allMediaItems.map{ Track($0) }
 
 guard tracks.count > 0 else {
     print("No JSON to record", to: &standardError)
