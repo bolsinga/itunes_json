@@ -4,15 +4,12 @@
 <dict>
 	<key>Label</key>
 	<string>com.bolsinga.backupitunes</string>
+	<key>Program</key>
+	<string>/Users/bolsinga/Applications/itunes_json/Products/usr/local/bin/itunes_json</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/Users/bolsinga/Applications/itunes_json/Products/usr/local/bin/itunes_json</string>
 		<string>/Users/bolsinga/Documents/code/itunes_backups/</string>
 	</array>
-	<key>LowPriorityIO</key>
-	<true/>
-	<key>Nice</key>
-	<integer>1</integer>
 	<key>StartCalendarInterval</key>
 	<dict>
 		<key>Hour</key>
