@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import iTunesLibrary
 
 struct Track : Codable {
     var album : String? = nil // "Album"
@@ -68,4 +69,11 @@ struct Track : Codable {
     var videoHeight : Int? = nil // "Video Height"
     var videoWidth : Int? = nil // "Video Width"
     var year : Int? = nil // "Year"
+}
+
+extension Track {
+    static public func gatherAllTracks() throws -> [Track] {
+        let itunes = try ITLibrary(apiVersion: "1.0")
+        return itunes.allMediaItems.map{ Track($0) }
+    }
 }

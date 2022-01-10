@@ -1,5 +1,4 @@
 import Foundation
-import iTunesLibrary
 import func Darwin.fputs
 import var Darwin.stderr
 
@@ -40,20 +39,10 @@ struct StderrOutputStream: TextOutputStream {
 }
 var standardError = StderrOutputStream()
 
-let itunesLib: ITLibrary?
-do {
-    itunesLib = try ITLibrary(apiVersion: "1.0")
-} catch {
-    print("Cannot open the library: \(error).", to: &standardError)
+guard let tracks = try? Track.gatherAllTracks() else {
+    print("Cannot get tracks from iTunes", to: &standardError)
     exit(1)
 }
-
-guard let itunes = itunesLib else {
-    print("No library", to: &standardError)
-    exit(1)
-}
-
-var tracks = itunes.allMediaItems.map{ Track($0) }
 
 guard tracks.count > 0 else {
     print("No JSON to record", to: &standardError)
