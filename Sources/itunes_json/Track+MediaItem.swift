@@ -78,9 +78,6 @@ extension Track {
             self.kind = kind
         }
         if let location = mediaItem.location {
-            if location.isFileURL && !FileManager.default.fileExists(atPath: location.path) {
-                print("Non-existant media file: \(location)", to: &standardError)
-            }
             self.location = location.absoluteString
         }
         if mediaItem.mediaKind == .kindMovie {
