@@ -73,7 +73,7 @@ struct Track : Codable {
 
 extension Track {
     static public func gatherAllTracks() throws -> [Track] {
-        let itunes = try ITLibrary(apiVersion: "1.0")
+        let itunes = try ITLibrary(apiVersion: "1.1")
         return itunes.allMediaItems.map{ Track($0) }
     }
 }
