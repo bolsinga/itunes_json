@@ -17,5 +17,5 @@ if_failure "Cannot create itunes json file: $ITUNES_JSON_FILE"
 $HOME/Applications/web_generator/site $HOME/Documents/code/git/web_data $HOME/Sites index $ITUNES_JSON_FILE
 if_failure "Cannot create site locally"
 
-rsync -avzr $HOME/Sites/* mink.he.net:/home/bolsinga/public_html
+rsync -avzr $HOME/Sites/* mink.he.net:/home/bolsinga/secure_html
 if_failure "Cannot update web site"
