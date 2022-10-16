@@ -27,10 +27,6 @@ struct Program: ParsableCommand {
       throw ValidationError("Unable to create JSON for \(tracks)")
     }
 
-    guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-      throw ValidationError("Unable to create JSON string for \(tracks)")
-    }
-
     if !directoryPath.isEmpty {
       let destinationDirectoryPath = directoryPath
       var destinationURL = URL(fileURLWithPath: destinationDirectoryPath, isDirectory: true)
@@ -42,8 +38,12 @@ struct Program: ParsableCommand {
       destinationURL.appendPathComponent("iTunes-\(dateString).json")
       FileManager.default.createFile(atPath: destinationURL.path, contents: nil, attributes: nil)
 
-      try jsonString.write(toFile: destinationURL.path, atomically: true, encoding: .utf8)
+      try jsonData.write(to: destinationURL, options: .atomic)
     } else {
+      guard let jsonString = String(data: jsonData, encoding: .utf8) else {
+        throw ValidationError("Unable to create JSON string for \(tracks)")
+      }
+
       print("\(jsonString)")
     }
   }
