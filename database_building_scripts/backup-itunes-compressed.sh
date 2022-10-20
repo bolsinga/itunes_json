@@ -1,13 +1,5 @@
 #/bin/sh
 
-if_failure ()
-{
-  if [ "$?" -ne 0 ] ; then
-    echo "$0: Failure Error: $1" 1>&2
-    exit 1
-  fi
-}
-
 DST_DIR="$1"
 if [ -z "$DST_DIR" ] ; then
     echo "No destination directory"  1>&2
