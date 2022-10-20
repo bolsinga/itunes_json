@@ -6,7 +6,7 @@
 	<string>com.bolsinga.backupitunes.compressed</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/Users/bolsinga/Documents/code/git/bin_utils/backup-itunes-compressed.sh</string>
+		<string>/Users/bolsinga/Applications/backup-itunes-compressed.sh</string>
 		<string>/Users/bolsinga/Documents/code/itunes_backups/</string>
 	</array>
 	<key>StartCalendarInterval</key>
