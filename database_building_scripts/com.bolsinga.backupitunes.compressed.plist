@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>com.bolsinga.backupitunes</string>
+	<string>com.bolsinga.backupitunes.compressed</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>/Users/bolsinga/Documents/code/git/backup-itunes-compressed.sh</string>
