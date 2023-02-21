@@ -26,5 +26,5 @@ if_failure "Cannot create itunes json file: $ITUNES_JSON_FILE"
 
 cp -a $HOME/Documents/code/git/web_data/html/ $SITE_DIR
 
-$HOME/Applications/web_generator/site site $HOME/Documents/code/git/web_data $SITE_DIR $ITUNES_JSON_FILE
+$HOME/Applications/web_generator/site site $SITE_DIR $HOME/Documents/code/git/web_data $ITUNES_JSON_FILE
 if_failure "Cannot create site locally"
