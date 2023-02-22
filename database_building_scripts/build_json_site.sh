@@ -24,5 +24,6 @@ rm -rf $SITE_DIR/*
 
 cp -a $HOME/Documents/code/git/web_data/html/ $SITE_DIR
 
+# JAVA_OPTS="-Dweb.debug_output=true"
 $HOME/Applications/web_generator/site json-site $SITE_DIR $HOME/Documents/code/git/web_data/settings.properties $JSON_DIR
 if_failure "Cannot create site locally"
