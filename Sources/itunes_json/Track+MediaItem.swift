@@ -186,3 +186,10 @@ extension Track {
     }
   }
 }
+
+extension Track {
+  static public func gatherAllTracks() throws -> [Track] {
+    let itunes = try ITLibrary(apiVersion: "1.1")
+    return itunes.allMediaItems.map { Track($0) }
+  }
+}
