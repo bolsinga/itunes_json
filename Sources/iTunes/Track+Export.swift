@@ -7,38 +7,24 @@
 
 import Foundation
 
-public struct TrackExportError: Error, CustomStringConvertible {
-  public internal(set) var message: String
-
-  /// Creates a new validation error with the given message.
-  public init(_ message: String) {
-    self.message = message
-  }
-
-  public var description: String {
-    message
-  }
+enum TrackExportError: Error {
+  case noITunesTracks
+  case cannotConvertJSONToString
 }
 
 extension Track {
   static private func jsonData() throws -> Data {
-    guard let tracks = try? Track.gatherAllTracks() else {
-      throw TrackExportError("Cannot get tracks from iTunes")
-    }
+    let tracks = try Track.gatherAllTracks()
 
     guard tracks.count > 0 else {
-      throw TrackExportError("No JSON to record")
+      throw TrackExportError.noITunesTracks
     }
 
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     encoder.dateEncodingStrategy = .iso8601
 
-    guard let jsonData = try? encoder.encode(tracks) else {
-      throw TrackExportError("Unable to create JSON for \(tracks)")
-    }
-
-    return jsonData
+    return try encoder.encode(tracks)
   }
 
   static public func export(_ directoryURL: URL) throws {
@@ -56,7 +42,7 @@ extension Track {
     let jsonData = try Track.jsonData()
 
     guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-      throw TrackExportError("Unable to create JSON string")
+      throw TrackExportError.cannotConvertJSONToString
     }
     return jsonString
   }
