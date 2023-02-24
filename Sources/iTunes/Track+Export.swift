@@ -41,20 +41,17 @@ extension Track {
     return jsonData
   }
 
-  static public func export(_ directoryPath: String) throws {
+  static public func export(_ directoryURL: URL) throws {
     let jsonData = try Track.jsonData()
-
-    let destinationDirectoryPath = directoryPath
-    var destinationURL = URL(fileURLWithPath: destinationDirectoryPath, isDirectory: true)
 
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy-MM-dd"
     let dateString = dateFormatter.string(from: Date())
 
-    destinationURL.appendPathComponent("iTunes-\(dateString).json")
-    FileManager.default.createFile(atPath: destinationURL.path, contents: nil, attributes: nil)
+    let url = directoryURL.appending(path: "iTunes-\(dateString).json")
+    FileManager.default.createFile(atPath: url.path, contents: nil, attributes: nil)
 
-    try jsonData.write(to: destinationURL, options: .atomic)
+    try jsonData.write(to: url, options: .atomic)
   }
 
   static public func jsonString() throws -> String {
