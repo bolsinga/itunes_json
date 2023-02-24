@@ -27,14 +27,8 @@ extension Track {
     return try encoder.encode(tracks)
   }
 
-  static public func export(_ directoryURL: URL) throws {
+  static public func export(to url: URL) throws {
     let jsonData = try Track.jsonData()
-
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "yyyy-MM-dd"
-    let dateString = dateFormatter.string(from: Date())
-
-    let url = directoryURL.appending(path: "iTunes-\(dateString).json")
     try jsonData.write(to: url, options: .atomic)
   }
 
