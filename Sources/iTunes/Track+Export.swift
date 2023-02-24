@@ -49,8 +49,6 @@ extension Track {
     let dateString = dateFormatter.string(from: Date())
 
     let url = directoryURL.appending(path: "iTunes-\(dateString).json")
-    FileManager.default.createFile(atPath: url.path, contents: nil, attributes: nil)
-
     try jsonData.write(to: url, options: .atomic)
   }
 
