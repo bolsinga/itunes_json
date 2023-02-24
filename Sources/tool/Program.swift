@@ -14,14 +14,19 @@ struct Program: ParsableCommand {
       if !manager.fileExists(atPath: url.relativePath) {
         try manager.createDirectory(at: url, withIntermediateDirectories: true)
       }
-      return url
+
+      let dateFormatter = DateFormatter()
+      dateFormatter.dateFormat = "yyyy-MM-dd"
+      let dateString = dateFormatter.string(from: Date())
+
+      return url.appending(path: "iTunes-\(dateString).json")
     })
   )
-  var outputDirectoryURL: URL? = nil
+  var outputFile: URL? = nil
 
   func run() throws {
-    if let outputDirectoryURL {
-      try Track.export(outputDirectoryURL)
+    if let outputFile {
+      try Track.export(to: outputFile)
     } else {
       print("\(try Track.jsonString())")
     }
