@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import iTunes
 
 enum TrackExportError: Error {
   case noITunesTracks
