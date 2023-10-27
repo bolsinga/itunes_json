@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
   name: "itunes_json",
   platforms: [
-    .macOS(.v13)
+    .macOS(.v14)
   ],
   products: [
     .library(name: "iTunes", targets: ["iTunes"]),
