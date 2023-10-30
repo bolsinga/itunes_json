@@ -12,7 +12,7 @@ let package = Package(
     .executable(name: "tool", targets: ["tool"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-argument-parser", from: "1.2.2")
+    .package(url: "https://github.com/apple/swift-argument-parser", from: "1.2.3")
   ],
   targets: [
     .target(name: "iTunes"),
