@@ -2,6 +2,8 @@ import ArgumentParser
 import Foundation
 import iTunes
 
+extension Source: EnumerableFlag {}
+
 @main
 struct Program: ParsableCommand {
 
@@ -24,11 +26,13 @@ struct Program: ParsableCommand {
   )
   var outputFile: URL? = nil
 
+  @Flag var source: Source = .itunes
+
   func run() throws {
     if let outputFile {
-      try Track.export(to: outputFile)
+      try Track.export(to: outputFile, source: source)
     } else {
-      print("\(try Track.jsonString())")
+      print("\(try Track.jsonString(source))")
     }
   }
 }
