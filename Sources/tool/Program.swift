@@ -5,7 +5,7 @@ import iTunes
 extension Source: EnumerableFlag {}
 
 @main
-struct Program: ParsableCommand {
+struct Program: AsyncParsableCommand {
 
   @Argument(
     help:
@@ -28,11 +28,11 @@ struct Program: ParsableCommand {
 
   @Flag var source: Source = .itunes
 
-  func run() throws {
+  func run() async throws {
     if let outputFile {
-      try Track.export(to: outputFile, source: source)
+      try await Track.export(to: outputFile, source: source)
     } else {
-      print("\(try Track.jsonString(source))")
+      print("\(try await Track.jsonString(source))")
     }
   }
 }
