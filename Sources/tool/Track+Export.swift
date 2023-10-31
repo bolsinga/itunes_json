@@ -11,7 +11,6 @@ import iTunes
 enum TrackExportError: Error {
   case noITunesTracks
   case cannotConvertJSONToString
-  case invalidSource
 }
 
 extension Source {
@@ -20,7 +19,7 @@ extension Source {
     case .itunes:
       return try Track.gatherAllTracks()
     case .musickit:
-      throw TrackExportError.invalidSource
+      return try await Track.gatherWithMusicKit()
     }
   }
 }
