@@ -12,11 +12,11 @@ enum DataExportError: Error {
 }
 
 extension Array where Element == Track {
-  public func data() throws -> Data {
+  public func data(for destination: Destination) throws -> Data {
     guard self.count > 0 else {
       throw DataExportError.noTracks
     }
 
-    return try self.jsonData()
+    return try destination.data(for: self)
   }
 }
