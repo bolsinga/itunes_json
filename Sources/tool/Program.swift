@@ -36,10 +36,13 @@ struct Program: AsyncParsableCommand {
 
   func run() async throws {
     let tracks = try await source.gather()
+
+    let data = try tracks.data()
+
     if let outputFile {
-      try Track.export(to: outputFile, tracks: tracks)
+      try data.write(to: outputFile, options: .atomic)
     } else {
-      print("\(try Track.jsonString(tracks))")
+      print("\(try data.asUTF8String())")
     }
   }
 }
