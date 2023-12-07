@@ -3,6 +3,7 @@ import Foundation
 import iTunes
 
 extension Source: EnumerableFlag {}
+extension Destination: EnumerableFlag {}
 
 @main
 struct Program: AsyncParsableCommand {
@@ -25,19 +26,16 @@ struct Program: AsyncParsableCommand {
   private var outputFile: URL? {
     guard let outputDirectory else { return nil }
 
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "yyyy-MM-dd"
-    let dateString = dateFormatter.string(from: Date())
-
-    return outputDirectory.appending(path: "iTunes-\(dateString).json")
+    return destination.outputFile(using: outputDirectory)
   }
 
   @Flag var source: Source = .itunes
+  @Flag var destination: Destination = .json
 
   func run() async throws {
     let tracks = try await source.gather()
 
-    let data = try tracks.data()
+    let data = try tracks.data(for: destination)
 
     if let outputFile {
       try data.write(to: outputFile, options: .atomic)
