@@ -19,11 +19,7 @@ extension Track {
       throw TrackExportError.noITunesTracks
     }
 
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-    encoder.dateEncodingStrategy = .iso8601
-
-    return try encoder.encode(tracks)
+    return try tracks.jsonData()
   }
 
   static public func export(to url: URL, tracks: [Track]) throws {
