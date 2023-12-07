@@ -35,10 +35,11 @@ struct Program: AsyncParsableCommand {
   @Flag var source: Source = .itunes
 
   func run() async throws {
+    let tracks = try await source.gather()
     if let outputFile {
-      try await Track.export(to: outputFile, source: source)
+      try Track.export(to: outputFile, tracks: tracks)
     } else {
-      print("\(try await Track.jsonString(source))")
+      print("\(try Track.jsonString(tracks))")
     }
   }
 }

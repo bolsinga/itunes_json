@@ -13,21 +13,8 @@ enum TrackExportError: Error {
   case cannotConvertJSONToString
 }
 
-extension Source {
-  func gather() async throws -> [Track] {
-    switch self {
-    case .itunes:
-      return try Track.gatherAllTracks()
-    case .musickit:
-      return try await Track.gatherWithMusicKit()
-    }
-  }
-}
-
 extension Track {
-  static private func jsonData(_ source: Source) async throws -> Data {
-    let tracks = try await source.gather()
-
+  static private func jsonData(_ tracks: [Track]) throws -> Data {
     guard tracks.count > 0 else {
       throw TrackExportError.noITunesTracks
     }
@@ -39,13 +26,13 @@ extension Track {
     return try encoder.encode(tracks)
   }
 
-  static public func export(to url: URL, source: Source) async throws {
-    let jsonData = try await Track.jsonData(source)
+  static public func export(to url: URL, tracks: [Track]) throws {
+    let jsonData = try Track.jsonData(tracks)
     try jsonData.write(to: url, options: .atomic)
   }
 
-  static public func jsonString(_ source: Source) async throws -> String {
-    let jsonData = try await Track.jsonData(source)
+  static public func jsonString(_ tracks: [Track]) throws -> String {
+    let jsonData = try Track.jsonData(tracks)
 
     guard let jsonString = String(data: jsonData, encoding: .utf8) else {
       throw TrackExportError.cannotConvertJSONToString
