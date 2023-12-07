@@ -9,7 +9,7 @@ struct Program: AsyncParsableCommand {
 
   @Argument(
     help:
-      "The path at which to create an iTunes JSON file. Writes JSON to standard output if not provided.",
+      "The path at which to create the output file. Writes to standard output if not provided.",
     transform: ({
       let url = URL(filePath: $0, directoryHint: .isDirectory)
       let manager = FileManager.default
@@ -17,14 +17,20 @@ struct Program: AsyncParsableCommand {
         try manager.createDirectory(at: url, withIntermediateDirectories: true)
       }
 
-      let dateFormatter = DateFormatter()
-      dateFormatter.dateFormat = "yyyy-MM-dd"
-      let dateString = dateFormatter.string(from: Date())
-
-      return url.appending(path: "iTunes-\(dateString).json")
+      return url
     })
   )
-  var outputFile: URL? = nil
+  var outputDirectory: URL? = nil
+
+  private var outputFile: URL? {
+    guard let outputDirectory else { return nil }
+
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
+    let dateString = dateFormatter.string(from: Date())
+
+    return outputDirectory.appending(path: "iTunes-\(dateString).json")
+  }
 
   @Flag var source: Source = .itunes
 
