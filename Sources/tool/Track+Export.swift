@@ -14,16 +14,16 @@ enum TrackExportError: Error {
 
 extension Track {
   static public func export(to url: URL, tracks: [Track]) throws {
-    let jsonData = try tracks.data()
-    try jsonData.write(to: url, options: .atomic)
+    let data = try tracks.data()
+    try data.write(to: url, options: .atomic)
   }
 
   static public func jsonString(_ tracks: [Track]) throws -> String {
-    let jsonData = try tracks.data()
+    let data = try tracks.data()
 
-    guard let jsonString = String(data: jsonData, encoding: .utf8) else {
+    guard let s = String(data: data, encoding: .utf8) else {
       throw TrackExportError.cannotConvertJSONToString
     }
-    return jsonString
+    return s
   }
 }
