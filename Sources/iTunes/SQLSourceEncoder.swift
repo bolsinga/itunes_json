@@ -7,6 +7,16 @@
 
 import Foundation
 
+extension Track {
+  fileprivate var shouldEncode: Bool {
+    let kind: String = kind?.lowercased() ?? ""
+    guard !kind.contains("video") else { return false }
+    guard !kind.contains("pdf") else { return false }
+    guard !kind.contains("itunes lp") else { return false }
+    return true
+  }
+}
+
 extension String {
   var quoteEscaped: String {
     self.replacingOccurrences(of: "'", with: "''")
@@ -110,6 +120,53 @@ class SQLSourceEncoder {
     }
   }
 
+  fileprivate final class AlbumTableData: TrackEncoding {
+    struct Album: Hashable {
+      let name: String
+      let sortName: String?
+      let trackCount: Int
+      let discCount: Int
+      let discNumber: Int
+      let compilation: Bool
+
+      init(_ track: Track) {
+        self.name = (track.album ?? "Unknown Album Name").quoteEscaped
+        let potentialSortName = track.sortAlbum?.quoteEscaped
+        self.sortName = (self.name != potentialSortName) ? potentialSortName : nil
+        self.trackCount = track.trackCount ?? -1
+        self.discCount = track.discCount ?? 1
+        self.discNumber = track.discNumber ?? 1
+        self.compilation = track.compilation ?? false
+      }
+
+      var compilationValue: Int {
+        compilation ? 1 : 0
+      }
+    }
+
+    var values = Set<Album>()
+
+    var statements: String {
+      var keyStatements = Array(values).map {
+        if let sortName = $0.sortName {
+          "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES ('\($0.name)', '\(sortName)', \($0.trackCount), \($0.discCount), \($0.discNumber), \($0.compilationValue));"
+        } else {
+          "INSERT INTO albums (name, trackcount, disccount, discnumber, compilation) VALUES ('\($0.name)', \($0.trackCount), \($0.discCount), \($0.discNumber), \($0.compilationValue));"
+        }
+      }.sorted()
+      keyStatements.insert("BEGIN;", at: 0)
+      keyStatements.append("COMMIT;")
+      keyStatements.insert(
+        "CREATE TABLE albums (id INTEGER PRIMARY KEY, name TEXT NOT NULL, sortname TEXT, trackcount INTEGER NOT NULL, disccount INTEGER NOT NULL, discnumber INTEGER NOT NULL, compilation INTEGER DEFAULT 0 NOT NULL, UNIQUE(name, trackcount, disccount, discnumber, compilation), CHECK(trackcount > 0), CHECK(disccount > 0), CHECK(discnumber > 0), CHECK(compilation = 0 OR compilation = 1));",
+        at: 0)
+      return keyStatements.joined(separator: "\n")
+    }
+
+    func encode(_ track: Track) {
+      values.insert(Album(track))
+    }
+  }
+
   enum SQLSourceEncoderError: Error {
     case cannotMakeData
   }
@@ -118,7 +175,7 @@ class SQLSourceEncoder {
     let trackEncoders: [TrackEncoding]
 
     internal init() {
-      self.trackEncoders = [LookupTableData(), ArtistTableData()]
+      self.trackEncoders = [LookupTableData(), ArtistTableData(), AlbumTableData()]
     }
 
     func encode(_ track: Track) {
@@ -132,7 +189,7 @@ class SQLSourceEncoder {
 
   func encode(_ tracks: [Track]) throws -> String {
     let encoder = Encoder()
-    tracks.forEach { encoder.encode($0) }
+    tracks.filter { $0.shouldEncode }.forEach { encoder.encode($0) }
     return encoder.sqlStatements
   }
 
