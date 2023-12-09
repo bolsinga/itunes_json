@@ -29,6 +29,13 @@ extension Track {
   var albumName: String {
     (album ?? "").quoteEscaped
   }
+
+  var albumIsCompilation: Int {
+    if let compilation {
+      return compilation ? 1 : 0
+    }
+    return 0
+  }
 }
 
 private protocol TrackEncoding {
@@ -134,7 +141,7 @@ class SQLSourceEncoder {
       let trackCount: Int
       let discCount: Int
       let discNumber: Int
-      let compilation: Bool
+      let compilation: Int
 
       init(_ track: Track) {
         self.name = track.albumName
@@ -146,11 +153,7 @@ class SQLSourceEncoder {
         self.trackCount = track.trackCount ?? -1
         self.discCount = track.discCount ?? 1
         self.discNumber = track.discNumber ?? 1
-        self.compilation = track.compilation ?? false
-      }
-
-      var compilationValue: Int {
-        compilation ? 1 : 0
+        self.compilation = track.albumIsCompilation
       }
     }
 
@@ -176,7 +179,7 @@ class SQLSourceEncoder {
 
     var statements: String {
       var keyStatements = Array(values).map {
-        "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES ('\($0.name)', '\($0.sortName)', \($0.trackCount), \($0.discCount), \($0.discNumber), \($0.compilationValue));"
+        "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES ('\($0.name)', '\($0.sortName)', \($0.trackCount), \($0.discCount), \($0.discNumber), \($0.compilation));"
       }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
