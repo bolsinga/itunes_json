@@ -30,6 +30,18 @@ extension Track {
     (album ?? "").quoteEscaped
   }
 
+  var albumTrackCount: Int {
+    trackCount ?? -1
+  }
+
+  var albumDiscCount: Int {
+    discCount ?? 1
+  }
+
+  var albumDiscNumber: Int {
+    discNumber ?? 1
+  }
+
   var albumIsCompilation: Int {
     if let compilation {
       return compilation ? 1 : 0
@@ -150,9 +162,9 @@ class SQLSourceEncoder {
         } else {
           self.sortName = ""
         }
-        self.trackCount = track.trackCount ?? -1
-        self.discCount = track.discCount ?? 1
-        self.discNumber = track.discNumber ?? 1
+        self.trackCount = track.albumTrackCount
+        self.discCount = track.albumDiscCount
+        self.discNumber = track.albumDiscNumber
         self.compilation = track.albumIsCompilation
       }
     }
