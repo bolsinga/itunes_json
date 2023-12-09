@@ -7,17 +7,13 @@
 
 import Foundation
 
-enum DestinationDataError: Error {
-  case sqlNotYetSupported
-}
-
 extension Destination {
   public func data(for tracks: [Track]) throws -> Data {
     switch self {
     case .json:
       return try tracks.jsonData()
     case .sqlSource:
-      throw DestinationDataError.sqlNotYetSupported
+      return try tracks.sqlData()
     }
   }
 }
