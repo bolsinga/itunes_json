@@ -8,7 +8,7 @@
 import Foundation
 
 extension Track {
-  var shouldEmit: Bool {
+  fileprivate var shouldEncode: Bool {
     let kind: String = kind?.lowercased() ?? ""
     guard !kind.contains("video") else { return false }
     guard !kind.contains("pdf") else { return false }
@@ -189,7 +189,7 @@ class SQLSourceEncoder {
 
   func encode(_ tracks: [Track]) throws -> String {
     let encoder = Encoder()
-    tracks.filter { $0.shouldEmit }.forEach { encoder.encode($0) }
+    tracks.filter { $0.shouldEncode }.forEach { encoder.encode($0) }
     return encoder.sqlStatements
   }
 
