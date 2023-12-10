@@ -152,7 +152,7 @@ class SQLSourceEncoder {
               trackcount INTEGER NOT NULL,
               disccount INTEGER NOT NULL,
               discnumber INTEGER NOT NULL,
-              compilation INTEGER DEFAULT 0 NOT NULL,
+              compilation INTEGER NOT NULL,
               UNIQUE(name, trackcount, disccount, discnumber, compilation),
               CHECK(trackcount > 0),
               CHECK(disccount > 0),
