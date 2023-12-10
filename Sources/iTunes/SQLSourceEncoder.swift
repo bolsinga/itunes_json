@@ -220,7 +220,8 @@ class SQLSourceEncoder {
     }
 
     var sqlStatements: String {
-      trackEncoders.map { $0.statements }.compactMap { $0 }.joined(separator: "\n")
+      (["PRAGMA foreign_keys = ON;"] + trackEncoders.map { $0.statements }.compactMap { $0 })
+        .joined(separator: "\n")
     }
   }
 
