@@ -91,7 +91,7 @@ class SQLSourceEncoder {
       let sortName: String?
 
       init(_ track: Track) {
-        self.name = (track.artist ?? track.albumArtist ?? "Unknown Artist Name").quoteEscaped
+        self.name = (track.artist ?? track.albumArtist ?? "").quoteEscaped
         let potentialSortName = (track.sortArtist ?? track.sortAlbumArtist)?.quoteEscaped
         self.sortName = (self.name != potentialSortName) ? potentialSortName : nil
       }
@@ -110,7 +110,7 @@ class SQLSourceEncoder {
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
       keyStatements.insert(
-        "CREATE TABLE artists (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE, sortname TEXT);",
+        "CREATE TABLE artists (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE, sortname TEXT, CHECK(length(name) > 0));",
         at: 0)
       return keyStatements.joined(separator: "\n")
     }
