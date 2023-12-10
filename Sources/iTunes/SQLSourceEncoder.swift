@@ -7,6 +7,12 @@
 
 import Foundation
 
+extension String {
+  var quoteEscaped: String {
+    self.replacingOccurrences(of: "'", with: "''")
+  }
+}
+
 extension Track {
   fileprivate var shouldEncode: Bool {
     let kind: String = kind?.lowercased() ?? ""
@@ -15,11 +21,13 @@ extension Track {
     guard !kind.contains("itunes lp") else { return false }
     return true
   }
-}
 
-extension String {
-  var quoteEscaped: String {
-    self.replacingOccurrences(of: "'", with: "''")
+  var artistName: String {
+    (artist ?? albumArtist ?? "").quoteEscaped
+  }
+
+  var albumName: String {
+    (album ?? "").quoteEscaped
   }
 }
 
@@ -91,7 +99,7 @@ class SQLSourceEncoder {
       let sortName: String
 
       init(_ track: Track) {
-        self.name = (track.artist ?? track.albumArtist ?? "").quoteEscaped
+        self.name = track.artistName
         if let potentialSortName = (track.sortArtist ?? track.sortAlbumArtist)?.quoteEscaped {
           self.sortName = (self.name != potentialSortName) ? potentialSortName : ""
         } else {
@@ -129,7 +137,7 @@ class SQLSourceEncoder {
       let compilation: Bool
 
       init(_ track: Track) {
-        self.name = (track.album ?? "").quoteEscaped
+        self.name = track.albumName
         if let potentialSortName = track.sortAlbum?.quoteEscaped {
           self.sortName = (self.name != potentialSortName) ? potentialSortName : ""
         } else {
