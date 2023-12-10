@@ -130,7 +130,7 @@ class SQLSourceEncoder {
       let compilation: Bool
 
       init(_ track: Track) {
-        self.name = (track.album ?? "Unknown Album Name").quoteEscaped
+        self.name = (track.album ?? "").quoteEscaped
         let potentialSortName = track.sortAlbum?.quoteEscaped
         self.sortName = (self.name != potentialSortName) ? potentialSortName : nil
         self.trackCount = track.trackCount ?? -1
@@ -154,6 +154,7 @@ class SQLSourceEncoder {
               discnumber INTEGER NOT NULL,
               compilation INTEGER NOT NULL,
               UNIQUE(name, trackcount, disccount, discnumber, compilation),
+              CHECK(length(name) > 0),
               CHECK(trackcount > 0),
               CHECK(disccount > 0),
               CHECK(discnumber > 0),
