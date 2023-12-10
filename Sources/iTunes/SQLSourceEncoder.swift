@@ -144,6 +144,22 @@ class SQLSourceEncoder {
       }
     }
 
+    static let CreateTable = """
+            CREATE TABLE albums (
+              id INTEGER PRIMARY KEY,
+              name TEXT NOT NULL,
+              sortname TEXT,
+              trackcount INTEGER NOT NULL,
+              disccount INTEGER NOT NULL,
+              discnumber INTEGER NOT NULL,
+              compilation INTEGER DEFAULT 0 NOT NULL,
+              UNIQUE(name, trackcount, disccount, discnumber, compilation),
+              CHECK(trackcount > 0),
+              CHECK(disccount > 0),
+              CHECK(discnumber > 0),
+              CHECK(compilation = 0 OR compilation = 1));
+      """
+
     var values = Set<Album>()
 
     var statements: String {
@@ -156,9 +172,7 @@ class SQLSourceEncoder {
       }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
-      keyStatements.insert(
-        "CREATE TABLE albums (id INTEGER PRIMARY KEY, name TEXT NOT NULL, sortname TEXT, trackcount INTEGER NOT NULL, disccount INTEGER NOT NULL, discnumber INTEGER NOT NULL, compilation INTEGER DEFAULT 0 NOT NULL, UNIQUE(name, trackcount, disccount, discnumber, compilation), CHECK(trackcount > 0), CHECK(disccount > 0), CHECK(discnumber > 0), CHECK(compilation = 0 OR compilation = 1));",
-        at: 0)
+      keyStatements.insert(SQLSourceEncoder.AlbumTableData.CreateTable, at: 0)
       return keyStatements.joined(separator: "\n")
     }
 
