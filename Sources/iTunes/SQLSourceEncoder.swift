@@ -65,13 +65,11 @@ class SQLSourceEncoder {
     var values: [KeyName: Set<String>] = [:]
 
     static let KindKey = "kind"
-    static let GenreKey = "genre"
 
     internal init() {
-      [
-        KeyName(key: SQLSourceEncoder.LookupTableData.KindKey, name: "name"),
-        KeyName(key: SQLSourceEncoder.LookupTableData.GenreKey, name: "name"),
-      ].forEach { self.values[$0] = Set<String>() }
+      [KeyName(key: SQLSourceEncoder.LookupTableData.KindKey, name: "name")].forEach {
+        self.values[$0] = Set<String>()
+      }
     }
 
     private func tableName(for keyName: KeyName) -> String {
@@ -105,9 +103,6 @@ class SQLSourceEncoder {
     func encode(_ track: Track) {
       if let kind = track.kind {
         encode(key: SQLSourceEncoder.LookupTableData.KindKey, value: kind)
-      }
-      if let genre = track.genre {
-        encode(key: SQLSourceEncoder.LookupTableData.GenreKey, value: genre)
       }
     }
   }
