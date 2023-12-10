@@ -88,12 +88,15 @@ class SQLSourceEncoder {
   fileprivate final class ArtistTableData: TrackEncoding {
     struct ArtistName: Hashable {
       let name: String
-      let sortName: String?
+      let sortName: String
 
       init(_ track: Track) {
         self.name = (track.artist ?? track.albumArtist ?? "").quoteEscaped
-        let potentialSortName = (track.sortArtist ?? track.sortAlbumArtist)?.quoteEscaped
-        self.sortName = (self.name != potentialSortName) ? potentialSortName : nil
+        if let potentialSortName = (track.sortArtist ?? track.sortAlbumArtist)?.quoteEscaped {
+          self.sortName = (self.name != potentialSortName) ? potentialSortName : ""
+        } else {
+          self.sortName = ""
+        }
       }
     }
 
@@ -101,16 +104,12 @@ class SQLSourceEncoder {
 
     var statements: String {
       var keyStatements = Array(values).map {
-        if let sortName = $0.sortName {
-          "INSERT INTO artists (name, sortname) VALUES ('\($0.name)', '\(sortName)');"
-        } else {
-          "INSERT INTO artists (name) VALUES ('\($0.name)');"
-        }
+        "INSERT INTO artists (name, sortname) VALUES ('\($0.name)', '\($0.sortName)');"
       }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
       keyStatements.insert(
-        "CREATE TABLE artists (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE, sortname TEXT, CHECK(length(name) > 0));",
+        "CREATE TABLE artists (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE, sortname TEXT NOT NULL DEFAULT '', CHECK(length(name) > 0), CHECK(name != sortname));",
         at: 0)
       return keyStatements.joined(separator: "\n")
     }
@@ -123,7 +122,7 @@ class SQLSourceEncoder {
   fileprivate final class AlbumTableData: TrackEncoding {
     struct Album: Hashable {
       let name: String
-      let sortName: String?
+      let sortName: String
       let trackCount: Int
       let discCount: Int
       let discNumber: Int
@@ -131,8 +130,11 @@ class SQLSourceEncoder {
 
       init(_ track: Track) {
         self.name = (track.album ?? "").quoteEscaped
-        let potentialSortName = track.sortAlbum?.quoteEscaped
-        self.sortName = (self.name != potentialSortName) ? potentialSortName : nil
+        if let potentialSortName = track.sortAlbum?.quoteEscaped {
+          self.sortName = (self.name != potentialSortName) ? potentialSortName : ""
+        } else {
+          self.sortName = ""
+        }
         self.trackCount = track.trackCount ?? -1
         self.discCount = track.discCount ?? 1
         self.discNumber = track.discNumber ?? 1
@@ -148,13 +150,14 @@ class SQLSourceEncoder {
             CREATE TABLE albums (
               id INTEGER PRIMARY KEY,
               name TEXT NOT NULL,
-              sortname TEXT,
+              sortname TEXT NOT NULL DEFAULT '',
               trackcount INTEGER NOT NULL,
               disccount INTEGER NOT NULL,
               discnumber INTEGER NOT NULL,
               compilation INTEGER NOT NULL,
               UNIQUE(name, trackcount, disccount, discnumber, compilation),
               CHECK(length(name) > 0),
+              CHECK(name != sortname),
               CHECK(trackcount > 0),
               CHECK(disccount > 0),
               CHECK(discnumber > 0),
@@ -165,11 +168,7 @@ class SQLSourceEncoder {
 
     var statements: String {
       var keyStatements = Array(values).map {
-        if let sortName = $0.sortName {
-          "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES ('\($0.name)', '\(sortName)', \($0.trackCount), \($0.discCount), \($0.discNumber), \($0.compilationValue));"
-        } else {
-          "INSERT INTO albums (name, trackcount, disccount, discnumber, compilation) VALUES ('\($0.name)', \($0.trackCount), \($0.discCount), \($0.discNumber), \($0.compilationValue));"
-        }
+        "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES ('\($0.name)', '\($0.sortName)', \($0.trackCount), \($0.discCount), \($0.discNumber), \($0.compilationValue));"
       }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
