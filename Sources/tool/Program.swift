@@ -30,8 +30,21 @@ struct Program: AsyncParsableCommand {
   @Flag var source: Source = .itunes
   @Flag var destination: Destination = .json
 
+  @Argument(help: "Optional json string to parse when --json-string is passed as input.")
+  var jsonSource: String?
+
+  mutating func validate() throws {
+    if jsonSource != nil, source != .jsonString {
+      throw ValidationError("Passing JSON Source requires --json-string to be passed.")
+    }
+
+    if jsonSource == nil, source == .jsonString {
+      throw ValidationError("Using --json-string requires JSON String to be passed as an argument.")
+    }
+  }
+
   func run() async throws {
-    let tracks = try await source.gather()
+    let tracks = try await source.gather(jsonSource)
 
     let data = try tracks.data(for: destination)
 

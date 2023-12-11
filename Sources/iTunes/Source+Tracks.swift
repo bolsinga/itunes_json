@@ -8,12 +8,14 @@
 import Foundation
 
 extension Source {
-  public func gather() async throws -> [Track] {
+  public func gather(_ source: String?) async throws -> [Track] {
     switch self {
     case .itunes:
       return try Track.gatherAllTracks()
     case .musickit:
       return try await Track.gatherWithMusicKit()
+    case .jsonString:
+      return try Track.createFromString(source)
     }
   }
 }
