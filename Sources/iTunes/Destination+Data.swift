@@ -12,7 +12,7 @@ extension Destination {
     switch self {
     case .json:
       return try tracks.jsonData()
-    case .sqlSource:
+    case .sqlCode:
       return try tracks.sqlData()
     }
   }
