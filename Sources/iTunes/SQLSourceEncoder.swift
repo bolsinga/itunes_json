@@ -54,6 +54,22 @@ extension Track {
     return 0
   }
 
+  var songTrackNumber: Int {
+    trackNumber ?? -1
+  }
+
+  var songYear: Int {
+    year ?? -1
+  }
+
+  var songSize: UInt64 {
+    size ?? 0
+  }
+
+  var songDuration: Int {
+    totalTime ?? -1
+  }
+
   var artistSelect: String {
     "SELECT id FROM artists WHERE name = '\(artistName)'"
   }
@@ -239,10 +255,10 @@ class SQLSourceEncoder {
           self.sortName = ""
         }
         self.itunesid = track.persistentID
-        self.trackNumber = track.trackNumber ?? -1
-        self.year = track.year ?? -1
-        self.size = track.size ?? 0
-        self.duration = track.totalTime ?? -1
+        self.trackNumber = track.songTrackNumber
+        self.year = track.songYear
+        self.size = track.songSize
+        self.duration = track.songDuration
         self.dateAdded = track.dateAddedISO8601
         self.artistSelect = track.artistSelect
         self.albumSelect = track.albumSelect
