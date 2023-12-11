@@ -6,8 +6,7 @@ extension Source: EnumerableFlag {}
 extension Destination: EnumerableFlag {}
 
 struct Program: AsyncParsableCommand {
-
-  @Argument(
+  @Option(
     help:
       "The path at which to create the output file. Writes to standard output if not provided.",
     transform: ({
