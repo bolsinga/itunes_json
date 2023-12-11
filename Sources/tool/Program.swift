@@ -5,7 +5,6 @@ import iTunes
 extension Source: EnumerableFlag {}
 extension Destination: EnumerableFlag {}
 
-@main
 struct Program: AsyncParsableCommand {
 
   @Argument(
