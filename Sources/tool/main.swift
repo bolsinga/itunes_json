@@ -9,7 +9,7 @@ import Foundation
 
 let command = Program.parseOrExit()
 do {
-    try await command.run()
+  try await command.run()
 } catch {
   Program.exit(withError: error)
 }
