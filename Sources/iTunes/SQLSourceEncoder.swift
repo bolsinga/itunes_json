@@ -47,6 +47,11 @@ extension Track {
     return dateAdded.formatted(.iso8601)
   }
 
+  var datePlayedISO8601: String {
+    guard let playDateUTC else { return "" }
+    return playDateUTC.formatted(.iso8601)
+  }
+
   var albumIsCompilation: Int {
     if let compilation {
       return compilation ? 1 : 0
@@ -70,6 +75,14 @@ extension Track {
     totalTime ?? -1
   }
 
+  var songName: String {
+    name.quoteEscaped
+  }
+
+  var songPlayCount: Int {
+    playCount ?? 0
+  }
+
   var artistSelect: String {
     "SELECT id FROM artists WHERE name = '\(artistName)'"
   }
@@ -81,6 +94,10 @@ extension Track {
   var kindSelect: String {
     guard let kind else { preconditionFailure() }
     return "SELECT id FROM kinds WHERE name = '\(kind)'"
+  }
+
+  var songSelect: String {
+    "SELECT id FROM songs WHERE name = '\(songName)' AND itunesid = '\(persistentID)' AND artistid = (\(artistSelect)) AND albumid = (\(albumSelect)) AND kindid = (\(kindSelect)) AND tracknumber = \(songTrackNumber) AND year = \(songYear) AND size = \(songSize) AND duration = \(songDuration) AND dateadded = '\(dateAddedISO8601)'"
   }
 }
 
@@ -248,7 +265,7 @@ class SQLSourceEncoder {
       let kindSelect: String
 
       init(_ track: Track) {
-        self.name = track.name.quoteEscaped
+        self.name = track.songName
         if let potentialSortName = track.sortName?.quoteEscaped {
           self.sortName = (self.name != potentialSortName) ? potentialSortName : ""
         } else {
@@ -309,6 +326,48 @@ class SQLSourceEncoder {
     }
   }
 
+  fileprivate final class PlayTableData: TrackEncoding {
+    fileprivate struct Play: Hashable {
+      let date: String
+      let delta: Int
+      let songSelect: String
+
+      init(_ track: Track) {
+        self.date = track.datePlayedISO8601
+        self.delta = track.playCount ?? 0
+        self.songSelect = track.songSelect
+      }
+    }
+
+    static let CreateTable = """
+      CREATE TABLE plays (
+        id INTEGER PRIMARY KEY,
+        songid TEXT NOT NULL,
+        date TEXT NOT NULL,
+        delta INTEGER NOT NULL,
+        UNIQUE(songid, date, delta),
+        FOREIGN KEY(songid) REFERENCES songs(id),
+        CHECK(delta > 0));
+      """
+
+    var values = Set<Play>()
+
+    func encode(_ track: Track) {
+      guard track.songPlayCount > 0 else { return }
+      values.insert(Play(track))
+    }
+
+    var statements: String {
+      var keyStatements = Array(values).map {
+        "INSERT INTO plays (songid, date, delta) VALUES ((\($0.songSelect)), '\($0.date)', \($0.delta));"
+      }.sorted()
+      keyStatements.insert("BEGIN;", at: 0)
+      keyStatements.append("COMMIT;")
+      keyStatements.insert(SQLSourceEncoder.PlayTableData.CreateTable, at: 0)
+      return keyStatements.joined(separator: "\n")
+    }
+  }
+
   enum SQLSourceEncoderError: Error {
     case cannotMakeData
   }
@@ -318,7 +377,7 @@ class SQLSourceEncoder {
 
     internal init() {
       self.trackEncoders = [
-        LookupTableData(), ArtistTableData(), AlbumTableData(), SongTableData(),
+        LookupTableData(), ArtistTableData(), AlbumTableData(), SongTableData(), PlayTableData(),
       ]
     }
 
