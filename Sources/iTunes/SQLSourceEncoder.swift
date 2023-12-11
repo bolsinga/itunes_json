@@ -42,11 +42,29 @@ extension Track {
     discNumber ?? 1
   }
 
+  var dateAddedISO8601: String {
+    guard let dateAdded else { preconditionFailure() }
+    return dateAdded.formatted(.iso8601)
+  }
+
   var albumIsCompilation: Int {
     if let compilation {
       return compilation ? 1 : 0
     }
     return 0
+  }
+
+  var artistSelect: String {
+    "SELECT id FROM artists WHERE name = '\(artistName)'"
+  }
+
+  var albumSelect: String {
+    "SELECT id FROM albums WHERE name = '\(albumName)' AND trackcount = \(albumTrackCount) AND disccount = \(albumDiscCount) AND discnumber = \(albumDiscNumber) AND compilation = \(albumIsCompilation)"
+  }
+
+  var kindSelect: String {
+    guard let kind else { preconditionFailure() }
+    return "SELECT id FROM kinds WHERE name = '\(kind)'"
   }
 }
 
@@ -199,6 +217,82 @@ class SQLSourceEncoder {
     }
   }
 
+  fileprivate final class SongTableData: TrackEncoding {
+    struct Song: Hashable {
+      let name: String
+      let sortName: String
+      let itunesid: UInt
+      let trackNumber: Int
+      let year: Int
+      let size: UInt64
+      let duration: Int
+      let dateAdded: String
+      let artistSelect: String
+      let albumSelect: String
+      let kindSelect: String
+
+      init(_ track: Track) {
+        self.name = track.name.quoteEscaped
+        if let potentialSortName = track.sortName?.quoteEscaped {
+          self.sortName = (self.name != potentialSortName) ? potentialSortName : ""
+        } else {
+          self.sortName = ""
+        }
+        self.itunesid = track.persistentID
+        self.trackNumber = track.trackNumber ?? -1
+        self.year = track.year ?? -1
+        self.size = track.size ?? 0
+        self.duration = track.totalTime ?? -1
+        self.dateAdded = track.dateAddedISO8601
+        self.artistSelect = track.artistSelect
+        self.albumSelect = track.albumSelect
+        self.kindSelect = track.kindSelect
+      }
+    }
+
+    // itunesid is TEXT since UInt is bigger than Int64 in sqlite
+    static let CreateTable = """
+      CREATE TABLE songs (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        sortname TEXT NOT NULL DEFAULT '',
+        itunesid TEXT NOT NULL,
+        artistid INTEGER NOT NULL,
+        albumid INTEGER NOT NULL,
+        kindid INTEGER NOT NULL,
+        tracknumber INTEGER NOT NULL,
+        year INTEGER NOT NULL,
+        size INTEGER NOT NULL,
+        duration INTEGER NOT NULL,
+        dateadded TEXT NOT NULL,
+        UNIQUE(name, sortname, itunesid, artistid, albumid, kindid, tracknumber, year, size, duration, dateadded),
+        FOREIGN KEY(artistid) REFERENCES artists(id),
+        FOREIGN KEY(albumid) REFERENCES albums(id),
+        FOREIGN KEY(kindid) REFERENCES kinds(id),
+        CHECK(name != sortname),
+        CHECK(tracknumber > 0),
+        CHECK(year >= 0),
+        CHECK(size > 0),
+        CHECK(duration > 0));
+      """
+
+    var values = Set<Song>()
+
+    var statements: String {
+      var keyStatements = Array(values).map {
+        "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, tracknumber, year, size, duration, dateadded) VALUES ('\($0.name)', '\($0.sortName)', '\($0.itunesid)', (\($0.artistSelect)), (\($0.albumSelect)), (\($0.kindSelect)), \($0.trackNumber), \($0.year), \($0.size), \($0.duration), '\($0.dateAdded)');"
+      }.sorted()
+      keyStatements.insert("BEGIN;", at: 0)
+      keyStatements.append("COMMIT;")
+      keyStatements.insert(SQLSourceEncoder.SongTableData.CreateTable, at: 0)
+      return keyStatements.joined(separator: "\n")
+    }
+
+    func encode(_ track: Track) {
+      values.insert(Song(track))
+    }
+  }
+
   enum SQLSourceEncoderError: Error {
     case cannotMakeData
   }
@@ -207,7 +301,9 @@ class SQLSourceEncoder {
     let trackEncoders: [TrackEncoding]
 
     internal init() {
-      self.trackEncoders = [LookupTableData(), ArtistTableData(), AlbumTableData()]
+      self.trackEncoders = [
+        LookupTableData(), ArtistTableData(), AlbumTableData(), SongTableData(),
+      ]
     }
 
     func encode(_ track: Track) {
