@@ -12,7 +12,7 @@ extension Destination {
     switch self {
     case .json:
       "json"
-    case .sqlSource:
+    case .sqlCode:
       "sql"
     }
   }
