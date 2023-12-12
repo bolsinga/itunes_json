@@ -9,7 +9,7 @@ let package = Package(
   ],
   products: [
     .library(name: "iTunes", targets: ["iTunes"]),
-    .executable(name: "tool", targets: ["tool"]),
+    .executable(name: "itunes_json", targets: ["tool"]),
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.2.3")
