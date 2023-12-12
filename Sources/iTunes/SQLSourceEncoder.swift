@@ -19,6 +19,7 @@ extension Track {
     guard !kind.contains("video") else { return false }
     guard !kind.contains("pdf") else { return false }
     guard !kind.contains("itunes lp") else { return false }
+    guard !kind.contains("internet audio stream") else { return false }
     return true
   }
 
@@ -92,7 +93,7 @@ extension Track {
   }
 
   var kindSelect: String {
-    guard let kind else { preconditionFailure() }
+    guard let kind else { preconditionFailure("\(self)") }
     return "SELECT id FROM kinds WHERE name = '\(kind)'"
   }
 
