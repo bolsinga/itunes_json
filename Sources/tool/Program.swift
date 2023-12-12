@@ -30,7 +30,10 @@ struct Program: AsyncParsableCommand {
   @Flag var source: Source = .itunes
   @Flag var destination: Destination = .json
 
-  @Argument(help: "Optional json string to parse when --json-string is passed as input.")
+  @Argument(
+    help:
+      "Optional json string to parse when --json-string is passed as input. Use '-' as last argument to read from stdin."
+  )
   var jsonSource: String?
 
   mutating func validate() throws {
