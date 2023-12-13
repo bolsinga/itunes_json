@@ -27,8 +27,8 @@ struct Program: AsyncParsableCommand {
     return destination.outputFile(using: outputDirectory)
   }
 
-  @Flag var source: Source = .itunes
-  @Flag var destination: Destination = .json
+  @Flag(help: "Input Source type") var source: Source = .itunes
+  @Flag(help: "Output Destination type") var destination: Destination = .json
 
   @Argument(
     help:
