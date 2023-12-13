@@ -311,7 +311,7 @@ class SQLSourceEncoder {
         size INTEGER NOT NULL,
         duration INTEGER NOT NULL,
         dateadded TEXT NOT NULL,
-        datereleased TEXT NOT NULL,
+        datereleased TEXT NOT NULL DEFAULT '',
         UNIQUE(name, sortname, itunesid, artistid, albumid, kindid, tracknumber, year, size, duration, dateadded, datereleased),
         FOREIGN KEY(artistid) REFERENCES artists(id),
         FOREIGN KEY(albumid) REFERENCES albums(id),
