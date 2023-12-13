@@ -53,6 +53,11 @@ extension Track {
     return dateAdded.formatted(.iso8601)
   }
 
+  var dateReleasedISO8601: String {
+    guard let releaseDate else { return "" }
+    return releaseDate.formatted(.iso8601)
+  }
+
   var datePlayedISO8601: String {
     guard let playDateUTC else { return "" }
     return playDateUTC.formatted(.iso8601)
@@ -266,6 +271,7 @@ class SQLSourceEncoder {
       let size: UInt64
       let duration: Int
       let dateAdded: String
+      let dateReleased: String
       let artistSelect: String
       let albumSelect: String
       let kindSelect: String
@@ -283,6 +289,7 @@ class SQLSourceEncoder {
         self.size = track.songSize
         self.duration = track.songDuration
         self.dateAdded = track.dateAddedISO8601
+        self.dateReleased = track.dateReleasedISO8601
         self.artistSelect = track.artistSelect
         self.albumSelect = track.albumSelect
         self.kindSelect = track.kindSelect
@@ -304,7 +311,8 @@ class SQLSourceEncoder {
         size INTEGER NOT NULL,
         duration INTEGER NOT NULL,
         dateadded TEXT NOT NULL,
-        UNIQUE(name, sortname, itunesid, artistid, albumid, kindid, tracknumber, year, size, duration, dateadded),
+        datereleased TEXT NOT NULL,
+        UNIQUE(name, sortname, itunesid, artistid, albumid, kindid, tracknumber, year, size, duration, dateadded, datereleased),
         FOREIGN KEY(artistid) REFERENCES artists(id),
         FOREIGN KEY(albumid) REFERENCES albums(id),
         FOREIGN KEY(kindid) REFERENCES kinds(id),
@@ -319,7 +327,7 @@ class SQLSourceEncoder {
 
     var statements: String {
       var keyStatements = Array(values).map {
-        "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, tracknumber, year, size, duration, dateadded) VALUES ('\($0.name)', '\($0.sortName)', '\($0.itunesid)', (\($0.artistSelect)), (\($0.albumSelect)), (\($0.kindSelect)), \($0.trackNumber), \($0.year), \($0.size), \($0.duration), '\($0.dateAdded)');"
+        "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, tracknumber, year, size, duration, dateadded, datereleased) VALUES ('\($0.name)', '\($0.sortName)', '\($0.itunesid)', (\($0.artistSelect)), (\($0.albumSelect)), (\($0.kindSelect)), \($0.trackNumber), \($0.year), \($0.size), \($0.duration), '\($0.dateAdded)', '\($0.dateReleased)');"
       }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
