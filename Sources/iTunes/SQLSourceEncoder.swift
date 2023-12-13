@@ -272,6 +272,7 @@ class SQLSourceEncoder {
       let duration: Int
       let dateAdded: String
       let dateReleased: String
+      let comments: String
       let artistSelect: String
       let albumSelect: String
       let kindSelect: String
@@ -290,6 +291,7 @@ class SQLSourceEncoder {
         self.duration = track.songDuration
         self.dateAdded = track.dateAddedISO8601
         self.dateReleased = track.dateReleasedISO8601
+        self.comments = track.comments ?? ""
         self.artistSelect = track.artistSelect
         self.albumSelect = track.albumSelect
         self.kindSelect = track.kindSelect
@@ -312,7 +314,8 @@ class SQLSourceEncoder {
         duration INTEGER NOT NULL,
         dateadded TEXT NOT NULL,
         datereleased TEXT NOT NULL DEFAULT '',
-        UNIQUE(name, sortname, itunesid, artistid, albumid, kindid, tracknumber, year, size, duration, dateadded, datereleased),
+        comments TEXT NOT NULL DEFAULT '',
+        UNIQUE(name, sortname, itunesid, artistid, albumid, kindid, tracknumber, year, size, duration, dateadded, datereleased, comments),
         FOREIGN KEY(artistid) REFERENCES artists(id),
         FOREIGN KEY(albumid) REFERENCES albums(id),
         FOREIGN KEY(kindid) REFERENCES kinds(id),
@@ -327,7 +330,7 @@ class SQLSourceEncoder {
 
     var statements: String {
       var keyStatements = Array(values).map {
-        "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, tracknumber, year, size, duration, dateadded, datereleased) VALUES ('\($0.name)', '\($0.sortName)', '\($0.itunesid)', (\($0.artistSelect)), (\($0.albumSelect)), (\($0.kindSelect)), \($0.trackNumber), \($0.year), \($0.size), \($0.duration), '\($0.dateAdded)', '\($0.dateReleased)');"
+        "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, tracknumber, year, size, duration, dateadded, datereleased, comments) VALUES ('\($0.name)', '\($0.sortName)', '\($0.itunesid)', (\($0.artistSelect)), (\($0.albumSelect)), (\($0.kindSelect)), \($0.trackNumber), \($0.year), \($0.size), \($0.duration), '\($0.dateAdded)', '\($0.dateReleased)', '\($0.comments)');"
       }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
