@@ -14,7 +14,12 @@ extension String {
 }
 
 extension Track {
+  fileprivate var oldPodcastWithoutKind: Bool {
+    kind == nil && (podcast != nil && podcast!)
+  }
+
   fileprivate var shouldEncode: Bool {
+    guard !oldPodcastWithoutKind else { return false }
     let kind: String = kind?.lowercased() ?? ""
     guard !kind.contains("video") else { return false }
     guard !kind.contains("pdf") else { return false }
