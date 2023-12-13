@@ -37,11 +37,11 @@ struct Program: AsyncParsableCommand {
   var jsonSource: String?
 
   mutating func validate() throws {
-    if jsonSource != nil, source != .jsonString {
-      throw ValidationError("Passing JSON Source requires --json-string to be passed.")
+    if jsonSource != nil && (source != .jsonString && source != .xmlJsonString) {
+      throw ValidationError("Passing JSON Source requires --json-string to be passed. \(source)")
     }
 
-    if jsonSource == nil, source == .jsonString {
+    if jsonSource == nil, source == .jsonString || source == .xmlJsonString {
       throw ValidationError("Using --json-string requires JSON String to be passed as an argument.")
     }
   }
