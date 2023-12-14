@@ -8,6 +8,11 @@
 import Foundation
 
 extension XMLTrack {
+  var xalbumRating: Int? {
+    if let albumRating { return Int(albumRating) }
+    return nil
+  }
+
   var xbitRate: Int? {
     if let bitRate { return Int(bitRate) }
     return nil
@@ -50,6 +55,11 @@ extension XMLTrack {
 
   var xhasVideo: Bool? {
     if let hasVideo { return Bool(hasVideo) }
+    return nil
+  }
+
+  var xhD: Bool? {
+    if let hD { return Bool(hD) }
     return nil
   }
 
@@ -154,7 +164,7 @@ extension Track {
     Track(
       album: x.album,
       albumArtist: x.albumArtist,
-      albumRating: x.albumRating,
+      albumRating: x.xalbumRating,
       albumRatingComputed: x.albumRatingComputed,
       artist: x.artist,
       bitRate: x.xbitRate,
@@ -174,7 +184,7 @@ extension Track {
       genre: x.genre,
       grouping: x.grouping,
       hasVideo: x.xhasVideo,
-      hD: x.hD,
+      hD: x.xhD,
       kind: x.kind,
       location: x.location,
       movie: x.xmovie,
