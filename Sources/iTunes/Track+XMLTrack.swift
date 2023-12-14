@@ -59,7 +59,7 @@ extension XMLTrack {
   }
 
   var xhD: Bool? {
-    if let hd { return Bool(hd) }
+    if let hD { return Bool(hD) }
     return nil
   }
 
