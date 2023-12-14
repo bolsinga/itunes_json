@@ -33,7 +33,7 @@ extension Track {
   }
 
   var albumName: String {
-    (album ?? "").quoteEscaped
+    (album ?? name).quoteEscaped
   }
 
   var albumTrackCount: Int {
