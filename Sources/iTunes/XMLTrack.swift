@@ -45,7 +45,7 @@ public struct XMLTrack: Codable {
   var protected: String? = nil  // "Protected"
   var purchased: String? = nil  // "Purchased"
   var rating: String? = nil  // "Rating"
-  var ratingComputed: Bool? = nil  // "Rating Computed"
+  var ratingComputed: String? = nil  // "Rating Computed"
   var releaseDate: Date? = nil  // "Release Date"
   var sampleRate: String? = nil  // "Sample Rate"
   var season: String? = nil  // "Season"
@@ -65,7 +65,7 @@ public struct XMLTrack: Codable {
   var trackType: String? = nil  // "Track Type"
   var tVShow: String? = nil  // "TV Show"
   var unplayed: String? = nil  // "Unplayed"
-  var videoHeight: Int? = nil  // "Video Height"
-  var videoWidth: Int? = nil  // "Video Width"
+  var videoHeight: String? = nil  // "Video Height"
+  var videoWidth: String? = nil  // "Video Width"
   var year: String? = nil  // "Year"
 }
