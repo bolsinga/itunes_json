@@ -29,6 +29,7 @@ struct Program: AsyncParsableCommand {
 
   @Flag(help: "Input Source type") var source: Source = .itunes
   @Flag(help: "Output Destination type") var destination: Destination = .json
+  @Flag(help: "Re-Exports XML JSON file to get sorted keys") var reExport: Bool = false
 
   @Argument(
     help:
@@ -44,9 +45,17 @@ struct Program: AsyncParsableCommand {
     if jsonSource == nil, source == .jsonString || source == .xmlJsonString {
       throw ValidationError("Using --json-string requires JSON String to be passed as an argument.")
     }
+
+    if reExport && (source != .xmlJsonString || destination != .json || outputFile != nil) {
+      throw ValidationError("reExport is only for xml json strings output to json via stdout.")
+    }
   }
 
   func run() async throws {
+    if reExport {
+      try source.reExport(jsonSource)
+      return
+    }
     let tracks = try await source.gather(jsonSource)
 
     let data = try tracks.data(for: destination)
