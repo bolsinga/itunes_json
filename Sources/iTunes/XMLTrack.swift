@@ -10,7 +10,7 @@ import Foundation
 public struct XMLTrack: Codable {
   var album: String? = nil  // "Album"
   var albumArtist: String? = nil  // "Album Artist"
-  var albumRating: Int? = nil  // "Album Rating"
+  var albumRating: String? = nil  // "Album Rating"
   var albumRatingComputed: Bool? = nil  // "Album Rating Computed"
   var artist: String? = nil  // "Artist"
   //    var artworkCount : UInt? = nil // "Artwork Count"
@@ -31,7 +31,7 @@ public struct XMLTrack: Codable {
   var genre: String? = nil  // "Genre"
   var grouping: String? = nil  // "Grouping"
   var hasVideo: String? = nil  // "Has Video"
-  var hD: Bool? = nil  // "HD"
+  var hD: String? = nil  // "HD"
   var kind: String? = nil  // "Kind"
   var location: String? = nil  // "Location"
   var movie: String? = nil  // "Movie"
