@@ -291,7 +291,7 @@ class SQLSourceEncoder {
         self.duration = track.songDuration
         self.dateAdded = track.dateAddedISO8601
         self.dateReleased = track.dateReleasedISO8601
-        self.comments = track.comments ?? ""
+        self.comments = (track.comments ?? "").quoteEscaped
         self.artistSelect = track.artistSelect
         self.albumSelect = track.albumSelect
         self.kindSelect = track.kindSelect
