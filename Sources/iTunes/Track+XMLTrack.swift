@@ -108,6 +108,11 @@ extension XMLTrack {
     return nil
   }
 
+  var xratingComputed: Bool? {
+    if let ratingComputed { return Bool(ratingComputed) }
+    return nil
+  }
+
   var xsampleRate: Int? {
     if let sampleRate { return Int(sampleRate) }
     return nil
@@ -150,6 +155,16 @@ extension XMLTrack {
 
   var xunplayed: Bool? {
     if let unplayed { return Bool(unplayed) }
+    return nil
+  }
+
+  var xvideoHeight: Int? {
+    if let videoHeight { return Int(videoHeight) }
+    return nil
+  }
+
+  var xvideoWidth: Int? {
+    if let videoWidth { return Int(videoWidth) }
     return nil
   }
 
@@ -198,7 +213,7 @@ extension Track {
       protected: x.xprotected,
       purchased: x.xpurchased,
       rating: x.xrating,
-      ratingComputed: x.ratingComputed,
+      ratingComputed: x.xratingComputed,
       releaseDate: x.releaseDate,
       sampleRate: x.xsampleRate,
       season: x.xseason,
@@ -218,8 +233,8 @@ extension Track {
       trackType: x.trackType,
       tVShow: x.xtVShow,
       unplayed: x.xunplayed,
-      videoHeight: x.videoHeight,
-      videoWidth: x.videoWidth,
+      videoHeight: x.xvideoHeight,
+      videoWidth: x.xvideoWidth,
       year: x.xyear)
   }
 }
