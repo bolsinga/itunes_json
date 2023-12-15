@@ -11,5 +11,4 @@ public enum Source: CaseIterable {
   case itunes
   case musickit
   case jsonString
-  case xmlJsonString
 }
