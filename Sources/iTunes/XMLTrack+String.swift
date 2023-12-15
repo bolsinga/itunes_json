@@ -17,7 +17,7 @@ extension XMLTrack {
     return oldTracks.map { Track.createFromXMLTrack($0) }
   }
 
-  static func _createFromString(_ source: String?) throws -> [XMLTrack] {
+  static private func _createFromString(_ source: String?) throws -> [XMLTrack] {
     guard let source else {
       preconditionFailure("Should have been caught during ParsableArguments.validate().")
     }
