@@ -16,8 +16,6 @@ extension Source {
       return try await Track.gatherWithMusicKit()
     case .jsonString:
       return try Track.createFromString(source)
-    case .xmlJsonString:
-      return try XMLTrack.createFromString(source)
     }
   }
 }
