@@ -21,6 +21,12 @@ struct Program: AsyncParsableCommand {
   )
   var outputDirectory: URL? = nil
 
+  @Option(
+    help: "Repair JSON file path. Repairs well-defined and specific Tracks.",
+    transform: ({ URL(filePath: $0) })
+  )
+  var repairFile: URL? = nil
+
   private var outputFile: URL? {
     guard let outputDirectory else { return nil }
 
@@ -44,10 +50,23 @@ struct Program: AsyncParsableCommand {
     if jsonSource == nil, source == .jsonString {
       throw ValidationError("Using --json-string requires JSON String to be passed as an argument.")
     }
+
+    if repairFile != nil && (source != .jsonString || destination != .json) {
+      throw ValidationError(
+        "Repairing requires source json (actually \(source)) to be converted to destination json (actually \(destination))."
+      )
+    }
   }
 
   func run() async throws {
-    let tracks = try await source.gather(jsonSource)
+    let tracks = try await {
+      let t = try await source.gather(jsonSource)
+      if let repairFile {
+        let repair = try await Repair.create(url: repairFile)
+        return repair.repair(t)
+      }
+      return t
+    }()
 
     let data = try tracks.data(for: destination)
 

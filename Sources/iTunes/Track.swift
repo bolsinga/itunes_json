@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Track: Codable {
+public struct Track: Codable, Hashable {
   var album: String? = nil  // "Album"
   var albumArtist: String? = nil  // "Album Artist"
   var albumRating: Int? = nil  // "Album Rating"
