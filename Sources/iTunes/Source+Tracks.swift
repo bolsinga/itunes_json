@@ -20,16 +20,4 @@ extension Source {
       return try XMLTrack.createFromString(source)
     }
   }
-
-  public func reExport(_ source: String?) throws {
-    let tracks = try XMLTrack._createFromString(source)
-
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-    encoder.dateEncodingStrategy = .iso8601
-
-    let data = try encoder.encode(tracks)
-
-    print("\(try data.asUTF8String())")
-  }
 }
