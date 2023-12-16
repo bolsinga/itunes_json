@@ -19,21 +19,28 @@ extension String {
 }
 
 extension Track {
-  fileprivate var oldPodcastWithoutKind: Bool {
-    kind == nil && (podcast != nil && podcast!)
+  fileprivate var isPodcast: Bool {
+    (podcast != nil && podcast!)
+  }
+
+  fileprivate var isVoiceMemo: Bool {
+    (trackCount == nil && year == nil && album != nil && kind != nil && album == "Voice Memos"
+      && kind == "AAC audio file")
   }
 
   fileprivate var shouldEncode: Bool {
-    guard !oldPodcastWithoutKind else { return false }
+    guard !isPodcast else { return false }
+    guard !isVoiceMemo else { return false }
     let kind: String = kind?.lowercased() ?? ""
-    guard kind != "book" else { return false }
-    guard kind != "iphone/ipod touch/ipad app" else { return false }
-    guard kind != "iphone/ipod touch app" else { return false }
-    guard kind != "quicktime movie file" else { return false }
+    guard !kind.contains(" app") else { return false }
+    guard !kind.contains("book") else { return false }
     guard !kind.contains("video") else { return false }
     guard !kind.contains("pdf") else { return false }
     guard !kind.contains("itunes lp") else { return false }
+    guard !kind.contains("itunes extras") else { return false }
     guard !kind.contains("internet audio stream") else { return false }
+    guard kind != "quicktime movie file" else { return false }
+
     return true
   }
 
