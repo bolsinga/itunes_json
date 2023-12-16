@@ -22,6 +22,8 @@ extension Track {
     guard !oldPodcastWithoutKind else { return false }
     let kind: String = kind?.lowercased() ?? ""
     guard kind != "book" else { return false }
+    guard kind != "iPhone/iPod touch/iPad app" else { return false }
+    guard kind != "QuickTime movie file" else { return false }
     guard !kind.contains("video") else { return false }
     guard !kind.contains("pdf") else { return false }
     guard !kind.contains("itunes lp") else { return false }
