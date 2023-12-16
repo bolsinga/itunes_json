@@ -23,6 +23,7 @@ extension Track {
     let kind: String = kind?.lowercased() ?? ""
     guard kind != "book" else { return false }
     guard kind != "iphone/ipod touch/ipad app" else { return false }
+    guard kind != "iphone/ipod touch app" else { return false }
     guard kind != "quicktime movie file" else { return false }
     guard !kind.contains("video") else { return false }
     guard !kind.contains("pdf") else { return false }
