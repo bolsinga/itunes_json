@@ -6,6 +6,11 @@
 //
 
 import Foundation
+import os
+
+extension Logger {
+  static let sql = Logger(subsystem: "itunes_json", category: "sql")
+}
 
 extension String {
   var quoteEscaped: String {
@@ -37,11 +42,19 @@ extension Track {
   }
 
   var albumName: String {
-    (album ?? "").quoteEscaped
+    guard let album else {
+      Logger.sql.error("No album name: \(String(describing: self), privacy: .public)")
+      return ""
+    }
+    return album.quoteEscaped
   }
 
   var albumTrackCount: Int {
-    trackCount ?? -1
+    guard let trackCount else {
+      Logger.sql.error("No trackCount: \(String(describing: self), privacy: .public)")
+      return -1
+    }
+    return trackCount
   }
 
   var albumDiscCount: Int {
@@ -79,7 +92,11 @@ extension Track {
   }
 
   var songYear: Int {
-    year ?? -1
+    guard let year else {
+      Logger.sql.error("No year: \(String(describing: self), privacy: .public)")
+      return -1
+    }
+    return year
   }
 
   var songSize: UInt64 {
