@@ -37,13 +37,17 @@ extension Track {
     return true
   }
 
+  fileprivate var debugLogInformation: String {
+    "album: \(String(describing: album)), artist: \(String(describing: artist)), kind: \(String(describing: kind)), name: \(name), podcast: \(String(describing: podcast)) trackCount: \(String(describing: trackCount)), trackNumber: \(String(describing: trackNumber)), year: \(String(describing: year))"
+  }
+
   var artistName: String {
     (artist ?? albumArtist ?? "").quoteEscaped
   }
 
   var albumName: String {
     guard let album else {
-      Logger.sql.error("No album name: \(String(describing: self), privacy: .public)")
+      Logger.sql.error("No album name: \(debugLogInformation, privacy: .public)")
       return ""
     }
     return album.quoteEscaped
@@ -51,7 +55,7 @@ extension Track {
 
   var albumTrackCount: Int {
     guard let trackCount else {
-      Logger.sql.error("No trackCount: \(String(describing: self), privacy: .public)")
+      Logger.sql.error("No trackCount: \(debugLogInformation, privacy: .public)")
       return -1
     }
     return trackCount
@@ -93,7 +97,7 @@ extension Track {
 
   var songYear: Int {
     guard let year else {
-      Logger.sql.error("No year: \(String(describing: self), privacy: .public)")
+      Logger.sql.error("No year: \(debugLogInformation, privacy: .public)")
       return -1
     }
     return year
