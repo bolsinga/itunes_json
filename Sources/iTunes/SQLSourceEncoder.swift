@@ -21,6 +21,9 @@ extension Track {
   fileprivate var shouldEncode: Bool {
     guard !oldPodcastWithoutKind else { return false }
     let kind: String = kind?.lowercased() ?? ""
+    guard kind != "book" else { return false }
+    guard kind != "iphone/ipod touch/ipad app" else { return false }
+    guard kind != "quicktime movie file" else { return false }
     guard !kind.contains("video") else { return false }
     guard !kind.contains("pdf") else { return false }
     guard !kind.contains("itunes lp") else { return false }
