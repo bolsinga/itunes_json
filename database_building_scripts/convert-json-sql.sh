@@ -21,7 +21,7 @@ for F in $(find $BKUP_DIR/ -type f | sort | grep "iTunes-\d\d\d\d-\d\d-\d\d$SUFF
   echo "Processing $NAME"
   gzip -cd $F | $JSON_TOOL --json-string --sql-code - | gzip -c > $SQL_DIR/$NAME.sql.gz &
   let COUNT++
-  if [ $COUNT -eq 5 ]; then
+  if [ $COUNT -eq 7 ]; then
     echo Waiting for Batch
     wait
     let COUNT=0

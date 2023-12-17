@@ -21,7 +21,7 @@ for F in $(find $SQL_DIR/ -type f | sort | grep "iTunes-\d\d\d\d-\d\d-\d\d$SUFFI
   echo "Processing $NAME"
   echo "gzip -cd $F | sqlite3 > $DB_DIR/$NAME.db" &
   let COUNT++
-  if [ $COUNT -eq 5 ]; then
+  if [ $COUNT -eq 7 ]; then
     echo Waiting for Batch
     wait
     let COUNT=0
