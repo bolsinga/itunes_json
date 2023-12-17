@@ -24,7 +24,7 @@ extension Track {
   }
 
   fileprivate var isVoiceMemo: Bool {
-    (trackCount == nil && year == nil && album != nil && kind != nil && album == "Voice Memos"
+    (trackCount == nil && album != nil && kind != nil && album == "Voice Memos"
       && kind == "AAC audio file")
   }
 
