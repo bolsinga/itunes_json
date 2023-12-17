@@ -1,5 +1,7 @@
 #/bin/sh
 
+trap "echo Exited!; exit;" SIGINT SIGTERM
+
 SQL_DIR="$1"
 if [ -z "$SQL_DIR" ] ; then
     echo "No SQL directory"  1>&2

@@ -1,5 +1,7 @@
 #/bin/sh
 
+trap "echo Exited!; exit;" SIGINT SIGTERM
+
 BKUP_DIR="$1"
 if [ -z "$BKUP_DIR" ] ; then
     echo "No backup directory"  1>&2
