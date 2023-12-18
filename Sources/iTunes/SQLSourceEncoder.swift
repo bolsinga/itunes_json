@@ -223,6 +223,14 @@ class SQLSourceEncoder {
     var values = Set<ArtistName>()
 
     var statements: String {
+      values.reduce(into: [String: [ArtistName]]()) {
+        var arr = $0[$1.name] ?? []
+        arr.append($1)
+        $0[$1.name] = arr
+      }.filter { $0.value.count > 1 }.flatMap { $0.value }.forEach {
+        Logger.sql.error("Duplicate Artist: \(String(describing: $0), privacy: .public)")
+      }
+
       var keyStatements = Array(values).map {
         "INSERT INTO artists (name, sortname) VALUES ('\($0.name)', '\($0.sortName)');"
       }.sorted()
