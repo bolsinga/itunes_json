@@ -218,6 +218,12 @@ class SQLSourceEncoder {
           self.sortName = ""
         }
       }
+
+      func isSameArtistDifferentSortName(_ artistName: ArtistName) -> Bool {
+        guard self.hashValue != artistName.hashValue else { return false }
+
+        return name == artistName.name && sortName != artistName.sortName
+      }
     }
 
     var values = Set<ArtistName>()
@@ -235,7 +241,13 @@ class SQLSourceEncoder {
     }
 
     func encode(_ track: Track) {
-      values.insert(ArtistName(track))
+      let artistName = ArtistName(track)
+      guard Array(values).filter({ $0.isSameArtistDifferentSortName(artistName) }).isEmpty else {
+        Logger.sql.error(
+          "ArtistName duplicate: \(String(describing: artistName), privacy: .public)")
+        return
+      }
+      values.insert(artistName)
     }
   }
 
