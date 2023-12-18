@@ -99,7 +99,11 @@ extension Track {
   }
 
   var songTrackNumber: Int {
-    trackNumber ?? -1
+    guard let trackNumber else {
+      Logger.sql.error("No trackNumber: \(debugLogInformation, privacy: .public)")
+      return -1
+    }
+    return trackNumber
   }
 
   var songYear: Int {
