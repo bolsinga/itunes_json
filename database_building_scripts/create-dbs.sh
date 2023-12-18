@@ -19,7 +19,7 @@ COUNT=0
 for F in $(find $SQL_DIR/ -type f | sort | grep "iTunes-\d\d\d\d-\d\d-\d\d$SUFFIX") ; do
   NAME=`basename -s"$SUFFIX" $F`
   echo "Processing $NAME"
-  echo "gzip -cd $F | sqlite3 > $DB_DIR/$NAME.db" &
+  gzip -cd $F | sqlite3 > $DB_DIR/$NAME.db &
   let COUNT++
   if [ $COUNT -eq 7 ]; then
     echo Waiting for Batch
