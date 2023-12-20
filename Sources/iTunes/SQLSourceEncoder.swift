@@ -45,11 +45,16 @@ extension Track {
   }
 
   fileprivate var debugLogInformation: String {
-    "album: \(String(describing: album)), artist: \(String(describing: artist)), kind: \(String(describing: kind)), name: \(name), podcast: \(String(describing: podcast)) trackCount: \(String(describing: trackCount)), trackNumber: \(String(describing: trackNumber)), year: \(String(describing: year))"
+    "album: \(String(describing: album)), artist: \(String(describing: artist)), kind: \(String(describing: kind)), name: \(name), podcast: \(String(describing: podcast)), trackCount: \(String(describing: trackCount)), trackNumber: \(String(describing: trackNumber)), year: \(String(describing: year))"
   }
 
   var artistName: String {
-    (artist ?? albumArtist ?? "").quoteEscaped
+    guard let name = (artist ?? albumArtist ?? nil) else {
+      Logger.sql.error("No name: \(debugLogInformation, privacy: .public)")
+      return ""
+    }
+
+    return name.quoteEscaped
   }
 
   var albumName: String {
