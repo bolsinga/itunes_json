@@ -9,7 +9,12 @@ import Foundation
 import os
 
 extension Logger {
-  static let sql = Logger(subsystem: "itunes_json", category: "sql")
+  static let noArtist = Logger(subsystem: "sql", category: "noArtist")
+  static let noAlbum = Logger(subsystem: "sql", category: "noAlbum")
+  static let noTrackCount = Logger(subsystem: "sql", category: "noTrackCount")
+  static let noTrackNumber = Logger(subsystem: "sql", category: "noTrackNumber")
+  static let noYear = Logger(subsystem: "sql", category: "noYear")
+  static let duplicateArtist = Logger(subsystem: "sql", category: "duplicateArtist")
 }
 
 extension String {
@@ -50,7 +55,7 @@ extension Track {
 
   var artistName: String {
     guard let name = (artist ?? albumArtist ?? nil) else {
-      Logger.sql.error("No name: \(debugLogInformation, privacy: .public)")
+      Logger.noArtist.error("\(debugLogInformation, privacy: .public)")
       return ""
     }
 
@@ -59,7 +64,7 @@ extension Track {
 
   var albumName: String {
     guard let album else {
-      Logger.sql.error("No album name: \(debugLogInformation, privacy: .public)")
+      Logger.noAlbum.error("\(debugLogInformation, privacy: .public)")
       return ""
     }
     return album.quoteEscaped
@@ -67,7 +72,7 @@ extension Track {
 
   var albumTrackCount: Int {
     guard let trackCount else {
-      Logger.sql.error("No trackCount: \(debugLogInformation, privacy: .public)")
+      Logger.noTrackCount.error("\(debugLogInformation, privacy: .public)")
       return -1
     }
     return trackCount
@@ -105,7 +110,7 @@ extension Track {
 
   var songTrackNumber: Int {
     guard let trackNumber else {
-      Logger.sql.error("No trackNumber: \(debugLogInformation, privacy: .public)")
+      Logger.noTrackNumber.error("\(debugLogInformation, privacy: .public)")
       return -1
     }
     return trackNumber
@@ -113,7 +118,7 @@ extension Track {
 
   var songYear: Int {
     guard let year else {
-      Logger.sql.error("No year: \(debugLogInformation, privacy: .public)")
+      Logger.noYear.error("\(debugLogInformation, privacy: .public)")
       return -1
     }
     return year
@@ -233,7 +238,7 @@ class SQLSourceEncoder {
         arr.append($1)
         $0[$1.name] = arr
       }.filter { $0.value.count > 1 }.flatMap { $0.value }.forEach {
-        Logger.sql.error("Duplicate Artist: \(String(describing: $0), privacy: .public)")
+        Logger.duplicateArtist.error("\(String(describing: $0), privacy: .public)")
       }
 
       var keyStatements = Array(values).map {
