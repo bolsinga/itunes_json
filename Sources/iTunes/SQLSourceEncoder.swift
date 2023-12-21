@@ -15,7 +15,6 @@ extension Logger {
   static let noTrackNumber = Logger(subsystem: "sql", category: "noTrackNumber")
   static let badTrackNumber = Logger(subsystem: "sql", category: "badTrackNumber")
   static let noYear = Logger(subsystem: "sql", category: "noYear")
-  static let badYear = Logger(subsystem: "sql", category: "badYear")
   static let duplicateArtist = Logger(subsystem: "sql", category: "duplicateArtist")
 }
 
@@ -126,10 +125,6 @@ extension Track {
     guard let year else {
       Logger.noYear.error("\(debugLogInformation, privacy: .public)")
       return -1
-    }
-    guard year > 0 else {
-      Logger.badYear.error("\(debugLogInformation, privacy: .public)")
-      return year
     }
     return year
   }
