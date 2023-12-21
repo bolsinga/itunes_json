@@ -13,6 +13,7 @@ extension Logger {
   static let noAlbum = Logger(subsystem: "sql", category: "noAlbum")
   static let noTrackCount = Logger(subsystem: "sql", category: "noTrackCount")
   static let noTrackNumber = Logger(subsystem: "sql", category: "noTrackNumber")
+  static let badTrackNumber = Logger(subsystem: "sql", category: "badTrackNumber")
   static let noYear = Logger(subsystem: "sql", category: "noYear")
   static let duplicateArtist = Logger(subsystem: "sql", category: "duplicateArtist")
 }
@@ -109,8 +110,12 @@ extension Track {
   }
 
   var songTrackNumber: Int {
-    guard let trackNumber, trackNumber > 0 else {
+    guard let trackNumber else {
       Logger.noTrackNumber.error("\(debugLogInformation, privacy: .public)")
+      return -1
+    }
+    guard trackNumber > 0 else {
+      Logger.badTrackNumber.error("\(debugLogInformation, privacy: .public)")
       return -1
     }
     return trackNumber
