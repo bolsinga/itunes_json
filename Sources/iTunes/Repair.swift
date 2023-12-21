@@ -139,14 +139,29 @@ public struct Repair {
   }
 }
 
+enum RepairError: Error {
+  case invalidInput
+  case invalidString
+}
+
 extension Repair {
-  public static func create(url: URL) async throws -> Repair {
-    return Repair(items: try await Repair.load(url: url))
+  public static func create(url: URL?, source: String?) async throws -> Repair {
+    if let url { return Repair(items: try await Repair.load(url: url)) }
+    if let source { return Repair(items: try Repair.load(source: source)) }
+    throw RepairError.invalidInput
+  }
+
+  private static func load(source: String) throws -> [Item] {
+    guard let data = source.data(using: .utf8) else { throw RepairError.invalidString }
+    return try load(data: data)
   }
 
   private static func load(url: URL) async throws -> [Item] {
     let (data, _) = try await URLSession.shared.data(from: url)
+    return try load(data: data)
+  }
 
+  private static func load(data: Data) throws -> [Item] {
     let decoder = JSONDecoder()
     return try decoder.decode([Item].self, from: data)
   }

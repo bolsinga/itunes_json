@@ -6,6 +6,9 @@ extension Source: EnumerableFlag {}
 extension Destination: EnumerableFlag {}
 
 struct Program: AsyncParsableCommand {
+  @Flag(help: "Input Source type") var source: Source = .itunes
+  @Flag(help: "Output Destination type") var destination: Destination = .json
+
   @Option(
     help:
       "The path at which to create the output file. Writes to standard output if not provided.",
@@ -27,20 +30,20 @@ struct Program: AsyncParsableCommand {
   )
   var repairFile: URL? = nil
 
-  private var outputFile: URL? {
-    guard let outputDirectory else { return nil }
-
-    return destination.outputFile(using: outputDirectory)
-  }
-
-  @Flag(help: "Input Source type") var source: Source = .itunes
-  @Flag(help: "Output Destination type") var destination: Destination = .json
+  @Option(help: "Optional json string to parse for repairs.")
+  var repairSource: String?
 
   @Argument(
     help:
       "Optional json string to parse when --json-string is passed as input. Use '-' as last argument to read from stdin."
   )
   var jsonSource: String?
+
+  private var outputFile: URL? {
+    guard let outputDirectory else { return nil }
+
+    return destination.outputFile(using: outputDirectory)
+  }
 
   mutating func validate() throws {
     if jsonSource != nil && source != .jsonString {
@@ -51,18 +54,25 @@ struct Program: AsyncParsableCommand {
       throw ValidationError("Using --json-string requires JSON String to be passed as an argument.")
     }
 
-    if repairFile != nil && (source != .jsonString || destination != .json) {
+    if isRepairing && (source != .jsonString || destination != .json) {
       throw ValidationError(
         "Repairing requires source json (actually \(source)) to be converted to destination json (actually \(destination))."
       )
     }
+    if (repairFile != nil) && (repairSource != nil) {
+      throw ValidationError("repairSource is already defined, but repairFile is being passed.")
+    }
+  }
+
+  var isRepairing: Bool {
+    repairFile != nil || (repairSource != nil && !repairSource!.isEmpty)
   }
 
   func run() async throws {
     let tracks = try await {
       let t = try await source.gather(jsonSource)
-      if let repairFile {
-        let repair = try await Repair.create(url: repairFile)
+      if isRepairing {
+        let repair = try await Repair.create(url: repairFile, source: repairSource)
         return repair.repair(t)
       }
       return t
