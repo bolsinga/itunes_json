@@ -109,7 +109,7 @@ extension Track {
   }
 
   var songTrackNumber: Int {
-    guard let trackNumber else {
+    guard let trackNumber, trackNumber > 0 else {
       Logger.noTrackNumber.error("\(debugLogInformation, privacy: .public)")
       return -1
     }
