@@ -129,7 +129,7 @@ extension Track {
     }
     guard year > 0 else {
       Logger.badYear.error("\(debugLogInformation, privacy: .public)")
-      return -1
+      return year
     }
     return year
   }
