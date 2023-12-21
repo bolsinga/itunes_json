@@ -378,6 +378,7 @@ class SQLSourceEncoder {
         FOREIGN KEY(artistid) REFERENCES artists(id),
         FOREIGN KEY(albumid) REFERENCES albums(id),
         FOREIGN KEY(kindid) REFERENCES kinds(id),
+        CHECK(length(name) > 0),
         CHECK(name != sortname),
         CHECK(tracknumber > 0),
         CHECK(year >= 0),
