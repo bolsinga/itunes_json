@@ -166,6 +166,11 @@ extension Track {
   var songSelect: String {
     "SELECT id FROM songs WHERE name = '\(songName)' AND itunesid = '\(persistentID)' AND artistid = (\(artistSelect)) AND albumid = (\(albumSelect)) AND kindid = (\(kindSelect)) AND tracknumber = \(songTrackNumber) AND year = \(songYear) AND size = \(songSize) AND duration = \(songDuration) AND dateadded = '\(dateAddedISO8601)'"
   }
+
+  var hasPlayed: Bool {
+    // Some songs have play dates but not play counts!
+    songPlayCount > 0 || !datePlayedISO8601.isEmpty
+  }
 }
 
 private protocol TrackEncoding {
@@ -435,13 +440,14 @@ class SQLSourceEncoder {
         delta INTEGER NOT NULL,
         UNIQUE(songid, date, delta),
         FOREIGN KEY(songid) REFERENCES songs(id),
-        CHECK(delta > 0));
+        CHECK(delta >= 0));
       """
 
     var values = Set<Play>()
 
     func encode(_ track: Track) {
-      guard track.songPlayCount > 0 else { return }
+      // Some tracks have play dates, but not play counts. Until that is repaired this table has a CHECK(delta >= 0) constraint.
+      guard track.hasPlayed else { return }
       values.insert(Play(track))
     }
 
