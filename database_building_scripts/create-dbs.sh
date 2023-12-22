@@ -8,8 +8,6 @@ if [ -z "$SQL_DIR" ] ; then
     exit 1
 fi
 
-JSON_TOOL=~/Applications/itunes_json/Products/usr/local/bin/itunes_json
-
 SUFFIX=".sql.gz"
 
 DB_DIR=$SQL_DIR/../dbs/
