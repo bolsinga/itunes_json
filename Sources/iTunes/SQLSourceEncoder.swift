@@ -102,6 +102,11 @@ extension Track {
     return playDateUTC.formatted(.iso8601)
   }
 
+  var dateModifiedISO8601: String {
+    guard let dateModified else { return "" }
+    return dateModified.formatted(.iso8601)
+  }
+
   var albumIsCompilation: Int {
     if let compilation {
       return compilation ? 1 : 0
@@ -332,6 +337,7 @@ class SQLSourceEncoder {
       let duration: Int
       let dateAdded: String
       let dateReleased: String
+      let dateModified: String
       let comments: String
       let artistSelect: String
       let albumSelect: String
@@ -352,6 +358,7 @@ class SQLSourceEncoder {
         self.duration = track.songDuration
         self.dateAdded = track.dateAddedISO8601
         self.dateReleased = track.dateReleasedISO8601
+        self.dateModified = track.dateModifiedISO8601
         self.comments = (track.comments ?? "").quoteEscaped
         self.artistSelect = track.artistSelect
         self.albumSelect = track.albumSelect
@@ -376,8 +383,9 @@ class SQLSourceEncoder {
         duration INTEGER NOT NULL,
         dateadded TEXT NOT NULL,
         datereleased TEXT NOT NULL DEFAULT '',
+        datemodified TEXT NOT NULL DEFAULT '',
         comments TEXT NOT NULL DEFAULT '',
-        UNIQUE(name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, comments),
+        UNIQUE(name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments),
         FOREIGN KEY(artistid) REFERENCES artists(id),
         FOREIGN KEY(albumid) REFERENCES albums(id),
         FOREIGN KEY(kindid) REFERENCES kinds(id),
@@ -393,7 +401,7 @@ class SQLSourceEncoder {
 
     var statements: String {
       var keyStatements = Array(values).map {
-        "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, comments) VALUES ('\($0.name)', '\($0.sortName)', '\($0.itunesid)', (\($0.artistSelect)), (\($0.albumSelect)), (\($0.kindSelect)), '\($0.composer)', \($0.trackNumber), \($0.year), \($0.size), \($0.duration), '\($0.dateAdded)', '\($0.dateReleased)', '\($0.comments)');"
+        "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments) VALUES ('\($0.name)', '\($0.sortName)', '\($0.itunesid)', (\($0.artistSelect)), (\($0.albumSelect)), (\($0.kindSelect)), '\($0.composer)', \($0.trackNumber), \($0.year), \($0.size), \($0.duration), '\($0.dateAdded)', '\($0.dateReleased)', '\($0.dateModified)', '\($0.comments)');"
       }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
