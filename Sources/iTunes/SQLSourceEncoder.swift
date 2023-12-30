@@ -25,31 +25,6 @@ extension String {
 }
 
 extension Track {
-  fileprivate var isPodcast: Bool {
-    (podcast != nil && podcast!)
-  }
-
-  fileprivate var isVoiceMemo: Bool {
-    (trackCount == nil && album != nil && kind != nil && album == "Voice Memos"
-      && kind == "AAC audio file")
-  }
-
-  fileprivate var shouldEncode: Bool {
-    guard !isPodcast else { return false }
-    guard !isVoiceMemo else { return false }
-    let kind: String = kind?.lowercased() ?? ""
-    guard !kind.contains(" app") else { return false }
-    guard !kind.contains("book") else { return false }
-    guard !kind.contains("video") else { return false }
-    guard !kind.contains("pdf") else { return false }
-    guard !kind.contains("itunes lp") else { return false }
-    guard !kind.contains("itunes extras") else { return false }
-    guard !kind.contains("internet audio stream") else { return false }
-    guard kind != "quicktime movie file" else { return false }
-
-    return true
-  }
-
   fileprivate var debugLogInformation: String {
     "album: \(String(describing: album)), artist: \(String(describing: artist)), kind: \(String(describing: kind)), name: \(name), podcast: \(String(describing: podcast)), trackCount: \(String(describing: trackCount)), trackNumber: \(String(describing: trackNumber)), year: \(String(describing: year))"
   }
@@ -399,7 +374,7 @@ class SQLSourceEncoder {
 
   func encode(_ tracks: [Track]) throws -> String {
     let encoder = Encoder()
-    tracks.filter { $0.shouldEncode }.forEach { encoder.encode($0) }
+    tracks.filter { $0.isSQLEncodable }.forEach { encoder.encode($0) }
     return encoder.sqlStatements
   }
 
