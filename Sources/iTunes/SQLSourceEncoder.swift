@@ -155,27 +155,27 @@ private protocol TrackEncoding {
 
 class SQLSourceEncoder {
   fileprivate final class KindTableData: TrackEncoding {
-    private var values = Set<String>()
+    struct KindRow: SQLRow {
+      let kind: String
+
+      var insertStatement: String {
+        "INSERT INTO kinds (name) VALUES ('\(kind.quoteEscaped)');"
+      }
+    }
+    private var values = Set<KindRow>()
 
     var statements: String {
-      var keyStatements = [String]()
-      keyStatements.append(Track.KindTable)
-      keyStatements.append("BEGIN;")
-
-      keyStatements.append(
-        contentsOf: Array(values).map {
-          "INSERT INTO kinds (name) VALUES ('\($0.quoteEscaped)');"
-        })
-
+      var keyStatements = Array(values).map { $0.insertStatement }.sorted()
+      keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
-
+      keyStatements.insert(Track.KindTable, at: 0)
       return keyStatements.joined(separator: "\n")
     }
 
     func encode(_ track: Track) {
       guard let kind = track.kind else { return }
 
-      values.insert(kind)
+      values.insert(KindRow(kind: kind))
     }
   }
 
