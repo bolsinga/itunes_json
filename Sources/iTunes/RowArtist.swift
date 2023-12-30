@@ -19,6 +19,6 @@ struct RowArtist: SQLRow {
   }
 
   var insertStatement: String {
-    "INSERT INTO artists (name, sortname) VALUES ('\(name.name)', '\(name.sorted)');"
+    "INSERT INTO artists (name, sortname) VALUES ('\(name.$name)', '\(name.$sorted)');"
   }
 }

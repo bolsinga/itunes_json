@@ -8,8 +8,8 @@
 import Foundation
 
 struct SortableName: Hashable {
-  let name: String
-  let sorted: String
+  @QuoteEscaped var name: String
+  @QuoteEscaped var sorted: String
 
   init(name: String = "", sorted: String = "") {
     self.name = name
