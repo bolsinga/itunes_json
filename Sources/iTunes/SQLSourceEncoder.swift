@@ -182,12 +182,9 @@ class SQLSourceEncoder {
   fileprivate final class KindTableData: TrackEncoding {
     private var values = Set<String>()
 
-    private static let createTable =
-      "CREATE TABLE kinds (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE);"
-
     var statements: String {
       var keyStatements = [String]()
-      keyStatements.append(SQLSourceEncoder.KindTableData.createTable)
+      keyStatements.append(Track.KindTable)
       keyStatements.append("BEGIN;")
 
       keyStatements.append(
@@ -238,9 +235,7 @@ class SQLSourceEncoder {
       }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
-      keyStatements.insert(
-        "CREATE TABLE artists (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE, sortname TEXT NOT NULL DEFAULT '', CHECK(length(name) > 0), CHECK(name != sortname));",
-        at: 0)
+      keyStatements.insert(Track.ArtistTable, at: 0)
       return keyStatements.joined(separator: "\n")
     }
 
@@ -272,24 +267,6 @@ class SQLSourceEncoder {
       }
     }
 
-    static let CreateTable = """
-            CREATE TABLE albums (
-              id INTEGER PRIMARY KEY,
-              name TEXT NOT NULL,
-              sortname TEXT NOT NULL DEFAULT '',
-              trackcount INTEGER NOT NULL,
-              disccount INTEGER NOT NULL,
-              discnumber INTEGER NOT NULL,
-              compilation INTEGER NOT NULL,
-              UNIQUE(name, trackcount, disccount, discnumber, compilation),
-              CHECK(length(name) > 0),
-              CHECK(name != sortname),
-              CHECK(trackcount > 0),
-              CHECK(disccount > 0),
-              CHECK(discnumber > 0),
-              CHECK(compilation = 0 OR compilation = 1));
-      """
-
     var values = Set<Album>()
 
     var statements: String {
@@ -298,7 +275,7 @@ class SQLSourceEncoder {
       }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
-      keyStatements.insert(SQLSourceEncoder.AlbumTableData.CreateTable, at: 0)
+      keyStatements.insert(Track.AlbumTable, at: 0)
       return keyStatements.joined(separator: "\n")
     }
 
@@ -348,37 +325,6 @@ class SQLSourceEncoder {
       }
     }
 
-    // itunesid is TEXT since UInt is bigger than Int64 in sqlite
-    static let CreateTable = """
-      CREATE TABLE songs (
-        id INTEGER PRIMARY KEY,
-        name TEXT NOT NULL,
-        sortname TEXT NOT NULL DEFAULT '',
-        itunesid TEXT NOT NULL,
-        artistid INTEGER NOT NULL,
-        albumid INTEGER NOT NULL,
-        kindid INTEGER NOT NULL,
-        composer TEXT NOT NULL DEFAULT '',
-        tracknumber INTEGER NOT NULL,
-        year INTEGER NOT NULL,
-        size INTEGER NOT NULL,
-        duration INTEGER NOT NULL,
-        dateadded TEXT NOT NULL,
-        datereleased TEXT NOT NULL DEFAULT '',
-        datemodified TEXT NOT NULL DEFAULT '',
-        comments TEXT NOT NULL DEFAULT '',
-        UNIQUE(name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments),
-        FOREIGN KEY(artistid) REFERENCES artists(id),
-        FOREIGN KEY(albumid) REFERENCES albums(id),
-        FOREIGN KEY(kindid) REFERENCES kinds(id),
-        CHECK(length(name) > 0),
-        CHECK(name != sortname),
-        CHECK(tracknumber > 0),
-        CHECK(year >= 0),
-        CHECK(size > 0),
-        CHECK(duration > 0));
-      """
-
     var values = Set<Song>()
 
     var statements: String {
@@ -387,7 +333,7 @@ class SQLSourceEncoder {
       }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
-      keyStatements.insert(SQLSourceEncoder.SongTableData.CreateTable, at: 0)
+      keyStatements.insert(Track.SongTable, at: 0)
       return keyStatements.joined(separator: "\n")
     }
 
@@ -409,17 +355,6 @@ class SQLSourceEncoder {
       }
     }
 
-    static let CreateTable = """
-      CREATE TABLE plays (
-        id INTEGER PRIMARY KEY,
-        songid TEXT NOT NULL,
-        date TEXT NOT NULL,
-        delta INTEGER NOT NULL,
-        UNIQUE(songid, date, delta),
-        FOREIGN KEY(songid) REFERENCES songs(id),
-        CHECK(delta >= 0));
-      """
-
     var values = Set<Play>()
 
     func encode(_ track: Track) {
@@ -434,7 +369,7 @@ class SQLSourceEncoder {
       }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
-      keyStatements.insert(SQLSourceEncoder.PlayTableData.CreateTable, at: 0)
+      keyStatements.insert(Track.PlaysTable, at: 0)
       return keyStatements.joined(separator: "\n")
     }
   }
