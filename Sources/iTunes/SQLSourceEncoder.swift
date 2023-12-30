@@ -155,14 +155,7 @@ private protocol TrackEncoding {
 
 class SQLSourceEncoder {
   fileprivate final class KindTableData: TrackEncoding {
-    struct KindRow: SQLRow {
-      let kind: String
-
-      var insertStatement: String {
-        "INSERT INTO kinds (name) VALUES ('\(kind.quoteEscaped)');"
-      }
-    }
-    private var values = Set<KindRow>()
+    private var values = Set<RowKind>()
 
     var statements: String {
       var keyStatements = Array(values).map { $0.insertStatement }.sorted()
@@ -175,33 +168,15 @@ class SQLSourceEncoder {
     func encode(_ track: Track) {
       guard let kind = track.kind else { return }
 
-      values.insert(KindRow(kind: kind))
+      values.insert(RowKind(kind: kind))
     }
   }
 
   fileprivate final class ArtistTableData: TrackEncoding {
-    struct ArtistName: SQLRow {
-      let name: String
-      let sortName: String
-
-      init(_ track: Track) {
-        self.name = track.artistName
-        if let potentialSortName = (track.sortArtist ?? track.sortAlbumArtist)?.quoteEscaped {
-          self.sortName = (self.name != potentialSortName) ? potentialSortName : ""
-        } else {
-          self.sortName = ""
-        }
-      }
-
-      var insertStatement: String {
-        "INSERT INTO artists (name, sortname) VALUES ('\(name)', '\(sortName)');"
-      }
-    }
-
-    var values = Set<ArtistName>()
+    var values = Set<RowArtist>()
 
     var statements: String {
-      values.reduce(into: [String: [ArtistName]]()) {
+      values.reduce(into: [String: [RowArtist]]()) {
         var arr = $0[$1.name] ?? []
         arr.append($1)
         $0[$1.name] = arr
@@ -217,38 +192,12 @@ class SQLSourceEncoder {
     }
 
     func encode(_ track: Track) {
-      values.insert(ArtistName(track))
+      values.insert(RowArtist(track))
     }
   }
 
   fileprivate final class AlbumTableData: TrackEncoding {
-    struct Album: SQLRow {
-      let name: String
-      let sortName: String
-      let trackCount: Int
-      let discCount: Int
-      let discNumber: Int
-      let compilation: Int
-
-      init(_ track: Track) {
-        self.name = track.albumName
-        if let potentialSortName = track.sortAlbum?.quoteEscaped {
-          self.sortName = (self.name != potentialSortName) ? potentialSortName : ""
-        } else {
-          self.sortName = ""
-        }
-        self.trackCount = track.albumTrackCount
-        self.discCount = track.albumDiscCount
-        self.discNumber = track.albumDiscNumber
-        self.compilation = track.albumIsCompilation
-      }
-
-      var insertStatement: String {
-        "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES ('\(name)', '\(sortName)', \(trackCount), \(discCount), \(discNumber), \(compilation));"
-      }
-    }
-
-    var values = Set<Album>()
+    var values = Set<RowAlbum>()
 
     var statements: String {
       var keyStatements = Array(values).map { $0.insertStatement }.sorted()
@@ -259,56 +208,12 @@ class SQLSourceEncoder {
     }
 
     func encode(_ track: Track) {
-      values.insert(Album(track))
+      values.insert(RowAlbum(track))
     }
   }
 
   fileprivate final class SongTableData: TrackEncoding {
-    struct Song: SQLRow {
-      let name: String
-      let sortName: String
-      let itunesid: UInt
-      let composer: String
-      let trackNumber: Int
-      let year: Int
-      let size: UInt64
-      let duration: Int
-      let dateAdded: String
-      let dateReleased: String
-      let dateModified: String
-      let comments: String
-      let artistSelect: String
-      let albumSelect: String
-      let kindSelect: String
-
-      init(_ track: Track) {
-        self.name = track.songName
-        if let potentialSortName = track.sortName?.quoteEscaped {
-          self.sortName = (self.name != potentialSortName) ? potentialSortName : ""
-        } else {
-          self.sortName = ""
-        }
-        self.itunesid = track.persistentID
-        self.composer = (track.composer ?? "").quoteEscaped
-        self.trackNumber = track.songTrackNumber
-        self.year = track.songYear
-        self.size = track.songSize
-        self.duration = track.songDuration
-        self.dateAdded = track.dateAddedISO8601
-        self.dateReleased = track.dateReleasedISO8601
-        self.dateModified = track.dateModifiedISO8601
-        self.comments = (track.comments ?? "").quoteEscaped
-        self.artistSelect = track.artistSelect
-        self.albumSelect = track.albumSelect
-        self.kindSelect = track.kindSelect
-      }
-
-      var insertStatement: String {
-        "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments) VALUES ('\(name)', '\(sortName)', '\(itunesid)', (\(artistSelect)), (\(albumSelect)), (\(kindSelect)), '\(composer)', \(trackNumber), \(year), \(size), \(duration), '\(dateAdded)', '\(dateReleased)', '\(dateModified)', '\(comments)');"
-      }
-    }
-
-    var values = Set<Song>()
+    var values = Set<RowSong>()
 
     var statements: String {
       var keyStatements = Array(values).map { $0.insertStatement }.sorted()
@@ -319,7 +224,7 @@ class SQLSourceEncoder {
     }
 
     func encode(_ track: Track) {
-      values.insert(Song(track))
+      values.insert(RowSong(track))
     }
   }
 
