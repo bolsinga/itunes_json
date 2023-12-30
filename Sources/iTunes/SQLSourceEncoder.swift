@@ -229,28 +229,12 @@ class SQLSourceEncoder {
   }
 
   fileprivate final class PlayTableData: TrackEncoding {
-    fileprivate struct Play: SQLRow {
-      let date: String
-      let delta: Int
-      let songSelect: String
-
-      init(_ track: Track) {
-        self.date = track.datePlayedISO8601
-        self.delta = track.playCount ?? 0
-        self.songSelect = track.songSelect
-      }
-
-      var insertStatement: String {
-        "INSERT INTO plays (songid, date, delta) VALUES ((\(songSelect)), '\(date)', \(delta));"
-      }
-    }
-
-    var values = Set<Play>()
+    var values = Set<RowPlay>()
 
     func encode(_ track: Track) {
       // Some tracks have play dates, but not play counts. Until that is repaired this table has a CHECK(delta >= 0) constraint.
       guard track.hasPlayed else { return }
-      values.insert(Play(track))
+      values.insert(RowPlay(track))
     }
 
     var statements: String {
