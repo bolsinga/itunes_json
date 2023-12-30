@@ -180,7 +180,7 @@ class SQLSourceEncoder {
   }
 
   fileprivate final class ArtistTableData: TrackEncoding {
-    struct ArtistName: Hashable {
+    struct ArtistName: SQLRow {
       let name: String
       let sortName: String
 
@@ -191,6 +191,10 @@ class SQLSourceEncoder {
         } else {
           self.sortName = ""
         }
+      }
+
+      var insertStatement: String {
+        "INSERT INTO artists (name, sortname) VALUES ('\(name)', '\(sortName)');"
       }
     }
 
@@ -205,9 +209,7 @@ class SQLSourceEncoder {
         Logger.duplicateArtist.error("\(String(describing: $0), privacy: .public)")
       }
 
-      var keyStatements = Array(values).map {
-        "INSERT INTO artists (name, sortname) VALUES ('\($0.name)', '\($0.sortName)');"
-      }.sorted()
+      var keyStatements = Array(values).map { $0.insertStatement }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
       keyStatements.insert(Track.ArtistTable, at: 0)
@@ -220,7 +222,7 @@ class SQLSourceEncoder {
   }
 
   fileprivate final class AlbumTableData: TrackEncoding {
-    struct Album: Hashable {
+    struct Album: SQLRow {
       let name: String
       let sortName: String
       let trackCount: Int
@@ -240,14 +242,16 @@ class SQLSourceEncoder {
         self.discNumber = track.albumDiscNumber
         self.compilation = track.albumIsCompilation
       }
+
+      var insertStatement: String {
+        "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES ('\(name)', '\(sortName)', \(trackCount), \(discCount), \(discNumber), \(compilation));"
+      }
     }
 
     var values = Set<Album>()
 
     var statements: String {
-      var keyStatements = Array(values).map {
-        "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES ('\($0.name)', '\($0.sortName)', \($0.trackCount), \($0.discCount), \($0.discNumber), \($0.compilation));"
-      }.sorted()
+      var keyStatements = Array(values).map { $0.insertStatement }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
       keyStatements.insert(Track.AlbumTable, at: 0)
@@ -260,7 +264,7 @@ class SQLSourceEncoder {
   }
 
   fileprivate final class SongTableData: TrackEncoding {
-    struct Song: Hashable {
+    struct Song: SQLRow {
       let name: String
       let sortName: String
       let itunesid: UInt
@@ -298,14 +302,16 @@ class SQLSourceEncoder {
         self.albumSelect = track.albumSelect
         self.kindSelect = track.kindSelect
       }
+
+      var insertStatement: String {
+        "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments) VALUES ('\(name)', '\(sortName)', '\(itunesid)', (\(artistSelect)), (\(albumSelect)), (\(kindSelect)), '\(composer)', \(trackNumber), \(year), \(size), \(duration), '\(dateAdded)', '\(dateReleased)', '\(dateModified)', '\(comments)');"
+      }
     }
 
     var values = Set<Song>()
 
     var statements: String {
-      var keyStatements = Array(values).map {
-        "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments) VALUES ('\($0.name)', '\($0.sortName)', '\($0.itunesid)', (\($0.artistSelect)), (\($0.albumSelect)), (\($0.kindSelect)), '\($0.composer)', \($0.trackNumber), \($0.year), \($0.size), \($0.duration), '\($0.dateAdded)', '\($0.dateReleased)', '\($0.dateModified)', '\($0.comments)');"
-      }.sorted()
+      var keyStatements = Array(values).map { $0.insertStatement }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
       keyStatements.insert(Track.SongTable, at: 0)
@@ -318,7 +324,7 @@ class SQLSourceEncoder {
   }
 
   fileprivate final class PlayTableData: TrackEncoding {
-    fileprivate struct Play: Hashable {
+    fileprivate struct Play: SQLRow {
       let date: String
       let delta: Int
       let songSelect: String
@@ -327,6 +333,10 @@ class SQLSourceEncoder {
         self.date = track.datePlayedISO8601
         self.delta = track.playCount ?? 0
         self.songSelect = track.songSelect
+      }
+
+      var insertStatement: String {
+        "INSERT INTO plays (songid, date, delta) VALUES ((\(songSelect)), '\(date)', \(delta));"
       }
     }
 
@@ -339,9 +349,7 @@ class SQLSourceEncoder {
     }
 
     var statements: String {
-      var keyStatements = Array(values).map {
-        "INSERT INTO plays (songid, date, delta) VALUES ((\($0.songSelect)), '\($0.date)', \($0.delta));"
-      }.sorted()
+      var keyStatements = Array(values).map { $0.insertStatement }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
       keyStatements.insert(Track.PlaysTable, at: 0)
