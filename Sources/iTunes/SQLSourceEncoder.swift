@@ -179,54 +179,31 @@ private protocol TrackEncoding {
 }
 
 class SQLSourceEncoder {
-  fileprivate struct KeyName: Hashable {
-    let key: String
-    let name: String
-  }
+  fileprivate final class KindTableData: TrackEncoding {
+    private var values = Set<String>()
 
-  fileprivate final class LookupTableData: TrackEncoding {
-    var values: [KeyName: Set<String>] = [:]
-
-    static let KindKey = "kind"
-
-    internal init() {
-      [KeyName(key: SQLSourceEncoder.LookupTableData.KindKey, name: "name")].forEach {
-        self.values[$0] = Set<String>()
-      }
-    }
-
-    private func tableName(for keyName: KeyName) -> String {
-      "\(keyName.key)s"
-    }
-
-    private func createTable(for keyName: KeyName) -> String {
-      "CREATE TABLE \(tableName(for: keyName)) (id INTEGER PRIMARY KEY, \(keyName.name) TEXT NOT NULL UNIQUE);"
-    }
+    private static let createTable =
+      "CREATE TABLE kinds (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE);"
 
     var statements: String {
-      values.reduce(into: [String]()) { statements, kv in
-        var keyStatements = Array(kv.value).map {
-          "INSERT INTO \(tableName(for: kv.key)) (\(kv.key.name)) VALUES ('\($0.description.quoteEscaped)');"
-        }.sorted()
-        keyStatements.insert("BEGIN;", at: 0)
-        keyStatements.append("COMMIT;")
-        keyStatements.insert(createTable(for: kv.key), at: 0)
-        statements.append(contentsOf: keyStatements)
-      }.joined(separator: "\n")
-    }
+      var keyStatements = [String]()
+      keyStatements.append(SQLSourceEncoder.KindTableData.createTable)
+      keyStatements.append("BEGIN;")
 
-    private func encode(key: String, value: String) {
-      values.keys.filter { key == $0.key }.forEach {
-        var s = values[$0] ?? Set<String>()
-        s.insert(value)
-        values[$0] = s
-      }
+      keyStatements.append(
+        contentsOf: Array(values).map {
+          "INSERT INTO kinds (name) VALUES ('\($0.quoteEscaped)');"
+        })
+
+      keyStatements.append("COMMIT;")
+
+      return keyStatements.joined(separator: "\n")
     }
 
     func encode(_ track: Track) {
-      if let kind = track.kind {
-        encode(key: SQLSourceEncoder.LookupTableData.KindKey, value: kind)
-      }
+      guard let kind = track.kind else { return }
+
+      values.insert(kind)
     }
   }
 
@@ -471,7 +448,7 @@ class SQLSourceEncoder {
 
     internal init() {
       self.trackEncoders = [
-        LookupTableData(), ArtistTableData(), AlbumTableData(), SongTableData(), PlayTableData(),
+        KindTableData(), ArtistTableData(), AlbumTableData(), SongTableData(), PlayTableData(),
       ]
     }
 
