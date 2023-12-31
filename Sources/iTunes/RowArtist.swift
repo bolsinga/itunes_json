@@ -8,19 +8,15 @@
 import Foundation
 
 struct RowArtist: SQLRow {
-  let name: String
-  let sortName: String
+  let name: SortableName
 
   init(_ track: Track) {
-    self.name = track.artistName
-    if let potentialSortName = (track.sortArtist ?? track.sortAlbumArtist)?.quoteEscaped {
-      self.sortName = (self.name != potentialSortName) ? potentialSortName : ""
-    } else {
-      self.sortName = ""
-    }
+    self.name = SortableName(
+      name: track.artistName,
+      sorted: (track.sortArtist ?? track.sortAlbumArtist)?.quoteEscaped ?? "")
   }
 
   var insertStatement: String {
-    "INSERT INTO artists (name, sortname) VALUES ('\(name)', '\(sortName)');"
+    "INSERT INTO artists (name, sortname) VALUES ('\(name.name)', '\(name.sorted)');"
   }
 }

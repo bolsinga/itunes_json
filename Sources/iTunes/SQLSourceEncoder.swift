@@ -177,9 +177,9 @@ class SQLSourceEncoder {
 
     var statements: String {
       values.reduce(into: [String: [RowArtist]]()) {
-        var arr = $0[$1.name] ?? []
+        var arr = $0[$1.name.name] ?? []
         arr.append($1)
-        $0[$1.name] = arr
+        $0[$1.name.name] = arr
       }.filter { $0.value.count > 1 }.flatMap { $0.value }.forEach {
         Logger.duplicateArtist.error("\(String(describing: $0), privacy: .public)")
       }
