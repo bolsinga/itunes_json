@@ -8,12 +8,16 @@
 import Foundation
 
 struct RowArtist: SQLRow {
-  let name: SortableName
+  private let name: SortableName
 
   init(_ track: Track) {
     self.name = SortableName(
       name: track.artistName,
       sorted: (track.sortArtist ?? track.sortAlbumArtist)?.quoteEscaped ?? "")
+  }
+
+  internal var nameOnly: String {
+    name.name
   }
 
   var insertStatement: String {

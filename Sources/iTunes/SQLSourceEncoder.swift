@@ -176,15 +176,13 @@ class SQLSourceEncoder {
     var values = Set<RowArtist>()
 
     var statements: String {
-      values.reduce(into: [String: [RowArtist]]()) {
-        var arr = $0[$1.name.name] ?? []
-        arr.append($1)
-        $0[$1.name.name] = arr
-      }.filter { $0.value.count > 1 }.flatMap { $0.value }.forEach {
+      let artistRows = Array(values)
+
+      artistRows.mismatchedSortableNames.forEach {
         Logger.duplicateArtist.error("\(String(describing: $0), privacy: .public)")
       }
 
-      var keyStatements = Array(values).map { $0.insertStatement }.sorted()
+      var keyStatements = artistRows.map { $0.insertStatement }.sorted()
       keyStatements.insert("BEGIN;", at: 0)
       keyStatements.append("COMMIT;")
       keyStatements.insert(Track.ArtistTable, at: 0)
