@@ -8,7 +8,11 @@
 import Foundation
 
 struct RowKind: SQLRow {
-  let kind: String
+  private let kind: String
+
+  init(_ kind: String) {
+    self.kind = kind
+  }
 
   var insertStatement: String {
     "INSERT INTO kinds (name) VALUES ('\(kind.quoteEscaped)');"

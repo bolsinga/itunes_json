@@ -8,9 +8,9 @@
 import Foundation
 
 struct RowPlay: SQLRow {
-  let date: String
-  let delta: Int
-  let songSelect: String
+  private let date: String
+  private let delta: Int
+  private let songSelect: String
 
   init(_ track: Track) {
     self.date = track.datePlayedISO8601

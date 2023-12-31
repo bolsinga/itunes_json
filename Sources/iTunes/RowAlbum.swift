@@ -8,11 +8,11 @@
 import Foundation
 
 struct RowAlbum: SQLRow {
-  let name: SortableName
-  let trackCount: Int
-  let discCount: Int
-  let discNumber: Int
-  let compilation: Int
+  private let name: SortableName
+  private let trackCount: Int
+  private let discCount: Int
+  private let discNumber: Int
+  private let compilation: Int
 
   init(_ track: Track) {
     self.name = SortableName(name: track.albumName, sorted: track.sortAlbum?.quoteEscaped ?? "")

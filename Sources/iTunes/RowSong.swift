@@ -8,20 +8,20 @@
 import Foundation
 
 struct RowSong: SQLRow {
-  let name: SortableName
-  let itunesid: UInt
-  let composer: String
-  let trackNumber: Int
-  let year: Int
-  let size: UInt64
-  let duration: Int
-  let dateAdded: String
-  let dateReleased: String
-  let dateModified: String
-  let comments: String
-  let artistSelect: String
-  let albumSelect: String
-  let kindSelect: String
+  private let name: SortableName
+  private let itunesid: UInt
+  private let composer: String
+  private let trackNumber: Int
+  private let year: Int
+  private let size: UInt64
+  private let duration: Int
+  private let dateAdded: String
+  private let dateReleased: String
+  private let dateModified: String
+  private let comments: String
+  private let artistSelect: String
+  private let albumSelect: String
+  private let kindSelect: String
 
   init(_ track: Track) {
     self.name = SortableName(name: track.songName, sorted: track.sortName?.quoteEscaped ?? "")
