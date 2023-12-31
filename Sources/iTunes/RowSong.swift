@@ -8,8 +8,7 @@
 import Foundation
 
 struct RowSong: SQLRow {
-  let name: String
-  let sortName: String
+  let name: SortableName
   let itunesid: UInt
   let composer: String
   let trackNumber: Int
@@ -25,12 +24,7 @@ struct RowSong: SQLRow {
   let kindSelect: String
 
   init(_ track: Track) {
-    self.name = track.songName
-    if let potentialSortName = track.sortName?.quoteEscaped {
-      self.sortName = (self.name != potentialSortName) ? potentialSortName : ""
-    } else {
-      self.sortName = ""
-    }
+    self.name = SortableName(name: track.songName, sorted: track.sortName?.quoteEscaped ?? "")
     self.itunesid = track.persistentID
     self.composer = (track.composer ?? "").quoteEscaped
     self.trackNumber = track.songTrackNumber
@@ -47,6 +41,6 @@ struct RowSong: SQLRow {
   }
 
   var insertStatement: String {
-    "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments) VALUES ('\(name)', '\(sortName)', '\(itunesid)', (\(artistSelect)), (\(albumSelect)), (\(kindSelect)), '\(composer)', \(trackNumber), \(year), \(size), \(duration), '\(dateAdded)', '\(dateReleased)', '\(dateModified)', '\(comments)');"
+    "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments) VALUES ('\(name.name)', '\(name.sorted)', '\(itunesid)', (\(artistSelect)), (\(albumSelect)), (\(kindSelect)), '\(composer)', \(trackNumber), \(year), \(size), \(duration), '\(dateAdded)', '\(dateReleased)', '\(dateModified)', '\(comments)');"
   }
 }
