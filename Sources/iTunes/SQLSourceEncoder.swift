@@ -168,7 +168,7 @@ class SQLSourceEncoder {
     func encode(_ track: Track) {
       guard let kind = track.kind else { return }
 
-      values.insert(RowKind(kind: kind))
+      values.insert(RowKind(kind))
     }
   }
 
