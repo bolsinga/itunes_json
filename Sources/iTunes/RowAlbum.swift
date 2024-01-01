@@ -15,7 +15,7 @@ struct RowAlbum: SQLRow {
   private let compilation: Int
 
   init(_ track: Track) {
-    self.name = SortableName(name: track.albumName, sorted: track.sortAlbum?.quoteEscaped ?? "")
+    self.name = track.albumName
     self.trackCount = track.albumTrackCount
     self.discCount = track.albumDiscCount
     self.discNumber = track.albumDiscNumber
