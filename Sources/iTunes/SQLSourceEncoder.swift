@@ -18,12 +18,6 @@ extension Logger {
   static let duplicateArtist = Logger(subsystem: "sql", category: "duplicateArtist")
 }
 
-extension String {
-  var quoteEscaped: String {
-    self.replacingOccurrences(of: "'", with: "''")
-  }
-}
-
 extension Track {
   fileprivate var debugLogInformation: String {
     "album: \(String(describing: album)), artist: \(String(describing: artist)), kind: \(String(describing: kind)), name: \(name), podcast: \(String(describing: podcast)), trackCount: \(String(describing: trackCount)), trackNumber: \(String(describing: trackNumber)), year: \(String(describing: year))"
@@ -34,8 +28,7 @@ extension Track {
       Logger.noArtist.error("\(debugLogInformation, privacy: .public)")
       return SortableName()
     }
-    return SortableName(
-      name: name.quoteEscaped, sorted: (sortArtist ?? sortAlbumArtist)?.quoteEscaped ?? "")
+    return SortableName(name: name, sorted: (sortArtist ?? sortAlbumArtist) ?? "")
   }
 
   var albumName: SortableName {
@@ -43,7 +36,7 @@ extension Track {
       Logger.noAlbum.error("\(debugLogInformation, privacy: .public)")
       return SortableName()
     }
-    return SortableName(name: album.quoteEscaped, sorted: sortAlbum?.quoteEscaped ?? "")
+    return SortableName(name: album, sorted: sortAlbum ?? "")
   }
 
   var albumTrackCount: Int {
@@ -118,7 +111,7 @@ extension Track {
   }
 
   var songName: SortableName {
-    SortableName(name: name.quoteEscaped, sorted: sortName?.quoteEscaped ?? "")
+    SortableName(name: name, sorted: sortName ?? "")
   }
 
   var songPlayCount: Int {
