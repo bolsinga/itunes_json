@@ -11,7 +11,7 @@ struct SortableName: Hashable {
   let name: String
   let sorted: String
 
-  init(name: String, sorted: String) {
+  init(name: String = "", sorted: String = "") {
     self.name = name
     self.sorted = (name != sorted) ? sorted : ""
   }

@@ -24,7 +24,7 @@ struct RowSong: SQLRow {
   private let kindSelect: String
 
   init(_ track: Track) {
-    self.name = SortableName(name: track.songName, sorted: track.sortName?.quoteEscaped ?? "")
+    self.name = track.songName
     self.itunesid = track.persistentID
     self.composer = (track.composer ?? "").quoteEscaped
     self.trackNumber = track.songTrackNumber

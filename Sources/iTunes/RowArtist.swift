@@ -11,9 +11,7 @@ struct RowArtist: SQLRow {
   private let name: SortableName
 
   init(_ track: Track) {
-    self.name = SortableName(
-      name: track.artistName,
-      sorted: (track.sortArtist ?? track.sortAlbumArtist)?.quoteEscaped ?? "")
+    self.name = track.artistName
   }
 
   internal var nameOnly: String {

@@ -29,21 +29,21 @@ extension Track {
     "album: \(String(describing: album)), artist: \(String(describing: artist)), kind: \(String(describing: kind)), name: \(name), podcast: \(String(describing: podcast)), trackCount: \(String(describing: trackCount)), trackNumber: \(String(describing: trackNumber)), year: \(String(describing: year))"
   }
 
-  var artistName: String {
+  var artistName: SortableName {
     guard let name = (artist ?? albumArtist ?? nil) else {
       Logger.noArtist.error("\(debugLogInformation, privacy: .public)")
-      return ""
+      return SortableName()
     }
-
-    return name.quoteEscaped
+    return SortableName(
+      name: name.quoteEscaped, sorted: (sortArtist ?? sortAlbumArtist)?.quoteEscaped ?? "")
   }
 
-  var albumName: String {
+  var albumName: SortableName {
     guard let album else {
       Logger.noAlbum.error("\(debugLogInformation, privacy: .public)")
-      return ""
+      return SortableName()
     }
-    return album.quoteEscaped
+    return SortableName(name: album.quoteEscaped, sorted: sortAlbum?.quoteEscaped ?? "")
   }
 
   var albumTrackCount: Int {
@@ -117,8 +117,8 @@ extension Track {
     totalTime ?? -1
   }
 
-  var songName: String {
-    name.quoteEscaped
+  var songName: SortableName {
+    SortableName(name: name.quoteEscaped, sorted: sortName?.quoteEscaped ?? "")
   }
 
   var songPlayCount: Int {
@@ -126,11 +126,11 @@ extension Track {
   }
 
   var artistSelect: String {
-    "SELECT id FROM artists WHERE name = '\(artistName)'"
+    "SELECT id FROM artists WHERE name = '\(artistName.name)'"
   }
 
   var albumSelect: String {
-    "SELECT id FROM albums WHERE name = '\(albumName)' AND trackcount = \(albumTrackCount) AND disccount = \(albumDiscCount) AND discnumber = \(albumDiscNumber) AND compilation = \(albumIsCompilation)"
+    "SELECT id FROM albums WHERE name = '\(albumName.name)' AND trackcount = \(albumTrackCount) AND disccount = \(albumDiscCount) AND discnumber = \(albumDiscNumber) AND compilation = \(albumIsCompilation)"
   }
 
   var kindSelect: String {
@@ -139,7 +139,7 @@ extension Track {
   }
 
   var songSelect: String {
-    "SELECT id FROM songs WHERE name = '\(songName)' AND itunesid = '\(persistentID)' AND artistid = (\(artistSelect)) AND albumid = (\(albumSelect)) AND kindid = (\(kindSelect)) AND tracknumber = \(songTrackNumber) AND year = \(songYear) AND size = \(songSize) AND duration = \(songDuration) AND dateadded = '\(dateAddedISO8601)'"
+    "SELECT id FROM songs WHERE name = '\(songName.name)' AND itunesid = '\(persistentID)' AND artistid = (\(artistSelect)) AND albumid = (\(albumSelect)) AND kindid = (\(kindSelect)) AND tracknumber = \(songTrackNumber) AND year = \(songYear) AND size = \(songSize) AND duration = \(songDuration) AND dateadded = '\(dateAddedISO8601)'"
   }
 
   var hasPlayed: Bool {
