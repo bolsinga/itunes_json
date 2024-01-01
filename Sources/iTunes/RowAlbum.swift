@@ -23,6 +23,6 @@ struct RowAlbum: SQLRow {
   }
 
   var insertStatement: String {
-    "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES ('\(name.name)', '\(name.sorted)', \(trackCount), \(discCount), \(discNumber), \(compilation));"
+    "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES ('\(name.$name)', '\(name.$sorted)', \(trackCount), \(discCount), \(discNumber), \(compilation));"
   }
 }
