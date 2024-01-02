@@ -109,11 +109,11 @@ extension Track {
   }
 
   var artistSelect: String {
-    "SELECT id FROM artists WHERE name = '\(artistName.name)'"
+    "SELECT id FROM artists WHERE name = '\(artistName.$name)'"
   }
 
   var albumSelect: String {
-    "SELECT id FROM albums WHERE name = '\(albumName.name)' AND trackcount = \(albumTrackCount) AND disccount = \(albumDiscCount) AND discnumber = \(albumDiscNumber) AND compilation = \(albumIsCompilation)"
+    "SELECT id FROM albums WHERE name = '\(albumName.$name)' AND trackcount = \(albumTrackCount) AND disccount = \(albumDiscCount) AND discnumber = \(albumDiscNumber) AND compilation = \(albumIsCompilation)"
   }
 
   var kindSelect: String {
@@ -122,7 +122,7 @@ extension Track {
   }
 
   var songSelect: String {
-    "SELECT id FROM songs WHERE name = '\(songName.name)' AND itunesid = '\(persistentID)' AND artistid = (\(artistSelect)) AND albumid = (\(albumSelect)) AND kindid = (\(kindSelect)) AND tracknumber = \(songTrackNumber) AND year = \(songYear) AND size = \(songSize) AND duration = \(songDuration) AND dateadded = '\(dateAddedISO8601)'"
+    "SELECT id FROM songs WHERE name = '\(songName.$name)' AND itunesid = '\(persistentID)' AND artistid = (\(artistSelect)) AND albumid = (\(albumSelect)) AND kindid = (\(kindSelect)) AND tracknumber = \(songTrackNumber) AND year = \(songYear) AND size = \(songSize) AND duration = \(songDuration) AND dateadded = '\(dateAddedISO8601)'"
   }
 }
 
