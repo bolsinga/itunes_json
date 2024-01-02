@@ -10,9 +10,9 @@ import Foundation
 struct RowPlay: SQLRow {
   let date: String
   let delta: Int
-  let songSelect: String
+  let song: RowSong
 
   var insertStatement: String {
-    "INSERT INTO plays (songid, date, delta) VALUES ((\(songSelect)), '\(date)', \(delta));"
+    "INSERT INTO plays (songid, date, delta) VALUES ((\(song.songSelect)), '\(date)', \(delta));"
   }
 }

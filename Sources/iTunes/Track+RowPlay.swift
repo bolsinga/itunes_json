@@ -22,15 +22,10 @@ extension Track {
     songPlayCount > 0 || !datePlayedISO8601.isEmpty
   }
 
-  fileprivate func songSelect(using song: RowSong) -> String {
-    "SELECT id FROM songs WHERE name = '\(song.name.$name)' AND itunesid = '\(song.itunesid)' AND artistid = (\(song.artist.artistSelect)) AND albumid = (\(song.album.albumSelect)) AND kindid = (\(song.kindSelect)) AND tracknumber = \(song.trackNumber) AND year = \(song.year) AND size = \(song.size) AND duration = \(song.duration) AND dateadded = '\(song.dateAdded)'"
-  }
-
   func rowPlay(using song: RowSong) -> RowPlay? {
     // Some tracks have play dates, but not play counts. Until that is repaired this table has a CHECK(delta >= 0) constraint.
     guard hasPlayed else { return nil }
 
-    return RowPlay(
-      date: datePlayedISO8601, delta: songPlayCount, songSelect: songSelect(using: song))
+    return RowPlay(date: datePlayedISO8601, delta: songPlayCount, song: song)
   }
 }
