@@ -14,20 +14,17 @@ extension Logger {
 
 private protocol TrackEncoding {
   func encode(_ track: Track)
-  var statements: String { get }
+  var statements: [String] { get }
+  var tableStatement: String { get }
 }
 
 class SQLSourceEncoder {
   fileprivate final class KindTableData: TrackEncoding {
     private var values = Set<RowKind>()
 
-    var statements: String {
-      var keyStatements = Array(values).map { $0.insertStatement }.sorted()
-      keyStatements.insert("BEGIN;", at: 0)
-      keyStatements.append("COMMIT;")
-      keyStatements.insert(Track.KindTable, at: 0)
-      return keyStatements.joined(separator: "\n")
-    }
+    var statements: [String] { Array(values).map { $0.insertStatement } }
+
+    var tableStatement: String { Track.KindTable }
 
     func encode(_ track: Track) {
       guard let row = track.rowKind else { return }
@@ -39,19 +36,17 @@ class SQLSourceEncoder {
   fileprivate final class ArtistTableData: TrackEncoding {
     var values = Set<RowArtist>()
 
-    var statements: String {
+    var statements: [String] {
       let artistRows = Array(values)
 
       artistRows.mismatchedSortableNames.forEach {
         Logger.duplicateArtist.error("\(String(describing: $0), privacy: .public)")
       }
 
-      var keyStatements = artistRows.map { $0.insertStatement }.sorted()
-      keyStatements.insert("BEGIN;", at: 0)
-      keyStatements.append("COMMIT;")
-      keyStatements.insert(Track.ArtistTable, at: 0)
-      return keyStatements.joined(separator: "\n")
+      return artistRows.map { $0.insertStatement }
     }
+
+    var tableStatement: String { Track.ArtistTable }
 
     func encode(_ track: Track) {
       values.insert(track.rowArtist)
@@ -61,13 +56,9 @@ class SQLSourceEncoder {
   fileprivate final class AlbumTableData: TrackEncoding {
     var values = Set<RowAlbum>()
 
-    var statements: String {
-      var keyStatements = Array(values).map { $0.insertStatement }.sorted()
-      keyStatements.insert("BEGIN;", at: 0)
-      keyStatements.append("COMMIT;")
-      keyStatements.insert(Track.AlbumTable, at: 0)
-      return keyStatements.joined(separator: "\n")
-    }
+    var statements: [String] { Array(values).map { $0.insertStatement } }
+
+    var tableStatement: String { Track.AlbumTable }
 
     func encode(_ track: Track) {
       values.insert(track.rowAlbum)
@@ -77,13 +68,9 @@ class SQLSourceEncoder {
   fileprivate final class SongTableData: TrackEncoding {
     var values = Set<RowSong>()
 
-    var statements: String {
-      var keyStatements = Array(values).map { $0.insertStatement }.sorted()
-      keyStatements.insert("BEGIN;", at: 0)
-      keyStatements.append("COMMIT;")
-      keyStatements.insert(Track.SongTable, at: 0)
-      return keyStatements.joined(separator: "\n")
-    }
+    var statements: [String] { Array(values).map { $0.insertStatement } }
+
+    var tableStatement: String { Track.SongTable }
 
     func encode(_ track: Track) {
       values.insert(track.rowSong)
@@ -99,13 +86,9 @@ class SQLSourceEncoder {
       values.insert(row)
     }
 
-    var statements: String {
-      var keyStatements = Array(values).map { $0.insertStatement }.sorted()
-      keyStatements.insert("BEGIN;", at: 0)
-      keyStatements.append("COMMIT;")
-      keyStatements.insert(Track.PlaysTable, at: 0)
-      return keyStatements.joined(separator: "\n")
-    }
+    var statements: [String] { Array(values).map { $0.insertStatement } }
+
+    var tableStatement: String { Track.PlaysTable }
   }
 
   enum SQLSourceEncoderError: Error {
@@ -126,8 +109,13 @@ class SQLSourceEncoder {
     }
 
     var sqlStatements: String {
-      (["PRAGMA foreign_keys = ON;"] + trackEncoders.map { $0.statements }.compactMap { $0 })
-        .joined(separator: "\n")
+      (["PRAGMA foreign_keys = ON;"]
+        + trackEncoders.flatMap {
+          var statements = [$0.tableStatement, "BEGIN;"]
+          statements.append(contentsOf: $0.statements.sorted())
+          statements.append("COMMIT;")
+          return statements
+        }.compactMap { $0 }).joined(separator: "\n")
     }
   }
 
