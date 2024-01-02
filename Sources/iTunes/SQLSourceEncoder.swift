@@ -14,13 +14,14 @@ extension Logger {
 
 extension Track {
   fileprivate var rows:
-    (kind: RowKind?, artist: RowArtist, album: RowAlbum, song: RowSong, play: RowPlay?)
+    (kind: RowKind, artist: RowArtist, album: RowAlbum, song: RowSong, play: RowPlay?)
   {
     let artist = rowArtist
     let album = rowAlbum
-    let song = rowSong(artist: artist, album: album)
+    let kind = rowKind
+    let song = rowSong(artist: artist, album: album, kind: kind)
     return (
-      kind: rowKind, artist: artist, album: album, song: song, play: rowPlay(using: song)
+      kind: kind, artist: artist, album: album, song: song, play: rowPlay(using: song)
     )
   }
 }
@@ -40,9 +41,7 @@ class SQLSourceEncoder {
     fileprivate func encode(_ track: Track) {
       let rows = track.rows
 
-      if let kind = rows.kind {
-        kindRows.insert(kind)
-      }
+      kindRows.insert(rows.kind)
       artistRows.insert(rows.artist)
       albumRows.insert(rows.album)
       songRows.insert(rows.song)

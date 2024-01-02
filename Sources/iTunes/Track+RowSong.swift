@@ -67,12 +67,12 @@ extension Track {
     return kind
   }
 
-  func rowSong(artist: RowArtist, album: RowAlbum) -> RowSong {
+  func rowSong(artist: RowArtist, album: RowAlbum, kind: RowKind) -> RowSong {
     RowSong(
       name: songName, itunesid: persistentID, composer: composer ?? "",
       trackNumber: songTrackNumber, year: songYear, size: songSize, duration: songDuration,
       dateAdded: dateAddedISO8601, dateReleased: dateReleasedISO8601,
       dateModified: dateModifiedISO8601, comments: comments ?? "", artist: artist,
-      album: album, kind: trackKind)
+      album: album, kind: kind)
   }
 }

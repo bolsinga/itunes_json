@@ -8,9 +8,7 @@
 import Foundation
 
 extension Track {
-  var rowKind: RowKind? {
-    guard let kind else { return nil }
-
-    return RowKind(kind: kind)
+  var rowKind: RowKind {
+    return RowKind(kind: kind ?? "")
   }
 }
