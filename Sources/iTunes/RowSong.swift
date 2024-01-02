@@ -19,7 +19,7 @@ struct RowSong: SQLRow {
   let dateReleased: String
   let dateModified: String
   @QuoteEscaped var comments: String
-  let artistSelect: String
+  let artist: RowArtist
   let albumSelect: String
   @QuoteEscaped var kind: String
 
@@ -28,6 +28,6 @@ struct RowSong: SQLRow {
   }
 
   var insertStatement: String {
-    "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments) VALUES ('\(name.$name)', '\(name.$sorted)', '\(itunesid)', (\(artistSelect)), (\(albumSelect)), (\(kindSelect)), '\($composer)', \(trackNumber), \(year), \(size), \(duration), '\(dateAdded)', '\(dateReleased)', '\(dateModified)', '\($comments)');"
+    "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments) VALUES ('\(name.$name)', '\(name.$sorted)', '\(itunesid)', (\(artist.artistSelect)), (\(albumSelect)), (\(kindSelect)), '\($composer)', \(trackNumber), \(year), \(size), \(duration), '\(dateAdded)', '\(dateReleased)', '\(dateModified)', '\($comments)');"
   }
 }
