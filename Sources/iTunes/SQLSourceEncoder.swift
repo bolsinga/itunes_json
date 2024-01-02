@@ -60,19 +60,9 @@ extension Track {
     return dateAdded.formatted(.iso8601)
   }
 
-  var dateReleasedISO8601: String {
-    guard let releaseDate else { return "" }
-    return releaseDate.formatted(.iso8601)
-  }
-
   var datePlayedISO8601: String {
     guard let playDateUTC else { return "" }
     return playDateUTC.formatted(.iso8601)
-  }
-
-  var dateModifiedISO8601: String {
-    guard let dateModified else { return "" }
-    return dateModified.formatted(.iso8601)
   }
 
   var albumIsCompilation: Int {
@@ -215,7 +205,7 @@ class SQLSourceEncoder {
     }
 
     func encode(_ track: Track) {
-      values.insert(RowSong(track))
+      values.insert(track.rowSong)
     }
   }
 
