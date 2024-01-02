@@ -13,16 +13,9 @@ extension Logger {
 }
 
 extension Track {
-  fileprivate var rows:
-    (kind: RowKind, artist: RowArtist, album: RowAlbum, song: RowSong, play: RowPlay?)
-  {
-    let artist = rowArtist
-    let album = rowAlbum
-    let kind = rowKind
-    let song = rowSong(artist: artist, album: album, kind: kind)
-    return (
-      kind: kind, artist: artist, album: album, song: song, play: rowPlay(using: song)
-    )
+  fileprivate var rows: (song: RowSong, play: RowPlay?) {
+    let song = rowSong(artist: rowArtist, album: rowAlbum, kind: rowKind)
+    return (song: song, play: rowPlay(using: song))
   }
 }
 
@@ -32,18 +25,11 @@ class SQLSourceEncoder {
   }
 
   fileprivate final class Encoder {
-    private var kindRows = Set<RowKind>()
-    private var artistRows = Set<RowArtist>()
-    private var albumRows = Set<RowAlbum>()
     private var songRows = Set<RowSong>()
     private var playRows = Set<RowPlay>()
 
     fileprivate func encode(_ track: Track) {
       let rows = track.rows
-
-      kindRows.insert(rows.kind)
-      artistRows.insert(rows.artist)
-      albumRows.insert(rows.album)
       songRows.insert(rows.song)
       if let play = rows.play {
         playRows.insert(play)
@@ -51,11 +37,11 @@ class SQLSourceEncoder {
     }
 
     private var kindStatements: (table: String, statements: [String]) {
-      (Track.KindTable, Array(kindRows).map { $0.insert })
+      (Track.KindTable, Array(Set(Array(songRows).map { $0.kind })).map { $0.insert })
     }
 
     private var artistStatements: (table: String, statements: [String]) {
-      let artistRows = Array(artistRows)
+      let artistRows = Array(Set(Array(songRows).map { $0.artist }))
 
       artistRows.mismatchedSortableNames.forEach {
         Logger.duplicateArtist.error("\(String(describing: $0), privacy: .public)")
@@ -65,7 +51,7 @@ class SQLSourceEncoder {
     }
 
     private var albumStatements: (table: String, statements: [String]) {
-      (Track.AlbumTable, Array(albumRows).map { $0.insert })
+      (Track.AlbumTable, Array(Set(Array(songRows).map { $0.album })).map { $0.insert })
     }
 
     private var songStatements: (table: String, statements: [String]) {
