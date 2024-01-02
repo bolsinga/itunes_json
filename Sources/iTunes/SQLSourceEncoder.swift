@@ -159,9 +159,9 @@ class SQLSourceEncoder {
     }
 
     func encode(_ track: Track) {
-      guard let kind = track.kind else { return }
+      guard let row = track.rowKind else { return }
 
-      values.insert(RowKind(kind))
+      values.insert(row)
     }
   }
 
