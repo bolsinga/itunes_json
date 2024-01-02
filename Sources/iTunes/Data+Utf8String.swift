@@ -12,7 +12,7 @@ enum DataUTF8Error: Error {
 }
 
 extension Data {
-  public func asUTF8String() throws -> String {
+  func asUTF8String() throws -> String {
     guard let s = String(data: self, encoding: .utf8) else {
       throw DataUTF8Error.cannotConvertToUTF8String
     }

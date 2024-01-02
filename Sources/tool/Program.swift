@@ -78,12 +78,6 @@ struct Program: AsyncParsableCommand {
       return t
     }()
 
-    let data = try tracks.data(for: destination)
-
-    if let outputFile {
-      try data.write(to: outputFile, options: .atomic)
-    } else {
-      print("\(try data.asUTF8String())")
-    }
+    try destination.emit(tracks, outputFile: outputFile)
   }
 }
