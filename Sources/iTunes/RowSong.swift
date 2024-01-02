@@ -21,17 +21,13 @@ struct RowSong: SQLRow {
   @QuoteEscaped var comments: String
   let artist: RowArtist
   let album: RowAlbum
-  @QuoteEscaped var kind: String
-
-  var kindSelect: String {
-    "SELECT id FROM kinds WHERE name = '\($kind)'"
-  }
+  let kind: RowKind
 
   var songSelect: String {
-    "SELECT id FROM songs WHERE name = '\(name.$name)' AND itunesid = '\(itunesid)' AND artistid = (\(artist.artistSelect)) AND albumid = (\(album.albumSelect)) AND kindid = (\(kindSelect)) AND tracknumber = \(trackNumber) AND year = \(year) AND size = \(size) AND duration = \(duration) AND dateadded = '\(dateAdded)'"
+    "SELECT id FROM songs WHERE name = '\(name.$name)' AND itunesid = '\(itunesid)' AND artistid = (\(artist.artistSelect)) AND albumid = (\(album.albumSelect)) AND kindid = (\(kind.kindSelect)) AND tracknumber = \(trackNumber) AND year = \(year) AND size = \(size) AND duration = \(duration) AND dateadded = '\(dateAdded)'"
   }
 
   var insertStatement: String {
-    "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments) VALUES ('\(name.$name)', '\(name.$sorted)', '\(itunesid)', (\(artist.artistSelect)), (\(album.albumSelect)), (\(kindSelect)), '\($composer)', \(trackNumber), \(year), \(size), \(duration), '\(dateAdded)', '\(dateReleased)', '\(dateModified)', '\($comments)');"
+    "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments) VALUES ('\(name.$name)', '\(name.$sorted)', '\(itunesid)', (\(artist.artistSelect)), (\(album.albumSelect)), (\(kind.kindSelect)), '\($composer)', \(trackNumber), \(year), \(size), \(duration), '\(dateAdded)', '\(dateReleased)', '\(dateModified)', '\($comments)');"
   }
 }
