@@ -9,6 +9,6 @@ import Foundation
 
 extension Track {
   var rowArtist: RowArtist {
-    RowArtist(self)
+    RowArtist(name: artistName)
   }
 }

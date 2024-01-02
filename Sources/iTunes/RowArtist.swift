@@ -8,11 +8,7 @@
 import Foundation
 
 struct RowArtist: SQLRow {
-  private let name: SortableName
-
-  init(_ track: Track) {
-    self.name = track.artistName
-  }
+  let name: SortableName
 
   internal var nameOnly: String {
     name.name

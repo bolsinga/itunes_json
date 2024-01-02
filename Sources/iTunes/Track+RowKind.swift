@@ -11,6 +11,6 @@ extension Track {
   var rowKind: RowKind? {
     guard let kind else { return nil }
 
-    return RowKind(kind)
+    return RowKind(kind: kind)
   }
 }

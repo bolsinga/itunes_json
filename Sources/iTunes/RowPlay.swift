@@ -8,15 +8,9 @@
 import Foundation
 
 struct RowPlay: SQLRow {
-  private let date: String
-  private let delta: Int
-  private let songSelect: String
-
-  init(_ track: Track) {
-    self.date = track.datePlayedISO8601
-    self.delta = track.playCount ?? 0
-    self.songSelect = track.songSelect
-  }
+  let date: String
+  let delta: Int
+  let songSelect: String
 
   var insertStatement: String {
     "INSERT INTO plays (songid, date, delta) VALUES ((\(songSelect)), '\(date)', \(delta));"

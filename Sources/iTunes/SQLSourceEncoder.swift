@@ -120,10 +120,6 @@ extension Track {
     guard let kind else { preconditionFailure("\(self)") }
     return "SELECT id FROM kinds WHERE name = '\(kind)'"
   }
-
-  var songSelect: String {
-    "SELECT id FROM songs WHERE name = '\(songName.$name)' AND itunesid = '\(persistentID)' AND artistid = (\(artistSelect)) AND albumid = (\(albumSelect)) AND kindid = (\(kindSelect)) AND tracknumber = \(songTrackNumber) AND year = \(songYear) AND size = \(songSize) AND duration = \(songDuration) AND dateadded = '\(dateAddedISO8601)'"
-  }
 }
 
 private protocol TrackEncoding {

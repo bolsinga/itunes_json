@@ -8,11 +8,7 @@
 import Foundation
 
 struct RowKind: SQLRow {
-  @QuoteEscaped private var kind: String
-
-  init(_ kind: String) {
-    self.kind = kind
-  }
+  @QuoteEscaped var kind: String
 
   var insertStatement: String {
     "INSERT INTO kinds (name) VALUES ('\($kind)');"
