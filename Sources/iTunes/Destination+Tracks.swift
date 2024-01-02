@@ -7,9 +7,17 @@
 
 import Foundation
 
+enum DataExportError: Error {
+  case noTracks
+}
+
 extension Destination {
   public func emit(_ tracks: [Track], outputFile: URL?) throws {
-    let data = try tracks.data(for: self)
+    guard tracks.count > 0 else {
+      throw DataExportError.noTracks
+    }
+
+    let data = try self.data(for: tracks)
 
     if let outputFile {
       try data.write(to: outputFile, options: .atomic)
