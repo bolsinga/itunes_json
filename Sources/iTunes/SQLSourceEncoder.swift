@@ -17,9 +17,10 @@ extension Track {
     (kind: RowKind?, artist: RowArtist, album: RowAlbum, song: RowSong, play: RowPlay?)
   {
     let artist = rowArtist
-    let song = rowSong(artist: artist)
+    let album = rowAlbum
+    let song = rowSong(artist: artist, album: album)
     return (
-      kind: rowKind, artist: artist, album: rowAlbum, song: song, play: rowPlay(using: song)
+      kind: rowKind, artist: artist, album: album, song: song, play: rowPlay(using: song)
     )
   }
 }
