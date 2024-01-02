@@ -14,11 +14,11 @@ struct RowArtist: SQLRow {
     name.name
   }
 
-  var artistSelect: String {
+  var select: String {
     "SELECT id FROM artists WHERE name = '\(name.$name)'"
   }
 
-  var insertStatement: String {
+  var insert: String {
     "INSERT INTO artists (name, sortname) VALUES ('\(name.$name)', '\(name.$sorted)');"
   }
 }
