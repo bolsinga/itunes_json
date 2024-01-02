@@ -13,14 +13,15 @@ extension Track {
     songPlayCount > 0 || !datePlayedISO8601.isEmpty
   }
 
-  fileprivate var songSelect: String {
-    "SELECT id FROM songs WHERE name = '\(songName.$name)' AND itunesid = '\(persistentID)' AND artistid = (\(artistSelect)) AND albumid = (\(albumSelect)) AND kindid = (\(kindSelect)) AND tracknumber = \(songTrackNumber) AND year = \(songYear) AND size = \(songSize) AND duration = \(songDuration) AND dateadded = '\(dateAddedISO8601)'"
+  fileprivate func songSelect(using song: RowSong) -> String {
+    "SELECT id FROM songs WHERE name = '\(song.name.$name)' AND itunesid = '\(persistentID)' AND artistid = (\(artistSelect)) AND albumid = (\(albumSelect)) AND kindid = (\(song.kindSelect)) AND tracknumber = \(song.trackNumber) AND year = \(song.year) AND size = \(song.size) AND duration = \(song.duration) AND dateadded = '\(song.dateAdded)'"
   }
 
-  var rowPlay: RowPlay? {
+  func rowPlay(using song: RowSong) -> RowPlay? {
     // Some tracks have play dates, but not play counts. Until that is repaired this table has a CHECK(delta >= 0) constraint.
     guard hasPlayed else { return nil }
 
-    return RowPlay(date: datePlayedISO8601, delta: playCount ?? 0, songSelect: songSelect)
+    return RowPlay(
+      date: datePlayedISO8601, delta: songPlayCount, songSelect: songSelect(using: song))
   }
 }

@@ -16,7 +16,10 @@ extension Track {
   fileprivate var rows:
     (kind: RowKind?, artist: RowArtist, album: RowAlbum, song: RowSong, play: RowPlay?)
   {
-    (kind: rowKind, artist: rowArtist, album: rowAlbum, song: rowSong, play: rowPlay)
+    let song = rowSong
+    return (
+      kind: rowKind, artist: rowArtist, album: rowAlbum, song: song, play: rowPlay(using: song)
+    )
   }
 }
 
