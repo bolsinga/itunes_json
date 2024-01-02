@@ -9,6 +9,8 @@ import Foundation
 
 extension Track {
   var rowAlbum: RowAlbum {
-    RowAlbum(self)
+    RowAlbum(
+      name: albumName, trackCount: albumTrackCount, discCount: albumDiscCount,
+      discNumber: albumDiscNumber, compilation: albumIsCompilation)
   }
 }

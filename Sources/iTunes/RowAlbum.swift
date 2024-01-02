@@ -8,19 +8,11 @@
 import Foundation
 
 struct RowAlbum: SQLRow {
-  private let name: SortableName
-  private let trackCount: Int
-  private let discCount: Int
-  private let discNumber: Int
-  private let compilation: Int
-
-  init(_ track: Track) {
-    self.name = track.albumName
-    self.trackCount = track.albumTrackCount
-    self.discCount = track.albumDiscCount
-    self.discNumber = track.albumDiscNumber
-    self.compilation = track.albumIsCompilation
-  }
+  let name: SortableName
+  let trackCount: Int
+  let discCount: Int
+  let discNumber: Int
+  let compilation: Int
 
   var insertStatement: String {
     "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES ('\(name.$name)', '\(name.$sorted)', \(trackCount), \(discCount), \(discNumber), \(compilation));"
