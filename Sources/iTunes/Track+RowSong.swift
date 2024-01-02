@@ -15,12 +15,12 @@ extension Logger {
 }
 
 extension Track {
-  var dateReleasedISO8601: String {
+  fileprivate var dateReleasedISO8601: String {
     guard let releaseDate else { return "" }
     return releaseDate.formatted(.iso8601)
   }
 
-  var dateModifiedISO8601: String {
+  fileprivate var dateModifiedISO8601: String {
     guard let dateModified else { return "" }
     return dateModified.formatted(.iso8601)
   }
