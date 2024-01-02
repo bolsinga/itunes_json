@@ -12,106 +12,74 @@ extension Logger {
   static let duplicateArtist = Logger(subsystem: "sql", category: "duplicateArtist")
 }
 
-private protocol TrackEncoding {
-  func encode(_ track: Track)
-  var statements: [String] { get }
-  var tableStatement: String { get }
+extension Track {
+  fileprivate var rows:
+    (kind: RowKind?, artist: RowArtist, album: RowAlbum, song: RowSong, play: RowPlay?)
+  {
+    (kind: rowKind, artist: rowArtist, album: rowAlbum, song: rowSong, play: rowPlay)
+  }
 }
 
 class SQLSourceEncoder {
-  fileprivate final class KindTableData: TrackEncoding {
-    private var values = Set<RowKind>()
-
-    var statements: [String] { Array(values).map { $0.insertStatement } }
-
-    var tableStatement: String { Track.KindTable }
-
-    func encode(_ track: Track) {
-      guard let row = track.rowKind else { return }
-
-      values.insert(row)
-    }
-  }
-
-  fileprivate final class ArtistTableData: TrackEncoding {
-    var values = Set<RowArtist>()
-
-    var statements: [String] {
-      let artistRows = Array(values)
-
-      artistRows.mismatchedSortableNames.forEach {
-        Logger.duplicateArtist.error("\(String(describing: $0), privacy: .public)")
-      }
-
-      return artistRows.map { $0.insertStatement }
-    }
-
-    var tableStatement: String { Track.ArtistTable }
-
-    func encode(_ track: Track) {
-      values.insert(track.rowArtist)
-    }
-  }
-
-  fileprivate final class AlbumTableData: TrackEncoding {
-    var values = Set<RowAlbum>()
-
-    var statements: [String] { Array(values).map { $0.insertStatement } }
-
-    var tableStatement: String { Track.AlbumTable }
-
-    func encode(_ track: Track) {
-      values.insert(track.rowAlbum)
-    }
-  }
-
-  fileprivate final class SongTableData: TrackEncoding {
-    var values = Set<RowSong>()
-
-    var statements: [String] { Array(values).map { $0.insertStatement } }
-
-    var tableStatement: String { Track.SongTable }
-
-    func encode(_ track: Track) {
-      values.insert(track.rowSong)
-    }
-  }
-
-  fileprivate final class PlayTableData: TrackEncoding {
-    var values = Set<RowPlay>()
-
-    func encode(_ track: Track) {
-      guard let row = track.rowPlay else { return }
-
-      values.insert(row)
-    }
-
-    var statements: [String] { Array(values).map { $0.insertStatement } }
-
-    var tableStatement: String { Track.PlaysTable }
-  }
-
   enum SQLSourceEncoderError: Error {
     case cannotMakeData
   }
 
   fileprivate final class Encoder {
-    let trackEncoders: [TrackEncoding]
+    private var kindRows = Set<RowKind>()
+    private var artistRows = Set<RowArtist>()
+    private var albumRows = Set<RowAlbum>()
+    private var songRows = Set<RowSong>()
+    private var playRows = Set<RowPlay>()
 
-    internal init() {
-      self.trackEncoders = [
-        KindTableData(), ArtistTableData(), AlbumTableData(), SongTableData(), PlayTableData(),
-      ]
+    fileprivate func encode(_ track: Track) {
+      let rows = track.rows
+
+      if let kind = rows.kind {
+        kindRows.insert(kind)
+      }
+      artistRows.insert(rows.artist)
+      albumRows.insert(rows.album)
+      songRows.insert(rows.song)
+      if let play = rows.play {
+        playRows.insert(play)
+      }
     }
 
-    func encode(_ track: Track) {
-      trackEncoders.forEach { $0.encode(track) }
+    private var kindStatements: (table: String, statements: [String]) {
+      (Track.KindTable, Array(kindRows).map { $0.insertStatement })
     }
 
-    var sqlStatements: String {
+    private var artistStatements: (table: String, statements: [String]) {
+      let artistRows = Array(artistRows)
+
+      artistRows.mismatchedSortableNames.forEach {
+        Logger.duplicateArtist.error("\(String(describing: $0), privacy: .public)")
+      }
+
+      return (Track.ArtistTable, artistRows.map { $0.insertStatement })
+    }
+
+    private var albumStatements: (table: String, statements: [String]) {
+      (Track.AlbumTable, Array(albumRows).map { $0.insertStatement })
+    }
+
+    private var songStatements: (table: String, statements: [String]) {
+      (Track.SongTable, Array(songRows).map { $0.insertStatement })
+    }
+
+    private var playStatements: (table: String, statements: [String]) {
+      (Track.PlaysTable, Array(playRows).map { $0.insertStatement })
+    }
+
+    private var tableStatements: [(table: String, statements: [String])] {
+      [kindStatements, artistStatements, albumStatements, songStatements, playStatements]
+    }
+
+    fileprivate var sqlStatements: String {
       (["PRAGMA foreign_keys = ON;"]
-        + trackEncoders.flatMap {
-          var statements = [$0.tableStatement, "BEGIN;"]
+        + tableStatements.flatMap {
+          var statements = [$0.table, "BEGIN;"]
           statements.append(contentsOf: $0.statements.sorted())
           statements.append("COMMIT;")
           return statements
