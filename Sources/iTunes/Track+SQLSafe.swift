@@ -12,13 +12,10 @@ extension Logger {
   static let noArtist = Logger(subsystem: "sql", category: "noArtist")
   static let noAlbum = Logger(subsystem: "sql", category: "noAlbum")
   static let noTrackCount = Logger(subsystem: "sql", category: "noTrackCount")
-  static let noTrackNumber = Logger(subsystem: "sql", category: "noTrackNumber")
-  static let badTrackNumber = Logger(subsystem: "sql", category: "badTrackNumber")
-  static let noYear = Logger(subsystem: "sql", category: "noYear")
 }
 
 extension Track {
-  fileprivate var debugLogInformation: String {
+  var debugLogInformation: String {
     "album: \(String(describing: album)), artist: \(String(describing: artist)), kind: \(String(describing: kind)), name: \(name), podcast: \(String(describing: podcast)), trackCount: \(String(describing: trackCount)), trackNumber: \(String(describing: trackNumber)), year: \(String(describing: year))"
   }
 
@@ -54,11 +51,6 @@ extension Track {
     discNumber ?? 1
   }
 
-  var dateAddedISO8601: String {
-    guard let dateAdded else { preconditionFailure() }
-    return dateAdded.formatted(.iso8601)
-  }
-
   var datePlayedISO8601: String {
     guard let playDateUTC else { return "" }
     return playDateUTC.formatted(.iso8601)
@@ -71,38 +63,6 @@ extension Track {
     return 0
   }
 
-  var songTrackNumber: Int {
-    guard let trackNumber else {
-      Logger.noTrackNumber.error("\(debugLogInformation, privacy: .public)")
-      return -1
-    }
-    guard trackNumber > 0 else {
-      Logger.badTrackNumber.error("\(debugLogInformation, privacy: .public)")
-      return -1
-    }
-    return trackNumber
-  }
-
-  var songYear: Int {
-    guard let year else {
-      Logger.noYear.error("\(debugLogInformation, privacy: .public)")
-      return -1
-    }
-    return year
-  }
-
-  var songSize: UInt64 {
-    size ?? 0
-  }
-
-  var songDuration: Int {
-    totalTime ?? -1
-  }
-
-  var songName: SortableName {
-    SortableName(name: name, sorted: sortName ?? "")
-  }
-
   var songPlayCount: Int {
     playCount ?? 0
   }
@@ -113,10 +73,5 @@ extension Track {
 
   var albumSelect: String {
     "SELECT id FROM albums WHERE name = '\(albumName.$name)' AND trackcount = \(albumTrackCount) AND disccount = \(albumDiscCount) AND discnumber = \(albumDiscNumber) AND compilation = \(albumIsCompilation)"
-  }
-
-  var kindSelect: String {
-    guard let kind else { preconditionFailure("\(self)") }
-    return "SELECT id FROM kinds WHERE name = '\(kind)'"
   }
 }

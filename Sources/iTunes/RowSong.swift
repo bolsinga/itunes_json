@@ -21,7 +21,11 @@ struct RowSong: SQLRow {
   @QuoteEscaped var comments: String
   let artistSelect: String
   let albumSelect: String
-  let kindSelect: String
+  @QuoteEscaped var kind: String
+
+  var kindSelect: String {
+    "SELECT id FROM kinds WHERE name = '\($kind)'"
+  }
 
   var insertStatement: String {
     "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments) VALUES ('\(name.$name)', '\(name.$sorted)', '\(itunesid)', (\(artistSelect)), (\(albumSelect)), (\(kindSelect)), '\($composer)', \(trackNumber), \(year), \(size), \(duration), '\(dateAdded)', '\(dateReleased)', '\(dateModified)', '\($comments)');"
