@@ -51,7 +51,7 @@ class SQLSourceEncoder {
     }
 
     private var kindStatements: (table: String, statements: [String]) {
-      (Track.KindTable, Array(kindRows).map { $0.insertStatement })
+      (Track.KindTable, Array(kindRows).map { $0.insert })
     }
 
     private var artistStatements: (table: String, statements: [String]) {
@@ -61,19 +61,19 @@ class SQLSourceEncoder {
         Logger.duplicateArtist.error("\(String(describing: $0), privacy: .public)")
       }
 
-      return (Track.ArtistTable, artistRows.map { $0.insertStatement })
+      return (Track.ArtistTable, artistRows.map { $0.insert })
     }
 
     private var albumStatements: (table: String, statements: [String]) {
-      (Track.AlbumTable, Array(albumRows).map { $0.insertStatement })
+      (Track.AlbumTable, Array(albumRows).map { $0.insert })
     }
 
     private var songStatements: (table: String, statements: [String]) {
-      (Track.SongTable, Array(songRows).map { $0.insertStatement })
+      (Track.SongTable, Array(songRows).map { $0.insert })
     }
 
     private var playStatements: (table: String, statements: [String]) {
-      (Track.PlaysTable, Array(playRows).map { $0.insertStatement })
+      (Track.PlaysTable, Array(playRows).map { $0.insert })
     }
 
     private var tableStatements: [(table: String, statements: [String])] {

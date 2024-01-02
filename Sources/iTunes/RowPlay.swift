@@ -12,7 +12,11 @@ struct RowPlay: SQLRow {
   let delta: Int
   let song: RowSong
 
-  var insertStatement: String {
-    "INSERT INTO plays (songid, date, delta) VALUES ((\(song.songSelect)), '\(date)', \(delta));"
+  var select: String {
+    preconditionFailure("Not Implemented")
+  }
+
+  var insert: String {
+    "INSERT INTO plays (songid, date, delta) VALUES ((\(song.select)), '\(date)', \(delta));"
   }
 }

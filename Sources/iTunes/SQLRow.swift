@@ -8,5 +8,6 @@
 import Foundation
 
 protocol SQLRow: Hashable {
-  var insertStatement: String { get }
+  var select: String { get }
+  var insert: String { get }
 }

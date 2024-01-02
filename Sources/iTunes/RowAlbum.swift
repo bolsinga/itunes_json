@@ -14,11 +14,11 @@ struct RowAlbum: SQLRow {
   let discNumber: Int
   let compilation: Int
 
-  var albumSelect: String {
+  var select: String {
     "SELECT id FROM albums WHERE name = '\(name.$name)' AND trackcount = \(trackCount) AND disccount = \(discCount) AND discnumber = \(discNumber) AND compilation = \(compilation)"
   }
 
-  var insertStatement: String {
+  var insert: String {
     "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES ('\(name.$name)', '\(name.$sorted)', \(trackCount), \(discCount), \(discNumber), \(compilation));"
   }
 }

@@ -10,11 +10,11 @@ import Foundation
 struct RowKind: SQLRow {
   @QuoteEscaped var kind: String
 
-  var kindSelect: String {
+  var select: String {
     "SELECT id FROM kinds WHERE name = '\($kind)'"
   }
 
-  var insertStatement: String {
+  var insert: String {
     "INSERT INTO kinds (name) VALUES ('\($kind)');"
   }
 }
