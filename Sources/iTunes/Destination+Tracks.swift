@@ -17,12 +17,21 @@ extension Destination {
       throw DataExportError.noTracks
     }
 
-    let data = try self.data(for: tracks)
+    switch self {
+    case .json, .sqlCode:
+      let data = try self.data(for: tracks)
 
-    if let outputFile {
-      try data.write(to: outputFile, options: .atomic)
-    } else {
-      print("\(try data.asUTF8String())")
+      if let outputFile {
+        try data.write(to: outputFile, options: .atomic)
+      } else {
+        print("\(try data.asUTF8String())")
+      }
+    case .db:
+      guard let outputFile else {
+        preconditionFailure("Should have been caught during ParasableArguments.validate().")
+      }
+
+      try tracks.database(file: outputFile)
     }
   }
 }

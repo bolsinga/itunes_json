@@ -14,6 +14,8 @@ extension Destination {
       return try tracks.jsonData()
     case .sqlCode:
       return try tracks.sqlData()
+    case .db:
+      preconditionFailure("No Data for db")
     }
   }
 }

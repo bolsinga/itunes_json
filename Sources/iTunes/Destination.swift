@@ -10,4 +10,5 @@ import Foundation
 public enum Destination: CaseIterable {
   case json
   case sqlCode
+  case db
 }
