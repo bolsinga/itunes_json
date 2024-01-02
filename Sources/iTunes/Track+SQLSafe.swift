@@ -51,20 +51,11 @@ extension Track {
     discNumber ?? 1
   }
 
-  var datePlayedISO8601: String {
-    guard let playDateUTC else { return "" }
-    return playDateUTC.formatted(.iso8601)
-  }
-
   var albumIsCompilation: Int {
     if let compilation {
       return compilation ? 1 : 0
     }
     return 0
-  }
-
-  var songPlayCount: Int {
-    playCount ?? 0
   }
 
   var artistSelect: String {
