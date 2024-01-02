@@ -8,6 +8,15 @@
 import Foundation
 
 extension Track {
+  fileprivate var datePlayedISO8601: String {
+    guard let playDateUTC else { return "" }
+    return playDateUTC.formatted(.iso8601)
+  }
+
+  fileprivate var songPlayCount: Int {
+    playCount ?? 0
+  }
+
   fileprivate var hasPlayed: Bool {
     // Some songs have play dates but not play counts!
     songPlayCount > 0 || !datePlayedISO8601.isEmpty
