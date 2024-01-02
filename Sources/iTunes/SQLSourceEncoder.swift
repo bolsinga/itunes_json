@@ -183,7 +183,7 @@ class SQLSourceEncoder {
     }
 
     func encode(_ track: Track) {
-      values.insert(RowArtist(track))
+      values.insert(track.rowArtist)
     }
   }
 
