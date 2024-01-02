@@ -58,10 +58,6 @@ extension Track {
     return 0
   }
 
-  var artistSelect: String {
-    "SELECT id FROM artists WHERE name = '\(artistName.$name)'"
-  }
-
   var albumSelect: String {
     "SELECT id FROM albums WHERE name = '\(albumName.$name)' AND trackcount = \(albumTrackCount) AND disccount = \(albumDiscCount) AND discnumber = \(albumDiscNumber) AND compilation = \(albumIsCompilation)"
   }

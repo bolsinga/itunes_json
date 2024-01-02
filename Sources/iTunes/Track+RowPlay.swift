@@ -23,7 +23,7 @@ extension Track {
   }
 
   fileprivate func songSelect(using song: RowSong) -> String {
-    "SELECT id FROM songs WHERE name = '\(song.name.$name)' AND itunesid = '\(song.itunesid)' AND artistid = (\(artistSelect)) AND albumid = (\(albumSelect)) AND kindid = (\(song.kindSelect)) AND tracknumber = \(song.trackNumber) AND year = \(song.year) AND size = \(song.size) AND duration = \(song.duration) AND dateadded = '\(song.dateAdded)'"
+    "SELECT id FROM songs WHERE name = '\(song.name.$name)' AND itunesid = '\(song.itunesid)' AND artistid = (\(song.artist.artistSelect)) AND albumid = (\(albumSelect)) AND kindid = (\(song.kindSelect)) AND tracknumber = \(song.trackNumber) AND year = \(song.year) AND size = \(song.size) AND duration = \(song.duration) AND dateadded = '\(song.dateAdded)'"
   }
 
   func rowPlay(using song: RowSong) -> RowPlay? {
