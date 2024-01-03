@@ -15,7 +15,7 @@ struct RowArtist: SQLRow {
   }
 
   var select: String {
-    "SELECT id FROM artists WHERE name = \(name.$name)"
+    "(SELECT id FROM artists WHERE name = \(name.$name))"
   }
 
   var insert: String {

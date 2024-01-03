@@ -24,10 +24,10 @@ struct RowSong: SQLRow {
   let kind: RowKind
 
   var select: String {
-    "SELECT id FROM songs WHERE name = \(name.$name) AND itunesid = '\(itunesid)' AND artistid = (\(artist.select)) AND albumid = (\(album.select)) AND kindid = (\(kind.select)) AND tracknumber = \(trackNumber) AND year = \(year) AND size = \(size) AND duration = \(duration) AND dateadded = '\(dateAdded)'"
+    "(SELECT id FROM songs WHERE name = \(name.$name) AND itunesid = '\(itunesid)' AND artistid = \(artist.select) AND albumid = \(album.select) AND kindid = \(kind.select) AND tracknumber = \(trackNumber) AND year = \(year) AND size = \(size) AND duration = \(duration) AND dateadded = '\(dateAdded)')"
   }
 
   var insert: String {
-    "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments) VALUES (\(name.$name), \(name.$sorted), '\(itunesid)', (\(artist.select)), (\(album.select)), (\(kind.select)), \($composer), \(trackNumber), \(year), \(size), \(duration), '\(dateAdded)', '\(dateReleased)', '\(dateModified)', \($comments));"
+    "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments) VALUES (\(name.$name), \(name.$sorted), '\(itunesid)', \(artist.select), \(album.select), \(kind.select), \($composer), \(trackNumber), \(year), \(size), \(duration), '\(dateAdded)', '\(dateReleased)', '\(dateModified)', \($comments));"
   }
 }
