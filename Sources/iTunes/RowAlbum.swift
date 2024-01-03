@@ -15,7 +15,7 @@ struct RowAlbum: SQLRow {
   let compilation: Int
 
   var select: String {
-    "SELECT id FROM albums WHERE name = \(name.$name) AND trackcount = \(trackCount) AND disccount = \(discCount) AND discnumber = \(discNumber) AND compilation = \(compilation)"
+    "(SELECT id FROM albums WHERE name = \(name.$name) AND trackcount = \(trackCount) AND disccount = \(discCount) AND discnumber = \(discNumber) AND compilation = \(compilation))"
   }
 
   var insert: String {
