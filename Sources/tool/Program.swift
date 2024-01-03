@@ -62,6 +62,10 @@ struct Program: AsyncParsableCommand {
     if (repairFile != nil) && (repairSource != nil) {
       throw ValidationError("repairSource is already defined, but repairFile is being passed.")
     }
+
+    if destination == .db && outputFile == nil {
+      throw ValidationError("--db requires outputDirectory to be set")
+    }
   }
 
   var isRepairing: Bool {

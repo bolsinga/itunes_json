@@ -14,6 +14,8 @@ extension Destination {
       "json"
     case .sqlCode:
       "sql"
+    case .db:
+      "db"
     }
   }
 }
