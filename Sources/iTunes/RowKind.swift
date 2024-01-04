@@ -9,11 +9,15 @@ import Foundation
 
 struct RowKind: SQLRow {
   let kind: String
+}
 
-  var select: String {
+extension RowKind: SQLSelectID {
+  var selectID: String {
     "(SELECT id FROM kinds WHERE name = \(kind, sql:.quoted))"
   }
+}
 
+extension RowKind: SQLInsert {
   var insert: String {
     "INSERT INTO kinds (name) VALUES (\(kind, sql:.quoted));"
   }

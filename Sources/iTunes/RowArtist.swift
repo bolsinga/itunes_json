@@ -13,11 +13,15 @@ struct RowArtist: SQLRow {
   internal var nameOnly: String {
     name.name
   }
+}
 
-  var select: String {
+extension RowArtist: SQLSelectID {
+  var selectID: String {
     "(SELECT id FROM artists WHERE name = \(name.name, sql:.quoted))"
   }
+}
 
+extension RowArtist: SQLInsert {
   var insert: String {
     "INSERT INTO artists (name, sortname) VALUES (\(name.name, sql:.quoted), \(name.sorted, sql:.quoted));"
   }
