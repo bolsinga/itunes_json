@@ -12,6 +12,6 @@ struct QuoteEscaped: Hashable {
   var wrappedValue: String
 
   var projectedValue: String {
-    "'\(wrappedValue.replacingOccurrences(of: "'", with: "''"))'"
+    wrappedValue.replacingOccurrences(of: "'", with: "''")
   }
 }

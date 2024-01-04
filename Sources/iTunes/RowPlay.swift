@@ -17,6 +17,6 @@ struct RowPlay: SQLRow {
   }
 
   var insert: String {
-    "INSERT INTO plays (songid, date, delta) VALUES (\(song.select), '\(date)', \(delta));"
+    "INSERT INTO plays (songid, date, delta) VALUES (\(song.select), \(date, sqlOptions:.quoted), \(delta));"
   }
 }
