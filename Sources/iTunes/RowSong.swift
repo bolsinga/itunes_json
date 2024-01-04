@@ -7,7 +7,9 @@
 
 import Foundation
 
-struct RowSong: SQLRow {
+struct RowSong<
+  Artist: SQLSelectID & Hashable, Album: SQLSelectID & Hashable, Kind: SQLSelectID & Hashable
+>: SQLRow {
   let name: SortableName
   let itunesid: UInt
   let composer: String
@@ -19,9 +21,9 @@ struct RowSong: SQLRow {
   let dateReleased: String
   let dateModified: String
   let comments: String
-  let artist: RowArtist
-  let album: RowAlbum
-  let kind: RowKind
+  let artist: Artist
+  let album: Album
+  let kind: Kind
 }
 
 extension RowSong: SQLSelectID {
