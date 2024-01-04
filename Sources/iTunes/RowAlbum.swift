@@ -13,11 +13,15 @@ struct RowAlbum: SQLRow {
   let discCount: Int
   let discNumber: Int
   let compilation: Int
+}
 
-  var select: String {
+extension RowAlbum: SQLSelectID {
+  var selectID: String {
     "(SELECT id FROM albums WHERE name = \(name.name, sql:.quoted) AND trackcount = \(trackCount) AND disccount = \(discCount) AND discnumber = \(discNumber) AND compilation = \(compilation))"
   }
+}
 
+extension RowAlbum: SQLInsert {
   var insert: String {
     "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES (\(name.name, sql:.quoted), \(name.sorted, sql:.quoted), \(trackCount), \(discCount), \(discNumber), \(compilation));"
   }
