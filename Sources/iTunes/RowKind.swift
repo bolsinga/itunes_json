@@ -8,13 +8,13 @@
 import Foundation
 
 struct RowKind: SQLRow {
-  @QuoteEscaped var kind: String
+  let kind: String
 
   var select: String {
-    "(SELECT id FROM kinds WHERE name = \($kind, sqlOptions:.quoted))"
+    "(SELECT id FROM kinds WHERE name = \(kind, sqlOptions:.quoted))"
   }
 
   var insert: String {
-    "INSERT INTO kinds (name) VALUES (\($kind, sqlOptions:.quoted));"
+    "INSERT INTO kinds (name) VALUES (\(kind, sqlOptions:.quoted));"
   }
 }

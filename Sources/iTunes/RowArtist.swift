@@ -15,10 +15,10 @@ struct RowArtist: SQLRow {
   }
 
   var select: String {
-    "(SELECT id FROM artists WHERE name = \(name.$name, sqlOptions:.quoted))"
+    "(SELECT id FROM artists WHERE name = \(name.name, sqlOptions:.quoted))"
   }
 
   var insert: String {
-    "INSERT INTO artists (name, sortname) VALUES (\(name.$name, sqlOptions:.quoted), \(name.$sorted, sqlOptions:.quoted));"
+    "INSERT INTO artists (name, sortname) VALUES (\(name.name, sqlOptions:.quoted), \(name.sorted, sqlOptions:.quoted));"
   }
 }
