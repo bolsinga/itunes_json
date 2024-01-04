@@ -13,7 +13,7 @@ extension Logger {
 }
 
 extension Track {
-  fileprivate var rows: (song: RowSong, play: RowPlay?) {
+  fileprivate var rows: (song: RowSong, play: RowPlay<RowSong>?) {
     let song = rowSong(artist: rowArtist, album: rowAlbum, kind: rowKind)
     return (song: song, play: rowPlay(using: song))
   }
@@ -26,7 +26,7 @@ class SQLSourceEncoder {
 
   fileprivate final class Encoder {
     private var songRows = Set<RowSong>()
-    private var playRows = Set<RowPlay>()
+    private var playRows = Set<RowPlay<RowSong>>()
 
     fileprivate func encode(_ track: Track) {
       let rows = track.rows
