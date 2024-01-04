@@ -11,10 +11,10 @@ struct RowKind: SQLRow {
   let kind: String
 
   var select: String {
-    "(SELECT id FROM kinds WHERE name = \(kind, sqlOptions:.quoted))"
+    "(SELECT id FROM kinds WHERE name = \(kind, sql:.quoted))"
   }
 
   var insert: String {
-    "INSERT INTO kinds (name) VALUES (\(kind, sqlOptions:.quoted));"
+    "INSERT INTO kinds (name) VALUES (\(kind, sql:.quoted));"
   }
 }

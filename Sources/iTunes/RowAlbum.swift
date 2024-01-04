@@ -15,10 +15,10 @@ struct RowAlbum: SQLRow {
   let compilation: Int
 
   var select: String {
-    "(SELECT id FROM albums WHERE name = \(name.name, sqlOptions:.quoted) AND trackcount = \(trackCount) AND disccount = \(discCount) AND discnumber = \(discNumber) AND compilation = \(compilation))"
+    "(SELECT id FROM albums WHERE name = \(name.name, sql:.quoted) AND trackcount = \(trackCount) AND disccount = \(discCount) AND discnumber = \(discNumber) AND compilation = \(compilation))"
   }
 
   var insert: String {
-    "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES (\(name.name, sqlOptions:.quoted), \(name.sorted, sqlOptions:.quoted), \(trackCount), \(discCount), \(discNumber), \(compilation));"
+    "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES (\(name.name, sql:.quoted), \(name.sorted, sql:.quoted), \(trackCount), \(discCount), \(discNumber), \(compilation));"
   }
 }
