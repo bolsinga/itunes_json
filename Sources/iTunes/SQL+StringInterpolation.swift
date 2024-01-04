@@ -17,11 +17,11 @@ struct SQLStringOptions: OptionSet {
 }
 
 extension String.StringInterpolation {
-  mutating func _appendInterpolation(_ string: String, sql: SQLStringOptions) {
+  mutating func _appendInterpolation(_ string: String, options: SQLStringOptions) {
     let literal =
-      sql.contains(.quoteEscaped) ? string.replacingOccurrences(of: "'", with: "''") : string
+      options.contains(.quoteEscaped) ? string.replacingOccurrences(of: "'", with: "''") : string
 
-    guard !sql.contains(.quoted) else {
+    guard !options.contains(.quoted) else {
       appendLiteral("'")
       appendLiteral(literal)
       appendLiteral("'")
@@ -31,11 +31,11 @@ extension String.StringInterpolation {
     appendLiteral(literal)
   }
 
-  mutating func appendInterpolation(_ number: UInt, sql: SQLStringOptions) {
-    _appendInterpolation(String(number), sql: sql)
+  mutating func appendInterpolation(_ number: UInt, options: SQLStringOptions = []) {
+    _appendInterpolation(String(number), options: options)
   }
 
-  mutating func appendInterpolation(_ string: String, sql: SQLStringOptions) {
-    _appendInterpolation(string, sql: sql)
+  mutating func appendInterpolation(_ string: String, options: SQLStringOptions = []) {
+    _appendInterpolation(string, options: options)
   }
 }
