@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct RowPlay<Song>: SQLRow where Song : SQLSelectID, Song: Hashable  {
+struct RowPlay<Song>: SQLRow where Song: SQLSelectID, Song: Hashable {
   let date: String
   let delta: Int
   let song: Song
