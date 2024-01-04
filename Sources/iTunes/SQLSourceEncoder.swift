@@ -12,8 +12,10 @@ extension Logger {
   static let duplicateArtist = Logger(subsystem: "sql", category: "duplicateArtist")
 }
 
+typealias SongRow = RowSong<RowArtist, RowAlbum, RowKind>
+
 extension Track {
-  fileprivate var rows: (song: RowSong, play: RowPlay<RowSong>?) {
+  fileprivate var rows: (song: SongRow, play: RowPlay<SongRow>?) {
     let song = rowSong(artist: rowArtist, album: rowAlbum, kind: rowKind)
     return (song: song, play: rowPlay(using: song))
   }
@@ -25,8 +27,8 @@ class SQLSourceEncoder {
   }
 
   fileprivate final class Encoder {
-    private var songRows = Set<RowSong>()
-    private var playRows = Set<RowPlay<RowSong>>()
+    private var songRows = Set<SongRow>()
+    private var playRows = Set<RowPlay<SongRow>>()
 
     fileprivate func encode(_ track: Track) {
       let rows = track.rows
