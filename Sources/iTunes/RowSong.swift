@@ -28,12 +28,12 @@ struct RowSong<
 
 extension RowSong: SQLSelectID {
   var selectID: String {
-    "(SELECT id FROM songs WHERE name = \(name.name, options:.safeQuoted) AND itunesid = \(itunesid, options: .quoted) AND artistid = \(artist.selectID) AND albumid = \(album.selectID) AND kindid = \(kind.selectID) AND tracknumber = \(trackNumber) AND year = \(year) AND size = \(size) AND duration = \(duration) AND dateadded = \(dateAdded, options: .quoted))"
+    "(SELECT id FROM songs WHERE name = \(sql: name.name, options:.safeQuoted) AND itunesid = \(sql: itunesid, options: .quoted) AND artistid = \(sql: artist.selectID) AND albumid = \(sql: album.selectID) AND kindid = \(sql: kind.selectID) AND tracknumber = \(sql: trackNumber) AND year = \(sql: year) AND size = \(sql: size) AND duration = \(sql: duration) AND dateadded = \(sql: dateAdded, options: .quoted))"
   }
 }
 
 extension RowSong: SQLInsert {
   var insert: String {
-    "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments) VALUES (\(name.name, options:.safeQuoted), \(name.sorted, options:.safeQuoted), \(itunesid, options: .quoted), \(artist.selectID), \(album.selectID), \(kind.selectID), \(composer, options:.safeQuoted), \(trackNumber), \(year), \(size), \(duration), \(dateAdded, options:.quoted), \(dateReleased, options:.quoted), \(dateModified, options:.quoted), \(comments, options:.safeQuoted));"
+    "INSERT INTO songs (name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments) VALUES (\(sql: name.name, options:.safeQuoted), \(sql: name.sorted, options:.safeQuoted), \(sql: itunesid, options: .quoted), \(sql: artist.selectID), \(sql: album.selectID), \(sql: kind.selectID), \(sql: composer, options:.safeQuoted), \(sql: trackNumber), \(sql: year), \(sql: size), \(sql: duration), \(sql: dateAdded, options:.quoted), \(sql: dateReleased, options:.quoted), \(sql: dateModified, options:.quoted), \(sql: comments, options:.safeQuoted));"
   }
 }

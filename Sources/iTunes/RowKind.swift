@@ -13,12 +13,12 @@ struct RowKind: SQLRow {
 
 extension RowKind: SQLSelectID {
   var selectID: String {
-    "(SELECT id FROM kinds WHERE name = \(kind, options:.safeQuoted))"
+    "(SELECT id FROM kinds WHERE name = \(sql: kind, options:.safeQuoted))"
   }
 }
 
 extension RowKind: SQLInsert {
   var insert: String {
-    "INSERT INTO kinds (name) VALUES (\(kind, options:.safeQuoted));"
+    "INSERT INTO kinds (name) VALUES (\(sql: kind, options:.safeQuoted));"
   }
 }

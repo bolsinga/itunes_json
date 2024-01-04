@@ -31,11 +31,19 @@ extension String.StringInterpolation {
     appendLiteral(literal)
   }
 
-  mutating func appendInterpolation(_ number: UInt, options: SQLStringOptions) {
+  mutating func appendInterpolation(sql number: UInt, options: SQLStringOptions = []) {
     appendSQLInterpolation(String(number), options: options)
   }
 
-  mutating func appendInterpolation(_ string: String, options: SQLStringOptions) {
+  mutating func appendInterpolation(sql number: Int, options: SQLStringOptions = []) {
+    appendSQLInterpolation(String(number), options: options)
+  }
+
+  mutating func appendInterpolation(sql number: UInt64, options: SQLStringOptions = []) {
+    appendSQLInterpolation(String(number), options: options)
+  }
+
+  mutating func appendInterpolation(sql string: String, options: SQLStringOptions = []) {
     appendSQLInterpolation(string, options: options)
   }
 }
