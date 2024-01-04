@@ -7,10 +7,10 @@
 
 import Foundation
 
-struct RowPlay<T>: SQLRow where T : SQLSelectID, T: Hashable  {
+struct RowPlay<Song>: SQLRow where Song : SQLSelectID, Song: Hashable  {
   let date: String
   let delta: Int
-  let song: T
+  let song: Song
 }
 
 extension RowPlay: SQLInsert {
