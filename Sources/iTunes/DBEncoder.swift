@@ -6,36 +6,12 @@
 //
 
 import Foundation
-import SQLite3
-
-enum DBError: Error {
-  case cannotOpen(String)
-}
 
 final class DBEncoder {
-  let handle: OpaquePointer
+  let db: Database
 
   init(file: URL) throws {
-    var handle: OpaquePointer?
-    let result = sqlite3_open_v2(
-      file.absoluteString, &handle, SQLITE_OPEN_URI | SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
-      nil)
-
-    guard let handle else {
-      throw DBError.cannotOpen("No handle")
-    }
-    self.handle = handle
-
-    guard result == SQLITE_OK else {
-      let code = sqlite3_errcode(handle)
-      let message = String(cString: sqlite3_errmsg(handle), encoding: .utf8) ?? "unknown"
-
-      throw DBError.cannotOpen("\(message) \(code)")
-    }
-  }
-
-  deinit {
-    sqlite3_close(handle)
+    self.db = try Database(file: file)
   }
 
   func encode(_ tracks: [Track]) async throws {
