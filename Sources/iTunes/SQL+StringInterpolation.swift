@@ -16,8 +16,15 @@ struct SQLStringOptions: OptionSet {
   static let safeQuoted: SQLStringOptions = [.quoted, .quoteEscaped]
 }
 
-extension String.StringInterpolation {
+extension DefaultStringInterpolation {
+  static var SQLBindable: Bool = false
+
   mutating private func appendSQLInterpolation(_ string: String, options: SQLStringOptions) {
+    guard !Self.SQLBindable else {
+      appendLiteral("?")
+      return
+    }
+
     let literal =
       options.contains(.quoteEscaped) ? string.replacingOccurrences(of: "'", with: "''") : string
 
