@@ -10,6 +10,7 @@ import SQLite3
 
 enum DatabaseError: Error {
   case cannotOpen(String)
+  case cannotExecute(String)
 }
 
 extension OpaquePointer {
@@ -34,4 +35,9 @@ actor Database {
   }
 
   deinit { sqlite3_close(handle) }
+
+  func execute(_ string: String) throws {
+    let result = sqlite3_exec(handle, string, nil, nil, nil)
+    guard result == SQLITE_OK else { throw DatabaseError.cannotExecute(handle.sqlError) }
+  }
 }
