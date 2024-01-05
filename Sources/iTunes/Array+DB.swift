@@ -8,8 +8,8 @@
 import Foundation
 
 extension Array where Element == Track {
-  public func database(file: URL) throws {
+  public func database(file: URL) async throws {
     let encoder = try DBEncoder(file: file)
-    try encoder.encode(self)
+    try await encoder.encode(self)
   }
 }
