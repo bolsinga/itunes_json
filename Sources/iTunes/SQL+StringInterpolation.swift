@@ -17,7 +17,7 @@ struct SQLStringOptions: OptionSet {
 }
 
 extension String.StringInterpolation {
-  mutating func _appendInterpolation(_ string: String, options: SQLStringOptions) {
+  mutating private func appendSQLInterpolation(_ string: String, options: SQLStringOptions) {
     let literal =
       options.contains(.quoteEscaped) ? string.replacingOccurrences(of: "'", with: "''") : string
 
@@ -32,10 +32,10 @@ extension String.StringInterpolation {
   }
 
   mutating func appendInterpolation(_ number: UInt, options: SQLStringOptions) {
-    _appendInterpolation(String(number), options: options)
+    appendSQLInterpolation(String(number), options: options)
   }
 
   mutating func appendInterpolation(_ string: String, options: SQLStringOptions) {
-    _appendInterpolation(string, options: options)
+    appendSQLInterpolation(string, options: options)
   }
 }
