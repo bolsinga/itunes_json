@@ -6,20 +6,6 @@
 //
 
 import Foundation
-import os
-
-extension Logger {
-  static let duplicateArtist = Logger(subsystem: "sql", category: "duplicateArtist")
-}
-
-typealias SongRow = RowSong<RowArtist, RowAlbum, RowKind>
-
-extension Track {
-  fileprivate var rows: (song: SongRow, play: RowPlay<SongRow>?) {
-    let song = rowSong(artist: rowArtist, album: rowAlbum, kind: rowKind)
-    return (song: song, play: rowPlay(using: song))
-  }
-}
 
 class SQLSourceEncoder {
   enum SQLSourceEncoderError: Error {
@@ -27,41 +13,35 @@ class SQLSourceEncoder {
   }
 
   fileprivate final class Encoder {
-    private var songRows = Set<SongRow>()
-    private var playRows = Set<RowPlay<SongRow>>()
+    private var sqlRowEncoder = SQLRowEncoder()
 
     fileprivate func encode(_ track: Track) {
-      let rows = track.rows
-      songRows.insert(rows.song)
-      if let play = rows.play {
-        playRows.insert(play)
-      }
+      sqlRowEncoder.encode(track)
     }
 
     private var kindStatements: (table: String, statements: [String]) {
-      (Track.KindTable, Array(Set(Array(songRows).map { $0.kind })).map { $0.insert })
+      let rows = sqlRowEncoder.kindRows
+      return (rows.table, rows.rows.map { $0.insert })
     }
 
     private var artistStatements: (table: String, statements: [String]) {
-      let artistRows = Array(Set(Array(songRows).map { $0.artist }))
-
-      artistRows.mismatchedSortableNames.forEach {
-        Logger.duplicateArtist.error("\(String(describing: $0), privacy: .public)")
-      }
-
-      return (Track.ArtistTable, artistRows.map { $0.insert })
+      let rows = sqlRowEncoder.artistRows
+      return (rows.table, rows.rows.map { $0.insert })
     }
 
     private var albumStatements: (table: String, statements: [String]) {
-      (Track.AlbumTable, Array(Set(Array(songRows).map { $0.album })).map { $0.insert })
+      let rows = sqlRowEncoder.albumRows
+      return (rows.table, rows.rows.map { $0.insert })
     }
 
     private var songStatements: (table: String, statements: [String]) {
-      (Track.SongTable, Array(songRows).map { $0.insert })
+      let rows = sqlRowEncoder.songRows
+      return (rows.table, rows.rows.map { $0.insert })
     }
 
     private var playStatements: (table: String, statements: [String]) {
-      (Track.PlaysTable, Array(playRows).map { $0.insert })
+      let rows = sqlRowEncoder.playRows
+      return (rows.table, rows.rows.map { $0.insert })
     }
 
     private var tableStatements: [(table: String, statements: [String])] {
