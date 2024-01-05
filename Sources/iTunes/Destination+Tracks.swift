@@ -12,7 +12,7 @@ enum DataExportError: Error {
 }
 
 extension Destination {
-  public func emit(_ tracks: [Track], outputFile: URL?) throws {
+  public func emit(_ tracks: [Track], outputFile: URL?) async throws {
     guard tracks.count > 0 else {
       throw DataExportError.noTracks
     }
@@ -31,7 +31,7 @@ extension Destination {
         preconditionFailure("Should have been caught during ParasableArguments.validate().")
       }
 
-      try tracks.database(file: outputFile)
+      try await tracks.database(file: outputFile)
     }
   }
 }

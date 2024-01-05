@@ -82,6 +82,6 @@ struct Program: AsyncParsableCommand {
       return t
     }()
 
-    try destination.emit(tracks, outputFile: outputFile)
+    try await destination.emit(tracks, outputFile: outputFile)
   }
 }

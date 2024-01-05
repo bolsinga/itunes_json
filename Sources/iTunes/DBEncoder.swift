@@ -38,7 +38,7 @@ final class DBEncoder {
     sqlite3_close(handle)
   }
 
-  func encode(_ tracks: [Track]) throws {
+  func encode(_ tracks: [Track]) async throws {
 
   }
 }
