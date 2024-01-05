@@ -15,15 +15,41 @@ final class DBEncoder {
     self.db = try Database(file: file)
   }
 
-  private func emitKinds() async throws {
-    let rows = sqlRowEncoder.kindRows
-    guard !rows.rows.isEmpty else { return }
+  private func emit<T: SQLBindableInsert>(table: String, rows: [T]) async throws -> [T: Int64] {
+    guard !rows.isEmpty else { return [:] }
 
-    try await db.execute(rows.table)
+    try await db.execute(table)
+
+    let statement = try await db.prepare(T.insertBinding)
+
+    var lookup = [T: Int64]()
+    for row in rows {
+      try row.bindInsert(db: db, statement: statement)
+      try statement.execute(db: db)
+      lookup[row] = await db.lastID
+    }
+    return lookup
+  }
+
+  private func emitKinds() async throws -> [RowKind: Int64] {
+    let rows = sqlRowEncoder.kindRows
+    return try await emit(table: rows.table, rows: rows.rows)
+  }
+
+  private func emitArtists() async throws -> [RowArtist: Int64] {
+    let rows = sqlRowEncoder.artistRows
+    return try await emit(table: rows.table, rows: rows.rows)
+  }
+
+  private func emitAlbums() async throws -> [RowAlbum: Int64] {
+    let rows = sqlRowEncoder.albumRows
+    return try await emit(table: rows.table, rows: rows.rows)
   }
 
   private func emit() async throws {
-    try await emitKinds()
+    let kindLookup = try await emitKinds()
+    let artistLookup = try await emitArtists()
+    let albumLookup = try await emitAlbums()
   }
 
   func encode(_ tracks: [Track]) async throws {
