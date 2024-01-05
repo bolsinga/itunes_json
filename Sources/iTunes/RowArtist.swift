@@ -17,12 +17,12 @@ struct RowArtist: SQLRow {
 
 extension RowArtist: SQLSelectID {
   var selectID: String {
-    "(SELECT id FROM artists WHERE name = \(name.name, sql:.quoted))"
+    "(SELECT id FROM artists WHERE name = \(name.name, sql:.safeQuoted))"
   }
 }
 
 extension RowArtist: SQLInsert {
   var insert: String {
-    "INSERT INTO artists (name, sortname) VALUES (\(name.name, sql:.quoted), \(name.sorted, sql:.quoted));"
+    "INSERT INTO artists (name, sortname) VALUES (\(name.name, sql:.safeQuoted), \(name.sorted, sql:.safeQuoted));"
   }
 }
