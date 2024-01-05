@@ -17,12 +17,12 @@ struct RowAlbum: SQLRow {
 
 extension RowAlbum: SQLSelectID {
   var selectID: String {
-    "(SELECT id FROM albums WHERE name = \(name.name, sql:.quoted) AND trackcount = \(trackCount) AND disccount = \(discCount) AND discnumber = \(discNumber) AND compilation = \(compilation))"
+    "(SELECT id FROM albums WHERE name = \(name.name, sql:.safeQuoted) AND trackcount = \(trackCount) AND disccount = \(discCount) AND discnumber = \(discNumber) AND compilation = \(compilation))"
   }
 }
 
 extension RowAlbum: SQLInsert {
   var insert: String {
-    "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES (\(name.name, sql:.quoted), \(name.sorted, sql:.quoted), \(trackCount), \(discCount), \(discNumber), \(compilation));"
+    "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES (\(name.name, sql:.safeQuoted), \(name.sorted, sql:.safeQuoted), \(trackCount), \(discCount), \(discNumber), \(compilation));"
   }
 }

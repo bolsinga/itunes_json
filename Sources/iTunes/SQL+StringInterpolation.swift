@@ -11,7 +11,9 @@ struct SQLStringOptions: OptionSet {
   let rawValue: Int
 
   static let quoted = SQLStringOptions(rawValue: 1 << 0)
-  fileprivate static let quoteEscaped = SQLStringOptions(rawValue: 1 << 1)
+  static let quoteEscaped = SQLStringOptions(rawValue: 1 << 1)
+
+  static let safeQuoted: SQLStringOptions = [.quoted, .quoteEscaped]
 }
 
 extension String.StringInterpolation {
@@ -34,6 +36,6 @@ extension String.StringInterpolation {
   }
 
   mutating func appendInterpolation(_ string: String, sql: SQLStringOptions) {
-    _appendInterpolation(string, sql: sql.union(.quoteEscaped))
+    _appendInterpolation(string, sql: sql)
   }
 }
