@@ -15,6 +15,6 @@ struct RowPlay<Song>: SQLRow where Song: SQLSelectID, Song: Hashable {
 
 extension RowPlay: SQLInsert {
   var insert: String {
-    "INSERT INTO plays (songid, date, delta) VALUES (\(song.selectID), \(date, sql:.quoted), \(delta));"
+    "INSERT INTO plays (songid, date, delta) VALUES (\(song.selectID), \(date, options:.quoted), \(delta));"
   }
 }
