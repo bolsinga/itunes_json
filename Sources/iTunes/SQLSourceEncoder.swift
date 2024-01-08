@@ -13,34 +13,34 @@ class SQLSourceEncoder {
   }
 
   fileprivate final class Encoder {
-    private var sqlRowEncoder = SQLRowEncoder()
+    private var rowEncoder = TrackRowEncoder()
 
     fileprivate func encode(_ track: Track) {
-      sqlRowEncoder.encode(track)
+      rowEncoder.encode(track)
     }
 
     private var kindStatements: (table: String, statements: [String]) {
-      let rows = sqlRowEncoder.kindRows
+      let rows = rowEncoder.kindRows
       return (rows.table, rows.rows.map { $0.insert })
     }
 
     private var artistStatements: (table: String, statements: [String]) {
-      let rows = sqlRowEncoder.artistRows
+      let rows = rowEncoder.artistRows
       return (rows.table, rows.rows.map { $0.insert })
     }
 
     private var albumStatements: (table: String, statements: [String]) {
-      let rows = sqlRowEncoder.albumRows
+      let rows = rowEncoder.albumRows
       return (rows.table, rows.rows.map { $0.insert })
     }
 
     private var songStatements: (table: String, statements: [String]) {
-      let rows = sqlRowEncoder.songRows
+      let rows = rowEncoder.songRows
       return (rows.table, rows.rows.map { $0.insert })
     }
 
     private var playStatements: (table: String, statements: [String]) {
-      let rows = sqlRowEncoder.playRows
+      let rows = rowEncoder.playRows
       return (rows.table, rows.rows.map { $0.insert })
     }
 

@@ -1,5 +1,5 @@
 //
-//  SQLRowEncoder.swift
+//  TrackRowEncoder.swift
 //
 //
 //  Created by Greg Bolsinga on 1/4/24.
@@ -21,7 +21,7 @@ extension Track {
   }
 }
 
-final class SQLRowEncoder {
+final class TrackRowEncoder {
   private var songs = Set<SongRow>()
   private var plays = Set<RowPlay<SongRow>>()
 
