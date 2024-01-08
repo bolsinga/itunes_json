@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct RowArtist: SQLRow {
+struct RowArtist: TrackRowItem {
   let name: SortableName
 
   internal var nameOnly: String {

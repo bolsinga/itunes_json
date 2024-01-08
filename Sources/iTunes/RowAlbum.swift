@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct RowAlbum: SQLRow {
+struct RowAlbum: TrackRowItem {
   let name: SortableName
   let trackCount: Int
   let discCount: Int
