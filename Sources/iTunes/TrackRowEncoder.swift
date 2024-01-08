@@ -32,7 +32,7 @@ final class TrackRowEncoder {
   }
 
   var kindRows: (table: String, rows: [RowKind]) {
-    (Track.KindTable, Array(Set(Array(songs).map { $0.kind })))
+    (Track.KindTable, Array(Set(Array(songs).map { $0.kind })).sorted(by: { $0.kind < $1.kind }))
   }
 
   var artistRows: (table: String, rows: [RowArtist]) {
@@ -42,18 +42,18 @@ final class TrackRowEncoder {
       Logger.duplicateArtist.error("\(String(describing: $0), privacy: .public)")
     }
 
-    return (Track.ArtistTable, artistRows)
+    return (Track.ArtistTable, artistRows.sorted(by: { $0.name < $1.name }))
   }
 
   var albumRows: (table: String, rows: [RowAlbum]) {
-    (Track.AlbumTable, Array(Set(Array(songs).map { $0.album })))
+    (Track.AlbumTable, Array(Set(Array(songs).map { $0.album })).sorted(by: { $0.name < $1.name }))
   }
 
   var songRows: (table: String, rows: [TrackRow.SongRow]) {
-    (Track.SongTable, Array(songs))
+    (Track.SongTable, Array(songs).sorted(by: { $0.name < $1.name }))
   }
 
   var playRows: (table: String, rows: [RowPlay<TrackRow.SongRow>]) {
-    (Track.PlaysTable, Array(plays))
+    (Track.PlaysTable, Array(plays).sorted(by: { $0.date < $1.date }))
   }
 }

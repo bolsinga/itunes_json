@@ -16,3 +16,13 @@ struct SortableName: Hashable {
     self.sorted = (name != sorted) ? sorted : ""
   }
 }
+
+extension SortableName: Comparable {
+  private var sort: String {
+    !sorted.isEmpty ? sorted : name
+  }
+
+  static func < (lhs: SortableName, rhs: SortableName) -> Bool {
+    lhs.sort < rhs.sort
+  }
+}
