@@ -13,7 +13,7 @@ struct RowPlay<Song>: TrackRowItem where Song: SQLSelectID, Song: Hashable {
   let song: Song
 }
 
-extension RowPlay: SQLInsert {
+extension RowPlay {
   var insert: String {
     "INSERT INTO plays (songid, date, delta) VALUES (\(sql: song.selectID), \(sql: date, options:.quoted), \(sql: delta));"
   }
