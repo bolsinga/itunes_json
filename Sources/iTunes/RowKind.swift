@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct RowKind: SQLRow {
+struct RowKind: TrackRowItem {
   let kind: String
 }
 

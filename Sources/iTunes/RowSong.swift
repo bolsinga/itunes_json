@@ -9,7 +9,7 @@ import Foundation
 
 struct RowSong<
   Artist: SQLSelectID & Hashable, Album: SQLSelectID & Hashable, Kind: SQLSelectID & Hashable
->: SQLRow {
+>: TrackRowItem {
   let name: SortableName
   let itunesid: UInt
   let composer: String

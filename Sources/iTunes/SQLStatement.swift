@@ -1,5 +1,5 @@
 //
-//  SQLRow.swift
+//  SQLStatement.swift
 //
 //
 //  Created by Greg Bolsinga on 12/30/23.
@@ -16,5 +16,3 @@ protocol SQLSelectID: SQLStatement {
 protocol SQLInsert: SQLStatement {
   var insert: String { get }
 }
-
-protocol SQLRow: Hashable {}
