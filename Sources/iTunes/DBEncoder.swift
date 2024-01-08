@@ -9,7 +9,7 @@ import Foundation
 
 final class DBEncoder {
   private let db: Database
-  private let sqlRowEncoder = SQLRowEncoder()
+  private let rowEncoder = TrackRowEncoder()
 
   init(file: URL) throws {
     self.db = try Database(file: file)
@@ -32,17 +32,17 @@ final class DBEncoder {
   }
 
   private func emitKinds() async throws -> [RowKind: Int64] {
-    let rows = sqlRowEncoder.kindRows
+    let rows = rowEncoder.kindRows
     return try await emit(table: rows.table, rows: rows.rows)
   }
 
   private func emitArtists() async throws -> [RowArtist: Int64] {
-    let rows = sqlRowEncoder.artistRows
+    let rows = rowEncoder.artistRows
     return try await emit(table: rows.table, rows: rows.rows)
   }
 
   private func emitAlbums() async throws -> [RowAlbum: Int64] {
-    let rows = sqlRowEncoder.albumRows
+    let rows = rowEncoder.albumRows
     return try await emit(table: rows.table, rows: rows.rows)
   }
 
@@ -53,7 +53,7 @@ final class DBEncoder {
   }
 
   func encode(_ tracks: [Track]) async throws {
-    tracks.filter { $0.isSQLEncodable }.forEach { sqlRowEncoder.encode($0) }
+    tracks.filter { $0.isSQLEncodable }.forEach { rowEncoder.encode($0) }
     try await emit()
   }
 }
