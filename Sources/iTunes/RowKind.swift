@@ -17,7 +17,7 @@ extension RowKind: SQLSelectID {
   }
 }
 
-extension RowKind: SQLInsert {
+extension RowKind {
   var insert: String {
     "INSERT INTO kinds (name) VALUES (\(sql: kind, options:.safeQuoted));"
   }

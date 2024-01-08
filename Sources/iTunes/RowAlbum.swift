@@ -21,7 +21,7 @@ extension RowAlbum: SQLSelectID {
   }
 }
 
-extension RowAlbum: SQLInsert {
+extension RowAlbum {
   var insert: String {
     "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES (\(sql: name.name, options:.safeQuoted), \(sql: name.sorted, options:.safeQuoted), \(sql: trackCount), \(sql: discCount), \(sql: discNumber), \(sql: compilation));"
   }

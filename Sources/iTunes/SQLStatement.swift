@@ -12,7 +12,3 @@ protocol SQLStatement {}
 protocol SQLSelectID: SQLStatement {
   var selectID: String { get }
 }
-
-protocol SQLInsert: SQLStatement {
-  var insert: String { get }
-}
