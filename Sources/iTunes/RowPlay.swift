@@ -7,14 +7,13 @@
 
 import Foundation
 
-struct RowPlay<Song>: TrackRowItem where Song: SQLSelectID, Song: Hashable {
+struct RowPlay: TrackRowItem {
   let date: String
   let delta: Int
-  let song: Song
 }
 
 extension RowPlay {
-  var insert: String {
-    "INSERT INTO plays (songid, date, delta) VALUES (\(sql: song.selectID), \(sql: date, options:.quoted), \(sql: delta));"
+  func insert(songid: String) -> String {
+    "INSERT INTO plays (songid, date, delta) VALUES (\(sql: songid), \(sql: date, options:.quoted), \(sql: delta));"
   }
 }

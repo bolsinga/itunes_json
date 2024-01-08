@@ -41,7 +41,7 @@ class SQLSourceEncoder {
 
     private var playStatements: (table: String, statements: [String]) {
       let rows = rowEncoder.playRows
-      return (rows.table, rows.rows.map { $0.insert })
+      return (rows.table, rows.rows.map { $0.0.insert(songid: $0.1.selectID) })
     }
 
     private var tableStatements: [(table: String, statements: [String])] {
