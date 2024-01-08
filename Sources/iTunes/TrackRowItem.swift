@@ -7,4 +7,4 @@
 
 import Foundation
 
-protocol TrackRowItem : Hashable {}
+protocol TrackRowItem: Hashable {}

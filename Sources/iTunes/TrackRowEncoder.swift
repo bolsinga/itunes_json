@@ -12,23 +12,21 @@ extension Logger {
   static let duplicateArtist = Logger(subsystem: "sql", category: "duplicateArtist")
 }
 
-typealias SongRow = RowSong<RowArtist, RowAlbum, RowKind>
-
 extension Track {
-  fileprivate var rows: (song: SongRow, play: RowPlay<SongRow>?) {
+  fileprivate var trackRow: TrackRow {
     let song = rowSong(artist: rowArtist, album: rowAlbum, kind: rowKind)
-    return (song: song, play: rowPlay(using: song))
+    return TrackRow(song: song, play: rowPlay(using: song))
   }
 }
 
 final class TrackRowEncoder {
-  private var songs = Set<SongRow>()
-  private var plays = Set<RowPlay<SongRow>>()
+  private var songs = Set<TrackRow.SongRow>()
+  private var plays = Set<RowPlay<TrackRow.SongRow>>()
 
   func encode(_ track: Track) {
-    let rows = track.rows
-    songs.insert(rows.song)
-    if let play = rows.play {
+    let trackRow = track.trackRow
+    songs.insert(trackRow.song)
+    if let play = trackRow.play {
       plays.insert(play)
     }
   }
@@ -51,11 +49,11 @@ final class TrackRowEncoder {
     (Track.AlbumTable, Array(Set(Array(songs).map { $0.album })))
   }
 
-  var songRows: (table: String, rows: [SongRow]) {
+  var songRows: (table: String, rows: [TrackRow.SongRow]) {
     (Track.SongTable, Array(songs))
   }
 
-  var playRows: (table: String, rows: [RowPlay<SongRow>]) {
+  var playRows: (table: String, rows: [RowPlay<TrackRow.SongRow>]) {
     (Track.PlaysTable, Array(plays))
   }
 }
