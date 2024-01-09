@@ -8,10 +8,9 @@
 import Foundation
 
 struct TrackRow {
-  typealias SongRow = RowSong<RowArtist>
-
   let kind: RowKind
   let album: RowAlbum
-  let song: SongRow
+  let artist: RowArtist
+  let song: RowSong
   let play: RowPlay?
 }
