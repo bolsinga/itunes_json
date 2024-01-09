@@ -11,5 +11,5 @@ struct TrackRow {
   typealias SongRow = RowSong<RowArtist, RowAlbum, RowKind>
 
   let song: SongRow
-  let play: RowPlay<SongRow>?
+  let play: RowPlay?
 }

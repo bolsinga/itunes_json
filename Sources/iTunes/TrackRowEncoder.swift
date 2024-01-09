@@ -15,20 +15,19 @@ extension Logger {
 extension Track {
   fileprivate var trackRow: TrackRow {
     let song = rowSong(artist: rowArtist, album: rowAlbum, kind: rowKind)
-    return TrackRow(song: song, play: rowPlay(using: song))
+    return TrackRow(song: song, play: rowPlay)
   }
 }
 
 final class TrackRowEncoder {
+  private var rows = [TrackRow]()
   private var songs = Set<TrackRow.SongRow>()
-  private var plays = Set<RowPlay<TrackRow.SongRow>>()
 
   func encode(_ track: Track) {
     let trackRow = track.trackRow
+    rows.append(trackRow)
+
     songs.insert(trackRow.song)
-    if let play = trackRow.play {
-      plays.insert(play)
-    }
   }
 
   var kindRows: (table: String, rows: [RowKind]) {
@@ -53,7 +52,7 @@ final class TrackRowEncoder {
     (Track.SongTable, Array(songs).sorted(by: { $0.name < $1.name }))
   }
 
-  var playRows: (table: String, rows: [RowPlay<TrackRow.SongRow>]) {
-    (Track.PlaysTable, Array(plays).sorted(by: { $0.date < $1.date }))
+  var playRows: (table: String, rows: [TrackRow]) {
+    (Track.PlaysTable, rows.filter { $0.play != nil }.sorted(by: { $0.play!.date < $1.play!.date }))
   }
 }

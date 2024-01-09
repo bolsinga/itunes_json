@@ -22,10 +22,10 @@ extension Track {
     songPlayCount > 0 || !datePlayedISO8601.isEmpty
   }
 
-  func rowPlay<Song: SQLSelectID>(using song: Song) -> RowPlay<Song>? {
+  var rowPlay: RowPlay? {
     // Some tracks have play dates, but not play counts. Until that is repaired this table has a CHECK(delta >= 0) constraint.
     guard hasPlayed else { return nil }
 
-    return RowPlay(date: datePlayedISO8601, delta: songPlayCount, song: song)
+    return RowPlay(date: datePlayedISO8601, delta: songPlayCount)
   }
 }
