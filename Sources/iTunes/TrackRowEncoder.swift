@@ -52,12 +52,7 @@ final class TrackRowEncoder {
     (Track.SongTable, Array(songs).sorted(by: { $0.name < $1.name }))
   }
 
-  var playRows: (table: String, rows: [(RowPlay, TrackRow.SongRow)]) {
-    (
-      Track.PlaysTable,
-      rows.filter { $0.play != nil }.map { ($0.play!, $0.song) }.sorted(by: {
-        $0.0.date < $1.0.date
-      })
-    )
+  var playRows: (table: String, rows: [TrackRow]) {
+    (Track.PlaysTable, rows.filter { $0.play != nil }.sorted(by: { $0.play!.date < $1.play!.date }))
   }
 }
