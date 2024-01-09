@@ -14,8 +14,9 @@ extension Logger {
 
 extension Track {
   fileprivate var trackRow: TrackRow {
-    let song = rowSong(artist: rowArtist, album: rowAlbum, kind: rowKind)
-    return TrackRow(song: song, play: rowPlay)
+    let kind = rowKind
+    let song = rowSong(artist: rowArtist, album: rowAlbum)
+    return TrackRow(kind: kind, song: song, play: rowPlay)
   }
 }
 
@@ -31,7 +32,7 @@ final class TrackRowEncoder {
   }
 
   var kindRows: (table: String, rows: [RowKind]) {
-    (Track.KindTable, Array(Set(Array(songs).map { $0.kind })).sorted(by: { $0.kind < $1.kind }))
+    (Track.KindTable, Array(Set(rows.map { $0.kind })).sorted(by: { $0.kind < $1.kind }))
   }
 
   var artistRows: (table: String, rows: [RowArtist]) {
@@ -48,8 +49,8 @@ final class TrackRowEncoder {
     (Track.AlbumTable, Array(Set(Array(songs).map { $0.album })).sorted(by: { $0.name < $1.name }))
   }
 
-  var songRows: (table: String, rows: [TrackRow.SongRow]) {
-    (Track.SongTable, Array(songs).sorted(by: { $0.name < $1.name }))
+  var songRows: (table: String, rows: [TrackRow]) {
+    (Track.SongTable, rows.sorted(by: { $0.song.name < $1.song.name }))
   }
 
   var playRows: (table: String, rows: [TrackRow]) {
