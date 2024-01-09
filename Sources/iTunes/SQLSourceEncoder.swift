@@ -36,12 +36,15 @@ class SQLSourceEncoder {
 
     private var songStatements: (table: String, statements: [String]) {
       let rows = rowEncoder.songRows
-      return (rows.table, rows.rows.map { $0.insert })
+      return (rows.table, rows.rows.map { $0.song.insert(kindID: $0.kind.selectID) })
     }
 
     private var playStatements: (table: String, statements: [String]) {
       let rows = rowEncoder.playRows
-      return (rows.table, rows.rows.map { $0.play!.insert(songid: $0.song.selectID) })
+      return (
+        rows.table,
+        rows.rows.map { $0.play!.insert(songid: $0.song.selectID(kindID: $0.kind.selectID)) }
+      )
     }
 
     private var tableStatements: [(table: String, statements: [String])] {
