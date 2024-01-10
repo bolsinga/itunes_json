@@ -15,16 +15,20 @@ final class DBEncoder {
     self.db = try Database(file: file)
   }
 
-  private func emit<T: SQLBindableInsert>(table: String, rows: [T]) async throws -> [T: Int64] {
+  private func emit<T: SQLBindableInsert>(table: String, rows: [T], ids: [[Int64]] = [])
+    async throws -> [T: Int64]
+  {
     guard !rows.isEmpty else { return [:] }
 
     try await db.execute(table)
 
     let statement = try await db.prepare(T.insertBinding)
 
+    let ids = ids.isEmpty ? Array(repeating: [], count: rows.count) : ids
+
     var lookup = [T: Int64]()
-    for row in rows {
-      try row.bindInsert(db: db, statement: statement)
+    for (row, ids) in zip(rows, ids) {
+      try row.bindInsert(db: db, statement: statement, ids: ids)
       try statement.execute(db: db)
       lookup[row] = await db.lastID
     }

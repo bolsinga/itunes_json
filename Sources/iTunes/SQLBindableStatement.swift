@@ -18,8 +18,12 @@ extension SQLBindableStatement {
   }
 }
 
+enum SQLBindingError: Error {
+  case noIDsRequired
+}
+
 protocol SQLBindableInsert: SQLBindableStatement {
   static var insertBinding: String { get }
 
-  func bindInsert(db: Database, statement: Database.Statement) throws
+  func bindInsert(db: Database, statement: Database.Statement, ids: [Int64]) throws
 }

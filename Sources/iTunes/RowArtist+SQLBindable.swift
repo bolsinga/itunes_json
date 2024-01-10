@@ -10,7 +10,9 @@ import Foundation
 extension RowArtist: SQLBindableInsert {
   static var insertBinding: String { Self.bound { RowArtist(name: SortableName()).insert } }
 
-  func bindInsert(db: Database, statement: Database.Statement) throws {
+  func bindInsert(db: Database, statement: Database.Statement, ids: [Int64]) throws {
+    guard ids.isEmpty else { throw SQLBindingError.noIDsRequired }
+
     try statement.bind(db: db, count: 2) { index in
       switch index {
       case 1:
