@@ -67,11 +67,11 @@ extension Track {
     return kind
   }
 
-  func rowSong<Artist: SQLSelectID>(artist: Artist) -> RowSong<Artist> {
+  var rowSong: RowSong {
     RowSong(
       name: songName, itunesid: persistentID, composer: composer ?? "",
       trackNumber: songTrackNumber, year: songYear, size: songSize, duration: songDuration,
       dateAdded: dateAddedISO8601, dateReleased: dateReleasedISO8601,
-      dateModified: dateModifiedISO8601, comments: comments ?? "", artist: artist)
+      dateModified: dateModifiedISO8601, comments: comments ?? "")
   }
 }

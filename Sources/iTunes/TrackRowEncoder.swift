@@ -14,21 +14,15 @@ extension Logger {
 
 extension Track {
   fileprivate var trackRow: TrackRow {
-    let kind = rowKind
-    let song = rowSong(artist: rowArtist)
-    return TrackRow(kind: kind, album: rowAlbum, song: song, play: rowPlay)
+    TrackRow(kind: rowKind, album: rowAlbum, artist: rowArtist, song: rowSong, play: rowPlay)
   }
 }
 
 final class TrackRowEncoder {
   private var rows = [TrackRow]()
-  private var songs = Set<TrackRow.SongRow>()
 
   func encode(_ track: Track) {
-    let trackRow = track.trackRow
-    rows.append(trackRow)
-
-    songs.insert(trackRow.song)
+    rows.append(track.trackRow)
   }
 
   var kindRows: (table: String, rows: [RowKind]) {
@@ -36,7 +30,7 @@ final class TrackRowEncoder {
   }
 
   var artistRows: (table: String, rows: [RowArtist]) {
-    let artistRows = Array(Set(Array(songs).map { $0.artist }))
+    let artistRows = Array(Set(rows.map { $0.artist }))
 
     artistRows.mismatchedSortableNames.forEach {
       Logger.duplicateArtist.error("\(String(describing: $0), privacy: .public)")
