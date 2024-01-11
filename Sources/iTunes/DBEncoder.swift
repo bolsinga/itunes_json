@@ -9,10 +9,11 @@ import Foundation
 
 final class DBEncoder {
   private let db: Database
-  private let rowEncoder = TrackRowEncoder()
+  private let rowEncoder: TrackRowEncoder
 
-  init(file: URL) throws {
+  init(file: URL, minimumCapacity: Int) throws {
     self.db = try Database(file: file)
+    self.rowEncoder = TrackRowEncoder(minimumCapacity: minimumCapacity)
   }
 
   private func emit<T: SQLBindableInsert>(table: String, rows: [T], ids: [[Int64]] = [])

@@ -13,7 +13,11 @@ class SQLSourceEncoder {
   }
 
   fileprivate final class Encoder {
-    private var rowEncoder = TrackRowEncoder()
+    private let rowEncoder: TrackRowEncoder
+
+    init(minimumCapacity: Int) {
+      self.rowEncoder = TrackRowEncoder(minimumCapacity: minimumCapacity)
+    }
 
     fileprivate func encode(_ track: Track) {
       rowEncoder.encode(track)
@@ -73,7 +77,7 @@ class SQLSourceEncoder {
   }
 
   func encode(_ tracks: [Track]) throws -> String {
-    let encoder = Encoder()
+    let encoder = Encoder(minimumCapacity: tracks.count)
     tracks.filter { $0.isSQLEncodable }.forEach { encoder.encode($0) }
     return encoder.sqlStatements
   }

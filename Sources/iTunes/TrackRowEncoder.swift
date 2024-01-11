@@ -21,6 +21,10 @@ extension Track {
 final class TrackRowEncoder {
   private var rows = [TrackRow]()
 
+  init(minimumCapacity: Int) {
+    self.rows.reserveCapacity(minimumCapacity)
+  }
+
   func encode(_ track: Track) {
     rows.append(track.trackRow)
   }
