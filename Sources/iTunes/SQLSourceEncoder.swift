@@ -40,7 +40,7 @@ class SQLSourceEncoder {
         rows.table,
         rows.rows.map {
           $0.song.insert(
-            kindID: $0.kind.selectID, albumID: $0.album.selectID, artistID: $0.artist.selectID)
+            artistID: $0.artist.selectID, albumID: $0.album.selectID, kindID: $0.kind.selectID)
         }
       )
     }
@@ -52,8 +52,7 @@ class SQLSourceEncoder {
         rows.rows.map {
           $0.play!.insert(
             songid: $0.song.selectID(
-              kindID: $0.kind.selectID, albumID: $0.album.selectID,
-              artistID: $0.artist.selectID))
+              artistID: $0.artist.selectID, albumID: $0.album.selectID, kindID: $0.kind.selectID))
         }
       )
     }
