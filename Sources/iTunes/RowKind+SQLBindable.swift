@@ -10,7 +10,9 @@ import Foundation
 extension RowKind: SQLBindableInsert {
   static var insertBinding: String { Self.bound { RowKind(kind: "").insert } }
 
-  func bindInsert(db: Database, statement: Database.Statement) throws {
+  func bindInsert(db: Database, statement: Database.Statement, ids: [Int64]) throws {
+    guard ids.isEmpty else { throw SQLBindingError.noIDsRequired }
+
     try statement.bind(db: db, count: 1) { _ in
       Database.Value.string(self.kind)
     }

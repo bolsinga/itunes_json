@@ -15,7 +15,9 @@ extension RowAlbum: SQLBindableInsert {
     }
   }
 
-  func bindInsert(db: Database, statement: Database.Statement) throws {
+  func bindInsert(db: Database, statement: Database.Statement, ids: [Int64]) throws {
+    guard ids.isEmpty else { throw SQLBindingError.noIDsRequired }
+
     try statement.bind(db: db, count: 6) { index in
       switch index {
       case 1:
