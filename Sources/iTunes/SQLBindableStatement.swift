@@ -20,6 +20,7 @@ extension SQLBindableStatement {
 
 enum SQLBindingError: Error {
   case noIDsRequired
+  case iDsRequired
 }
 
 protocol SQLBindableInsert: SQLBindableStatement {
