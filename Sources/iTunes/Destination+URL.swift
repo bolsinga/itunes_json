@@ -8,11 +8,15 @@
 import Foundation
 
 extension Destination {
-  public func outputFile(using directory: URL) -> URL? {
+  fileprivate var defaultName: String {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy-MM-dd"
     let dateString = dateFormatter.string(from: Date())
+    return "iTunes-\(dateString)"
+  }
 
-    return directory.appending(path: "iTunes-\(dateString).\(self.filenameExtension)")
+  public func outputFile(using directory: URL, name: String? = nil) -> URL? {
+    let name = name ?? defaultName
+    return directory.appending(path: "\(name).\(self.filenameExtension)")
   }
 }
