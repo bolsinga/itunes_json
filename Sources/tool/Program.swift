@@ -16,7 +16,7 @@ struct Program: AsyncParsableCommand {
   /// Optional Output Directory for output file.
   @Option(
     help:
-      "The path at which to create the output file. The file name will be based upon the date and the --destination. If possible, writes to standard output if not provided.",
+      "The path at which to create the output file. If possible, writes to standard output if not provided.",
     transform: ({
       let url = URL(filePath: $0, directoryHint: .isDirectory)
       let manager = FileManager.default
@@ -47,11 +47,18 @@ struct Program: AsyncParsableCommand {
   )
   var jsonSource: String?
 
+  /// Optional file name to use. Default is 'iTunes-yyyy-MM-dd". Its extension is always based upon the --destination.
+  @Option(
+    help:
+      "Optional file name to use when outputDirectory is used. If not set, the file name will be based upon the current date."
+  )
+  var fileName: String?
+
   /// Outputfile where data will be writen, if outputDirectory is not specified.
   private var outputFile: URL? {
     guard let outputDirectory else { return nil }
 
-    return destination.outputFile(using: outputDirectory)
+    return destination.outputFile(using: outputDirectory, name: fileName)
   }
 
   /// Validates the input matrix.
