@@ -60,12 +60,20 @@ final class DBEncoder {
     return try await emit(table: rows.table, rows: rows.rows.map { $0.song }, ids: ids)
   }
 
+  @discardableResult
+  private func emitPlays(songLookup: [RowSong: Int64]) async throws -> [RowPlay: Int64] {
+    let rows = rowEncoder.playRows
+    let ids = rows.rows.map { [songLookup[$0.song] ?? -1] }
+    return try await emit(table: rows.table, rows: rows.rows.map { $0.play! }, ids: ids)
+  }
+
   private func emit() async throws {
     let kindLookup = try await emitKinds()
     let artistLookup = try await emitArtists()
     let albumLookup = try await emitAlbums()
     let songLookup = try await emitSongs(
       artistLookup: artistLookup, albumLookup: albumLookup, kindLookup: kindLookup)
+    try await emitPlays(songLookup: songLookup)
   }
 
   func encode(_ tracks: [Track]) async throws {
