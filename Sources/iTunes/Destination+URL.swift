@@ -15,7 +15,7 @@ extension Destination {
     return "iTunes-\(dateString)"
   }
 
-  public func outputFile(using directory: URL, name: String? = nil) -> URL? {
+  public func outputFile(using directory: URL, name: String?) -> URL? {
     let name = name ?? defaultName
     return directory.appending(path: "\(name).\(self.filenameExtension)")
   }
