@@ -6,12 +6,17 @@ extension Source: EnumerableFlag {}
 extension Destination: EnumerableFlag {}
 
 struct Program: AsyncParsableCommand {
-  @Flag(help: "Input Source type") var source: Source = .itunes
-  @Flag(help: "Output Destination type") var destination: Destination = .json
+  /// Input source type.
+  @Flag(help: "Input Source type. Where Track data is being read from.") var source: Source =
+    .itunes
+  /// Output destination type.
+  @Flag(help: "Output Destination type. Format Track data will be written out as.") var destination:
+    Destination = .json
 
+  /// Optional Output Directory for output file.
   @Option(
     help:
-      "The path at which to create the output file. Writes to standard output if not provided.",
+      "The path at which to create the output file. The file name will be based upon the date and the --destination. If possible, writes to standard output if not provided.",
     transform: ({
       let url = URL(filePath: $0, directoryHint: .isDirectory)
       let manager = FileManager.default
@@ -24,27 +29,32 @@ struct Program: AsyncParsableCommand {
   )
   var outputDirectory: URL? = nil
 
+  /// Optional repair file path.
   @Option(
     help: "Repair JSON file path. Repairs well-defined and specific Tracks.",
     transform: ({ URL(filePath: $0) })
   )
   var repairFile: URL? = nil
 
+  /// Optional repair json source string.
   @Option(help: "Optional json string to parse for repairs.")
   var repairSource: String?
 
+  /// JSON Source to parse when using Source.jsonString.
   @Argument(
     help:
       "Optional json string to parse when --json-string is passed as input. Use '-' as last argument to read from stdin."
   )
   var jsonSource: String?
 
+  /// Outputfile where data will be writen, if outputDirectory is not specified.
   private var outputFile: URL? {
     guard let outputDirectory else { return nil }
 
     return destination.outputFile(using: outputDirectory)
   }
 
+  /// Validates the input matrix.
   mutating func validate() throws {
     if jsonSource != nil && source != .jsonString {
       throw ValidationError("Passing JSON Source requires --json-string to be passed. \(source)")
@@ -68,7 +78,8 @@ struct Program: AsyncParsableCommand {
     }
   }
 
-  var isRepairing: Bool {
+  /// Indicates if the Track data is going to be repaired.
+  private var isRepairing: Bool {
     repairFile != nil || (repairSource != nil && !repairSource!.isEmpty)
   }
 
