@@ -69,6 +69,7 @@ final class DBEncoder {
   }
 
   private func emit() async throws {
+    try await db.execute("PRAGMA foreign_keys = ON;")
     let kindLookup = try await emitKinds()
     let artistLookup = try await emitArtists()
     let albumLookup = try await emitAlbums()
