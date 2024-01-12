@@ -14,6 +14,6 @@ struct RowPlay: TrackRowItem {
 
 extension RowPlay {
   func insert(songid: String) -> String {
-    "INSERT INTO plays (songid, date, delta) VALUES (\(sql: songid), \(sql: date, options:.quoted), \(sql: delta));"
+    "INSERT INTO plays (date, delta, songid) VALUES (\(sql: date, options:.quoted), \(sql: delta), \(sql: songid));"
   }
 }
