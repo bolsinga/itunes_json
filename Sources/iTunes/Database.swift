@@ -80,7 +80,7 @@ actor Database {
       }
 
       guard result == SQLITE_ROW || result == SQLITE_DONE else {
-        throw DatabaseError.cannotStep(handle.sqlError)
+        throw DatabaseError.cannotStep(db.handle.sqlError)
       }
 
       let columnCount = sqlite3_column_count(handle)
