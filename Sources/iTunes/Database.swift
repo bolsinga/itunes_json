@@ -7,6 +7,20 @@
 
 import Foundation
 import SQLite3
+import os
+
+extension Logger {
+  static let open = Logger(subsystem: "sql", category: "open")
+  static let close = Logger(subsystem: "sql", category: "close")
+  static let exec = Logger(subsystem: "sql", category: "exec")
+  static let prepare = Logger(subsystem: "sql", category: "prepare")
+  static let step = Logger(subsystem: "sql", category: "step")
+  static let reset = Logger(subsystem: "sql", category: "reset")
+  static let clear = Logger(subsystem: "sql", category: "clear")
+  static let finalize = Logger(subsystem: "sql", category: "finalize")
+  static let bindText = Logger(subsystem: "sql", category: "bindText")
+  static let bindInt64 = Logger(subsystem: "sql", category: "bindInt64")
+}
 
 enum DatabaseError: Error {
   case cannotOpen(String)
@@ -48,7 +62,8 @@ actor Database {
     }
 
     func close() {
-      sqlite3_finalize(handle)
+      let result = sqlite3_finalize(handle)
+      Logger.finalize.log("\(result, privacy: .public)")
     }
 
     private func bind(db: Database, value: Value, index: Int32) throws {
@@ -56,11 +71,13 @@ actor Database {
       case .string(let string):
         let result = sqlite3_bind_text(handle, index, string, -1, Statement.SQLITE_TRANSIENT)
         guard result == SQLITE_OK else {
+          Logger.bindText.error("\(result, privacy: .public)")
           throw DatabaseError.cannotBind("\(db.handle.sqlError) - \(value.description) - \(index)")
         }
       case .integer(let integer):
         let result = sqlite3_bind_int64(handle, index, integer)
         guard result == SQLITE_OK else {
+          Logger.bindInt64.error("\(result, privacy: .public)")
           throw DatabaseError.cannotBind("\(db.handle.sqlError) - \(value.description) - \(index)")
         }
       }
@@ -75,11 +92,14 @@ actor Database {
     func execute(db: Database) throws {
       let result = sqlite3_step(handle)
       defer {
-        sqlite3_reset(handle)
-        sqlite3_clear_bindings(handle)
+        var result = sqlite3_reset(handle)
+        if result != SQLITE_OK { Logger.reset.error("\(result, privacy: .public)") }
+        result = sqlite3_clear_bindings(handle)
+        if result != SQLITE_OK { Logger.clear.error("\(result, privacy: .public)") }
       }
 
       guard result == SQLITE_ROW || result == SQLITE_DONE else {
+        Logger.step.error("\(result, privacy: .public)")
         throw DatabaseError.cannotStep(db.handle.sqlError)
       }
 
@@ -99,6 +119,7 @@ actor Database {
       file.absoluteString, &handle, SQLITE_OPEN_URI | SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
       nil)
 
+    Logger.open.log("\(result, privacy: .public)")
     guard let handle else { throw DatabaseError.cannotOpen("No handle") }
     guard result == SQLITE_OK else { throw DatabaseError.cannotOpen(handle.sqlError) }
 
@@ -107,11 +128,13 @@ actor Database {
 
   deinit {
     statements.values.forEach { $0.close() }
-    sqlite3_close(handle)
+    let result = sqlite3_close(handle)
+    Logger.close.log("\(result, privacy: .public)")
   }
 
   func execute(_ string: String) throws {
     let result = sqlite3_exec(handle, string, nil, nil, nil)
+    Logger.exec.log("\(string, privacy: .public) (result: \(result, privacy: .public))")
     guard result == SQLITE_OK else { throw DatabaseError.cannotExecute(handle.sqlError) }
   }
 
@@ -122,6 +145,7 @@ actor Database {
     let result = sqlite3_prepare_v3(
       handle, string, -1, UInt32(SQLITE_PREPARE_PERSISTENT), &statementHandle, nil)
 
+    Logger.prepare.log("\(string, privacy: .public) (result: \(result, privacy: .public))")
     guard let statementHandle else { throw DatabaseError.cannotPrepare(string) }
     guard result == SQLITE_OK else { throw DatabaseError.cannotPrepare(handle.sqlError) }
 
