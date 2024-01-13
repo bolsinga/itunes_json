@@ -9,9 +9,9 @@ import Foundation
 import os
 
 extension Logger {
-  static let noTrackNumber = Logger(subsystem: "sql", category: "noTrackNumber")
-  static let badTrackNumber = Logger(subsystem: "sql", category: "badTrackNumber")
-  static let noYear = Logger(subsystem: "sql", category: "noYear")
+  static let noTrackNumber = Logger(subsystem: "validation", category: "noTrackNumber")
+  static let badTrackNumber = Logger(subsystem: "validation", category: "badTrackNumber")
+  static let noYear = Logger(subsystem: "validation", category: "noYear")
 }
 
 extension Track {
