@@ -24,6 +24,8 @@ extension Logger {
 
 enum DatabaseError: Error {
   case cannotOpen(String)
+  case cannotEnableWALJournaling(String)
+  case cannotEnableSynchrounsNormal(String)
   case cannotExecute(String)
   case cannotPrepare(String)
   case cannotBind(String)
@@ -124,6 +126,13 @@ actor Database {
     guard result == SQLITE_OK else { throw DatabaseError.cannotOpen(handle.sqlError) }
 
     self.handle = handle
+
+    guard sqlite3_exec(handle, "PRAGMA journal_mode = WAL", nil, nil, nil) == SQLITE_OK else {
+      throw DatabaseError.cannotEnableWALJournaling(handle.sqlError)
+    }
+    guard sqlite3_exec(handle, "PRAGMA synchronous = NORMAL", nil, nil, nil) == SQLITE_OK else {
+      throw DatabaseError.cannotEnableSynchrounsNormal(handle.sqlError)
+    }
   }
 
   deinit {
