@@ -164,6 +164,7 @@ extension Repair {
   private static func printRepairJson(items: [Item]) throws {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys]
+    encoder.dateEncodingStrategy = .iso8601
     let data = try encoder.encode(items)
     if let string = String(data: data, encoding: .utf8) {
       print(string)
@@ -172,6 +173,7 @@ extension Repair {
 
   private static func load(data: Data) throws -> [Item] {
     let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .iso8601
     let items = try decoder.decode([Item].self, from: data)
     //    try printRepairJson(items: items)
     return items
