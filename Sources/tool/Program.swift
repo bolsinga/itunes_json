@@ -54,6 +54,9 @@ struct Program: AsyncParsableCommand {
   )
   var fileName: String?
 
+  @Flag
+  var timeTest = false
+
   /// Outputfile where data will be writen, if outputDirectory is not specified.
   private var outputFile: URL? {
     guard let outputDirectory else { return nil }
@@ -91,6 +94,12 @@ struct Program: AsyncParsableCommand {
   }
 
   func run() async throws {
+    guard !timeTest else {
+      let result = await testTime()
+      if result != 0 { throw ExitCode(Int32(result)) }
+      return
+    }
+
     let tracks = try await {
       let t = try await source.gather(jsonSource)
       if isRepairing {
