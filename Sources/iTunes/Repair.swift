@@ -115,14 +115,19 @@ public struct Repair {
   let items: [Item]
 
   func repair(_ tracks: [Track]) -> [Track] {
+    var datesAreAheadOneHour = false
+
     let fixes = tracks.reduce(into: [Track: [Fix]]()) { dictionary, track in
+      if !datesAreAheadOneHour {
+        datesAreAheadOneHour = track.datesAreAheadOneHour
+      }
       var arr = dictionary[track] ?? []
       arr.append(
         contentsOf: items.filter { track.matches(problem: $0.problem) }.compactMap { $0.fix })
       if !arr.isEmpty { dictionary[track] = arr }
     }
 
-    guard !fixes.isEmpty else { return tracks }
+    guard !fixes.isEmpty || datesAreAheadOneHour else { return tracks }
 
     return tracks.compactMap { track in
       if let fixes = fixes[track], !fixes.isEmpty {
@@ -132,9 +137,9 @@ public struct Repair {
             fixedTrack = repairedTrack.repair($0)
           }
         }
-        return fixedTrack
+        return datesAreAheadOneHour ? fixedTrack?.moveDatesBackOneHour() : fixedTrack
       }
-      return track
+      return datesAreAheadOneHour ? track.moveDatesBackOneHour() : track
     }
   }
 }
