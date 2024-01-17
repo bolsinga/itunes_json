@@ -107,7 +107,7 @@ private func validateTimeParsing() async throws {
     throw TimeTestError.jsonParseInvalidError
   }
 
-  let chetAtkinsYesterday = try await Source.itunes.gather(nil).filter {
+  let chetAtkinsYesterday = try await Source.itunes.gather(nil, repair: nil).filter {
     $0.persistentID == 17_859_820_717_873_205_520
   }
   if chetAtkinsYesterday.isEmpty {

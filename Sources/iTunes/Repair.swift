@@ -114,7 +114,7 @@ extension Track {
 public struct Repair {
   let items: [Item]
 
-  public func repair(_ tracks: [Track]) -> [Track] {
+  func repair(_ tracks: [Track]) -> [Track] {
     let fixes = tracks.reduce(into: [Track: [Fix]]()) { dictionary, track in
       var arr = dictionary[track] ?? []
       arr.append(
