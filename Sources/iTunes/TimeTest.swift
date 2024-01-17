@@ -9,7 +9,7 @@ import Carbon
 import Foundation
 
 private let validTime = "2004-02-04T23:32:22Z"
-private let validTimestamp = Double(1_075_937_542)
+private let validTimestamp = Double.timeIntervalSince1970ValidSentinel
 private let invalidTime = "2004-02-05T00:32:22Z"
 private let invalidTimestamp = Double(1_075_941_142)
 private let json = """
@@ -25,8 +25,8 @@ private enum TimeTestError: Error {
   case jsonParseInvalidError
   case jsonBothError
 
-  case chetAtkinsMissing
-  case chetAtkinsChanged
+  case validDateSentinelMissing
+  case validDateSentinelChanged
 
   var result: Int {
     switch self {
@@ -42,9 +42,9 @@ private enum TimeTestError: Error {
       return 5
     case .jsonBothError:
       return 6
-    case .chetAtkinsMissing:
+    case .validDateSentinelMissing:
       return 7
-    case .chetAtkinsChanged:
+    case .validDateSentinelChanged:
       return 8
     }
   }
@@ -107,14 +107,14 @@ private func validateTimeParsing() async throws {
     throw TimeTestError.jsonParseInvalidError
   }
 
-  let chetAtkinsYesterday = try await Source.itunes.gather(nil, repair: nil).filter {
-    $0.persistentID == 17_859_820_717_873_205_520
+  let validDateSentinels = try await Source.itunes.gather(nil, repair: nil).filter {
+    $0.isValidDateCheckSentinel
   }
-  if chetAtkinsYesterday.isEmpty {
-    throw TimeTestError.chetAtkinsMissing
+  if validDateSentinels.isEmpty {
+    throw TimeTestError.validDateSentinelMissing
   }
-  let chetAtkinsYesterdayExpectedDate = chetAtkinsYesterday.first!.playDateUTC == validDate
-  if !chetAtkinsYesterdayExpectedDate {
-    throw TimeTestError.chetAtkinsChanged
+  let validDateSentinelHasExpectedDate = validDateSentinels.first!.playDateUTC == validDate
+  if !validDateSentinelHasExpectedDate {
+    throw TimeTestError.validDateSentinelChanged
   }
 }
