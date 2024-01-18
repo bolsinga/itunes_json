@@ -15,7 +15,7 @@ protocol RowAlbumInterface {
   var albumIsCompilation: Int { get }
 }
 
-struct RowAlbum: TrackRowItem {
+struct RowAlbum: Hashable {
   init(_ album: RowAlbumInterface) {
     self.init(
       name: album.albumName, trackCount: album.albumTrackCount, discCount: album.albumDiscCount,

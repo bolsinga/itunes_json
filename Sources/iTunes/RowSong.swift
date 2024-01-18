@@ -19,7 +19,7 @@ protocol RowSongInterface {
   var dateAddedISO8601: String { get }
 }
 
-struct RowSong: TrackRowItem {
+struct RowSong: Hashable {
   init(_ song: RowSongInterface) {
     self.init(
       name: song.songName, itunesid: song.songPersistentID, composer: song.songComposer,
