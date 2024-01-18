@@ -44,10 +44,6 @@ extension Track {
     return year
   }
 
-  fileprivate var songSize: UInt64 {
-    size ?? 0
-  }
-
   fileprivate var songDuration: Int {
     totalTime ?? -1
   }
@@ -65,7 +61,7 @@ extension Track {
   var rowSong: RowSong {
     RowSong(
       name: songName, itunesid: persistentID, composer: composer ?? "",
-      trackNumber: songTrackNumber, year: songYear, size: songSize, duration: songDuration,
+      trackNumber: songTrackNumber, year: songYear, duration: songDuration,
       dateAdded: dateAddedISO8601, dateReleased: dateReleasedISO8601, comments: comments ?? "")
   }
 }
