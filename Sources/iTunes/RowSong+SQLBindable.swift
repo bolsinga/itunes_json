@@ -11,7 +11,7 @@ extension RowSong: SQLBindableInsert {
   static var insertBinding: String {
     Self.bound {
       RowSong(
-        name: SortableName(), itunesid: 0, composer: "", trackNumber: 0, year: 0, size: 0,
+        name: SortableName(), itunesid: 0, composer: "", trackNumber: 0, year: 0,
         duration: 0, dateAdded: "", dateReleased: "", comments: ""
       ).insert(artistID: "", albumID: "", kindID: "")
     }
@@ -20,7 +20,7 @@ extension RowSong: SQLBindableInsert {
   func bindInsert(db: Database, statement: Database.Statement, ids: [Int64]) throws {
     guard ids.count == 3 else { throw SQLBindingError.iDsRequired }
 
-    try statement.bind(db: db, count: 15) { index in
+    try statement.bind(db: db, count: 13) { index in
       switch index {
       case 1:
         Database.Value.string(name.name)
@@ -35,20 +35,18 @@ extension RowSong: SQLBindableInsert {
       case 6:
         Database.Value.integer(Int64(year))
       case 7:
-        Database.Value.integer(Int64(size))
-      case 8:
         Database.Value.integer(Int64(duration))
-      case 9:
+      case 8:
         Database.Value.string(dateAdded)
-      case 10:
+      case 9:
         Database.Value.string(dateReleased)
-      case 11:
+      case 10:
         Database.Value.string(comments)
-      case 12:
+      case 11:
         Database.Value.integer(ids[0])
-      case 13:
+      case 12:
         Database.Value.integer(ids[1])
-      case 14:
+      case 13:
         Database.Value.integer(ids[2])
       default:
         preconditionFailure()

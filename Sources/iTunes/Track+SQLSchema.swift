@@ -52,12 +52,11 @@ extension Track {
       composer TEXT NOT NULL DEFAULT '',
       tracknumber INTEGER NOT NULL,
       year INTEGER NOT NULL,
-      size INTEGER NOT NULL,
       duration INTEGER NOT NULL,
       dateadded TEXT NOT NULL,
       datereleased TEXT NOT NULL DEFAULT '',
       comments TEXT NOT NULL DEFAULT '',
-      UNIQUE(name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, size, duration, dateadded, datereleased, comments),
+      UNIQUE(name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, duration, dateadded, datereleased, comments),
       FOREIGN KEY(artistid) REFERENCES artists(id),
       FOREIGN KEY(albumid) REFERENCES albums(id),
       FOREIGN KEY(kindid) REFERENCES kinds(id),
@@ -65,7 +64,6 @@ extension Track {
       CHECK(name != sortname),
       CHECK(tracknumber > 0),
       CHECK(year >= 0),
-      CHECK(size > 0),
       CHECK(duration > 0)
     );
     """
