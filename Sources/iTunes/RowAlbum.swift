@@ -41,15 +41,11 @@ struct RowAlbum: Hashable {
   let discCount: Int
   let discNumber: Int
   let compilation: Int
-}
 
-extension RowAlbum {
   var selectID: String {
     "(SELECT id FROM albums WHERE name = \(sql: name.name, options:.safeQuoted) AND trackcount = \(sql: trackCount) AND disccount = \(sql: discCount) AND discnumber = \(sql: discNumber) AND compilation = \(sql: compilation))"
   }
-}
 
-extension RowAlbum {
   var insert: String {
     "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES (\(sql: name.name, options:.safeQuoted), \(sql: name.sorted, options:.safeQuoted), \(sql: trackCount), \(sql: discCount), \(sql: discNumber), \(sql: compilation));"
   }

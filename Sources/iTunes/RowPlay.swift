@@ -38,9 +38,7 @@ struct RowPlay: Hashable {
 
   let date: String
   let delta: Int
-}
 
-extension RowPlay {
   func insert(songid: String) -> String {
     "INSERT INTO plays (date, delta, songid) VALUES (\(sql: date, options:.quoted), \(sql: delta), \(sql: songid));"
   }
