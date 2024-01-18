@@ -8,7 +8,7 @@
 import Foundation
 
 extension RowArtist: SQLBindableInsert {
-  static var insertBinding: String { Self.bound { RowArtist(name: SortableName()).insert } }
+  static var insertBinding: String { Self.bound { RowArtist().insert } }
 
   func bindInsert(db: Database, statement: Database.Statement, ids: [Int64]) throws {
     guard ids.isEmpty else { throw SQLBindingError.noIDsRequired }

@@ -7,8 +7,24 @@
 
 import Foundation
 
+protocol RowArtistInterface {
+  var artistName: SortableName { get }
+}
+
 struct RowArtist: TrackRowItem {
   let name: SortableName
+
+  init(_ artist: RowArtistInterface) {
+    self.init(name: artist.artistName)
+  }
+
+  init() {
+    self.init(name: SortableName())
+  }
+
+  private init(name: SortableName) {
+    self.name = name
+  }
 
   internal var nameOnly: String {
     name.name
