@@ -17,6 +17,8 @@ extension Destination {
       throw DataExportError.noTracks
     }
 
+    let tracks = tracks.sorted { $0.persistentID < $1.persistentID }
+
     switch self {
     case .json, .sqlCode:
       let data = try self.data(for: tracks)
