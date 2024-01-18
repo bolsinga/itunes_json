@@ -19,7 +19,7 @@ extension RowPlayInterface {
   }
 }
 
-struct RowPlay: TrackRowItem {
+struct RowPlay: Hashable {
   init?(_ play: RowPlayInterface) {
     // Some tracks have play dates, but not play counts. Until that is repaired this table has a CHECK(delta >= 0) constraint.
     guard play.hasPlayed else { return nil }

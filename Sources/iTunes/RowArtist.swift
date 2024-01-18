@@ -11,7 +11,7 @@ protocol RowArtistInterface {
   var artistName: SortableName { get }
 }
 
-struct RowArtist: TrackRowItem {
+struct RowArtist: Hashable {
   let name: SortableName
 
   init(_ artist: RowArtistInterface) {
