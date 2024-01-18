@@ -20,11 +20,6 @@ extension Track {
     return releaseDate.formatted(.iso8601)
   }
 
-  fileprivate var dateModifiedISO8601: String {
-    guard let dateModified else { return "" }
-    return dateModified.formatted(.iso8601)
-  }
-
   fileprivate var songName: SortableName {
     SortableName(name: name, sorted: sortName ?? "")
   }
@@ -71,7 +66,6 @@ extension Track {
     RowSong(
       name: songName, itunesid: persistentID, composer: composer ?? "",
       trackNumber: songTrackNumber, year: songYear, size: songSize, duration: songDuration,
-      dateAdded: dateAddedISO8601, dateReleased: dateReleasedISO8601,
-      dateModified: dateModifiedISO8601, comments: comments ?? "")
+      dateAdded: dateAddedISO8601, dateReleased: dateReleasedISO8601, comments: comments ?? "")
   }
 }

@@ -12,7 +12,7 @@ extension RowSong: SQLBindableInsert {
     Self.bound {
       RowSong(
         name: SortableName(), itunesid: 0, composer: "", trackNumber: 0, year: 0, size: 0,
-        duration: 0, dateAdded: "", dateReleased: "", dateModified: "", comments: ""
+        duration: 0, dateAdded: "", dateReleased: "", comments: ""
       ).insert(artistID: "", albumID: "", kindID: "")
     }
   }
@@ -43,14 +43,12 @@ extension RowSong: SQLBindableInsert {
       case 10:
         Database.Value.string(dateReleased)
       case 11:
-        Database.Value.string(dateModified)
-      case 12:
         Database.Value.string(comments)
-      case 13:
+      case 12:
         Database.Value.integer(ids[0])
-      case 14:
+      case 13:
         Database.Value.integer(ids[1])
-      case 15:
+      case 14:
         Database.Value.integer(ids[2])
       default:
         preconditionFailure()

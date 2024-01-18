@@ -33,10 +33,6 @@ extension Track {
       guard let dateAdded else { return nil }
       return calendar.date(byAdding: .hour, value: -1, to: dateAdded)
     }()
-    let cDateModified: Date? = {
-      guard let dateModified else { return nil }
-      return calendar.date(byAdding: .hour, value: -1, to: dateModified)
-    }()
     let cPlayDate: Date? = {
       guard let playDateUTC else { return nil }
       return calendar.date(byAdding: .hour, value: -1, to: playDateUTC)
@@ -56,7 +52,7 @@ extension Track {
       album: album, albumArtist: albumArtist, albumRating: albumRating,
       albumRatingComputed: albumRatingComputed, artist: artist, bitRate: bitRate, bPM: bPM,
       comments: comments, compilation: compilation, composer: composer,
-      contentRating: contentRating, dateAdded: cDateAdded, dateModified: cDateModified,
+      contentRating: contentRating, dateAdded: cDateAdded, dateModified: dateModified,
       disabled: disabled, discCount: discCount, discNumber: discNumber, episode: episode,
       episodeOrder: episodeOrder, explicit: explicit, genre: genre, grouping: grouping,
       hasVideo: hasVideo, hD: hD, kind: kind, location: location, movie: movie,
