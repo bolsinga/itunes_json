@@ -9,12 +9,7 @@ import Foundation
 
 extension RowSong: SQLBindableInsert {
   static var insertBinding: String {
-    Self.bound {
-      RowSong(
-        name: SortableName(), itunesid: 0, composer: "", trackNumber: 0, year: 0,
-        duration: 0, dateAdded: "", dateReleased: "", comments: ""
-      ).insert(artistID: "", albumID: "")
-    }
+    Self.bound { RowSong().insert(artistID: "", albumID: "") }
   }
 
   func bindInsert(db: Database, statement: Database.Statement, ids: [Int64]) throws {
