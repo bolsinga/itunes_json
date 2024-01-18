@@ -9,7 +9,7 @@ import Foundation
 
 extension RowPlay: SQLBindableInsert {
   static var insertBinding: String {
-    Self.bound { RowPlay(date: "", delta: 0).insert(songid: "") }
+    Self.bound { RowPlay().insert(songid: "") }
   }
 
   func bindInsert(db: Database, statement: Database.Statement, ids: [Int64]) throws {
