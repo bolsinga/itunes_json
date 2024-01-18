@@ -17,7 +17,6 @@ struct RowSong: TrackRowItem {
   let duration: Int
   let dateAdded: String
   let dateReleased: String
-  let dateModified: String
   let comments: String
 }
 
@@ -29,6 +28,6 @@ extension RowSong {
 
 extension RowSong {
   func insert(artistID: String, albumID: String, kindID: String) -> String {
-    "INSERT INTO songs (name, sortname, itunesid, composer, tracknumber, year, size, duration, dateadded, datereleased, datemodified, comments, artistid, albumid, kindid) VALUES (\(sql: name.name, options:.safeQuoted), \(sql: name.sorted, options:.safeQuoted), \(sql: itunesid, options: .quoted), \(sql: composer, options:.safeQuoted), \(sql: trackNumber), \(sql: year), \(sql: size), \(sql: duration), \(sql: dateAdded, options:.quoted), \(sql: dateReleased, options:.quoted), \(sql: dateModified, options:.quoted), \(sql: comments, options:.safeQuoted), \(sql: artistID), \(sql: albumID), \(sql: kindID));"
+    "INSERT INTO songs (name, sortname, itunesid, composer, tracknumber, year, size, duration, dateadded, datereleased, comments, artistid, albumid, kindid) VALUES (\(sql: name.name, options:.safeQuoted), \(sql: name.sorted, options:.safeQuoted), \(sql: itunesid, options: .quoted), \(sql: composer, options:.safeQuoted), \(sql: trackNumber), \(sql: year), \(sql: size), \(sql: duration), \(sql: dateAdded, options:.quoted), \(sql: dateReleased, options:.quoted), \(sql: comments, options:.safeQuoted), \(sql: artistID), \(sql: albumID), \(sql: kindID));"
   }
 }
