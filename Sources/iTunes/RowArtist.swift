@@ -31,7 +31,7 @@ struct RowArtist: Hashable {
   }
 }
 
-extension RowArtist: SQLSelectID {
+extension RowArtist {
   var selectID: String {
     "(SELECT id FROM artists WHERE name = \(sql: name.name, options:.safeQuoted))"
   }

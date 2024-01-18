@@ -43,7 +43,7 @@ struct RowAlbum: Hashable {
   let compilation: Int
 }
 
-extension RowAlbum: SQLSelectID {
+extension RowAlbum {
   var selectID: String {
     "(SELECT id FROM albums WHERE name = \(sql: name.name, options:.safeQuoted) AND trackcount = \(sql: trackCount) AND disccount = \(sql: discCount) AND discnumber = \(sql: discNumber) AND compilation = \(sql: compilation))"
   }
