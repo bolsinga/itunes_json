@@ -14,7 +14,7 @@ extension Logger {
 
 extension Track {
   fileprivate var trackRow: TrackRow {
-    TrackRow(album: rowAlbum, artist: rowArtist, song: rowSong, play: rowPlay)
+    TrackRow(album: RowAlbum(self), artist: rowArtist, song: rowSong, play: rowPlay)
   }
 }
 
