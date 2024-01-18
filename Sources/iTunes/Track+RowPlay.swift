@@ -7,25 +7,13 @@
 
 import Foundation
 
-extension Track {
-  fileprivate var datePlayedISO8601: String {
+extension Track: RowPlayInterface {
+  var datePlayedISO8601: String {
     guard let playDateUTC else { return "" }
     return playDateUTC.formatted(.iso8601)
   }
 
-  fileprivate var songPlayCount: Int {
+  var songPlayCount: Int {
     playCount ?? 0
-  }
-
-  fileprivate var hasPlayed: Bool {
-    // Some songs have play dates but not play counts!
-    songPlayCount > 0 || !datePlayedISO8601.isEmpty
-  }
-
-  var rowPlay: RowPlay? {
-    // Some tracks have play dates, but not play counts. Until that is repaired this table has a CHECK(delta >= 0) constraint.
-    guard hasPlayed else { return nil }
-
-    return RowPlay(date: datePlayedISO8601, delta: songPlayCount)
   }
 }
