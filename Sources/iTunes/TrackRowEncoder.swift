@@ -14,7 +14,7 @@ extension Logger {
 
 extension Track {
   fileprivate var trackRow: TrackRow {
-    TrackRow(kind: rowKind, album: rowAlbum, artist: rowArtist, song: rowSong, play: rowPlay)
+    TrackRow(album: rowAlbum, artist: rowArtist, song: rowSong, play: rowPlay)
   }
 }
 
@@ -27,10 +27,6 @@ final class TrackRowEncoder {
 
   func encode(_ track: Track) {
     rows.append(track.trackRow)
-  }
-
-  var kindRows: (table: String, rows: [RowKind]) {
-    (Track.KindTable, Array(Set(rows.map { $0.kind })).sorted(by: { $0.kind < $1.kind }))
   }
 
   var artistRows: (table: String, rows: [RowArtist]) {

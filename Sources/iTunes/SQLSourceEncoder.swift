@@ -23,11 +23,6 @@ class SQLSourceEncoder {
       rowEncoder.encode(track)
     }
 
-    private var kindStatements: (table: String, statements: [String]) {
-      let rows = rowEncoder.kindRows
-      return (rows.table, rows.rows.map { $0.insert })
-    }
-
     private var artistStatements: (table: String, statements: [String]) {
       let rows = rowEncoder.artistRows
       return (rows.table, rows.rows.map { $0.insert })
@@ -42,10 +37,7 @@ class SQLSourceEncoder {
       let rows = rowEncoder.songRows
       return (
         rows.table,
-        rows.rows.map {
-          $0.song.insert(
-            artistID: $0.artist.selectID, albumID: $0.album.selectID, kindID: $0.kind.selectID)
-        }
+        rows.rows.map { $0.song.insert(artistID: $0.artist.selectID, albumID: $0.album.selectID) }
       )
     }
 
@@ -55,14 +47,13 @@ class SQLSourceEncoder {
         rows.table,
         rows.rows.map {
           $0.play!.insert(
-            songid: $0.song.selectID(
-              artistID: $0.artist.selectID, albumID: $0.album.selectID, kindID: $0.kind.selectID))
+            songid: $0.song.selectID(artistID: $0.artist.selectID, albumID: $0.album.selectID))
         }
       )
     }
 
     private var tableStatements: [(table: String, statements: [String])] {
-      [kindStatements, artistStatements, albumStatements, songStatements, playStatements]
+      [artistStatements, albumStatements, songStatements, playStatements]
     }
 
     fileprivate var sqlStatements: String {
