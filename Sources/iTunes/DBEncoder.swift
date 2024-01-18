@@ -36,11 +36,6 @@ final class DBEncoder {
     return lookup
   }
 
-  private func emitKinds() async throws -> [RowKind: Int64] {
-    let rows = rowEncoder.kindRows
-    return try await emit(table: rows.table, rows: rows.rows)
-  }
-
   private func emitArtists() async throws -> [RowArtist: Int64] {
     let rows = rowEncoder.artistRows
     return try await emit(table: rows.table, rows: rows.rows)
@@ -52,12 +47,10 @@ final class DBEncoder {
   }
 
   private func emitSongs(
-    artistLookup: [RowArtist: Int64], albumLookup: [RowAlbum: Int64], kindLookup: [RowKind: Int64]
+    artistLookup: [RowArtist: Int64], albumLookup: [RowAlbum: Int64]
   ) async throws -> [RowSong: Int64] {
     let rows = rowEncoder.songRows
-    let ids = rows.rows.map {
-      [artistLookup[$0.artist] ?? -1, albumLookup[$0.album] ?? -1, kindLookup[$0.kind] ?? -1]
-    }
+    let ids = rows.rows.map { [artistLookup[$0.artist] ?? -1, albumLookup[$0.album] ?? -1] }
     return try await emit(table: rows.table, rows: rows.rows.map { $0.song }, ids: ids)
   }
 
@@ -70,11 +63,9 @@ final class DBEncoder {
 
   private func emit() async throws {
     try await db.execute("PRAGMA foreign_keys = ON;")
-    let kindLookup = try await emitKinds()
     let artistLookup = try await emitArtists()
     let albumLookup = try await emitAlbums()
-    let songLookup = try await emitSongs(
-      artistLookup: artistLookup, albumLookup: albumLookup, kindLookup: kindLookup)
+    let songLookup = try await emitSongs(artistLookup: artistLookup, albumLookup: albumLookup)
     try await emitPlays(songLookup: songLookup)
   }
 

@@ -13,14 +13,14 @@ extension RowSong: SQLBindableInsert {
       RowSong(
         name: SortableName(), itunesid: 0, composer: "", trackNumber: 0, year: 0,
         duration: 0, dateAdded: "", dateReleased: "", comments: ""
-      ).insert(artistID: "", albumID: "", kindID: "")
+      ).insert(artistID: "", albumID: "")
     }
   }
 
   func bindInsert(db: Database, statement: Database.Statement, ids: [Int64]) throws {
-    guard ids.count == 3 else { throw SQLBindingError.iDsRequired }
+    guard ids.count == 2 else { throw SQLBindingError.iDsRequired }
 
-    try statement.bind(db: db, count: 13) { index in
+    try statement.bind(db: db, count: 12) { index in
       switch index {
       case 1:
         Database.Value.string(name.name)
@@ -46,8 +46,6 @@ extension RowSong: SQLBindableInsert {
         Database.Value.integer(ids[0])
       case 12:
         Database.Value.integer(ids[1])
-      case 13:
-        Database.Value.integer(ids[2])
       default:
         preconditionFailure()
       }

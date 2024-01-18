@@ -8,8 +8,6 @@
 import Foundation
 
 extension Track {
-  static let KindTable = "CREATE TABLE kinds (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE);"
-
   static let ArtistTable = """
     CREATE TABLE artists (
       id INTEGER PRIMARY KEY,
@@ -48,7 +46,6 @@ extension Track {
       itunesid TEXT NOT NULL,
       artistid INTEGER NOT NULL,
       albumid INTEGER NOT NULL,
-      kindid INTEGER NOT NULL,
       composer TEXT NOT NULL DEFAULT '',
       tracknumber INTEGER NOT NULL,
       year INTEGER NOT NULL,
@@ -56,10 +53,9 @@ extension Track {
       dateadded TEXT NOT NULL,
       datereleased TEXT NOT NULL DEFAULT '',
       comments TEXT NOT NULL DEFAULT '',
-      UNIQUE(name, sortname, itunesid, artistid, albumid, kindid, composer, tracknumber, year, duration, dateadded, datereleased, comments),
+      UNIQUE(name, sortname, itunesid, artistid, albumid, composer, tracknumber, year, duration, dateadded, datereleased, comments),
       FOREIGN KEY(artistid) REFERENCES artists(id),
       FOREIGN KEY(albumid) REFERENCES albums(id),
-      FOREIGN KEY(kindid) REFERENCES kinds(id),
       CHECK(length(name) > 0),
       CHECK(name != sortname),
       CHECK(tracknumber > 0),

@@ -8,7 +8,6 @@
 import Foundation
 
 struct TrackRow {
-  let kind: RowKind
   let album: RowAlbum
   let artist: RowArtist
   let song: RowSong
