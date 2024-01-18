@@ -53,11 +53,6 @@ extension Track {
     return dateAdded.formatted(.iso8601)
   }
 
-  fileprivate var trackKind: String {
-    guard let kind else { preconditionFailure("\(self)") }
-    return kind
-  }
-
   var rowSong: RowSong {
     RowSong(
       name: songName, itunesid: persistentID, composer: composer ?? "",
