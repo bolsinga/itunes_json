@@ -9,10 +9,7 @@ import Foundation
 
 extension RowAlbum: SQLBindableInsert {
   static var insertBinding: String {
-    Self.bound {
-      RowAlbum(name: SortableName(), trackCount: 0, discCount: 0, discNumber: 0, compilation: 0)
-        .insert
-    }
+    Self.bound { RowAlbum().insert }
   }
 
   func bindInsert(db: Database, statement: Database.Statement, ids: [Int64]) throws {
