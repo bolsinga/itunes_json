@@ -15,12 +15,8 @@ struct SQLSourceEncoder {
   fileprivate struct Encoder {
     private let rowEncoder: TrackRowEncoder
 
-    init(minimumCapacity: Int) {
-      self.rowEncoder = TrackRowEncoder(minimumCapacity: minimumCapacity)
-    }
-
-    fileprivate func encode(_ track: Track) {
-      rowEncoder.encode(track)
+    init(rowEncoder: TrackRowEncoder) {
+      self.rowEncoder = rowEncoder
     }
 
     private var artistStatements: (table: String, statements: [String]) {
@@ -67,9 +63,8 @@ struct SQLSourceEncoder {
     }
   }
 
-  func encode(_ tracks: [Track]) throws -> String {
-    let encoder = Encoder(minimumCapacity: tracks.count)
-    tracks.filter { $0.isSQLEncodable }.forEach { encoder.encode($0) }
+  private func encode(_ tracks: [Track]) throws -> String {
+    let encoder = Encoder(rowEncoder: tracks.rowEncoder)
     return encoder.sqlStatements
   }
 
