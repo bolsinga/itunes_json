@@ -12,7 +12,7 @@ struct SQLSourceEncoder {
     case cannotMakeData
   }
 
-  fileprivate final class Encoder {
+  fileprivate struct Encoder {
     private let rowEncoder: TrackRowEncoder
 
     init(minimumCapacity: Int) {
