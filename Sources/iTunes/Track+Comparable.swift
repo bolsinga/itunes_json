@@ -8,11 +8,9 @@
 import Foundation
 
 extension Track: Comparable {
-  fileprivate var compareArtist: String {
-    (sortArtist ?? sortAlbumArtist) ?? (artist ?? albumArtist ?? "")
-  }
+  fileprivate var compareArtist: String { artist ?? albumArtist ?? "" }
 
-  fileprivate var compareAlbum: String { sortAlbum ?? album ?? "" }
+  fileprivate var compareAlbum: String { album ?? "" }
 
   fileprivate var compareDiscNumber: Int { discNumber ?? 1 }
 
