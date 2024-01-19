@@ -7,7 +7,7 @@
 
 import Foundation
 
-class SQLSourceEncoder {
+struct SQLSourceEncoder {
   enum SQLSourceEncoderError: Error {
     case cannotMakeData
   }
