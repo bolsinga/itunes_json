@@ -11,9 +11,9 @@ final class DBEncoder {
   private let db: Database
   private let rowEncoder: TrackRowEncoder
 
-  init(file: URL, minimumCapacity: Int) throws {
+  init(file: URL, rowEncoder: TrackRowEncoder) throws {
     self.db = try Database(file: file)
-    self.rowEncoder = TrackRowEncoder(minimumCapacity: minimumCapacity)
+    self.rowEncoder = rowEncoder
   }
 
   private func emit<T: SQLBindableInsert>(table: String, rows: [T], ids: [[Int64]] = [])
@@ -61,16 +61,11 @@ final class DBEncoder {
     return try await emit(table: rows.table, rows: rows.rows.map { $0.play! }, ids: ids)
   }
 
-  private func emit() async throws {
+  func encode() async throws {
     try await db.execute("PRAGMA foreign_keys = ON;")
     let artistLookup = try await emitArtists()
     let albumLookup = try await emitAlbums()
     let songLookup = try await emitSongs(artistLookup: artistLookup, albumLookup: albumLookup)
     try await emitPlays(songLookup: songLookup)
-  }
-
-  func encode(_ tracks: [Track]) async throws {
-    tracks.filter { $0.isSQLEncodable }.forEach { rowEncoder.encode($0) }
-    try await emit()
   }
 }

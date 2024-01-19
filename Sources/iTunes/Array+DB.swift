@@ -9,7 +9,7 @@ import Foundation
 
 extension Array where Element == Track {
   public func database(file: URL) async throws {
-    let encoder = try DBEncoder(file: file, minimumCapacity: self.count)
-    try await encoder.encode(self)
+    let encoder = try DBEncoder(file: file, rowEncoder: self.rowEncoder)
+    try await encoder.encode()
   }
 }

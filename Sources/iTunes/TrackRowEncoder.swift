@@ -12,23 +12,8 @@ extension Logger {
   static let duplicateArtist = Logger(subsystem: "validation", category: "duplicateArtist")
 }
 
-extension Track {
-  fileprivate var trackRow: TrackRow {
-    TrackRow(
-      album: RowAlbum(self), artist: RowArtist(self), song: RowSong(self), play: RowPlay(self))
-  }
-}
-
-final class TrackRowEncoder {
-  private var rows = [TrackRow]()
-
-  init(minimumCapacity: Int) {
-    self.rows.reserveCapacity(minimumCapacity)
-  }
-
-  func encode(_ track: Track) {
-    rows.append(track.trackRow)
-  }
+struct TrackRowEncoder {
+  let rows: [TrackRow]
 
   var artistRows: (table: String, rows: [RowArtist]) {
     let artistRows = Array(Set(rows.map { $0.artist }))
