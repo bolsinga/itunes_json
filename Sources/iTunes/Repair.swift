@@ -152,8 +152,10 @@ enum RepairError: Error {
 
 extension Repair {
   public static func create(url: URL?, source: String?) async throws -> Repair {
-    if let url { return Repair(items: try await Repair.load(url: url)) }
-    if let source { return Repair(items: try Repair.load(source: source)) }
+    var items: [Item]?
+    if let url { items = try await Repair.load(url: url) }
+    if let source { items = try Repair.load(source: source) }
+    if let items { return Repair(items: items) }
     throw RepairError.invalidInput
   }
 
