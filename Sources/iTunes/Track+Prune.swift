@@ -8,7 +8,7 @@
 import Foundation
 
 extension Track {
-  var pruned : Track {
+  var pruned: Track {
     return Track(
       album: album, albumArtist: albumArtist, albumRating: nil,
       albumRatingComputed: nil, artist: artist, bitRate: nil, bPM: nil,
