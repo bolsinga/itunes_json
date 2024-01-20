@@ -115,9 +115,12 @@ public struct Repair {
   let items: [Item]
 
   func repair(_ tracks: [Track]) -> [Track] {
+    fix(tracks).filter { $0.isSQLEncodable }.map { $0.pruned }
+  }
+
+  private func fix(_ tracks: [Track]) -> [Track] {
     var datesAreAheadOneHour = false
 
-    let tracks = tracks.filter { $0.isSQLEncodable }.map { $0.pruned }
     let fixes = tracks.reduce(into: [Track: [Fix]]()) { dictionary, track in
       if !datesAreAheadOneHour {
         datesAreAheadOneHour = track.datesAreAheadOneHour
