@@ -4,13 +4,18 @@ trap "echo Exited!; exit;" SIGINT SIGTERM
 
 SQL_DIR="$1"
 if [ -z "$SQL_DIR" ] ; then
-    echo "No SQL directory"  1>&2
+    echo "No SQL directory" 1>&2
+    exit 1
+fi
+
+DB_DIR="$2"
+if [ -z "$DB_DIR" ] ; then
+    echo "No Destination DB directory" 1>&2
     exit 1
 fi
 
 SUFFIX=".sql.gz"
 
-DB_DIR=$SQL_DIR/../dbs/
 mkdir -p $DB_DIR
 
 COUNT=0
