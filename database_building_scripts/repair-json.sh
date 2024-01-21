@@ -4,7 +4,13 @@ trap "echo Exited!; exit;" SIGINT SIGTERM
 
 BKUP_DIR="$1"
 if [ -z "$BKUP_DIR" ] ; then
-    echo "No backup directory"  1>&2
+    echo "No backup directory" 1>&2
+    exit 1
+fi
+
+REPAIR_DIR="$2"
+if [ -z "$REPAIR_DIR" ] ; then
+    echo "No destination directory" 1>&2
     exit 1
 fi
 
@@ -12,7 +18,6 @@ JSON_TOOL=~/Applications/itunes_json/Products/usr/local/bin/itunes_json
 
 SUFFIX=".json.gz"
 
-REPAIR_DIR=$BKUP_DIR/../repair/
 mkdir -p $REPAIR_DIR
 
 REPAIR=`cat ~/Documents/code/git/web_data/itunes-repair.json`
