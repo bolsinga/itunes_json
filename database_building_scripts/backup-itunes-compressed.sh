@@ -27,7 +27,9 @@ fi
 
 MDATE=`date "+%Y-%m-%d"`
 
-DST_FILE=$DST_DIR/iTunes-$MDATE.json.gz
+MESSAGE=iTunes-$MDATE
+
+DST_FILE=$DST_DIR/$MESSAGE.json.gz
 
 /Users/bolsinga/Applications/itunes_json/Products/usr/local/bin/itunes_json | gzip -c > $DST_FILE
 
@@ -40,7 +42,7 @@ checkFailure $? "$GIT_DIR is not a git directory."
 gzip -cd $DST_FILE > itunes.json
 checkFailure $? gzip
 
-$PRG_HOME/database-add-git.sh $GIT_DIR $MDATE
+$PRG_HOME/database-add-git.sh $GIT_DIR $MESSAGE
 checkFailure $? database-git
 
 git gc --prune=now
