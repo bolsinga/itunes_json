@@ -24,14 +24,14 @@ checkFailure() {
 pushd $GIT_DIR
 
 git add -A
-echo "add"
 checkFailure $? add
 git commit -m $MESSAGE
-echo "commit"
 if [ $? -ne 0 ] ; then
   echo "$MESSAGE has no changes."
+  git tag $MESSAGE-empty
+else
+  git tag $MESSAGE
 fi
-git tag $MESSAGE
 checkFailure $? tag
 
 popd
