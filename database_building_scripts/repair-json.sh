@@ -37,4 +37,6 @@ for NAME in $(git tag --list | grep -v empty | sort) ; do
   fi
 done
 
+git checkout main
+
 popd
