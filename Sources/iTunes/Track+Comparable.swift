@@ -17,24 +17,30 @@ extension Track: Comparable {
   fileprivate var compareTrackNumber: Int { trackNumber ?? 1 }
 
   public static func < (lhs: Track, rhs: Track) -> Bool {
-    let lhArtist = lhs.compareArtist
-    let rhArtist = rhs.compareArtist
+    let lhEncodable = lhs.isSQLEncodable
+    let rhEncodable = rhs.isSQLEncodable
 
-    if lhArtist == rhArtist {
-      let lhAlbum = lhs.compareAlbum
-      let rhAlbum = rhs.compareAlbum
+    if lhEncodable == rhEncodable {
+      let lhArtist = lhs.compareArtist
+      let rhArtist = rhs.compareArtist
 
-      if lhAlbum == rhAlbum {
-        let lhDiscNumber = lhs.compareDiscNumber
-        let rhDiscNumber = rhs.compareDiscNumber
+      if lhArtist == rhArtist {
+        let lhAlbum = lhs.compareAlbum
+        let rhAlbum = rhs.compareAlbum
 
-        if lhDiscNumber == rhDiscNumber {
-          return lhs.compareTrackNumber < rhs.compareTrackNumber
+        if lhAlbum == rhAlbum {
+          let lhDiscNumber = lhs.compareDiscNumber
+          let rhDiscNumber = rhs.compareDiscNumber
+
+          if lhDiscNumber == rhDiscNumber {
+            return lhs.compareTrackNumber < rhs.compareTrackNumber
+          }
+          return lhDiscNumber < rhDiscNumber
         }
-        return lhDiscNumber < rhDiscNumber
+        return lhAlbum < rhAlbum
       }
-      return lhAlbum < rhAlbum
+      return lhArtist < rhArtist
     }
-    return lhArtist < rhArtist
+    return lhEncodable
   }
 }
