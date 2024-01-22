@@ -17,8 +17,6 @@ fi
 JSON_TOOL=~/Applications/itunes_json/Products/usr/local/bin/itunes_json
 REPAIR=`cat ~/Documents/code/git/web_data/itunes-repair.json`
 
-SUFFIX=".json.gz"
-
 mkdir -p $DST_DIR
 
 createDbArchive() {
