@@ -9,6 +9,7 @@ if [ -z "$BKUP_DIR" ] ; then
 fi
 
 JSON_TOOL=~/Applications/itunes_json/Products/usr/local/bin/itunes_json
+REPAIR=`cat ~/Documents/code/git/web_data/itunes-repair.json`
 
 SUFFIX=".json.gz"
 
@@ -21,7 +22,7 @@ createDbArchive() {
   local DB_NAME_DIR="$DB_DIR/$NAME"
   mkdir -p $DB_NAME_DIR
   echo "Processing $NAME"
-  gzip -cd $1 | $JSON_TOOL --json-string --db --output-directory $DB_NAME_DIR --file-name $NAME -
+  gzip -cd $1 | $JSON_TOOL --repair-source "$REPAIR" --json-string --db --output-directory $DB_NAME_DIR --file-name $NAME -
   tar czf $DB_NAME_DIR.tar.gz -C $DB_DIR $NAME
   if [ $? -eq 0 ] ; then
     rm -rf $DB_NAME_DIR
