@@ -8,22 +8,27 @@ if [ -z "$BKUP_DIR" ] ; then
     exit 1
 fi
 
+DST_DIR="$2"
+if [ -z "$DST_DIR" ] ; then
+    echo "No destination directory" 1>&2
+    exit 1
+fi
+
 JSON_TOOL=~/Applications/itunes_json/Products/usr/local/bin/itunes_json
 REPAIR=`cat ~/Documents/code/git/web_data/itunes-repair.json`
 
 SUFFIX=".json.gz"
 
-DB_DIR=$BKUP_DIR/../dbs/
-mkdir -p $DB_DIR
+mkdir -p $DST_DIR
 
 createDbArchive() {
   # $1 file
   local NAME=`basename -s"$SUFFIX" $1`
-  local DB_NAME_DIR="$DB_DIR/$NAME"
+  local DB_NAME_DIR="$DST_DIR/$NAME"
   mkdir -p $DB_NAME_DIR
   echo "Processing $NAME"
   gzip -cd $1 | $JSON_TOOL --repair-source "$REPAIR" --json-string --db --output-directory $DB_NAME_DIR --file-name $NAME -
-  tar czf $DB_NAME_DIR.tar.gz -C $DB_DIR $NAME
+  tar czf $DB_NAME_DIR.tar.gz -C $DST_DIR $NAME
   if [ $? -eq 0 ] ; then
     rm -rf $DB_NAME_DIR
   fi
