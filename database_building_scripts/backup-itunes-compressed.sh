@@ -39,6 +39,9 @@ pushd $GIT_DIR
 git status
 checkFailure $? "$GIT_DIR is not a git directory."
 
+git checkout main
+checkFailure $? "checkout main"
+
 gzip -cd $DST_FILE > itunes.json
 checkFailure $? gzip
 
