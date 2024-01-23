@@ -11,12 +11,15 @@ struct Problem: Codable, Hashable {
   let artist: String?
   let album: String?
   let name: String?
+  let playCount: Int?
+  let playDate: Date?
 }
 
 struct Fix: Codable {
   let album: String?
   let artist: String?
   let kind: String?
+  let playCount: Int?
   let sortArtist: String?
   let trackCount: Int?
   let trackNumber: Int?
@@ -62,6 +65,7 @@ extension Track {
 
     let fixedAlbum = (self.fixableAlbum ? fix.album : nil) ?? self.album
     let fixedArtist = fix.artist ?? self.artist
+    let fixedPlayCount = fix.playCount ?? self.playCount
     let fixedTrackCount = (self.fixableTrackCount ? fix.trackCount : nil) ?? self.trackCount
     let fixedTrackNumber = (self.fixableTrackNumber ? fix.trackNumber : nil) ?? self.trackNumber
     let fixedYear = (self.fixableYear ? fix.year : nil) ?? self.year
@@ -80,7 +84,7 @@ extension Track {
       episodeOrder: episodeOrder, explicit: explicit, genre: genre, grouping: grouping,
       hasVideo: hasVideo, hD: hD, kind: fix.kind ?? kind, location: location, movie: movie,
       musicVideo: musicVideo, name: name, partOfGaplessAlbum: partOfGaplessAlbum,
-      persistentID: persistentID, playCount: playCount, playDateUTC: playDateUTC,
+      persistentID: persistentID, playCount: fixedPlayCount, playDateUTC: playDateUTC,
       podcast: podcast, protected: protected, purchased: purchased, rating: rating,
       ratingComputed: ratingComputed, releaseDate: releaseDate, sampleRate: sampleRate,
       season: season, series: series, size: size, skipCount: skipCount, skipDate: skipDate,
@@ -111,12 +115,37 @@ extension Track {
       return name == self.name
     }()
 
-    return nameMatch
+    guard nameMatch else { return false }
+
+    let playDateMatch = {
+      guard let problemPlayDate = problem.playDate else { return true }
+      guard let problemPlayCount = problem.playCount else { return true }
+
+      guard let playDate = self.playDateUTC else { return true }
+      guard let playCount = self.playCount else { return true }
+
+      guard problemPlayCount == playCount else { return true }
+
+      return problemPlayDate == playDate
+    }()
+
+    return playDateMatch
   }
 }
 
 public struct Repair {
   let items: [Item]
+
+  //  internal init(items: [Item]) {
+  //    self.items =
+  //      items + [
+  //        Item(problem: Problem(artist: nil, album: nil, name: nil, playCount: nil, playDate: nil),
+  //          fix: Fix(album: nil, artist: nil, kind: nil, playCount: nil, sortArtist: nil, trackCount: nil,trackNumber: nil, year: nil, ignore: nil))
+  //      ]
+  //    do {
+  //      try Repair.printRepairJson(items: self.items)
+  //    } catch {}
+  //  }
 
   func repair(_ tracks: [Track]) -> [Track] {
     fix(adjustDates(tracks)).filter { $0.isSQLEncodable }.map { $0.pruned }
@@ -177,7 +206,7 @@ extension Repair {
 
   private static func printRepairJson(items: [Item]) throws {
     let encoder = JSONEncoder()
-    encoder.outputFormatting = [.sortedKeys]
+    encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
     encoder.dateEncodingStrategy = .iso8601
     let data = try encoder.encode(items)
     if let string = String(data: data, encoding: .utf8) {
@@ -189,7 +218,6 @@ extension Repair {
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
     let items = try decoder.decode([Item].self, from: data)
-    //    try printRepairJson(items: items)
     return items
   }
 }
