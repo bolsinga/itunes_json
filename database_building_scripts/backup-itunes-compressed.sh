@@ -33,7 +33,7 @@ DST_FILE=$DST_DIR/$MESSAGE.json.gz
 
 /Users/bolsinga/Applications/itunes_json/Products/usr/local/bin/itunes_json | gzip -c > $DST_FILE
 
-GIT_DIR=$DST_DIR/../itunes_backups_git/
+GIT_DIR=$DST_DIR/git/
 
 pushd $GIT_DIR
 git status
