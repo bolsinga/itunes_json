@@ -97,17 +97,21 @@ extension Track {
       return artist == self.artist
     }()
 
+    guard artistMatch else { return false }
+
     let albumMatch = {
       guard let album = problem.album else { return true }
       return album == self.album
     }()
+
+    guard albumMatch else { return false }
 
     let nameMatch = {
       guard let name = problem.name else { return true }
       return name == self.name
     }()
 
-    return artistMatch && albumMatch && nameMatch
+    return nameMatch
   }
 }
 
