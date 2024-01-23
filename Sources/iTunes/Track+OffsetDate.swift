@@ -12,6 +12,17 @@ extension Double {
   static var timeIntervalSince1970ValidSentinel: Double { Double(1_075_937_542) }
 }
 
+extension Array where Element == Track {
+  var datesAreAheadOneHour: Bool {
+    for track in self {
+      if track.datesAreAheadOneHour {
+        return true
+      }
+    }
+    return false
+  }
+}
+
 extension Track {
   var isValidDateCheckSentinel: Bool {
     // "Yesterday" by Chet Atkins has not been played since before this data has been saved.
