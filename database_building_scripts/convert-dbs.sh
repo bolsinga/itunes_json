@@ -36,6 +36,8 @@ pushd $BKUP_DIR
 
 COUNT=0
 for NAME in $(git tag --list | grep -v empty | sort) ; do
+  git checkout $NAME
+
   createDbArchive $NAME &
 
   let COUNT++
