@@ -48,8 +48,11 @@ checkFailure $? gzip
 $PRG_HOME/database-add-git.sh $GIT_DIR $MESSAGE
 checkFailure $? database-git
 
-git push --tags
+git push
 checkFailure $? push
+
+git push --tags
+checkFailure $? push_tags
 
 git gc --prune=now
 popd
