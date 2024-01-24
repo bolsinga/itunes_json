@@ -126,7 +126,8 @@ extension Track {
 
       guard problemPlayCount == playCount else { return true }
 
-      return problemPlayDate == playDate
+      let timeInterval = abs(problemPlayDate.timeIntervalSince1970 - playDate.timeIntervalSince1970)
+      return timeInterval == 0 || timeInterval == 60 * 60
     }()
 
     return playDateMatch
@@ -136,16 +137,16 @@ extension Track {
 public struct Repair {
   let items: [Item]
 
-  //  internal init(items: [Item]) {
-  //    self.items =
-  //      items + [
-  //        Item(problem: Problem(artist: nil, album: nil, name: nil, playCount: nil, playDate: nil),
-  //          fix: Fix(album: nil, artist: nil, kind: nil, playCount: nil, sortArtist: nil, trackCount: nil,trackNumber: nil, year: nil, ignore: nil))
-  //      ]
-  //    do {
-  //      try Repair.printRepairJson(items: self.items)
-  //    } catch {}
-  //  }
+  internal init(items: [Item]) {
+    self.items = items
+    //        items + [
+    //          Item(problem: Problem(artist: nil, album: nil, name: nil, playCount: nil, playDate: nil),
+    //            fix: Fix(album: nil, artist: nil, kind: nil, playCount: nil, sortArtist: nil, trackCount: nil,trackNumber: nil, year: nil, ignore: nil))
+    //        ]
+    //      do {
+    //        try Repair.printRepairJson(items: self.items)
+    //      } catch {}
+  }
 
   func repair(_ tracks: [Track]) -> [Track] {
     fix(adjustDates(tracks)).filter { $0.isSQLEncodable }.map { $0.pruned }
