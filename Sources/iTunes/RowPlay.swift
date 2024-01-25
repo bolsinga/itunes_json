@@ -6,25 +6,30 @@
 //
 
 import Foundation
+import os
+
+extension Logger {
+  static let brokenPlayDate = Logger(subsystem: "validation", category: "brokenPlayDate")
+}
 
 protocol RowPlayInterface {
   var datePlayedISO8601: String { get }
   var songPlayCount: Int { get }
 }
 
-extension RowPlayInterface {
-  fileprivate var hasPlayed: Bool {
-    // Some songs have play dates but not play counts!
-    songPlayCount > 0 || !datePlayedISO8601.isEmpty
-  }
-}
-
 struct RowPlay: Hashable {
   init?(_ play: RowPlayInterface) {
-    // Some tracks have play dates, but not play counts. Until that is repaired this table has a CHECK(delta >= 0) constraint.
-    guard play.hasPlayed else { return nil }
+    let songPlayCount = play.songPlayCount
+    let datePlayed = play.datePlayedISO8601
 
-    self.init(date: play.datePlayedISO8601, delta: play.songPlayCount)
+    // Some tracks have had play dates, but not play counts. This table also has a CHECK(delta > 0) constraint.
+    if songPlayCount == 0, !datePlayed.isEmpty {
+      Logger.brokenPlayDate.error("")
+    }
+
+    guard songPlayCount > 0 || !datePlayed.isEmpty else { return nil }
+
+    self.init(date: datePlayed, delta: songPlayCount)
   }
 
   init() {
