@@ -124,7 +124,7 @@ extension Track {
       guard let playDate = self.playDateUTC else { return true }
       guard let playCount = self.playCount else { return true }
 
-      guard problemPlayCount == playCount else { return true }
+      guard problemPlayCount == playCount else { return false }
 
       let timeInterval = abs(problemPlayDate.timeIntervalSince1970 - playDate.timeIntervalSince1970)
       return timeInterval == 0 || timeInterval == 60 * 60
