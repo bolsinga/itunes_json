@@ -36,4 +36,20 @@ struct TrackRowEncoder {
   var playRows: (table: String, rows: [TrackRow]) {
     (Track.PlaysTable, rows.filter { $0.play != nil }.sorted(by: { $0.play!.date < $1.play!.date }))
   }
+
+  var views = """
+    CREATE VIEW tracks AS
+    SELECT
+      s.name AS sname,
+      s.trackNumber AS track,
+      a.name AS aname,
+      al.name AS alname,
+      p.date AS date,
+      p.delta as delta
+    FROM songs s
+    LEFT JOIN artists a ON s.artistid=a.id
+    LEFT JOIN albums al ON s.albumid=al.id
+    LEFT JOIN plays p ON s.id=p.songid
+    ;
+    """
 }

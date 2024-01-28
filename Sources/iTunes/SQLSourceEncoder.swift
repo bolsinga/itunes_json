@@ -59,7 +59,7 @@ struct SQLSourceEncoder {
           statements.append(contentsOf: $0.statements.sorted())
           statements.append("COMMIT;")
           return statements
-        }.compactMap { $0 }).joined(separator: "\n")
+        } + [rowEncoder.views].compactMap { $0 }).joined(separator: "\n")
     }
   }
 
