@@ -6,14 +6,37 @@
 //
 
 import Foundation
+import os
+
+extension Logger {
+  static let noPlayDate = Logger(subsystem: "validation", category: "noPlayDate")
+  static let noPlayCount = Logger(subsystem: "validation", category: "noPlayCount")
+}
 
 extension Track: RowPlayInterface {
-  var datePlayedISO8601: String {
+  var songPlayedInformation: (datePlayedISO8601: String, playCount: Int) {
+    let datePlayed = datePlayedISO8601
+    let playCount = songPlayCount
+
+    if datePlayed.isEmpty || playCount == 0 {
+      if playCount != 0 {
+        Logger.noPlayDate.error("\(debugLogInformation, privacy: .public)")
+      }
+      if !datePlayed.isEmpty {
+        Logger.noPlayCount.error("\(debugLogInformation, privacy: .public)")
+      }
+    }
+
+    return (datePlayed, playCount)
+  }
+
+  private var datePlayedISO8601: String {
     guard let playDateUTC else { return "" }
     return playDateUTC.formatted(.iso8601)
   }
 
-  var songPlayCount: Int {
-    playCount ?? 0
+  private var songPlayCount: Int {
+    guard let playCount else { return 0 }
+    return playCount
   }
 }
