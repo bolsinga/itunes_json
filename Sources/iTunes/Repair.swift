@@ -20,6 +20,7 @@ struct Fix: Codable {
   let artist: String?
   let kind: String?
   let playCount: Int?
+  let playDate: Date?
   let sortArtist: String?
   let trackCount: Int?
   let trackNumber: Int?
@@ -66,6 +67,7 @@ extension Track {
     let fixedAlbum = (self.fixableAlbum ? fix.album : nil) ?? self.album
     let fixedArtist = fix.artist ?? self.artist
     let fixedPlayCount = fix.playCount ?? self.playCount
+    let fixedPlayDate = fix.playDate ?? self.playDateUTC
     let fixedTrackCount = (self.fixableTrackCount ? fix.trackCount : nil) ?? self.trackCount
     let fixedTrackNumber = (self.fixableTrackNumber ? fix.trackNumber : nil) ?? self.trackNumber
     let fixedYear = (self.fixableYear ? fix.year : nil) ?? self.year
@@ -84,7 +86,7 @@ extension Track {
       episodeOrder: episodeOrder, explicit: explicit, genre: genre, grouping: grouping,
       hasVideo: hasVideo, hD: hD, kind: fix.kind ?? kind, location: location, movie: movie,
       musicVideo: musicVideo, name: name, partOfGaplessAlbum: partOfGaplessAlbum,
-      persistentID: persistentID, playCount: fixedPlayCount, playDateUTC: playDateUTC,
+      persistentID: persistentID, playCount: fixedPlayCount, playDateUTC: fixedPlayDate,
       podcast: podcast, protected: protected, purchased: purchased, rating: rating,
       ratingComputed: ratingComputed, releaseDate: releaseDate, sampleRate: sampleRate,
       season: season, series: series, size: size, skipCount: skipCount, skipDate: skipDate,
@@ -130,7 +132,15 @@ extension Track {
       return timeInterval == 0 || timeInterval == 60 * 60
     }()
 
-    return playDateMatch
+    if playDateMatch { return true }
+
+    let playDateEmptyMatch = {
+      guard problem.playDate == nil, self.playDateUTC == nil else { return false }
+
+      return problem.playCount != nil
+    }()
+
+    return playDateEmptyMatch
   }
 }
 
