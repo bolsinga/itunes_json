@@ -74,11 +74,6 @@ struct Program: AsyncParsableCommand {
       throw ValidationError("Using --json-string requires JSON String to be passed as an argument.")
     }
 
-    if isRepairing && (source != .jsonString) {
-      throw ValidationError(
-        "Repairing requires source json (actually \(source)) to be converted."
-      )
-    }
     if (repairFile != nil) && (repairSource != nil) {
       throw ValidationError("repairSource is already defined, but repairFile is being passed.")
     }
