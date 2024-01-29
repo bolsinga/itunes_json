@@ -67,5 +67,6 @@ final class DBEncoder {
     let albumLookup = try await emitAlbums()
     let songLookup = try await emitSongs(artistLookup: artistLookup, albumLookup: albumLookup)
     try await emitPlays(songLookup: songLookup)
+    try await db.execute(rowEncoder.views)
   }
 }
