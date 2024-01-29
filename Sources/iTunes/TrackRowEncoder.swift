@@ -40,10 +40,14 @@ struct TrackRowEncoder {
   var views = """
     CREATE VIEW tracks AS
     SELECT
-      s.name AS sname,
+      s.id AS sid,
+      s.name AS song,
       s.trackNumber AS track,
-      a.name AS aname,
-      al.name AS alname,
+      a.id AS aid,
+      a.name AS artist,
+      al.id AS alid,
+      al.name AS album,
+      p.id AS pid,
       p.date AS date,
       p.delta as delta
     FROM songs s
