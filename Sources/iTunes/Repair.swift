@@ -97,7 +97,7 @@ extension Track {
       videoWidth: videoWidth, year: fixedYear)
   }
 
-  fileprivate func matches(problem: Problem) -> Bool {
+  internal func matches(problem: Problem) -> Bool {
     let artistMatch = {
       guard let artist = problem.artist else { return true }
       return artist == self.artist
@@ -166,7 +166,7 @@ public struct Repair {
     tracks.datesAreAheadOneHour ? tracks.map { $0.moveDatesBackOneHour() } : tracks
   }
 
-  private func fix(_ tracks: [Track]) -> [Track] {
+  internal func fix(_ tracks: [Track]) -> [Track] {
     let fixes = tracks.reduce(into: [Track: [Fix]]()) { dictionary, track in
       var arr = dictionary[track] ?? []
       arr.append(

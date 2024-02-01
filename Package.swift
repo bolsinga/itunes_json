@@ -16,6 +16,7 @@ let package = Package(
   ],
   targets: [
     .target(name: "iTunes"),
+    .testTarget(name: "iTunesTests", dependencies: ["iTunes"]),
     .executableTarget(
       name: "tool",
       dependencies: [
