@@ -95,4 +95,34 @@ final class RepairTests: XCTestCase {
     let repaired = repair.repair([track])
     XCTAssertEqual(repaired.count, 0)
   }
+
+  func testIgnored_exclusive() throws {
+    let ignoreItem = """
+      {
+        "fix" : {
+          "ignore" : true
+        },
+        "problem" : {
+          "artist" : "Pink Floyd",
+        }
+      }
+      """
+    var item = createItem(ignoreItem)
+    XCTAssertTrue(item.fix.validateIgnoreFix)
+    XCTAssertTrue(item.fix.trackIgnored)
+
+    let ignoreItem2 = """
+      {
+        "fix" : {
+          "ignore" : true,
+          "year": 1970
+        },
+        "problem" : {
+          "artist" : "Pink Floyd",
+        }
+      }
+      """
+    item = createItem(ignoreItem2)
+    XCTAssertFalse(item.fix.validateIgnoreFix)
+  }
 }
