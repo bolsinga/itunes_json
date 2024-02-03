@@ -1,5 +1,8 @@
 #/bin/sh
 
+# NOTE! This must be copied into ~/Applications.
+#  So must any scripts it accesses! Otherwise it will not run from ~/bin/
+
 checkFailure() {
   # $1 exit code
   # $2 message
