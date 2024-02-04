@@ -9,11 +9,23 @@ import Foundation
 
 enum Remedy {
   case ignore
+  case correctSortArtist(String)
 
   var isIgnored: Bool {
     switch self {
     case .ignore:
       return true
+    case .correctSortArtist(_):
+      return false
+    }
+  }
+
+  var sortArtist: String? {
+    switch self {
+    case .ignore:
+      return nil
+    case .correctSortArtist(let string):
+      return string
     }
   }
 }

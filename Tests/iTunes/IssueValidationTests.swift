@@ -61,4 +61,16 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNil(issue)
   }
+
+  func testSortArtist() throws {
+    let item = Item(problem: Problem(artist: "The Artist"), fix: Fix(sortArtist: "Artist, The"))
+    let issue = item.issue
+
+    XCTAssertNotNil(issue)
+    XCTAssertEqual(issue?.critera.count, 1)
+    XCTAssertTrue((issue?.critera[0])!.matchesArtist("The Artist"))
+
+    XCTAssertEqual(issue?.remedies.count, 1)
+    XCTAssertTrue((issue?.remedies[0])!.sortArtist == "Artist, The")
+  }
 }
