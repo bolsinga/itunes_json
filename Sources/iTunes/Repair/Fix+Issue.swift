@@ -14,6 +14,7 @@ extension Fix {
     var result = [Remedy]()
 
     if let sortArtist { result.append(.correctSortArtist(sortArtist)) }
+    if let kind { result.append(.correctKind(kind)) }
 
     return result
   }
@@ -23,6 +24,7 @@ extension Problem {
   var criteria: [Criterion] {
     var result = [Criterion]()
 
+    if let album { result.append(.album(album)) }
     if let artist { result.append(.artist(artist)) }
     if let name { result.append(.song(name)) }
 

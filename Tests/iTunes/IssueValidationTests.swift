@@ -73,4 +73,27 @@ final class IssueValidationTests: XCTestCase {
     XCTAssertEqual(issue?.remedies.count, 1)
     XCTAssertTrue((issue?.remedies[0])!.sortArtist == "Artist, The")
   }
+
+  func testKind() throws {
+    let item = Item(
+      problem: Problem(artist: "artist", album: "album", name: "song"), fix: Fix(kind: "kind"))
+    let issue = item.issue
+
+    XCTAssertNotNil(issue)
+    XCTAssertEqual(issue?.critera.count, 3)
+    XCTAssertTrue((issue?.critera[0])!.matchesAlbum("album"))
+    XCTAssertTrue((issue?.critera[1])!.matchesArtist("artist"))
+    XCTAssertTrue((issue?.critera[2])!.matchesSong("song"))
+
+    XCTAssertEqual(issue?.remedies.count, 1)
+    XCTAssertTrue((issue?.remedies[0])!.kind == "kind")
+  }
+
+  func testKindMissingProperties() throws {
+    let item = Item(
+      problem: Problem(artist: "artist", name: "song"), fix: Fix(kind: "kind"))
+    let issue = item.issue
+
+    XCTAssertNil(issue)
+  }
 }
