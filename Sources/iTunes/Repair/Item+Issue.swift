@@ -18,6 +18,17 @@ extension Array where Element == Criterion {
       return true
     }
   }
+
+  var validForSortArtist: Bool {
+    guard count == 1 else { return false }
+
+    switch self[0] {
+    case .artist(_):
+      return true
+    case .song(_):
+      return false
+    }
+  }
 }
 
 extension Item {

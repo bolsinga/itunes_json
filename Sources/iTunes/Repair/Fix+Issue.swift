@@ -11,7 +11,11 @@ extension Fix {
   var remedies: [Remedy] {
     if let ignore, ignore { return [Remedy.ignore] }
 
-    return []
+    var result = [Remedy]()
+
+    if let sortArtist { result.append(.correctSortArtist(sortArtist)) }
+
+    return result
   }
 }
 

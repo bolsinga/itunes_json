@@ -12,6 +12,7 @@ extension Logger {
   static let noRemedies = Logger(subsystem: "repair", category: "noRemedies")
   static let noCriteria = Logger(subsystem: "repair", category: "noCriteria")
   static let ignore = Logger(subsystem: "repair", category: "ignore")
+  static let sortArtist = Logger(subsystem: "repair", category: "sortArtist")
 }
 
 extension Issue {
@@ -31,6 +32,11 @@ extension Issue {
       case .ignore:
         guard critera.validForIgnore else {
           Logger.ignore.error("\(String(describing: self), privacy: .public)")
+          return false
+        }
+      case .correctSortArtist(_):
+        guard critera.validForSortArtist else {
+          Logger.sortArtist.error("\(String(describing: self), privacy: .public)")
           return false
         }
       }

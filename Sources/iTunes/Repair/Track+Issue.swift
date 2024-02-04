@@ -25,10 +25,42 @@ extension Track {
     return true
   }
 
+  private func update(
+    fixedAlbum: String? = nil, fixedArtist: String? = nil, fixedKind: String? = nil,
+    fixedPlayCount: Int? = nil, fixedPlayDate: Date? = nil, fixedSortArtist: String? = nil,
+    fixedTrackCount: Int? = nil, fixedTrackNumber: Int? = nil, fixedYear: Int? = nil
+  ) -> Track {
+    Track(
+      album: fixedAlbum ?? album, albumArtist: albumArtist, albumRating: albumRating,
+      albumRatingComputed: albumRatingComputed, artist: fixedArtist ?? artist, bitRate: bitRate,
+      bPM: bPM,
+      comments: comments, compilation: compilation, composer: composer,
+      contentRating: contentRating, dateAdded: dateAdded, dateModified: dateModified,
+      disabled: disabled, discCount: discCount, discNumber: discNumber, episode: episode,
+      episodeOrder: episodeOrder, explicit: explicit, genre: genre, grouping: grouping,
+      hasVideo: hasVideo, hD: hD, kind: fixedKind ?? kind, location: location, movie: movie,
+      musicVideo: musicVideo, name: name, partOfGaplessAlbum: partOfGaplessAlbum,
+      persistentID: persistentID, playCount: fixedPlayCount ?? playCount,
+      playDateUTC: fixedPlayDate ?? playDateUTC,
+      podcast: podcast, protected: protected, purchased: purchased, rating: rating,
+      ratingComputed: ratingComputed, releaseDate: releaseDate, sampleRate: sampleRate,
+      season: season, series: series, size: size, skipCount: skipCount, skipDate: skipDate,
+      sortAlbum: sortAlbum, sortAlbumArtist: sortAlbumArtist,
+      sortArtist: fixedSortArtist ?? sortArtist,
+      sortComposer: sortComposer, sortName: sortName, sortSeries: sortSeries,
+      totalTime: totalTime, trackCount: fixedTrackCount ?? trackCount,
+      trackNumber: fixedTrackNumber ?? trackNumber,
+      trackType: trackType, tVShow: tVShow, unplayed: unplayed, videoHeight: videoHeight,
+      videoWidth: videoWidth, year: fixedYear ?? year)
+  }
+
   internal func applyRemedy(_ remedy: Remedy) -> Track? {
     switch remedy {
     case .ignore:
       return nil
+    case .correctSortArtist(let string):
+      guard sortArtist == nil else { return self }
+      return self.update(fixedSortArtist: string)
     }
   }
 
