@@ -126,4 +126,27 @@ final class RepairTrackIssueTests: XCTestCase {
     XCTAssertNotNil(fixedTrack)
     XCTAssertEqual(fixedTrack, track)
   }
+
+  func testRepairTrackCount() throws {
+    let track = Track(album: "album", name: "song", persistentID: 0)
+
+    let issue = Issue(critera: [.album("album")], remedies: [.correctTrackCount(3)])
+
+    let fixedTrack = track.repair(issue)
+
+    XCTAssertNotNil(fixedTrack)
+    XCTAssertNotNil(fixedTrack?.trackCount)
+    XCTAssertEqual(fixedTrack?.trackCount, 3)
+  }
+
+  func testRepairTrackCountAlreadySet() throws {
+    let track = Track(album: "album", name: "song", persistentID: 0, trackCount: 10)
+
+    let issue = Issue(critera: [.album("album")], remedies: [.correctTrackCount(3)])
+
+    let fixedTrack = track.repair(issue)
+
+    XCTAssertNotNil(fixedTrack)
+    XCTAssertEqual(fixedTrack, track)
+  }
 }

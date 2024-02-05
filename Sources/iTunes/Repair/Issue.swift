@@ -11,6 +11,7 @@ enum Remedy {
   case ignore
   case correctSortArtist(String)
   case correctKind(String)
+  case correctTrackCount(Int)
   case correctYear(Int)
 
   var isIgnored: Bool {
@@ -43,6 +44,15 @@ enum Remedy {
   var year: Int? {
     switch self {
     case .correctYear(let int):
+      return int
+    default:
+      return nil
+    }
+  }
+
+  var trackCount: Int? {
+    switch self {
+    case .correctTrackCount(let int):
       return int
     default:
       return nil
