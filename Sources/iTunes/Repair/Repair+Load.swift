@@ -17,7 +17,16 @@ extension Repair {
     var items: [Item]?
     if let url { items = try await Repair.load(url: url) }
     if let source { items = try Repair.load(source: source) }
-    if let items { return Repair(items: items) }
+    if let items {
+      let issues = items.compactMap { $0.issue }
+      if items.count != issues.count {
+        print("items: \(items.count) issues: \(issues.count)")
+      }
+      //      do {
+      //        try Repair.printRepairJson(items: items)
+      //      } catch {}
+      return Repair(items: items)
+    }
     throw RepairError.invalidInput
   }
 
