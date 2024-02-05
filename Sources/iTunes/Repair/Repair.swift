@@ -12,13 +12,6 @@ public struct Repair {
 
   internal init(items: [Item]) {
     self.items = items
-    //        items + [
-    //          Item(problem: Problem(artist: nil, album: nil, name: nil, playCount: nil, playDate: nil),
-    //            fix: Fix(album: nil, artist: nil, kind: nil, playCount: nil, sortArtist: nil, trackCount: nil,trackNumber: nil, year: nil, ignore: nil))
-    //        ]
-    //      do {
-    //        try Repair.printRepairJson(items: self.items)
-    //      } catch {}
   }
 
   func repair(_ tracks: [Track]) -> [Track] {
