@@ -10,45 +10,65 @@ import Foundation
 enum Remedy {
   case ignore
   case correctSortArtist(String)
+  case correctKind(String)
 
   var isIgnored: Bool {
     switch self {
     case .ignore:
       return true
-    case .correctSortArtist(_):
+    default:
       return false
     }
   }
 
   var sortArtist: String? {
     switch self {
-    case .ignore:
-      return nil
     case .correctSortArtist(let string):
       return string
+    default:
+      return nil
+    }
+  }
+
+  var kind: String? {
+    switch self {
+    case .correctKind(let string):
+      return string
+    default:
+      return nil
     }
   }
 }
 
 enum Criterion {
+  case album(String)
   case artist(String)
   case song(String)
+
+  func matchesAlbum(_ album: String) -> Bool {
+    switch self {
+    case .album(let string):
+      return string == album
+    default:
+      return false
+    }
+  }
 
   func matchesArtist(_ artist: String) -> Bool {
     switch self {
     case .artist(let string):
       return string == artist
-    case .song(_):
+    default:
       return false
     }
   }
 
   func matchesSong(_ song: String) -> Bool {
     switch self {
-    case .artist(_):
-      return false
     case .song(let string):
       return string == song
+    default:
+      return false
     }
   }
 }

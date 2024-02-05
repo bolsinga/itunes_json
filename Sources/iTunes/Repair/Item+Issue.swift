@@ -16,6 +16,8 @@ extension Array where Element == Criterion {
       return true
     case .song(_):
       return true
+    default:
+      return false
     }
   }
 
@@ -25,9 +27,22 @@ extension Array where Element == Criterion {
     switch self[0] {
     case .artist(_):
       return true
-    case .song(_):
+    default:
       return false
     }
+  }
+
+  var validForKind: Bool {
+    guard count == 3 else { return false }
+
+    var matchingCriteriaCount = 0
+    for criteria in self {
+      switch criteria {
+      case .album(_), .artist(_), .song(_):
+        matchingCriteriaCount += 1
+      }
+    }
+    return matchingCriteriaCount == 3
   }
 }
 

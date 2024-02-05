@@ -10,6 +10,9 @@ import Foundation
 extension Track {
   internal func criterionApplies(_ criterion: Criterion) -> Bool {
     switch criterion {
+    case .album(let string):
+      guard let album else { return false }
+      return album == string
     case .artist(let string):
       guard let artist else { return false }
       return artist == string
@@ -61,6 +64,9 @@ extension Track {
     case .correctSortArtist(let string):
       guard sortArtist == nil else { return self }
       return self.update(fixedSortArtist: string)
+    case .correctKind(let string):
+      guard kind == nil else { return self }
+      return self.update(fixedKind: string)
     }
   }
 
