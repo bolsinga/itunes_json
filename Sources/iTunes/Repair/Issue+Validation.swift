@@ -14,6 +14,7 @@ extension Logger {
   static let ignore = Logger(subsystem: "repair", category: "ignore")
   static let sortArtist = Logger(subsystem: "repair", category: "sortArtist")
   static let kind = Logger(subsystem: "repair", category: "kind")
+  static let year = Logger(subsystem: "repair", category: "year")
 }
 
 extension Issue {
@@ -43,6 +44,11 @@ extension Issue {
       case .correctKind(_):
         guard critera.validForKind else {
           Logger.kind.error("\(String(describing: self), privacy: .public)")
+          return false
+        }
+      case .correctYear(_):
+        guard critera.validForYear else {
+          Logger.year.error("\(String(describing: self), privacy: .public)")
           return false
         }
       }

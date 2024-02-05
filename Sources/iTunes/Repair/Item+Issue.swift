@@ -44,6 +44,24 @@ extension Array where Element == Criterion {
     }
     return matchingCriteriaCount == 3
   }
+
+  var validForYear: Bool {
+    var hasArtist: Bool = false
+    var hasAlbum: Bool = false
+    var hasSong: Bool = false
+
+    for criteria in self {
+      switch criteria {
+      case .album(_):
+        hasAlbum = true
+      case .artist(_):
+        hasArtist = true
+      case .song(_):
+        hasSong = true
+      }
+    }
+    return hasAlbum || (hasArtist && hasSong)
+  }
 }
 
 extension Item {

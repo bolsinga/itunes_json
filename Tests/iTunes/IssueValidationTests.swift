@@ -96,4 +96,58 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNil(issue)
   }
+
+  func testYearArtistAlbum() throws {
+    let item = Item(problem: Problem(artist: "artist", album: "album"), fix: Fix(year: 1970))
+    let issue = item.issue
+
+    XCTAssertNotNil(issue)
+    XCTAssertEqual(issue?.critera.count, 2)
+    XCTAssertTrue((issue?.critera[0])!.matchesAlbum("album"))
+    XCTAssertTrue((issue?.critera[1])!.matchesArtist("artist"))
+
+    XCTAssertEqual(issue?.remedies.count, 1)
+    XCTAssertTrue((issue?.remedies[0])!.year == 1970)
+  }
+
+  func testYearArtistAlbumSong() throws {
+    let item = Item(
+      problem: Problem(artist: "artist", album: "album", name: "song"), fix: Fix(year: 1970))
+    let issue = item.issue
+
+    XCTAssertNotNil(issue)
+    XCTAssertEqual(issue?.critera.count, 3)
+    XCTAssertTrue((issue?.critera[0])!.matchesAlbum("album"))
+    XCTAssertTrue((issue?.critera[1])!.matchesArtist("artist"))
+    XCTAssertTrue((issue?.critera[2])!.matchesSong("song"))
+
+    XCTAssertEqual(issue?.remedies.count, 1)
+    XCTAssertTrue((issue?.remedies[0])!.year == 1970)
+  }
+
+  func testYearAlbum() throws {
+    let item = Item(problem: Problem(album: "album"), fix: Fix(year: 1970))
+    let issue = item.issue
+
+    XCTAssertNotNil(issue)
+    XCTAssertEqual(issue?.critera.count, 1)
+    XCTAssertTrue((issue?.critera[0])!.matchesAlbum("album"))
+
+    XCTAssertEqual(issue?.remedies.count, 1)
+    XCTAssertTrue((issue?.remedies[0])!.year == 1970)
+  }
+
+  func testYearArtist() throws {
+    let item = Item(problem: Problem(artist: "artist"), fix: Fix(year: 1970))
+    let issue = item.issue
+
+    XCTAssertNil(issue)
+  }
+
+  func testYearSong() throws {
+    let item = Item(problem: Problem(name: "song"), fix: Fix(year: 1970))
+    let issue = item.issue
+
+    XCTAssertNil(issue)
+  }
 }
