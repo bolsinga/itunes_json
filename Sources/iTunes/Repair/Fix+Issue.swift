@@ -15,6 +15,7 @@ extension Fix {
 
     if let sortArtist { result.append(.correctSortArtist(sortArtist)) }
     if let kind { result.append(.correctKind(kind)) }
+    if let year { result.append(.correctYear(year)) }
 
     return result
   }

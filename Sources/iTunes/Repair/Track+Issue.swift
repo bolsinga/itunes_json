@@ -67,6 +67,9 @@ extension Track {
     case .correctKind(let string):
       guard kind == nil else { return self }
       return self.update(fixedKind: string)
+    case .correctYear(let int):
+      guard year == nil else { return self }
+      return self.update(fixedYear: int)
     }
   }
 

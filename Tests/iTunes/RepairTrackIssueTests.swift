@@ -103,4 +103,27 @@ final class RepairTrackIssueTests: XCTestCase {
     XCTAssertNotNil(fixedTrack)
     XCTAssertEqual(fixedTrack, track)
   }
+
+  func testRepairYear() throws {
+    let track = Track(album: "album", name: "song", persistentID: 0)
+
+    let issue = Issue(critera: [.album("album")], remedies: [.correctYear(1970)])
+
+    let fixedTrack = track.repair(issue)
+
+    XCTAssertNotNil(fixedTrack)
+    XCTAssertNotNil(fixedTrack?.year)
+    XCTAssertEqual(fixedTrack?.year, 1970)
+  }
+
+  func testRepairYearAlreadySet() throws {
+    let track = Track(album: "album", name: "song", persistentID: 0, year: 1971)
+
+    let issue = Issue(critera: [.album("album")], remedies: [.correctYear(1970)])
+
+    let fixedTrack = track.repair(issue)
+
+    XCTAssertNotNil(fixedTrack)
+    XCTAssertEqual(fixedTrack, track)
+  }
 }
