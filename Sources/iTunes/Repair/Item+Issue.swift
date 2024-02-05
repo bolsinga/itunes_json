@@ -79,6 +79,23 @@ extension Array where Element == Criterion {
     }
     return hasAlbum || hasArtist
   }
+
+  var validForAlbum: Bool {
+    var hasArtist: Bool = false
+    var hasSong: Bool = false
+
+    for criteria in self {
+      switch criteria {
+      case .album(_):
+        ()
+      case .artist(_):
+        hasArtist = true
+      case .song(_):
+        hasSong = true
+      }
+    }
+    return hasSong || hasArtist
+  }
 }
 
 extension Item {

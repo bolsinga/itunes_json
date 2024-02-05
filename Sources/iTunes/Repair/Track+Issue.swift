@@ -73,6 +73,9 @@ extension Track {
     case .correctTrackCount(let int):
       guard trackCount == nil else { return self }
       return self.update(fixedTrackCount: int)
+    case .correctAlbum(let string):
+      guard album == nil else { return self }
+      return self.update(fixedAlbum: string)
     }
   }
 

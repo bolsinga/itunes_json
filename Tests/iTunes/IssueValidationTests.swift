@@ -236,4 +236,23 @@ final class IssueValidationTests: XCTestCase {
     XCTAssertEqual(remedies.count, 1)
     XCTAssertTrue(!remedies.filter { $0.trackCount == 3 }.isEmpty)
   }
+
+  func testAlbum() throws {
+    let item = Item(
+      problem: Problem(artist: "artist", name: "song"),
+      fix: Fix(album: "song", trackCount: 1, trackNumber: 1))
+    let issue = item.issue
+
+    XCTAssertNotNil(issue)
+
+    let critera = try XCTUnwrap(issue?.critera)
+    XCTAssertEqual(critera.count, 2)
+    XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
+    XCTAssertTrue(!critera.filter { $0.matchesSong("song") }.isEmpty)
+
+    let remedies = try XCTUnwrap(issue?.remedies)
+    XCTAssertEqual(remedies.count, 2)
+    XCTAssertTrue(!remedies.filter { $0.album == "song" }.isEmpty)
+    XCTAssertTrue(!remedies.filter { $0.trackCount == 1 }.isEmpty)
+  }
 }
