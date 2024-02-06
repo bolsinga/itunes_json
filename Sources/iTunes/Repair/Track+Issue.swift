@@ -76,6 +76,9 @@ extension Track {
     case .correctAlbum(let string):
       guard album == nil else { return self }
       return self.update(fixedAlbum: string)
+    case .correctArtist(let string):
+      guard artist != nil else { return self }
+      return self.update(fixedArtist: string)
     }
   }
 

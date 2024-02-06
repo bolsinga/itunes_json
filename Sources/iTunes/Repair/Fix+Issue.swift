@@ -18,6 +18,7 @@ extension Fix {
     if let year { result.append(.correctYear(year)) }
     if let trackCount { result.append(.correctTrackCount(trackCount)) }
     if let album { result.append(.correctAlbum(album)) }
+    if let artist { result.append(.correctArtist(artist)) }
 
     return result
   }

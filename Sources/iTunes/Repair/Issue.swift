@@ -14,6 +14,7 @@ enum Remedy {
   case correctTrackCount(Int)
   case correctYear(Int)
   case correctAlbum(String)
+  case correctArtist(String)
 
   var isIgnored: Bool {
     switch self {
@@ -63,6 +64,15 @@ enum Remedy {
   var album: String? {
     switch self {
     case .correctAlbum(let string):
+      return string
+    default:
+      return nil
+    }
+  }
+
+  var artist: String? {
+    switch self {
+    case .correctArtist(let string):
       return string
     default:
       return nil
