@@ -96,6 +96,10 @@ extension Array where Element == Criterion {
     }
     return hasSong || hasArtist
   }
+
+  var validForArtist: Bool {
+    validForAlbum
+  }
 }
 
 extension Item {
