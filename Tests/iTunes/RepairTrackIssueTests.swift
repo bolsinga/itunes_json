@@ -153,7 +153,7 @@ final class RepairTrackIssueTests: XCTestCase {
   func testRepairAlbum() throws {
     let track = Track(artist: "artist", name: "song", persistentID: 0)
 
-    let issue = Issue(critera: [.artist("artist")], remedies: [.correctAlbum("album")])
+    let issue = Issue(critera: [.artist("artist"), .song("song")], remedies: [.correctAlbum("album")])
 
     let fixedTrack = track.repair(issue)
 
@@ -165,7 +165,7 @@ final class RepairTrackIssueTests: XCTestCase {
   func testRepairAlbumAlreadySet() throws {
     let track = Track(album: "ALBUM", artist: "artist", name: "song", persistentID: 0)
 
-    let issue = Issue(critera: [.album("album")], remedies: [.correctAlbum("album")])
+    let issue = Issue(critera: [.artist("artist"), .song("song")], remedies: [.correctAlbum("album")])
 
     let fixedTrack = track.repair(issue)
 
