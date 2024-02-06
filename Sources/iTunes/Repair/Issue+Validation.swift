@@ -16,6 +16,7 @@ extension Logger {
   static let kind = Logger(subsystem: "repair", category: "kind")
   static let year = Logger(subsystem: "repair", category: "year")
   static let trackCount = Logger(subsystem: "repair", category: "trackCount")
+  static let album = Logger(subsystem: "repair", category: "album")
 }
 
 extension Issue {
@@ -55,6 +56,11 @@ extension Issue {
       case .correctTrackCount(_):
         guard critera.validForTrackCount else {
           Logger.trackCount.error("\(String(describing: self), privacy: .public)")
+          return false
+        }
+      case .correctAlbum(_):
+        guard critera.validForAlbum else {
+          Logger.album.error("\(String(describing: self), privacy: .public)")
           return false
         }
       }
