@@ -39,11 +39,11 @@ final class IssueValidationTests: XCTestCase {
 
     let critera = try XCTUnwrap(issue?.critera)
     XCTAssertEqual(critera.count, 1)
-    XCTAssertTrue(critera[0].matchesArtist("artist"))
+    XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
 
     let remedies = try XCTUnwrap(issue?.remedies)
     XCTAssertEqual(remedies.count, 1)
-    XCTAssertTrue(remedies[0].isIgnored)
+    XCTAssertTrue(!remedies.filter { $0.isIgnored }.isEmpty)
   }
 
   func testIgnoreSong() throws {
@@ -54,11 +54,11 @@ final class IssueValidationTests: XCTestCase {
 
     let critera = try XCTUnwrap(issue?.critera)
     XCTAssertEqual(critera.count, 1)
-    XCTAssertTrue(critera[0].matchesSong("song"))
+    XCTAssertTrue(!critera.filter { $0.matchesSong("song") }.isEmpty)
 
     let remedies = try XCTUnwrap(issue?.remedies)
     XCTAssertEqual(remedies.count, 1)
-    XCTAssertTrue(remedies[0].isIgnored)
+    XCTAssertTrue(!remedies.filter { $0.isIgnored }.isEmpty)
   }
 
   func testIgnoreSongAndArtistInvalid() throws {
@@ -76,11 +76,11 @@ final class IssueValidationTests: XCTestCase {
 
     let critera = try XCTUnwrap(issue?.critera)
     XCTAssertEqual(critera.count, 1)
-    XCTAssertTrue(critera[0].matchesArtist("The Artist"))
+    XCTAssertTrue(!critera.filter { $0.matchesArtist("The Artist") }.isEmpty)
 
     let remedies = try XCTUnwrap(issue?.remedies)
     XCTAssertEqual(remedies.count, 1)
-    XCTAssertTrue(remedies[0].sortArtist == "Artist, The")
+    XCTAssertTrue(!remedies.filter { $0.sortArtist == "Artist, The" }.isEmpty)
   }
 
   func testKind() throws {
@@ -92,13 +92,13 @@ final class IssueValidationTests: XCTestCase {
 
     let critera = try XCTUnwrap(issue?.critera)
     XCTAssertEqual(critera.count, 3)
-    XCTAssertTrue(critera[0].matchesAlbum("album"))
-    XCTAssertTrue(critera[1].matchesArtist("artist"))
-    XCTAssertTrue(critera[2].matchesSong("song"))
+    XCTAssertTrue(!critera.filter { $0.matchesAlbum("album") }.isEmpty)
+    XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
+    XCTAssertTrue(!critera.filter { $0.matchesSong("song") }.isEmpty)
 
     let remedies = try XCTUnwrap(issue?.remedies)
     XCTAssertEqual(remedies.count, 1)
-    XCTAssertTrue(remedies[0].kind == "kind")
+    XCTAssertTrue(!remedies.filter { $0.kind == "kind" }.isEmpty)
   }
 
   func testKindMissingProperties() throws {
@@ -117,12 +117,12 @@ final class IssueValidationTests: XCTestCase {
 
     let critera = try XCTUnwrap(issue?.critera)
     XCTAssertEqual(critera.count, 2)
-    XCTAssertTrue(critera[0].matchesAlbum("album"))
-    XCTAssertTrue(critera[1].matchesArtist("artist"))
+    XCTAssertTrue(!critera.filter { $0.matchesAlbum("album") }.isEmpty)
+    XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
 
     let remedies = try XCTUnwrap(issue?.remedies)
     XCTAssertEqual(remedies.count, 1)
-    XCTAssertTrue(remedies[0].year == 1970)
+    XCTAssertTrue(!remedies.filter { $0.year == 1970 }.isEmpty)
   }
 
   func testYearArtistAlbumSong() throws {
@@ -134,13 +134,13 @@ final class IssueValidationTests: XCTestCase {
 
     let critera = try XCTUnwrap(issue?.critera)
     XCTAssertEqual(critera.count, 3)
-    XCTAssertTrue(critera[0].matchesAlbum("album"))
-    XCTAssertTrue(critera[1].matchesArtist("artist"))
-    XCTAssertTrue(critera[2].matchesSong("song"))
+    XCTAssertTrue(!critera.filter { $0.matchesAlbum("album") }.isEmpty)
+    XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
+    XCTAssertTrue(!critera.filter { $0.matchesSong("song") }.isEmpty)
 
     let remedies = try XCTUnwrap(issue?.remedies)
     XCTAssertEqual(remedies.count, 1)
-    XCTAssertTrue(remedies[0].year == 1970)
+    XCTAssertTrue(!remedies.filter { $0.year == 1970 }.isEmpty)
   }
 
   func testYearAlbum() throws {
@@ -151,11 +151,11 @@ final class IssueValidationTests: XCTestCase {
 
     let critera = try XCTUnwrap(issue?.critera)
     XCTAssertEqual(critera.count, 1)
-    XCTAssertTrue(critera[0].matchesAlbum("album"))
+    XCTAssertTrue(!critera.filter { $0.matchesAlbum("album") }.isEmpty)
 
     let remedies = try XCTUnwrap(issue?.remedies)
     XCTAssertEqual(remedies.count, 1)
-    XCTAssertTrue(remedies[0].year == 1970)
+    XCTAssertTrue(!remedies.filter { $0.year == 1970 }.isEmpty)
   }
 
   func testYearArtist() throws {
@@ -180,11 +180,11 @@ final class IssueValidationTests: XCTestCase {
 
     let critera = try XCTUnwrap(issue?.critera)
     XCTAssertEqual(critera.count, 1)
-    XCTAssertTrue(critera[0].matchesAlbum("album"))
+    XCTAssertTrue(!critera.filter { $0.matchesAlbum("album") }.isEmpty)
 
     let remedies = try XCTUnwrap(issue?.remedies)
     XCTAssertEqual(remedies.count, 1)
-    XCTAssertTrue(remedies[0].trackCount == 3)
+    XCTAssertTrue(!remedies.filter { $0.trackCount == 3 }.isEmpty)
   }
 
   func testTrackCountAlbumArtist() throws {
@@ -195,12 +195,12 @@ final class IssueValidationTests: XCTestCase {
 
     let critera = try XCTUnwrap(issue?.critera)
     XCTAssertEqual(critera.count, 2)
-    XCTAssertTrue(critera[0].matchesAlbum("album"))
-    XCTAssertTrue(critera[1].matchesArtist("artist"))
+    XCTAssertTrue(!critera.filter { $0.matchesAlbum("album") }.isEmpty)
+    XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
 
     let remedies = try XCTUnwrap(issue?.remedies)
     XCTAssertEqual(remedies.count, 1)
-    XCTAssertTrue(remedies[0].trackCount == 3)
+    XCTAssertTrue(!remedies.filter { $0.trackCount == 3 }.isEmpty)
   }
 
   func testTrackCountAlbumArtistSong() throws {
@@ -212,13 +212,13 @@ final class IssueValidationTests: XCTestCase {
 
     let critera = try XCTUnwrap(issue?.critera)
     XCTAssertEqual(critera.count, 3)
-    XCTAssertTrue(critera[0].matchesAlbum("album"))
-    XCTAssertTrue(critera[1].matchesArtist("artist"))
-    XCTAssertTrue(critera[2].matchesSong("song"))
+    XCTAssertTrue(!critera.filter { $0.matchesAlbum("album") }.isEmpty)
+    XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
+    XCTAssertTrue(!critera.filter { $0.matchesSong("song") }.isEmpty)
 
     let remedies = try XCTUnwrap(issue?.remedies)
     XCTAssertEqual(remedies.count, 1)
-    XCTAssertTrue(remedies[0].trackCount == 3)
+    XCTAssertTrue(!remedies.filter { $0.trackCount == 3 }.isEmpty)
   }
 
   func testTrackCountArtistSong() throws {
@@ -229,11 +229,11 @@ final class IssueValidationTests: XCTestCase {
 
     let critera = try XCTUnwrap(issue?.critera)
     XCTAssertEqual(critera.count, 2)
-    XCTAssertTrue(critera[0].matchesArtist("artist"))
-    XCTAssertTrue(critera[1].matchesSong("song"))
+    XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
+    XCTAssertTrue(!critera.filter { $0.matchesSong("song") }.isEmpty)
 
     let remedies = try XCTUnwrap(issue?.remedies)
     XCTAssertEqual(remedies.count, 1)
-    XCTAssertTrue(remedies[0].trackCount == 3)
+    XCTAssertTrue(!remedies.filter { $0.trackCount == 3 }.isEmpty)
   }
 }
