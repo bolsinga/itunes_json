@@ -8,97 +8,63 @@
 import Foundation
 
 extension Array where Element == Criterion {
-  var validForIgnore: Bool {
-    guard count == 1 else { return false }
+  fileprivate struct Qualifier: OptionSet {
+    let rawValue: Int
 
-    switch self[0] {
-    case .artist(_):
-      return true
-    case .song(_):
-      return true
-    default:
-      return false
+    static let album = Qualifier(rawValue: 1 << 0)
+    static let artist = Qualifier(rawValue: 1 << 1)
+    static let song = Qualifier(rawValue: 1 << 2)
+
+    static let albumArtistSong: Qualifier = [.album, .artist, .song]
+    static let artistSong: Qualifier = [.artist, .song]
+    static let albumArtist: Qualifier = [.album, .artist]
+  }
+
+  fileprivate var qualifiers: Qualifier {
+    self.reduce(into: Qualifier()) { partialResult, critera in
+      switch critera {
+      case .album(_):
+        partialResult.insert(.album)
+      case .artist(_):
+        partialResult.insert(.artist)
+      case .song(_):
+        partialResult.insert(.song)
+      }
     }
+  }
+
+  var validForIgnore: Bool {
+    let qualifiers = qualifiers
+    return qualifiers == .artist || qualifiers == .song
   }
 
   var validForSortArtist: Bool {
-    guard count == 1 else { return false }
-
-    switch self[0] {
-    case .artist(_):
-      return true
-    default:
-      return false
-    }
+    qualifiers == .artist
   }
 
   var validForKind: Bool {
-    guard count == 3 else { return false }
-
-    var matchingCriteriaCount = 0
-    for criteria in self {
-      switch criteria {
-      case .album(_), .artist(_), .song(_):
-        matchingCriteriaCount += 1
-      }
-    }
-    return matchingCriteriaCount == 3
+    qualifiers == .albumArtistSong
   }
 
   var validForYear: Bool {
-    var hasArtist: Bool = false
-    var hasAlbum: Bool = false
-    var hasSong: Bool = false
-
-    for criteria in self {
-      switch criteria {
-      case .album(_):
-        hasAlbum = true
-      case .artist(_):
-        hasArtist = true
-      case .song(_):
-        hasSong = true
-      }
-    }
-    return hasAlbum || (hasArtist && hasSong)
+    let qualifiers = qualifiers
+    return qualifiers.contains(.album)
+      || qualifiers.intersection(Qualifier.artistSong) == Qualifier.artistSong
   }
 
   var validForTrackCount: Bool {
-    var hasArtist: Bool = false
-    var hasAlbum: Bool = false
-
-    for criteria in self {
-      switch criteria {
-      case .album(_):
-        hasAlbum = true
-      case .artist(_):
-        hasArtist = true
-      case .song(_):
-        ()
-      }
-    }
-    return hasAlbum || hasArtist
+    // album or artist
+    !qualifiers.intersection(Qualifier.albumArtist).isEmpty
   }
 
   var validForAlbum: Bool {
-    var hasArtist: Bool = false
-    var hasSong: Bool = false
-
-    for criteria in self {
-      switch criteria {
-      case .album(_):
-        ()
-      case .artist(_):
-        hasArtist = true
-      case .song(_):
-        hasSong = true
-      }
-    }
-    return hasSong || hasArtist
+    // artist or song
+    !qualifiers.intersection(Qualifier.artistSong).isEmpty
   }
 
   var validForArtist: Bool {
-    validForAlbum
+    // artist or song
+    !qualifiers.intersection(Qualifier.artistSong).isEmpty
   }
 }
 
