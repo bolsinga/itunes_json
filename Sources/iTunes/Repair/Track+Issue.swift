@@ -28,6 +28,25 @@ extension Track {
     return true
   }
 
+  internal func remedyApplies(_ remedy: Remedy) -> Bool {
+    switch remedy {
+    case .ignore:
+      return true
+    case .correctSortArtist(_):
+      return sortArtist == nil
+    case .correctKind(_):
+      return kind == nil
+    case .correctYear(_):
+      return year == nil
+    case .correctTrackCount(_):
+      return trackCount == nil
+    case .correctAlbum(_):
+      return album == nil
+    case .correctArtist(_):
+      return artist != nil
+    }
+  }
+
   private func update(
     fixedAlbum: String? = nil, fixedArtist: String? = nil, fixedKind: String? = nil,
     fixedPlayCount: Int? = nil, fixedPlayDate: Date? = nil, fixedSortArtist: String? = nil,
@@ -62,22 +81,16 @@ extension Track {
     case .ignore:
       return nil
     case .correctSortArtist(let string):
-      guard sortArtist == nil else { return self }
       return self.update(fixedSortArtist: string)
     case .correctKind(let string):
-      guard kind == nil else { return self }
       return self.update(fixedKind: string)
     case .correctYear(let int):
-      guard year == nil else { return self }
       return self.update(fixedYear: int)
     case .correctTrackCount(let int):
-      guard trackCount == nil else { return self }
       return self.update(fixedTrackCount: int)
     case .correctAlbum(let string):
-      guard album == nil else { return self }
       return self.update(fixedAlbum: string)
     case .correctArtist(let string):
-      guard artist != nil else { return self }
       return self.update(fixedArtist: string)
     }
   }
@@ -88,7 +101,10 @@ extension Track {
 
     var fixedTrack: Track? = self
     for remedy in issue.remedies {
-      fixedTrack = fixedTrack?.applyRemedy(remedy)
+      guard let track = fixedTrack else { break }
+      if track.remedyApplies(remedy) {
+        fixedTrack = track.applyRemedy(remedy)
+      }
     }
     return fixedTrack
   }
