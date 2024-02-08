@@ -20,13 +20,13 @@ extension Issue {
       return false
     }
 
-    guard !critera.isEmpty else {
+    guard !criteria.isEmpty else {
       Logger.noCriteria.error("\(String(describing: self), privacy: .public)")
       return false
     }
 
     for remedy in remedies {
-      if !remedy.validate(critera) {
+      if !remedy.validate(criteria) {
         return false
       }
     }

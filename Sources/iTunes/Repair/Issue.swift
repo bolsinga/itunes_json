@@ -114,6 +114,6 @@ enum Criterion {
 }
 
 struct Issue {
-  let critera: [Criterion]
+  let criteria: [Criterion]
   let remedies: [Remedy]
 }

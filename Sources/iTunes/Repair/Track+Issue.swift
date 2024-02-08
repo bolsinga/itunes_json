@@ -97,7 +97,7 @@ extension Track {
 
   func repair(_ issue: Issue) -> Track? {
     guard issue.isValid else { return self }
-    guard criteriaApplies(issue.critera) else { return self }
+    guard criteriaApplies(issue.criteria) else { return self }
 
     var fixedTrack: Track? = self
     for remedy in issue.remedies {

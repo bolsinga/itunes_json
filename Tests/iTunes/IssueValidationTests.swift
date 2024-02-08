@@ -37,7 +37,7 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNotNil(issue)
 
-    let critera = try XCTUnwrap(issue?.critera)
+    let critera = try XCTUnwrap(issue?.criteria)
     XCTAssertEqual(critera.count, 1)
     XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
 
@@ -52,7 +52,7 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNotNil(issue)
 
-    let critera = try XCTUnwrap(issue?.critera)
+    let critera = try XCTUnwrap(issue?.criteria)
     XCTAssertEqual(critera.count, 1)
     XCTAssertTrue(!critera.filter { $0.matchesSong("song") }.isEmpty)
 
@@ -81,7 +81,7 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNotNil(issue)
 
-    let critera = try XCTUnwrap(issue?.critera)
+    let critera = try XCTUnwrap(issue?.criteria)
     XCTAssertEqual(critera.count, 1)
     XCTAssertTrue(!critera.filter { $0.matchesArtist("The Artist") }.isEmpty)
 
@@ -104,7 +104,7 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNotNil(issue)
 
-    let critera = try XCTUnwrap(issue?.critera)
+    let critera = try XCTUnwrap(issue?.criteria)
     XCTAssertEqual(critera.count, 3)
     XCTAssertTrue(!critera.filter { $0.matchesAlbum("album") }.isEmpty)
     XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
@@ -129,7 +129,7 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNotNil(issue)
 
-    let critera = try XCTUnwrap(issue?.critera)
+    let critera = try XCTUnwrap(issue?.criteria)
     XCTAssertEqual(critera.count, 2)
     XCTAssertTrue(!critera.filter { $0.matchesAlbum("album") }.isEmpty)
     XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
@@ -146,7 +146,7 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNotNil(issue)
 
-    let critera = try XCTUnwrap(issue?.critera)
+    let critera = try XCTUnwrap(issue?.criteria)
     XCTAssertEqual(critera.count, 3)
     XCTAssertTrue(!critera.filter { $0.matchesAlbum("album") }.isEmpty)
     XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
@@ -163,7 +163,7 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNotNil(issue)
 
-    let critera = try XCTUnwrap(issue?.critera)
+    let critera = try XCTUnwrap(issue?.criteria)
     XCTAssertEqual(critera.count, 1)
     XCTAssertTrue(!critera.filter { $0.matchesAlbum("album") }.isEmpty)
 
@@ -192,7 +192,7 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNotNil(issue)
 
-    let critera = try XCTUnwrap(issue?.critera)
+    let critera = try XCTUnwrap(issue?.criteria)
     XCTAssertEqual(critera.count, 1)
     XCTAssertTrue(!critera.filter { $0.matchesAlbum("album") }.isEmpty)
 
@@ -207,7 +207,7 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNotNil(issue)
 
-    let critera = try XCTUnwrap(issue?.critera)
+    let critera = try XCTUnwrap(issue?.criteria)
     XCTAssertEqual(critera.count, 2)
     XCTAssertTrue(!critera.filter { $0.matchesAlbum("album") }.isEmpty)
     XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
@@ -224,7 +224,7 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNotNil(issue)
 
-    let critera = try XCTUnwrap(issue?.critera)
+    let critera = try XCTUnwrap(issue?.criteria)
     XCTAssertEqual(critera.count, 3)
     XCTAssertTrue(!critera.filter { $0.matchesAlbum("album") }.isEmpty)
     XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
@@ -241,7 +241,7 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNotNil(issue)
 
-    let critera = try XCTUnwrap(issue?.critera)
+    let critera = try XCTUnwrap(issue?.criteria)
     XCTAssertEqual(critera.count, 2)
     XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
     XCTAssertTrue(!critera.filter { $0.matchesSong("song") }.isEmpty)
@@ -259,7 +259,7 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNotNil(issue)
 
-    let critera = try XCTUnwrap(issue?.critera)
+    let critera = try XCTUnwrap(issue?.criteria)
     XCTAssertEqual(critera.count, 2)
     XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
     XCTAssertTrue(!critera.filter { $0.matchesSong("song") }.isEmpty)
@@ -278,7 +278,7 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNotNil(issue)
 
-    let critera = try XCTUnwrap(issue?.critera)
+    let critera = try XCTUnwrap(issue?.criteria)
     XCTAssertEqual(critera.count, 3)
     XCTAssertTrue(!critera.filter { $0.matchesAlbum("album") }.isEmpty)
     XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
@@ -298,7 +298,7 @@ final class IssueValidationTests: XCTestCase {
 
     XCTAssertNotNil(issue)
 
-    let critera = try XCTUnwrap(issue?.critera)
+    let critera = try XCTUnwrap(issue?.criteria)
     XCTAssertEqual(critera.count, 2)
     XCTAssertTrue(!critera.filter { $0.matchesArtist("artist") }.isEmpty)
     XCTAssertTrue(!critera.filter { $0.matchesSong("song") }.isEmpty)
