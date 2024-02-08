@@ -68,14 +68,14 @@ final class IssueValidationTests: XCTestCase {
     XCTAssertNil(issue)
   }
 
-  func testIgnorAlbumInvalid() throws {
+  func testIgnoreAlbumInvalid() throws {
     let item = Item(problem: Problem(album: "album"), fix: Fix(ignore: true))
     let issue = item.issue
 
     XCTAssertNil(issue)
   }
 
-  func testSortArtist() throws {
+  func testRepairEmptySortArtist() throws {
     let item = Item(problem: Problem(artist: "The Artist"), fix: Fix(sortArtist: "Artist, The"))
     let issue = item.issue
 
@@ -90,14 +90,14 @@ final class IssueValidationTests: XCTestCase {
     XCTAssertTrue(!remedies.filter { $0.sortArtist == "Artist, The" }.isEmpty)
   }
 
-  func testSortArtistInvalid() throws {
+  func testRepairEmptySortArtistInvalid() throws {
     let item = Item(problem: Problem(name: "song"), fix: Fix(sortArtist: "artist"))
     let issue = item.issue
 
     XCTAssertNil(issue)
   }
 
-  func testKind() throws {
+  func testRepairEmptyKind() throws {
     let item = Item(
       problem: Problem(artist: "artist", album: "album", name: "song"), fix: Fix(kind: "kind"))
     let issue = item.issue
@@ -115,7 +115,7 @@ final class IssueValidationTests: XCTestCase {
     XCTAssertTrue(!remedies.filter { $0.kind == "kind" }.isEmpty)
   }
 
-  func testKindMissingProperties() throws {
+  func testRepairEmptyKindMissingProperties() throws {
     let item = Item(
       problem: Problem(artist: "artist", name: "song"), fix: Fix(kind: "kind"))
     let issue = item.issue
@@ -123,7 +123,7 @@ final class IssueValidationTests: XCTestCase {
     XCTAssertNil(issue)
   }
 
-  func testYearArtistAlbum() throws {
+  func testRepairEmptyYearArtistAlbum() throws {
     let item = Item(problem: Problem(artist: "artist", album: "album"), fix: Fix(year: 1970))
     let issue = item.issue
 
@@ -139,7 +139,7 @@ final class IssueValidationTests: XCTestCase {
     XCTAssertTrue(!remedies.filter { $0.year == 1970 }.isEmpty)
   }
 
-  func testYearArtistAlbumSong() throws {
+  func testRepairEmptyYearArtistAlbumSong() throws {
     let item = Item(
       problem: Problem(artist: "artist", album: "album", name: "song"), fix: Fix(year: 1970))
     let issue = item.issue
@@ -157,7 +157,7 @@ final class IssueValidationTests: XCTestCase {
     XCTAssertTrue(!remedies.filter { $0.year == 1970 }.isEmpty)
   }
 
-  func testYearAlbum() throws {
+  func testRepairEmptyYearAlbum() throws {
     let item = Item(problem: Problem(album: "album"), fix: Fix(year: 1970))
     let issue = item.issue
 
@@ -172,21 +172,21 @@ final class IssueValidationTests: XCTestCase {
     XCTAssertTrue(!remedies.filter { $0.year == 1970 }.isEmpty)
   }
 
-  func testYearArtist() throws {
+  func testRepairEmptyYearArtist() throws {
     let item = Item(problem: Problem(artist: "artist"), fix: Fix(year: 1970))
     let issue = item.issue
 
     XCTAssertNil(issue)
   }
 
-  func testYearSong() throws {
+  func testRepairEmptyYearSong() throws {
     let item = Item(problem: Problem(name: "song"), fix: Fix(year: 1970))
     let issue = item.issue
 
     XCTAssertNil(issue)
   }
 
-  func testTrackCountAlbum() throws {
+  func testRepairEmptyTrackCountAlbum() throws {
     let item = Item(problem: Problem(album: "album"), fix: Fix(trackCount: 3))
     let issue = item.issue
 
@@ -201,7 +201,7 @@ final class IssueValidationTests: XCTestCase {
     XCTAssertTrue(!remedies.filter { $0.trackCount == 3 }.isEmpty)
   }
 
-  func testTrackCountAlbumArtist() throws {
+  func testRepairEmptyTrackCountAlbumArtist() throws {
     let item = Item(problem: Problem(artist: "artist", album: "album"), fix: Fix(trackCount: 3))
     let issue = item.issue
 
@@ -217,7 +217,7 @@ final class IssueValidationTests: XCTestCase {
     XCTAssertTrue(!remedies.filter { $0.trackCount == 3 }.isEmpty)
   }
 
-  func testTrackCountAlbumArtistSong() throws {
+  func testRepairEmptyTrackCountAlbumArtistSong() throws {
     let item = Item(
       problem: Problem(artist: "artist", album: "album", name: "song"), fix: Fix(trackCount: 3))
     let issue = item.issue
@@ -235,7 +235,7 @@ final class IssueValidationTests: XCTestCase {
     XCTAssertTrue(!remedies.filter { $0.trackCount == 3 }.isEmpty)
   }
 
-  func testTrackCountArtistSong() throws {
+  func testRepairEmptyTrackCountArtistSong() throws {
     let item = Item(problem: Problem(artist: "artist", name: "song"), fix: Fix(trackCount: 3))
     let issue = item.issue
 
@@ -251,7 +251,7 @@ final class IssueValidationTests: XCTestCase {
     XCTAssertTrue(!remedies.filter { $0.trackCount == 3 }.isEmpty)
   }
 
-  func testAlbum() throws {
+  func testRepairEmptyAlbum() throws {
     let item = Item(
       problem: Problem(artist: "artist", name: "song"),
       fix: Fix(album: "song", trackCount: 1, trackNumber: 1))
@@ -270,7 +270,7 @@ final class IssueValidationTests: XCTestCase {
     XCTAssertTrue(!remedies.filter { $0.trackCount == 1 }.isEmpty)
   }
 
-  func testAlbumInvalid() throws {
+  func testRepairEmptyAlbumInvalid() throws {
     let item = Item(
       problem: Problem(artist: "artist", album: "album", name: "song"),
       fix: Fix(album: "song", trackCount: 1, trackNumber: 1))
@@ -290,7 +290,7 @@ final class IssueValidationTests: XCTestCase {
     XCTAssertTrue(!remedies.filter { $0.trackCount == 1 }.isEmpty)
   }
 
-  func testArtist() throws {
+  func testReplaceArtist() throws {
     let item = Item(
       problem: Problem(artist: "artist", name: "song"),
       fix: Fix(artist: "Artist", trackCount: 1, trackNumber: 1))

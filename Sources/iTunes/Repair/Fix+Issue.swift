@@ -13,12 +13,12 @@ extension Fix {
 
     var result = [Remedy]()
 
-    if let sortArtist { result.append(.correctSortArtist(sortArtist)) }
-    if let kind { result.append(.correctKind(kind)) }
-    if let year { result.append(.correctYear(year)) }
-    if let trackCount { result.append(.correctTrackCount(trackCount)) }
-    if let album { result.append(.correctAlbum(album)) }
-    if let artist { result.append(.correctArtist(artist)) }
+    if let sortArtist { result.append(.repairEmptySortArtist(sortArtist)) }
+    if let kind { result.append(.repairEmptyKind(kind)) }
+    if let year { result.append(.repairEmptyYear(year)) }
+    if let trackCount { result.append(.repairEmptyTrackCount(trackCount)) }
+    if let album { result.append(.repairEmptyAlbum(album)) }
+    if let artist { result.append(.replaceArtist(artist)) }
 
     return result
   }

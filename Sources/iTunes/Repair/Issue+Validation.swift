@@ -39,32 +39,32 @@ extension Issue {
           Logger.ignore.error("\(String(describing: self), privacy: .public)")
           return false
         }
-      case .correctSortArtist(_):
+      case .repairEmptySortArtist(_):
         guard critera.validForSortArtist else {
           Logger.sortArtist.error("\(String(describing: self), privacy: .public)")
           return false
         }
-      case .correctKind(_):
+      case .repairEmptyKind(_):
         guard critera.validForKind else {
           Logger.kind.error("\(String(describing: self), privacy: .public)")
           return false
         }
-      case .correctYear(_):
+      case .repairEmptyYear(_):
         guard critera.validForYear else {
           Logger.year.error("\(String(describing: self), privacy: .public)")
           return false
         }
-      case .correctTrackCount(_):
+      case .repairEmptyTrackCount(_):
         guard critera.validForTrackCount else {
           Logger.trackCount.error("\(String(describing: self), privacy: .public)")
           return false
         }
-      case .correctAlbum(_):
+      case .repairEmptyAlbum(_):
         guard critera.validForAlbum else {
           Logger.album.error("\(String(describing: self), privacy: .public)")
           return false
         }
-      case .correctArtist(_):
+      case .replaceArtist(_):
         guard critera.validForArtist else {
           Logger.artist.error("\(String(describing: self), privacy: .public)")
           return false

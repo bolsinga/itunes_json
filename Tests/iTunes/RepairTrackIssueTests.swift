@@ -52,11 +52,11 @@ final class RepairTrackIssueTests: XCTestCase {
     XCTAssertEqual(track, fixedTrack)
   }
 
-  func testRepairSortArtist() throws {
+  func testRepairEmptySortArtist() throws {
     let track = Track(artist: "The Artist", name: "song", persistentID: 0)
 
     let issue = Issue(
-      critera: [.artist("The Artist")], remedies: [.correctSortArtist("Artist, The")])
+      critera: [.artist("The Artist")], remedies: [.repairEmptySortArtist("Artist, The")])
 
     let fixedTrack = track.repair(issue)
 
@@ -65,11 +65,11 @@ final class RepairTrackIssueTests: XCTestCase {
     XCTAssertEqual(fixedTrack?.sortArtist, "Artist, The")
   }
 
-  func testRepairSortArtistAlreadySet() throws {
+  func testRepairEmptySortArtistAlreadySet() throws {
     let track = Track(artist: "The Artist", name: "song", persistentID: 0, sortArtist: "Something")
 
     let issue = Issue(
-      critera: [.artist("The Artist")], remedies: [.correctSortArtist("Artist, The")])
+      critera: [.artist("The Artist")], remedies: [.repairEmptySortArtist("Artist, The")])
 
     let fixedTrack = track.repair(issue)
 
@@ -77,11 +77,12 @@ final class RepairTrackIssueTests: XCTestCase {
     XCTAssertEqual(fixedTrack, track)
   }
 
-  func testRepairKind() throws {
+  func testRepairEmptyKind() throws {
     let track = Track(album: "album", artist: "artist", name: "song", persistentID: 0)
 
     let issue = Issue(
-      critera: [.album("album"), .artist("artist"), .song("song")], remedies: [.correctKind("kind")]
+      critera: [.album("album"), .artist("artist"), .song("song")],
+      remedies: [.repairEmptyKind("kind")]
     )
 
     let fixedTrack = track.repair(issue)
@@ -91,11 +92,12 @@ final class RepairTrackIssueTests: XCTestCase {
     XCTAssertEqual(fixedTrack?.kind, "kind")
   }
 
-  func testRepairKindAlreadySet() throws {
+  func testRepairEmptyKindAlreadySet() throws {
     let track = Track(album: "album", artist: "artist", kind: "KIND", name: "song", persistentID: 0)
 
     let issue = Issue(
-      critera: [.album("album"), .artist("artist"), .song("song")], remedies: [.correctKind("kind")]
+      critera: [.album("album"), .artist("artist"), .song("song")],
+      remedies: [.repairEmptyKind("kind")]
     )
 
     let fixedTrack = track.repair(issue)
@@ -104,10 +106,10 @@ final class RepairTrackIssueTests: XCTestCase {
     XCTAssertEqual(fixedTrack, track)
   }
 
-  func testRepairYear() throws {
+  func testRepairEmptyYear() throws {
     let track = Track(album: "album", name: "song", persistentID: 0)
 
-    let issue = Issue(critera: [.album("album")], remedies: [.correctYear(1970)])
+    let issue = Issue(critera: [.album("album")], remedies: [.repairEmptyYear(1970)])
 
     let fixedTrack = track.repair(issue)
 
@@ -116,10 +118,10 @@ final class RepairTrackIssueTests: XCTestCase {
     XCTAssertEqual(fixedTrack?.year, 1970)
   }
 
-  func testRepairYearAlreadySet() throws {
+  func testRepairEmptyYearAlreadySet() throws {
     let track = Track(album: "album", name: "song", persistentID: 0, year: 1971)
 
-    let issue = Issue(critera: [.album("album")], remedies: [.correctYear(1970)])
+    let issue = Issue(critera: [.album("album")], remedies: [.repairEmptyYear(1970)])
 
     let fixedTrack = track.repair(issue)
 
@@ -127,10 +129,10 @@ final class RepairTrackIssueTests: XCTestCase {
     XCTAssertEqual(fixedTrack, track)
   }
 
-  func testRepairTrackCount() throws {
+  func testRepairEmptyTrackCount() throws {
     let track = Track(album: "album", name: "song", persistentID: 0)
 
-    let issue = Issue(critera: [.album("album")], remedies: [.correctTrackCount(3)])
+    let issue = Issue(critera: [.album("album")], remedies: [.repairEmptyTrackCount(3)])
 
     let fixedTrack = track.repair(issue)
 
@@ -139,10 +141,10 @@ final class RepairTrackIssueTests: XCTestCase {
     XCTAssertEqual(fixedTrack?.trackCount, 3)
   }
 
-  func testRepairTrackCountAlreadySet() throws {
+  func testRepairEmptyTrackCountAlreadySet() throws {
     let track = Track(album: "album", name: "song", persistentID: 0, trackCount: 10)
 
-    let issue = Issue(critera: [.album("album")], remedies: [.correctTrackCount(3)])
+    let issue = Issue(critera: [.album("album")], remedies: [.repairEmptyTrackCount(3)])
 
     let fixedTrack = track.repair(issue)
 
@@ -150,11 +152,11 @@ final class RepairTrackIssueTests: XCTestCase {
     XCTAssertEqual(fixedTrack, track)
   }
 
-  func testRepairAlbum() throws {
+  func testRepairEmptyAlbum() throws {
     let track = Track(artist: "artist", name: "song", persistentID: 0)
 
     let issue = Issue(
-      critera: [.artist("artist"), .song("song")], remedies: [.correctAlbum("album")])
+      critera: [.artist("artist"), .song("song")], remedies: [.repairEmptyAlbum("album")])
 
     let fixedTrack = track.repair(issue)
 
@@ -163,11 +165,11 @@ final class RepairTrackIssueTests: XCTestCase {
     XCTAssertEqual(fixedTrack?.album, "album")
   }
 
-  func testRepairAlbumAlreadySet() throws {
+  func testRepairEmptyAlbumAlreadySet() throws {
     let track = Track(album: "ALBUM", artist: "artist", name: "song", persistentID: 0)
 
     let issue = Issue(
-      critera: [.artist("artist"), .song("song")], remedies: [.correctAlbum("album")])
+      critera: [.artist("artist"), .song("song")], remedies: [.repairEmptyAlbum("album")])
 
     let fixedTrack = track.repair(issue)
 
@@ -175,11 +177,11 @@ final class RepairTrackIssueTests: XCTestCase {
     XCTAssertEqual(fixedTrack, track)
   }
 
-  func testRepairArtist() throws {
+  func testReplaceArtist() throws {
     let track = Track(artist: "artist", name: "song", persistentID: 0)
 
     let issue = Issue(
-      critera: [.artist("artist"), .song("song")], remedies: [.correctArtist("Artist")])
+      critera: [.artist("artist"), .song("song")], remedies: [.replaceArtist("Artist")])
 
     let fixedTrack = track.repair(issue)
 
@@ -188,10 +190,10 @@ final class RepairTrackIssueTests: XCTestCase {
     XCTAssertEqual(fixedTrack?.artist, "Artist")
   }
 
-  func testRepairArtistNotSet() throws {
+  func testReplaceArtistNotSet() throws {
     let track = Track(name: "song", persistentID: 0)
 
-    let issue = Issue(critera: [.song("song")], remedies: [.correctArtist("artist")])
+    let issue = Issue(critera: [.song("song")], remedies: [.replaceArtist("artist")])
 
     let fixedTrack = track.repair(issue)
 

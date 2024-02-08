@@ -9,12 +9,12 @@ import Foundation
 
 enum Remedy {
   case ignore
-  case correctSortArtist(String)
-  case correctKind(String)
-  case correctTrackCount(Int)
-  case correctYear(Int)
-  case correctAlbum(String)
-  case correctArtist(String)
+  case repairEmptyAlbum(String)
+  case repairEmptyKind(String)
+  case repairEmptySortArtist(String)
+  case repairEmptyTrackCount(Int)
+  case repairEmptyYear(Int)
+  case replaceArtist(String)
 
   var isIgnored: Bool {
     switch self {
@@ -27,7 +27,7 @@ enum Remedy {
 
   var sortArtist: String? {
     switch self {
-    case .correctSortArtist(let string):
+    case .repairEmptySortArtist(let string):
       return string
     default:
       return nil
@@ -36,7 +36,7 @@ enum Remedy {
 
   var kind: String? {
     switch self {
-    case .correctKind(let string):
+    case .repairEmptyKind(let string):
       return string
     default:
       return nil
@@ -45,7 +45,7 @@ enum Remedy {
 
   var year: Int? {
     switch self {
-    case .correctYear(let int):
+    case .repairEmptyYear(let int):
       return int
     default:
       return nil
@@ -54,7 +54,7 @@ enum Remedy {
 
   var trackCount: Int? {
     switch self {
-    case .correctTrackCount(let int):
+    case .repairEmptyTrackCount(let int):
       return int
     default:
       return nil
@@ -63,7 +63,7 @@ enum Remedy {
 
   var album: String? {
     switch self {
-    case .correctAlbum(let string):
+    case .repairEmptyAlbum(let string):
       return string
     default:
       return nil
@@ -72,7 +72,7 @@ enum Remedy {
 
   var artist: String? {
     switch self {
-    case .correctArtist(let string):
+    case .replaceArtist(let string):
       return string
     default:
       return nil
