@@ -5,7 +5,6 @@
 //  Created by Greg Bolsinga on 1/15/24.
 //
 
-import Carbon
 import Foundation
 
 private let validTime = "2004-02-04T23:32:22Z"
