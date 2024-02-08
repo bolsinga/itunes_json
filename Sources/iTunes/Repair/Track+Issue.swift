@@ -32,17 +32,17 @@ extension Track {
     switch remedy {
     case .ignore:
       return true
-    case .correctSortArtist(_):
+    case .repairEmptySortArtist(_):
       return sortArtist == nil
-    case .correctKind(_):
+    case .repairEmptyKind(_):
       return kind == nil
-    case .correctYear(_):
+    case .repairEmptyYear(_):
       return year == nil
-    case .correctTrackCount(_):
+    case .repairEmptyTrackCount(_):
       return trackCount == nil
-    case .correctAlbum(_):
+    case .repairEmptyAlbum(_):
       return album == nil
-    case .correctArtist(_):
+    case .replaceArtist(_):
       return artist != nil
     }
   }
@@ -80,17 +80,17 @@ extension Track {
     switch remedy {
     case .ignore:
       return nil
-    case .correctSortArtist(let string):
+    case .repairEmptySortArtist(let string):
       return self.update(fixedSortArtist: string)
-    case .correctKind(let string):
+    case .repairEmptyKind(let string):
       return self.update(fixedKind: string)
-    case .correctYear(let int):
+    case .repairEmptyYear(let int):
       return self.update(fixedYear: int)
-    case .correctTrackCount(let int):
+    case .repairEmptyTrackCount(let int):
       return self.update(fixedTrackCount: int)
-    case .correctAlbum(let string):
+    case .repairEmptyAlbum(let string):
       return self.update(fixedAlbum: string)
-    case .correctArtist(let string):
+    case .replaceArtist(let string):
       return self.update(fixedArtist: string)
     }
   }
