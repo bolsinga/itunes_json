@@ -21,8 +21,8 @@ extension Array where Element == Criterion {
   }
 
   fileprivate var qualifiers: Qualifier {
-    self.reduce(into: Qualifier()) { partialResult, critera in
-      switch critera {
+    self.reduce(into: Qualifier()) { partialResult, criteria in
+      switch criteria {
       case .album(_):
         partialResult.insert(.album)
       case .artist(_):
