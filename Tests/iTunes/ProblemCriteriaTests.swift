@@ -61,4 +61,17 @@ final class ProblemCriteriaTests: XCTestCase {
 
     XCTAssertTrue(c.isEmpty)
   }
+
+  func testAllSet() throws {
+    let p = Problem(
+      artist: "a", album: "l", name: "n", playCount: 3,
+      playDate: Date(timeIntervalSince1970: Double(1_075_937_542)))
+
+    let c = p.criteria
+
+    XCTAssertEqual(c.count, 3)
+    XCTAssertTrue(!c.filter { $0.matchesAlbum("l") }.isEmpty)
+    XCTAssertTrue(!c.filter { $0.matchesArtist("a") }.isEmpty)
+    XCTAssertTrue(!c.filter { $0.matchesSong("n") }.isEmpty)
+  }
 }
