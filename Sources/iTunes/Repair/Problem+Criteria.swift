@@ -8,12 +8,12 @@
 import Foundation
 
 extension Problem {
-  var criteria: [Criterion] {
-    var result = [Criterion]()
+  var criteria: Set<Criterion> {
+    var result = Set<Criterion>()
 
-    if let album { result.append(.album(album)) }
-    if let artist { result.append(.artist(artist)) }
-    if let name { result.append(.song(name)) }
+    if let album { result.insert(.album(album)) }
+    if let artist { result.insert(.artist(artist)) }
+    if let name { result.insert(.song(name)) }
 
     return result
   }

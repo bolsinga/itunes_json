@@ -1,5 +1,5 @@
 //
-//  Array+Criterion.swift
+//  Set+Criterion.swift
 //
 //
 //  Created by Greg Bolsinga on 2/8/24.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Array where Element == Criterion {
+extension Set where Element == Criterion {
   fileprivate struct Qualifier: OptionSet {
     let rawValue: Int
 

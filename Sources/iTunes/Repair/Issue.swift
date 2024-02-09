@@ -8,6 +8,6 @@
 import Foundation
 
 struct Issue {
-  let criteria: [Criterion]
+  let criteria: Set<Criterion>
   let remedies: [Remedy]
 }
