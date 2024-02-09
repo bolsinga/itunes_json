@@ -19,7 +19,7 @@ extension Logger {
 }
 
 extension Remedy {
-  func validate(_ criteria: [Criterion]) -> Bool {
+  func validate(_ criteria: Set<Criterion>) -> Bool {
     switch self {
     case .ignore:
       guard criteria.validForIgnore else {

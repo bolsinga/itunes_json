@@ -21,7 +21,7 @@ extension Track {
     }
   }
 
-  internal func criteriaApplies(_ criteria: [Criterion]) -> Bool {
+  internal func criteriaApplies(_ criteria: Set<Criterion>) -> Bool {
     for criterion in criteria {
       guard criterionApplies(criterion) else { return false }
     }

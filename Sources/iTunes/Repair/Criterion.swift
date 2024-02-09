@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Criterion {
+enum Criterion: Hashable {
   case album(String)
   case artist(String)
   case song(String)
