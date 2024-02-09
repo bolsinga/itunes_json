@@ -9,8 +9,6 @@ import Foundation
 
 extension Item {
   var issue: Issue? {
-    let issue = Issue(criteria: problem.criteria, remedies: fix.remedies)
-    guard issue.isValid else { return nil }
-    return issue
+    Issue.create(criteria: problem.criteria, remedies: fix.remedies)
   }
 }
