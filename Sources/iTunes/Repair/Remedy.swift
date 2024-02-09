@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Remedy {
+enum Remedy: Hashable {
   case ignore
   case repairEmptyAlbum(String)
   case repairEmptyKind(String)

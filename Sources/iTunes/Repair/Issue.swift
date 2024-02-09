@@ -9,5 +9,5 @@ import Foundation
 
 struct Issue {
   let criteria: Set<Criterion>
-  let remedies: [Remedy]
+  let remedies: Set<Remedy>
 }
