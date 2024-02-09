@@ -13,7 +13,7 @@ final class RepairTrackIssueTests: XCTestCase {
   func testRepairIgnoreSong() throws {
     let track = Track(name: "song", persistentID: 0)
 
-    let issue = Issue(criteria: [.song("song")], remedies: [.ignore])
+    let issue = try XCTUnwrap(Issue.create(criteria: [.song("song")], remedies: [.ignore]))
 
     let fixedTrack = track.repair(issue)
 
@@ -23,28 +23,17 @@ final class RepairTrackIssueTests: XCTestCase {
   func testRepairIgnoreArtist() throws {
     let track = Track(artist: "artist", name: "song", persistentID: 0)
 
-    let issue = Issue(criteria: [.artist("artist")], remedies: [.ignore])
+    let issue = try XCTUnwrap(Issue.create(criteria: [.artist("artist")], remedies: [.ignore]))
 
     let fixedTrack = track.repair(issue)
 
     XCTAssertNil(fixedTrack)
   }
 
-  func testRepairIgnoreInvalid() throws {
-    let track = Track(artist: "artist", name: "song", persistentID: 0)
-
-    let issue = Issue(criteria: [.artist("artist"), .song("song")], remedies: [.ignore])
-
-    let fixedTrack = track.repair(issue)
-
-    XCTAssertNotNil(fixedTrack)
-    XCTAssertEqual(track, fixedTrack)
-  }
-
   func testRepairIgnoreNotApplicable() throws {
     let track = Track(name: "song", persistentID: 0)
 
-    let issue = Issue(criteria: [.song("cool")], remedies: [.ignore])
+    let issue = try XCTUnwrap(Issue.create(criteria: [.song("cool")], remedies: [.ignore]))
 
     let fixedTrack = track.repair(issue)
 
@@ -55,8 +44,9 @@ final class RepairTrackIssueTests: XCTestCase {
   func testRepairEmptySortArtist() throws {
     let track = Track(artist: "The Artist", name: "song", persistentID: 0)
 
-    let issue = Issue(
-      criteria: [.artist("The Artist")], remedies: [.repairEmptySortArtist("Artist, The")])
+    let issue = try XCTUnwrap(
+      Issue.create(
+        criteria: [.artist("The Artist")], remedies: [.repairEmptySortArtist("Artist, The")]))
 
     let fixedTrack = track.repair(issue)
 
@@ -68,8 +58,9 @@ final class RepairTrackIssueTests: XCTestCase {
   func testRepairEmptySortArtistAlreadySet() throws {
     let track = Track(artist: "The Artist", name: "song", persistentID: 0, sortArtist: "Something")
 
-    let issue = Issue(
-      criteria: [.artist("The Artist")], remedies: [.repairEmptySortArtist("Artist, The")])
+    let issue = try XCTUnwrap(
+      Issue.create(
+        criteria: [.artist("The Artist")], remedies: [.repairEmptySortArtist("Artist, The")]))
 
     let fixedTrack = track.repair(issue)
 
@@ -80,10 +71,11 @@ final class RepairTrackIssueTests: XCTestCase {
   func testRepairEmptyKind() throws {
     let track = Track(album: "album", artist: "artist", name: "song", persistentID: 0)
 
-    let issue = Issue(
-      criteria: [.album("album"), .artist("artist"), .song("song")],
-      remedies: [.repairEmptyKind("kind")]
-    )
+    let issue = try XCTUnwrap(
+      Issue.create(
+        criteria: [.album("album"), .artist("artist"), .song("song")],
+        remedies: [.repairEmptyKind("kind")]
+      ))
 
     let fixedTrack = track.repair(issue)
 
@@ -95,10 +87,11 @@ final class RepairTrackIssueTests: XCTestCase {
   func testRepairEmptyKindAlreadySet() throws {
     let track = Track(album: "album", artist: "artist", kind: "KIND", name: "song", persistentID: 0)
 
-    let issue = Issue(
-      criteria: [.album("album"), .artist("artist"), .song("song")],
-      remedies: [.repairEmptyKind("kind")]
-    )
+    let issue = try XCTUnwrap(
+      Issue.create(
+        criteria: [.album("album"), .artist("artist"), .song("song")],
+        remedies: [.repairEmptyKind("kind")]
+      ))
 
     let fixedTrack = track.repair(issue)
 
@@ -109,7 +102,8 @@ final class RepairTrackIssueTests: XCTestCase {
   func testRepairEmptyYear() throws {
     let track = Track(album: "album", name: "song", persistentID: 0)
 
-    let issue = Issue(criteria: [.album("album")], remedies: [.repairEmptyYear(1970)])
+    let issue = try XCTUnwrap(
+      Issue.create(criteria: [.album("album")], remedies: [.repairEmptyYear(1970)]))
 
     let fixedTrack = track.repair(issue)
 
@@ -121,7 +115,8 @@ final class RepairTrackIssueTests: XCTestCase {
   func testRepairEmptyYearAlreadySet() throws {
     let track = Track(album: "album", name: "song", persistentID: 0, year: 1971)
 
-    let issue = Issue(criteria: [.album("album")], remedies: [.repairEmptyYear(1970)])
+    let issue = try XCTUnwrap(
+      Issue.create(criteria: [.album("album")], remedies: [.repairEmptyYear(1970)]))
 
     let fixedTrack = track.repair(issue)
 
@@ -132,7 +127,8 @@ final class RepairTrackIssueTests: XCTestCase {
   func testRepairEmptyTrackCount() throws {
     let track = Track(album: "album", name: "song", persistentID: 0)
 
-    let issue = Issue(criteria: [.album("album")], remedies: [.repairEmptyTrackCount(3)])
+    let issue = try XCTUnwrap(
+      Issue.create(criteria: [.album("album")], remedies: [.repairEmptyTrackCount(3)]))
 
     let fixedTrack = track.repair(issue)
 
@@ -144,7 +140,8 @@ final class RepairTrackIssueTests: XCTestCase {
   func testRepairEmptyTrackCountAlreadySet() throws {
     let track = Track(album: "album", name: "song", persistentID: 0, trackCount: 10)
 
-    let issue = Issue(criteria: [.album("album")], remedies: [.repairEmptyTrackCount(3)])
+    let issue = try XCTUnwrap(
+      Issue.create(criteria: [.album("album")], remedies: [.repairEmptyTrackCount(3)]))
 
     let fixedTrack = track.repair(issue)
 
@@ -155,8 +152,9 @@ final class RepairTrackIssueTests: XCTestCase {
   func testRepairEmptyAlbum() throws {
     let track = Track(artist: "artist", name: "song", persistentID: 0)
 
-    let issue = Issue(
-      criteria: [.artist("artist"), .song("song")], remedies: [.repairEmptyAlbum("album")])
+    let issue = try XCTUnwrap(
+      Issue.create(
+        criteria: [.artist("artist"), .song("song")], remedies: [.repairEmptyAlbum("album")]))
 
     let fixedTrack = track.repair(issue)
 
@@ -168,8 +166,9 @@ final class RepairTrackIssueTests: XCTestCase {
   func testRepairEmptyAlbumAlreadySet() throws {
     let track = Track(album: "ALBUM", artist: "artist", name: "song", persistentID: 0)
 
-    let issue = Issue(
-      criteria: [.artist("artist"), .song("song")], remedies: [.repairEmptyAlbum("album")])
+    let issue = try XCTUnwrap(
+      Issue.create(
+        criteria: [.artist("artist"), .song("song")], remedies: [.repairEmptyAlbum("album")]))
 
     let fixedTrack = track.repair(issue)
 
@@ -180,8 +179,9 @@ final class RepairTrackIssueTests: XCTestCase {
   func testReplaceArtist() throws {
     let track = Track(artist: "artist", name: "song", persistentID: 0)
 
-    let issue = Issue(
-      criteria: [.artist("artist"), .song("song")], remedies: [.replaceArtist("Artist")])
+    let issue = try XCTUnwrap(
+      Issue.create(
+        criteria: [.artist("artist"), .song("song")], remedies: [.replaceArtist("Artist")]))
 
     let fixedTrack = track.repair(issue)
 
@@ -193,7 +193,8 @@ final class RepairTrackIssueTests: XCTestCase {
   func testReplaceArtistNotSet() throws {
     let track = Track(name: "song", persistentID: 0)
 
-    let issue = Issue(criteria: [.song("song")], remedies: [.replaceArtist("artist")])
+    let issue = try XCTUnwrap(
+      Issue.create(criteria: [.song("song")], remedies: [.replaceArtist("artist")]))
 
     let fixedTrack = track.repair(issue)
 
