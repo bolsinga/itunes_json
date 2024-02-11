@@ -18,6 +18,9 @@ extension Track {
       return artist == string
     case .song(let string):
       return name == string
+    case .playCount(let int):
+      guard let playCount else { return false }
+      return playCount == int
     }
   }
 

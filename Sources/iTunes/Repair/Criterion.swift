@@ -11,6 +11,7 @@ enum Criterion: Hashable {
   case album(String)
   case artist(String)
   case song(String)
+  case playCount(Int)
 
   func matchesAlbum(_ album: String) -> Bool {
     switch self {
@@ -34,6 +35,15 @@ enum Criterion: Hashable {
     switch self {
     case .song(let string):
       return string == song
+    default:
+      return false
+    }
+  }
+
+  func matchesPlayCount(_ playCount: Int) -> Bool {
+    switch self {
+    case .playCount(let int):
+      return int == playCount
     default:
       return false
     }

@@ -25,6 +25,7 @@ final class ProblemCriteriaTests: XCTestCase {
     XCTAssertTrue(c.filter { $0.matchesAlbum("a") }.isEmpty)
     XCTAssertTrue(!c.filter { $0.matchesArtist("a") }.isEmpty)
     XCTAssertTrue(c.filter { $0.matchesSong("a") }.isEmpty)
+    XCTAssertTrue(c.filter { $0.matchesPlayCount(3) }.isEmpty)
   }
 
   func testAlbum() throws {
@@ -35,6 +36,7 @@ final class ProblemCriteriaTests: XCTestCase {
     XCTAssertTrue(!c.filter { $0.matchesAlbum("a") }.isEmpty)
     XCTAssertTrue(c.filter { $0.matchesArtist("a") }.isEmpty)
     XCTAssertTrue(c.filter { $0.matchesSong("a") }.isEmpty)
+    XCTAssertTrue(c.filter { $0.matchesPlayCount(3) }.isEmpty)
   }
 
   func testName() throws {
@@ -45,13 +47,18 @@ final class ProblemCriteriaTests: XCTestCase {
     XCTAssertTrue(c.filter { $0.matchesAlbum("a") }.isEmpty)
     XCTAssertTrue(c.filter { $0.matchesArtist("a") }.isEmpty)
     XCTAssertTrue(!c.filter { $0.matchesSong("a") }.isEmpty)
+    XCTAssertTrue(c.filter { $0.matchesPlayCount(3) }.isEmpty)
   }
 
   func testPlayCount() throws {
     let p = Problem(playCount: 3)
     let c = p.criteria
 
-    XCTAssertTrue(c.isEmpty)
+    XCTAssertEqual(c.count, 1)
+    XCTAssertTrue(c.filter { $0.matchesAlbum("a") }.isEmpty)
+    XCTAssertTrue(c.filter { $0.matchesArtist("a") }.isEmpty)
+    XCTAssertTrue(c.filter { $0.matchesSong("a") }.isEmpty)
+    XCTAssertTrue(!c.filter { $0.matchesPlayCount(3) }.isEmpty)
   }
 
   func testPlayDate() throws {
@@ -69,9 +76,10 @@ final class ProblemCriteriaTests: XCTestCase {
 
     let c = p.criteria
 
-    XCTAssertEqual(c.count, 3)
+    XCTAssertEqual(c.count, 4)
     XCTAssertTrue(!c.filter { $0.matchesAlbum("l") }.isEmpty)
     XCTAssertTrue(!c.filter { $0.matchesArtist("a") }.isEmpty)
     XCTAssertTrue(!c.filter { $0.matchesSong("n") }.isEmpty)
+    XCTAssertTrue(!c.filter { $0.matchesPlayCount(3) }.isEmpty)
   }
 }

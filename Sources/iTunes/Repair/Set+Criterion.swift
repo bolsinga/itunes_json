@@ -14,6 +14,7 @@ extension Set where Element == Criterion {
     static let album = Qualifier(rawValue: 1 << 0)
     static let artist = Qualifier(rawValue: 1 << 1)
     static let song = Qualifier(rawValue: 1 << 2)
+    static let playCount = Qualifier(rawValue: 1 << 3)
 
     static let albumArtistSong: Qualifier = [.album, .artist, .song]
     static let artistSong: Qualifier = [.artist, .song]
@@ -29,6 +30,8 @@ extension Set where Element == Criterion {
         partialResult.insert(.artist)
       case .song(_):
         partialResult.insert(.song)
+      case .playCount(_):
+        partialResult.insert(.playCount)
       }
     }
   }
