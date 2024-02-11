@@ -10,6 +10,11 @@ import XCTest
 @testable import iTunes
 
 final class ProblemCriteriaTests: XCTestCase {
+  private var playDate: Date {
+    // "2004-02-04T23:32:22Z"
+    Date(timeIntervalSince1970: Double(1_075_937_542))
+  }
+
   func testEmpty() throws {
     let p = Problem()
     let c = p.criteria
@@ -26,6 +31,7 @@ final class ProblemCriteriaTests: XCTestCase {
     XCTAssertTrue(!c.filter { $0.matchesArtist("a") }.isEmpty)
     XCTAssertTrue(c.filter { $0.matchesSong("a") }.isEmpty)
     XCTAssertTrue(c.filter { $0.matchesPlayCount(3) }.isEmpty)
+    XCTAssertTrue(c.filter { $0.matchesPlayDate(playDate) }.isEmpty)
   }
 
   func testAlbum() throws {
@@ -37,6 +43,7 @@ final class ProblemCriteriaTests: XCTestCase {
     XCTAssertTrue(c.filter { $0.matchesArtist("a") }.isEmpty)
     XCTAssertTrue(c.filter { $0.matchesSong("a") }.isEmpty)
     XCTAssertTrue(c.filter { $0.matchesPlayCount(3) }.isEmpty)
+    XCTAssertTrue(c.filter { $0.matchesPlayDate(playDate) }.isEmpty)
   }
 
   func testName() throws {
@@ -48,6 +55,7 @@ final class ProblemCriteriaTests: XCTestCase {
     XCTAssertTrue(c.filter { $0.matchesArtist("a") }.isEmpty)
     XCTAssertTrue(!c.filter { $0.matchesSong("a") }.isEmpty)
     XCTAssertTrue(c.filter { $0.matchesPlayCount(3) }.isEmpty)
+    XCTAssertTrue(c.filter { $0.matchesPlayDate(playDate) }.isEmpty)
   }
 
   func testPlayCount() throws {
@@ -59,27 +67,31 @@ final class ProblemCriteriaTests: XCTestCase {
     XCTAssertTrue(c.filter { $0.matchesArtist("a") }.isEmpty)
     XCTAssertTrue(c.filter { $0.matchesSong("a") }.isEmpty)
     XCTAssertTrue(!c.filter { $0.matchesPlayCount(3) }.isEmpty)
+    XCTAssertTrue(c.filter { $0.matchesPlayDate(playDate) }.isEmpty)
   }
 
   func testPlayDate() throws {
-    // "2004-02-04T23:32:22Z"
-    let p = Problem(playDate: Date(timeIntervalSince1970: Double(1_075_937_542)))
+    let p = Problem(playDate: playDate)
     let c = p.criteria
 
-    XCTAssertTrue(c.isEmpty)
+    XCTAssertEqual(c.count, 1)
+    XCTAssertTrue(c.filter { $0.matchesAlbum("a") }.isEmpty)
+    XCTAssertTrue(c.filter { $0.matchesArtist("a") }.isEmpty)
+    XCTAssertTrue(c.filter { $0.matchesSong("a") }.isEmpty)
+    XCTAssertTrue(c.filter { $0.matchesPlayCount(3) }.isEmpty)
+    XCTAssertTrue(!c.filter { $0.matchesPlayDate(playDate) }.isEmpty)
   }
 
   func testAllSet() throws {
-    let p = Problem(
-      artist: "a", album: "l", name: "n", playCount: 3,
-      playDate: Date(timeIntervalSince1970: Double(1_075_937_542)))
+    let p = Problem(artist: "a", album: "l", name: "n", playCount: 3, playDate: playDate)
 
     let c = p.criteria
 
-    XCTAssertEqual(c.count, 4)
+    XCTAssertEqual(c.count, 5)
     XCTAssertTrue(!c.filter { $0.matchesAlbum("l") }.isEmpty)
     XCTAssertTrue(!c.filter { $0.matchesArtist("a") }.isEmpty)
     XCTAssertTrue(!c.filter { $0.matchesSong("n") }.isEmpty)
     XCTAssertTrue(!c.filter { $0.matchesPlayCount(3) }.isEmpty)
+    XCTAssertTrue(!c.filter { $0.matchesPlayDate(playDate) }.isEmpty)
   }
 }
