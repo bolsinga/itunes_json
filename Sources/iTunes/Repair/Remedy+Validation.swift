@@ -14,6 +14,7 @@ extension Logger {
   static let kind = Logger(subsystem: "repair", category: "kind")
   static let year = Logger(subsystem: "repair", category: "year")
   static let trackCount = Logger(subsystem: "repair", category: "trackCount")
+  static let trackNumber = Logger(subsystem: "repair", category: "trackNumber")
   static let album = Logger(subsystem: "repair", category: "album")
   static let artist = Logger(subsystem: "repair", category: "artist")
 }
@@ -44,6 +45,11 @@ extension Remedy {
     case .repairEmptyTrackCount(_):
       guard criteria.validForTrackCount else {
         Logger.trackCount.error("\(String(describing: self), privacy: .public)")
+        return false
+      }
+    case .repairEmptyTrackNumber(_):
+      guard criteria.validForTrackNumber else {
+        Logger.trackNumber.error("\(String(describing: self), privacy: .public)")
         return false
       }
     case .repairEmptyAlbum(_):

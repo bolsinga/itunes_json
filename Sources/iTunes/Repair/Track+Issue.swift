@@ -44,6 +44,8 @@ extension Track {
       return year == nil
     case .repairEmptyTrackCount(_):
       return trackCount == nil
+    case .repairEmptyTrackNumber(_):
+      return trackNumber == nil
     case .repairEmptyAlbum(_):
       return album == nil
     case .replaceArtist(_):
@@ -92,6 +94,8 @@ extension Track {
       return self.update(fixedYear: int)
     case .repairEmptyTrackCount(let int):
       return self.update(fixedTrackCount: int)
+    case .repairEmptyTrackNumber(let int):
+      return self.update(fixedTrackNumber: int)
     case .repairEmptyAlbum(let string):
       return self.update(fixedAlbum: string)
     case .replaceArtist(let string):

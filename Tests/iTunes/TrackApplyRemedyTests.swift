@@ -45,6 +45,13 @@ final class TrackApplyRemedyTests: XCTestCase {
     XCTAssertEqual(f, 3)
   }
 
+  func testRepairEmptyTrackNumber() throws {
+    let t = Track(name: "s", persistentID: 0)
+    let r = try XCTUnwrap(t.applyRemedy(.repairEmptyTrackNumber(3)))
+    let f = try XCTUnwrap(r.trackNumber)
+    XCTAssertEqual(f, 3)
+  }
+
   func testRepairEmptyYear() throws {
     let t = Track(name: "s", persistentID: 0)
     let r = try XCTUnwrap(t.applyRemedy(.repairEmptyYear(1970)))

@@ -38,6 +38,12 @@ final class RemedyTrackApplicableTests: XCTestCase {
       Track(name: "s", persistentID: 0, trackCount: 2).remedyApplies(.repairEmptyTrackCount(3)))
   }
 
+  func testRepairEmptyTrackNumber() throws {
+    XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.repairEmptyTrackNumber(3)))
+    XCTAssertFalse(
+      Track(name: "s", persistentID: 0, trackNumber: 2).remedyApplies(.repairEmptyTrackNumber(3)))
+  }
+
   func testRepairEmptyYear() throws {
     XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.repairEmptyYear(1970)))
     XCTAssertFalse(

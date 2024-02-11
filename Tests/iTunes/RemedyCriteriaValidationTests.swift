@@ -91,6 +91,19 @@ final class RemedyCriteriaValidationTests: XCTestCase {
     XCTAssertFalse(r.validate([]))
   }
 
+  func testRepairEmptyTrackNumber() throws {
+    let r = Remedy.repairEmptyTrackNumber(3)
+
+    XCTAssertFalse(r.validate([Criterion.album("z")]))
+    XCTAssertFalse(r.validate([Criterion.artist("z")]))
+    XCTAssertFalse(r.validate([Criterion.song("z")]))
+    XCTAssertTrue(r.validate(albumArtistCriterion))
+    XCTAssertFalse(r.validate(albumSongCriterion))
+    XCTAssertTrue(r.validate(artistSongCriterion))
+    XCTAssertTrue(r.validate(allCriterion))
+    XCTAssertFalse(r.validate([]))
+  }
+
   func testRepairEmptyYear() throws {
     let r = Remedy.repairEmptyYear(1970)
 
