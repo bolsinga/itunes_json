@@ -25,7 +25,9 @@ extension Track {
     guard !criteria.isEmpty else { return false }
 
     for criterion in criteria {
-      guard criterionApplies(criterion) else { return false }
+      guard criterionApplies(criterion) else {
+        return false
+      }
     }
     return true
   }
@@ -98,7 +100,9 @@ extension Track {
   }
 
   func repair(_ issue: Issue) -> Track? {
-    guard criteriaApplies(issue.criteria) else { return self }
+    guard criteriaApplies(issue.criteria) else {
+      return self
+    }
 
     var fixedTrack: Track? = self
     for remedy in issue.remedies {
