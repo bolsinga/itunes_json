@@ -22,6 +22,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.kind != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.sortArtist != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
   }
 
@@ -39,6 +40,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.kind != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.sortArtist != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
   }
 
@@ -56,6 +58,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.kind != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.sortArtist != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
   }
 
@@ -73,6 +76,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertFalse(r.filter { $0.kind != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.sortArtist != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
   }
 
@@ -88,6 +92,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.kind != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.sortArtist != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
   }
 
@@ -104,6 +109,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.kind != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.sortArtist != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
   }
 
@@ -121,6 +127,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.kind != nil }.isEmpty)
     XCTAssertFalse(r.filter { $0.sortArtist != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
   }
 
@@ -138,6 +145,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.kind != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.sortArtist != nil }.isEmpty)
     XCTAssertFalse(r.filter { $0.trackCount != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
   }
 
@@ -145,7 +153,9 @@ final class FixRemedyTests: XCTestCase {
     let f = Fix(trackNumber: 3)
     let r = f.remedies
 
-    XCTAssertTrue(r.isEmpty)
+    XCTAssertEqual(r.count, 1)
+
+    XCTAssertEqual(r.filter { $0.trackNumber == 3 }.count, 1)
 
     XCTAssertTrue(r.filter { $0.album != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.artist != nil }.isEmpty)
@@ -153,6 +163,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.kind != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.sortArtist != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
+    XCTAssertFalse(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
   }
 
@@ -170,6 +181,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.kind != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.sortArtist != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertFalse(r.filter { $0.year != nil }.isEmpty)
   }
 
@@ -187,6 +199,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.kind != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.sortArtist != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
   }
 
@@ -202,6 +215,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.kind != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.sortArtist != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
   }
 
@@ -222,6 +236,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.kind != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.sortArtist != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
   }
 
@@ -232,13 +247,14 @@ final class FixRemedyTests: XCTestCase {
       trackNumber: 2, year: 1970, ignore: false)
     let r = f.remedies
 
-    XCTAssertEqual(r.count, 6)
+    XCTAssertEqual(r.count, 7)
 
     XCTAssertEqual(r.filter { $0.album == "l" }.count, 1)
     XCTAssertEqual(r.filter { $0.artist == "a" }.count, 1)
     XCTAssertEqual(r.filter { $0.kind == "k" }.count, 1)
     XCTAssertEqual(r.filter { $0.sortArtist == "s" }.count, 1)
     XCTAssertEqual(r.filter { $0.trackCount == 3 }.count, 1)
+    XCTAssertEqual(r.filter { $0.trackNumber == 2 }.count, 1)
     XCTAssertEqual(r.filter { $0.year == 1970 }.count, 1)
 
     XCTAssertFalse(r.filter { $0.album != nil }.isEmpty)
@@ -247,6 +263,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertFalse(r.filter { $0.kind != nil }.isEmpty)
     XCTAssertFalse(r.filter { $0.sortArtist != nil }.isEmpty)
     XCTAssertFalse(r.filter { $0.trackCount != nil }.isEmpty)
+    XCTAssertFalse(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertFalse(r.filter { $0.year != nil }.isEmpty)
   }
 }

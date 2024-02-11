@@ -57,6 +57,13 @@ extension Set where Element == Criterion {
     !qualifiers.intersection(Qualifier.albumArtist).isEmpty
   }
 
+  var validForTrackNumber: Bool {
+    // (song && artist) || (album && artist)
+    let qualifiers = qualifiers
+    return qualifiers.intersection(Qualifier.artistSong) == Qualifier.artistSong
+      || qualifiers.intersection(Qualifier.albumArtist) == Qualifier.albumArtist
+  }
+
   var validForAlbum: Bool {
     // artist or song
     !qualifiers.intersection(Qualifier.artistSong).isEmpty
