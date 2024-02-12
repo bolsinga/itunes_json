@@ -24,6 +24,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.playCount != nil }.isEmpty)
   }
 
   func testAlbum() throws {
@@ -42,6 +43,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.playCount != nil }.isEmpty)
   }
 
   func testArtist() throws {
@@ -60,6 +62,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.playCount != nil }.isEmpty)
   }
 
   func testKind() throws {
@@ -78,13 +81,16 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.playCount != nil }.isEmpty)
   }
 
   func testPlayCount() throws {
     let f = Fix(playCount: 3)
     let r = f.remedies
 
-    XCTAssertTrue(r.isEmpty)
+    XCTAssertEqual(r.count, 1)
+
+    XCTAssertEqual(r.filter { $0.playCount == 3 }.count, 1)
 
     XCTAssertTrue(r.filter { $0.album != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.artist != nil }.isEmpty)
@@ -94,6 +100,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
+    XCTAssertFalse(r.filter { $0.playCount != nil }.isEmpty)
   }
 
   func testPlayDate() throws {
@@ -111,6 +118,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.playCount != nil }.isEmpty)
   }
 
   func testSortArtist() throws {
@@ -129,6 +137,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.playCount != nil }.isEmpty)
   }
 
   func testTrackCount() throws {
@@ -147,6 +156,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertFalse(r.filter { $0.trackCount != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.playCount != nil }.isEmpty)
   }
 
   func testTrackNumber() throws {
@@ -165,6 +175,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
     XCTAssertFalse(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.playCount != nil }.isEmpty)
   }
 
   func testYear() throws {
@@ -183,6 +194,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertFalse(r.filter { $0.year != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.playCount != nil }.isEmpty)
   }
 
   func testIgnore_true() throws {
@@ -201,6 +213,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.playCount != nil }.isEmpty)
   }
 
   func testIgnore_false() throws {
@@ -217,6 +230,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.playCount != nil }.isEmpty)
   }
 
   func testAll_ignoreTrue() throws {
@@ -238,6 +252,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertTrue(r.filter { $0.trackCount != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertTrue(r.filter { $0.year != nil }.isEmpty)
+    XCTAssertTrue(r.filter { $0.playCount != nil }.isEmpty)
   }
 
   func testAll_ignoreFalse() throws {
@@ -247,7 +262,7 @@ final class FixRemedyTests: XCTestCase {
       trackNumber: 2, year: 1970, ignore: false)
     let r = f.remedies
 
-    XCTAssertEqual(r.count, 7)
+    XCTAssertEqual(r.count, 8)
 
     XCTAssertEqual(r.filter { $0.album == "l" }.count, 1)
     XCTAssertEqual(r.filter { $0.artist == "a" }.count, 1)
@@ -256,6 +271,7 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertEqual(r.filter { $0.trackCount == 3 }.count, 1)
     XCTAssertEqual(r.filter { $0.trackNumber == 2 }.count, 1)
     XCTAssertEqual(r.filter { $0.year == 1970 }.count, 1)
+    XCTAssertEqual(r.filter { $0.playCount == 3 }.count, 1)
 
     XCTAssertFalse(r.filter { $0.album != nil }.isEmpty)
     XCTAssertFalse(r.filter { $0.artist != nil }.isEmpty)
@@ -265,5 +281,6 @@ final class FixRemedyTests: XCTestCase {
     XCTAssertFalse(r.filter { $0.trackCount != nil }.isEmpty)
     XCTAssertFalse(r.filter { $0.trackNumber != nil }.isEmpty)
     XCTAssertFalse(r.filter { $0.year != nil }.isEmpty)
+    XCTAssertFalse(r.filter { $0.playCount != nil }.isEmpty)
   }
 }

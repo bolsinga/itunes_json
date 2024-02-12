@@ -17,6 +17,7 @@ extension Logger {
   static let trackNumber = Logger(subsystem: "repair", category: "trackNumber")
   static let album = Logger(subsystem: "repair", category: "album")
   static let artist = Logger(subsystem: "repair", category: "artist")
+  static let playCount = Logger(subsystem: "repair", category: "playCount")
 }
 
 extension Remedy {
@@ -60,6 +61,11 @@ extension Remedy {
     case .replaceArtist(_):
       guard criteria.validForArtist else {
         Logger.artist.error("\(String(describing: self), privacy: .public)")
+        return false
+      }
+    case .replacePlayCount(_):
+      guard criteria.validForPlayCount else {
+        Logger.playCount.error("\(String(describing: self), privacy: .public)")
         return false
       }
     }
