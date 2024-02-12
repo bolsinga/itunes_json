@@ -65,4 +65,11 @@ final class TrackApplyRemedyTests: XCTestCase {
     let f = try XCTUnwrap(r.artist)
     XCTAssertEqual(f, "a")
   }
+
+  func testReplacePlayCount() throws {
+    let t = Track(name: "s", persistentID: 0)
+    let r = try XCTUnwrap(t.applyRemedy(.replacePlayCount(3)))
+    let f = try XCTUnwrap(r.playCount)
+    XCTAssertEqual(f, 3)
+  }
 }

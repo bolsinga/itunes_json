@@ -57,6 +57,8 @@ extension Track {
       return album == nil
     case .replaceArtist(_):
       return artist != nil
+    case .replacePlayCount(_):
+      return playCount != nil
     }
   }
 
@@ -107,6 +109,8 @@ extension Track {
       return self.update(fixedAlbum: string)
     case .replaceArtist(let string):
       return self.update(fixedArtist: string)
+    case .replacePlayCount(let int):
+      return self.update(fixedPlayCount: int)
     }
   }
 

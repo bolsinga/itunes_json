@@ -54,4 +54,10 @@ final class RemedyTrackApplicableTests: XCTestCase {
     XCTAssertTrue(Track(artist: "b", name: "s", persistentID: 0).remedyApplies(.replaceArtist("a")))
     XCTAssertFalse(Track(name: "s", persistentID: 0).remedyApplies(.replaceArtist("s")))
   }
+
+  func testReplacePlayCount() throws {
+    XCTAssertTrue(
+      Track(name: "s", persistentID: 0, playCount: 8).remedyApplies(.replacePlayCount(3)))
+    XCTAssertFalse(Track(name: "s", persistentID: 0).remedyApplies(.replacePlayCount(3)))
+  }
 }

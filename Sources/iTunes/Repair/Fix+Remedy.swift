@@ -20,6 +20,7 @@ extension Fix {
     if let trackNumber { result.insert(.repairEmptyTrackNumber(trackNumber)) }
     if let album { result.insert(.repairEmptyAlbum(album)) }
     if let artist { result.insert(.replaceArtist(artist)) }
+    if let playCount { result.insert(.replacePlayCount(playCount)) }
 
     return result
   }
