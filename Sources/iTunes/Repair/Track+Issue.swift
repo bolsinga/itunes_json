@@ -21,6 +21,10 @@ extension Track {
     case .playCount(let int):
       guard let playCount else { return false }
       return playCount == int
+    case .playDate(let date):
+      guard let playDateUTC else { return false }
+      let timeInterval = abs(playDateUTC.timeIntervalSince1970 - date.timeIntervalSince1970)
+      return timeInterval == 0 || timeInterval == 60 * 60
     }
   }
 

@@ -15,6 +15,7 @@ extension Problem {
     if let artist { result.insert(.artist(artist)) }
     if let name { result.insert(.song(name)) }
     if let playCount { result.insert(.playCount(playCount)) }
+    if let playDate { result.insert(.playDate(playDate)) }
 
     return result
   }
