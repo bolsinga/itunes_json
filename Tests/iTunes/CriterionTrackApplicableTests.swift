@@ -71,12 +71,6 @@ final class CriterionTrackApplicableTests: XCTestCase {
     XCTAssertFalse(t.criteriaApplies(h.albumPlayCountCriterion))
     XCTAssertFalse(t.criteriaApplies(h.artistPlayCountCriterion))
     XCTAssertFalse(t.criteriaApplies(h.songPlayCountCriterion))
-    XCTAssertFalse(t.criteriaApplies(h.albumArtistPlayCountCriterion))
-    XCTAssertFalse(t.criteriaApplies(h.albumSongPlayCountCriterion))
-    XCTAssertFalse(t.criteriaApplies(h.artistSongPlayCountCriterion))
-    XCTAssertFalse(t.criteriaApplies(h.albumPlayCountCriterion))
-    XCTAssertFalse(t.criteriaApplies(h.artistPlayCountCriterion))
-    XCTAssertFalse(t.criteriaApplies(h.songPlayCountCriterion))
     XCTAssertFalse(t.criteriaApplies(h.allCriterion))
     XCTAssertFalse(t.criteriaApplies([]))
   }
