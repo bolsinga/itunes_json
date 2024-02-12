@@ -59,6 +59,8 @@ extension Track {
       return artist != nil
     case .replacePlayCount(_):
       return playCount != nil
+    case .replacePlayDate(_):
+      return playDateUTC != nil
     }
   }
 
@@ -111,6 +113,8 @@ extension Track {
       return self.update(fixedArtist: string)
     case .replacePlayCount(let int):
       return self.update(fixedPlayCount: int)
+    case .replacePlayDate(let date):
+      return self.update(fixedPlayDate: date)
     }
   }
 

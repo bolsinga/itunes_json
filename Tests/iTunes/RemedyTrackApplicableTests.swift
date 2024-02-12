@@ -60,4 +60,13 @@ final class RemedyTrackApplicableTests: XCTestCase {
       Track(name: "s", persistentID: 0, playCount: 8).remedyApplies(.replacePlayCount(3)))
     XCTAssertFalse(Track(name: "s", persistentID: 0).remedyApplies(.replacePlayCount(3)))
   }
+
+  func testReplacePlayDate() throws {
+    XCTAssertTrue(
+      Track(name: "s", persistentID: 0, playDateUTC: Date.now).remedyApplies(
+        .replacePlayDate(Date(timeIntervalSince1970: Double(1_075_937_542)))))
+    XCTAssertFalse(
+      Track(name: "s", persistentID: 0).remedyApplies(
+        .replacePlayDate(Date(timeIntervalSince1970: Double(1_075_937_542)))))
+  }
 }

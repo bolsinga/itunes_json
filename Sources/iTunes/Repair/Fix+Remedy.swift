@@ -21,6 +21,7 @@ extension Fix {
     if let album { result.insert(.repairEmptyAlbum(album)) }
     if let artist { result.insert(.replaceArtist(artist)) }
     if let playCount { result.insert(.replacePlayCount(playCount)) }
+    if let playDate { result.insert(.replacePlayDate(playDate)) }
 
     return result
   }
