@@ -8,11 +8,7 @@
 import Foundation
 
 struct Repair: Repairing {
-  private let items: [Item]
-
-  internal init(items: [Item]) {
-    self.items = items
-  }
+  let issues: [Issue]
 
   public func repair(_ tracks: [Track]) -> [Track] {
     fix(adjustDates(tracks)).filter { $0.isSQLEncodable }.map { $0.pruned }
@@ -23,26 +19,19 @@ struct Repair: Repairing {
   }
 
   internal func fix(_ tracks: [Track]) -> [Track] {
-    let fixes = tracks.reduce(into: [Track: [Fix]]()) { dictionary, track in
-      var arr = dictionary[track] ?? []
-      arr.append(
-        contentsOf: items.filter { track.matches(problem: $0.problem) }.compactMap { $0.fix })
-      if !arr.isEmpty { dictionary[track] = arr }
+    let issueTracks = tracks.filter { track in
+      !issues.map { $0.criteria }.filter { track.criteriaApplies($0) }.isEmpty
     }
-
-    guard !fixes.isEmpty else { return tracks }
-
-    return tracks.compactMap { track in
-      if let fixes = fixes[track], !fixes.isEmpty {
-        var fixedTrack: Track? = track
-        fixes.forEach {
-          if let repairedTrack: Track = fixedTrack {
-            fixedTrack = repairedTrack.repair($0)
-          }
+    let noIssueTracks = Array(Set(tracks).subtracting(issueTracks))
+    let fixedIssueTracks = issueTracks.compactMap { track in
+      var fixedTrack: Track? = track
+      issues.forEach {
+        if let track = fixedTrack {
+          fixedTrack = track.repair($0)
         }
-        return fixedTrack
       }
-      return track
+      return fixedTrack
     }
+    return fixedIssueTracks + noIssueTracks
   }
 }

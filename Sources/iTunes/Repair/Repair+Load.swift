@@ -29,11 +29,12 @@ public func createRepair(url: URL?, source: String?) async throws -> Repairing {
     duplicateProblems.forEach {
       Logger.duplicateProblem.error("\(String(describing: $0), privacy: .public)")
     }
-
     //      do {
     //        try printRepairJson(items: items)
     //      } catch {}
-    return Repair(items: items)
+
+    let issues = items.compactMap { $0.issue }
+    return Repair(issues: issues)
   }
   throw RepairError.invalidInput
 }
