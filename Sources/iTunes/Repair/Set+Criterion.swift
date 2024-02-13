@@ -22,6 +22,7 @@ extension Set where Element == Criterion {
     static let albumArtist: Qualifier = [.album, .artist]
 
     static let artistSongPlayCountPlayDate: Qualifier = [.artist, .song, .playCount, .playDate]
+    static let artistSongPlayCount: Qualifier = [.artist, .song, .playCount]
   }
 
   fileprivate var qualifiers: Qualifier {
@@ -85,5 +86,10 @@ extension Set where Element == Criterion {
   var validForPlayCount: Bool {
     qualifiers.intersection(Qualifier.artistSongPlayCountPlayDate)
       == Qualifier.artistSongPlayCountPlayDate
+  }
+
+  var validForPlayDate: Bool {
+    qualifiers.intersection(Qualifier.artistSongPlayCount)
+      == Qualifier.artistSongPlayCount
   }
 }

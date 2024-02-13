@@ -72,4 +72,12 @@ final class TrackApplyRemedyTests: XCTestCase {
     let f = try XCTUnwrap(r.playCount)
     XCTAssertEqual(f, 3)
   }
+
+  func testReplacePlayDate() throws {
+    let t = Track(name: "s", persistentID: 0)
+    let r = try XCTUnwrap(
+      t.applyRemedy(.replacePlayDate(Date(timeIntervalSince1970: Double(1_075_937_542)))))
+    let f = try XCTUnwrap(r.playDateUTC)
+    XCTAssertEqual(f, Date(timeIntervalSince1970: Double(1_075_937_542)))
+  }
 }
