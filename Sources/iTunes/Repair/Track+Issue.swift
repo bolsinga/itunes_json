@@ -43,8 +43,8 @@ extension Track {
     switch remedy {
     case .ignore:
       return true
-    case .repairEmptySortArtist(_):
-      return sortArtist == nil
+    case .repairSortArtist(_):
+      return sortArtist == nil || sortArtist == artist
     case .repairEmptyKind(_):
       return kind == nil
     case .repairEmptyYear(_):
@@ -97,7 +97,7 @@ extension Track {
     switch remedy {
     case .ignore:
       return nil
-    case .repairEmptySortArtist(let string):
+    case .repairSortArtist(let string):
       return self.update(fixedSortArtist: string)
     case .repairEmptyKind(let string):
       return self.update(fixedKind: string)

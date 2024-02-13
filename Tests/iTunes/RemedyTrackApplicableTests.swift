@@ -26,10 +26,11 @@ final class RemedyTrackApplicableTests: XCTestCase {
       Track(kind: "a", name: "s", persistentID: 0).remedyApplies(.repairEmptyKind("k")))
   }
 
-  func testRepairEmptySortArtist() throws {
-    XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.repairEmptySortArtist("s")))
+  func testRepairSortArtist() throws {
+    XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.repairSortArtist("s")))
+    XCTAssertTrue(Track(artist: "a", name: "s", persistentID: 0, sortArtist: "a").remedyApplies(.repairSortArtist("s")))
     XCTAssertFalse(
-      Track(name: "s", persistentID: 0, sortArtist: "a").remedyApplies(.repairEmptySortArtist("s")))
+      Track(name: "s", persistentID: 0, sortArtist: "a").remedyApplies(.repairSortArtist("s")))
   }
 
   func testRepairEmptyTrackCount() throws {
