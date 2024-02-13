@@ -97,7 +97,7 @@ struct Program: AsyncParsableCommand {
 
     let tracks = try await {
       let repair =
-        isRepairing ? try? await Repair.create(url: repairFile, source: repairSource) : nil
+        isRepairing ? try? await createRepair(url: repairFile, source: repairSource) : nil
       return try await source.gather(jsonSource, repair: repair)
     }()
 
