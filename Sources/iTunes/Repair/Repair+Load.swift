@@ -7,13 +7,17 @@
 
 import Foundation
 
+public func createRepair(url: URL?, source: String?) async throws -> Repair {
+  try await Repair.create(url: url, source: source)
+}
+
 extension Repair {
   fileprivate enum RepairError: Error {
     case invalidInput
     case invalidString
   }
 
-  public static func create(url: URL?, source: String?) async throws -> Repair {
+  static func create(url: URL?, source: String?) async throws -> Repair {
     var items: [Item]?
     if let url { items = try await Repair.load(url: url) }
     if let source { items = try Repair.load(source: source) }
