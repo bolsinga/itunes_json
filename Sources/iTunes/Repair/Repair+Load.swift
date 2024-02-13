@@ -7,57 +7,47 @@
 
 import Foundation
 
-public func createRepair(url: URL?, source: String?) async throws -> Repairing {
-  try await Repair.create(url: url, source: source)
+private enum RepairError: Error {
+  case invalidInput
+  case invalidString
 }
 
-extension Repair {
-  fileprivate enum RepairError: Error {
-    case invalidInput
-    case invalidString
+public func createRepair(url: URL?, source: String?) async throws -> Repairing {
+  var items: [Item]?
+  if let url { items = try await load(url: url) }
+  if let source { items = try load(source: source) }
+  if let items {
+    //      do {
+    //        try printRepairJson(items: items)
+    //      } catch {}
+    return Repair(items: items)
   }
+  throw RepairError.invalidInput
+}
 
-  static func create(url: URL?, source: String?) async throws -> Repair {
-    var items: [Item]?
-    if let url { items = try await Repair.load(url: url) }
-    if let source { items = try Repair.load(source: source) }
-    if let items {
-      let issues = items.compactMap { $0.issue }
-      if items.count != issues.count {
-        print("items: \(items.count) issues: \(issues.count)")
-      }
-      //      do {
-      //        try Repair.printRepairJson(items: items)
-      //      } catch {}
-      return Repair(items: items)
-    }
-    throw RepairError.invalidInput
-  }
+private func load(source: String) throws -> [Item] {
+  guard let data = source.data(using: .utf8) else { throw RepairError.invalidString }
+  return try load(data: data)
+}
 
-  private static func load(source: String) throws -> [Item] {
-    guard let data = source.data(using: .utf8) else { throw RepairError.invalidString }
-    return try load(data: data)
-  }
+private func load(url: URL) async throws -> [Item] {
+  let (data, _) = try await URLSession.shared.data(from: url)
+  return try load(data: data)
+}
 
-  private static func load(url: URL) async throws -> [Item] {
-    let (data, _) = try await URLSession.shared.data(from: url)
-    return try load(data: data)
+private func printRepairJson(items: [Item]) throws {
+  let encoder = JSONEncoder()
+  encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
+  encoder.dateEncodingStrategy = .iso8601
+  let data = try encoder.encode(items)
+  if let string = String(data: data, encoding: .utf8) {
+    print(string)
   }
+}
 
-  private static func printRepairJson(items: [Item]) throws {
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
-    encoder.dateEncodingStrategy = .iso8601
-    let data = try encoder.encode(items)
-    if let string = String(data: data, encoding: .utf8) {
-      print(string)
-    }
-  }
-
-  private static func load(data: Data) throws -> [Item] {
-    let decoder = JSONDecoder()
-    decoder.dateDecodingStrategy = .iso8601
-    let items = try decoder.decode([Item].self, from: data)
-    return items
-  }
+private func load(data: Data) throws -> [Item] {
+  let decoder = JSONDecoder()
+  decoder.dateDecodingStrategy = .iso8601
+  let items = try decoder.decode([Item].self, from: data)
+  return items
 }

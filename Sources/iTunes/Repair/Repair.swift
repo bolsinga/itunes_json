@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Repair : Repairing {
+struct Repair: Repairing {
   private let items: [Item]
 
   internal init(items: [Item]) {
