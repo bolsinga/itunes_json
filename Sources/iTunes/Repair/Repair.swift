@@ -7,14 +7,14 @@
 
 import Foundation
 
-public struct Repair {
+struct Repair: Repairing {
   private let items: [Item]
 
   internal init(items: [Item]) {
     self.items = items
   }
 
-  func repair(_ tracks: [Track]) -> [Track] {
+  public func repair(_ tracks: [Track]) -> [Track] {
     fix(adjustDates(tracks)).filter { $0.isSQLEncodable }.map { $0.pruned }
   }
 
