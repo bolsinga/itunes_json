@@ -7,7 +7,7 @@
 
 import Foundation
 
-public func createRepair(url: URL?, source: String?) async throws -> Repair {
+public func createRepair(url: URL?, source: String?) async throws -> Repairing {
   try await Repair.create(url: url, source: source)
 }
 

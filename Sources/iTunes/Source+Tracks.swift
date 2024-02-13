@@ -8,7 +8,7 @@
 import Foundation
 
 extension Source {
-  public func gather(_ source: String?, repair: Repair?) async throws -> [Track] {
+  public func gather(_ source: String?, repair: Repairing?) async throws -> [Track] {
     let tracks = try await gather(source)
     return repair != nil ? repair!.repair(tracks) : tracks
   }
