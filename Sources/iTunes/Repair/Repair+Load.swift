@@ -6,6 +6,11 @@
 //
 
 import Foundation
+import os
+
+extension Logger {
+  static let duplicateProblem = Logger(subsystem: "repair", category: "duplicateProblem")
+}
 
 private enum RepairError: Error {
   case invalidInput
@@ -17,6 +22,14 @@ public func createRepair(url: URL?, source: String?) async throws -> Repairing {
   if let url { items = try await load(url: url) }
   if let source { items = try load(source: source) }
   if let items {
+    let duplicateProblems = Dictionary(grouping: items.compactMap { $0.problem }) { $0 }.filter {
+      $1.count > 1
+    }
+    .keys
+    duplicateProblems.forEach {
+      Logger.duplicateProblem.error("\(String(describing: $0), privacy: .public)")
+    }
+
     //      do {
     //        try printRepairJson(items: items)
     //      } catch {}
