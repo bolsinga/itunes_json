@@ -28,7 +28,9 @@ final class RemedyTrackApplicableTests: XCTestCase {
 
   func testRepairSortArtist() throws {
     XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.repairSortArtist("s")))
-    XCTAssertTrue(Track(artist: "a", name: "s", persistentID: 0, sortArtist: "a").remedyApplies(.repairSortArtist("s")))
+    XCTAssertTrue(
+      Track(artist: "a", name: "s", persistentID: 0, sortArtist: "a").remedyApplies(
+        .repairSortArtist("s")))
     XCTAssertFalse(
       Track(name: "s", persistentID: 0, sortArtist: "a").remedyApplies(.repairSortArtist("s")))
   }
