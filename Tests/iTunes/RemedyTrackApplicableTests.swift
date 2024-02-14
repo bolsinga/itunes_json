@@ -37,14 +37,16 @@ final class RemedyTrackApplicableTests: XCTestCase {
 
   func testRepairEmptyTrackCount() throws {
     XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.repairEmptyTrackCount(3)))
-    XCTAssertTrue(Track(name: "s", persistentID: 0, trackCount: 0).remedyApplies(.repairEmptyTrackCount(3)))
+    XCTAssertTrue(
+      Track(name: "s", persistentID: 0, trackCount: 0).remedyApplies(.repairEmptyTrackCount(3)))
     XCTAssertFalse(
       Track(name: "s", persistentID: 0, trackCount: 2).remedyApplies(.repairEmptyTrackCount(3)))
   }
 
   func testRepairEmptyTrackNumber() throws {
     XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.repairEmptyTrackNumber(3)))
-    XCTAssertTrue(Track(name: "s", persistentID: 0, trackNumber: 0).remedyApplies(.repairEmptyTrackNumber(3)))
+    XCTAssertTrue(
+      Track(name: "s", persistentID: 0, trackNumber: 0).remedyApplies(.repairEmptyTrackNumber(3)))
     XCTAssertFalse(
       Track(name: "s", persistentID: 0, trackNumber: 2).remedyApplies(.repairEmptyTrackNumber(3)))
   }
