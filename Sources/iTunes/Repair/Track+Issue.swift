@@ -49,9 +49,11 @@ extension Track {
     case .repairEmptyYear(_):
       return year == nil
     case .repairEmptyTrackCount(_):
-      return trackCount == nil
+      guard let trackCount else { return true }
+      return trackCount == 0
     case .repairEmptyTrackNumber(_):
-      return trackNumber == nil
+      guard let trackNumber else { return true }
+      return trackNumber == 0
     case .repairEmptyAlbum(_):
       return album == nil
     case .replaceArtist(_):
