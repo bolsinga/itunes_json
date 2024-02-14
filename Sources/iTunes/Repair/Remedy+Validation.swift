@@ -29,7 +29,7 @@ extension Remedy {
         Logger.ignore.error("\(String(describing: self), privacy: .public)")
         return false
       }
-    case .repairSortArtist(_):
+    case .replaceSortArtist(_):
       guard criteria.validForSortArtist else {
         Logger.sortArtist.error("\(String(describing: self), privacy: .public)")
         return false

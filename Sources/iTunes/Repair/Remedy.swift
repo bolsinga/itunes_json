@@ -11,7 +11,7 @@ enum Remedy: Hashable {
   case ignore
   case repairEmptyAlbum(String)
   case repairEmptyKind(String)
-  case repairSortArtist(String)
+  case replaceSortArtist(String)
   case repairEmptyTrackCount(Int)
   case repairEmptyTrackNumber(Int)
   case repairEmptyYear(Int)
@@ -30,7 +30,7 @@ enum Remedy: Hashable {
 
   var sortArtist: String? {
     switch self {
-    case .repairSortArtist(let string):
+    case .replaceSortArtist(let string):
       return string
     default:
       return nil

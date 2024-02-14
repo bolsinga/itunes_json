@@ -48,7 +48,7 @@ final class RepairTrackIssueTests: XCTestCase {
     let t = Track(album: "l", artist: "a", name: "s", persistentID: 0)
 
     let i = try XCTUnwrap(
-      Issue.create(criteria: [.artist("a")], remedies: [.ignore, .repairSortArtist("sa")]))
+      Issue.create(criteria: [.artist("a")], remedies: [.ignore, .replaceSortArtist("sa")]))
 
     let f = t.repair(i)
 

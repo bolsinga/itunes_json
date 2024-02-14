@@ -125,8 +125,8 @@ final class RemedyCriteriaValidationTests: XCTestCase {
     XCTAssertFalse(r.validate([]))
   }
 
-  func testRepairSortArtist() throws {
-    let r = Remedy.repairSortArtist("a")
+  func testReplaceSortArtist() throws {
+    let r = Remedy.replaceSortArtist("a")
 
     XCTAssertFalse(r.validate(h.albumCriterion))
     XCTAssertTrue(r.validate(h.artistCriterion))
