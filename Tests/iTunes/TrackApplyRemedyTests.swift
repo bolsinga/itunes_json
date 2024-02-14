@@ -31,9 +31,9 @@ final class TrackApplyRemedyTests: XCTestCase {
     XCTAssertEqual(f, "k")
   }
 
-  func testRepairSortArtist() throws {
+  func testReplaceSortArtist() throws {
     let t = Track(name: "s", persistentID: 0)
-    let r = try XCTUnwrap(t.applyRemedy(.repairSortArtist("s")))
+    let r = try XCTUnwrap(t.applyRemedy(.replaceSortArtist("s")))
     let f = try XCTUnwrap(r.sortArtist)
     XCTAssertEqual(f, "s")
   }

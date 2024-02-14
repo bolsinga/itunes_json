@@ -13,7 +13,7 @@ extension Fix {
 
     var result = Set<Remedy>()
 
-    if let sortArtist { result.insert(.repairSortArtist(sortArtist)) }
+    if let sortArtist { result.insert(.replaceSortArtist(sortArtist)) }
     if let kind { result.insert(.repairEmptyKind(kind)) }
     if let year { result.insert(.repairEmptyYear(year)) }
     if let trackCount { result.insert(.repairEmptyTrackCount(trackCount)) }
