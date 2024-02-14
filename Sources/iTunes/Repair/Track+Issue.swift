@@ -58,7 +58,7 @@ extension Track {
     case .replaceArtist(_):
       return artist != nil
     case .replacePlayCount(_):
-      return playCount != nil
+      return true
     case .replacePlayDate(_):
       return playDateUTC != nil
     }
