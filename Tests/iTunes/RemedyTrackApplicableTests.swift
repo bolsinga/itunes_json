@@ -55,6 +55,7 @@ final class RemedyTrackApplicableTests: XCTestCase {
     XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.repairEmptyYear(1970)))
     XCTAssertFalse(
       Track(name: "s", persistentID: 0, year: 1966).remedyApplies(.repairEmptyYear(1970)))
+    XCTAssertTrue(Track(name: "s", persistentID: 0, year: 0).remedyApplies(.repairEmptyYear(1970)))
   }
 
   func testReplaceArtist() throws {

@@ -47,7 +47,8 @@ extension Track {
     case .repairEmptyKind(_):
       return kind == nil
     case .repairEmptyYear(_):
-      return year == nil
+      guard let year else { return true }
+      return year == 0
     case .repairEmptyTrackCount(_):
       guard let trackCount else { return true }
       return trackCount == 0
