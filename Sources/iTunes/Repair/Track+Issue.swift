@@ -19,8 +19,7 @@ extension Track {
     case .song(let string):
       return name == string
     case .playCount(let int):
-      guard let playCount else { return false }
-      return playCount == int
+      return (playCount ?? 0) == int
     case .playDate(let date):
       guard let playDateUTC else { return false }
       let timeInterval = abs(playDateUTC.timeIntervalSince1970 - date.timeIntervalSince1970)

@@ -279,4 +279,10 @@ final class CriterionTrackApplicableTests: XCTestCase {
     XCTAssertFalse(t.criteriaApplies(h.allCriterion))
     XCTAssertFalse(t.criteriaApplies([]))
   }
+
+  func testPlayCountNil_matchesZero() throws {
+    let t = Track(name: h.song, persistentID: 0)
+
+    XCTAssertTrue(t.criteriaApplies([.playCount(0)]))
+  }
 }
