@@ -10,6 +10,7 @@ import os
 
 extension Logger {
   static let duplicateArtist = Logger(subsystem: "validation", category: "duplicateArtist")
+  static let duplicatePlayDate = Logger(subsystem: "validation", category: "duplicatePlayDate")
 }
 
 struct TrackRowEncoder {
@@ -34,7 +35,13 @@ struct TrackRowEncoder {
   }
 
   var playRows: (table: String, rows: [TrackRow]) {
-    (Track.PlaysTable, rows.filter { $0.play != nil }.sorted(by: { $0.play!.date < $1.play!.date }))
+    let playRows = rows.filter { $0.play != nil }
+
+    playRows.duplicatePlayDates.forEach {
+      Logger.duplicatePlayDate.error("\(String(describing: $0), privacy: .public)")
+    }
+
+    return (Track.PlaysTable, playRows.sorted(by: { $0.play!.date < $1.play!.date }))
   }
 
   var views = """
