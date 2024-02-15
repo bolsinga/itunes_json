@@ -72,6 +72,7 @@ extension Track {
       delta INTEGER NOT NULL,
       UNIQUE(songid, date, delta),
       FOREIGN KEY(songid) REFERENCES songs(id),
+      CHECK(length(date) > 0),
       CHECK(delta > 0)
     );
     """
