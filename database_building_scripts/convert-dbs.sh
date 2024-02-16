@@ -25,7 +25,7 @@ createDbArchive() {
   local DB_NAME_DIR="$DST_DIR/$NAME"
   mkdir -p $DB_NAME_DIR
   echo "Processing $NAME"
-  cat itunes.json | $JSON_TOOL --repair-source "$REPAIR" --json-string --db --output-directory $DB_NAME_DIR --file-name $NAME -
+  cat itunes.json | $JSON_TOOL --logging-token $NAME --repair-source "$REPAIR" --json-string --db --output-directory $DB_NAME_DIR --file-name $NAME -
   tar czf $DB_NAME_DIR.tar.gz -C $DST_DIR $NAME
   if [ $? -eq 0 ] ; then
     rm -rf $DB_NAME_DIR
