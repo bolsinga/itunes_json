@@ -10,7 +10,7 @@ import Foundation
 extension Destination {
   var filenameExtension: String {
     switch self {
-    case .json:
+    case .json, .duplicates:
       "json"
     case .sqlCode:
       "sql"

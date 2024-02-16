@@ -16,6 +16,8 @@ extension Destination {
       return try tracks.sqlData()
     case .db:
       preconditionFailure("No Data for db")
+    case .duplicates:
+      return try tracks.duplicatePlayDateItems.jsonData()
     }
   }
 }
