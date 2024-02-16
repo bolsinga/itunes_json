@@ -27,7 +27,7 @@ for NAME in $(git tag --list | grep -v empty | sort) ; do
   echo "Processing $NAME"
   git checkout $NAME
 
-  cat itunes.json | $JSON_TOOL --json-string --json - | gzip -c > $DST_DIR/$NAME$SUFFIX &
+  cat itunes.json | $JSON_TOOL --logging-token $NAME --json-string --json - | gzip -c > $DST_DIR/$NAME$SUFFIX &
   let COUNT++
   if [ $COUNT -eq 7 ]; then
     echo Waiting for Batch
