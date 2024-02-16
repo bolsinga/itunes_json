@@ -13,6 +13,39 @@ extension Logger {
   static let duplicatePlayDate = Logger(subsystem: "validation", category: "duplicatePlayDate")
 }
 
+extension RowAlbum {
+  var debugLogInformation: String {
+    "name: \(name.name) trackCount: \(trackCount)"
+  }
+}
+
+extension RowArtist {
+  var debugLogInformation: String {
+    "name: \(name.name)"
+  }
+}
+
+extension RowSong {
+  var debugLogInformation: String {
+    "name: \(name.name) id: \(itunesid) track: \(trackNumber) year: \(year)"
+  }
+}
+
+extension RowPlay {
+  var debugLogInformation: String {
+    "date: \(date) delta: \(delta)"
+  }
+}
+
+extension TrackRow {
+  var debugLogInformation: String {
+    let na = "n/a"
+    let prefix = LoggingToken != nil ? "\(LoggingToken!): " : ""
+    return prefix
+      + "album: [\(album.debugLogInformation)], artist: (\(artist.debugLogInformation)), song: (\(song.debugLogInformation)), play: (\(play?.debugLogInformation ?? na))"
+  }
+}
+
 struct TrackRowEncoder {
   let rows: [TrackRow]
 
@@ -20,7 +53,7 @@ struct TrackRowEncoder {
     let artistRows = Array(Set(rows.map { $0.artist }))
 
     artistRows.mismatchedSortableNames.forEach {
-      Logger.duplicateArtist.error("\(String(describing: $0), privacy: .public)")
+      Logger.duplicateArtist.error("\($0, privacy: .public)")
     }
 
     return (Track.ArtistTable, artistRows.sorted(by: { $0.name < $1.name }))
@@ -38,7 +71,7 @@ struct TrackRowEncoder {
     let playRows = rows.filter { $0.play != nil }
 
     playRows.duplicatePlayDates.forEach {
-      Logger.duplicatePlayDate.error("\(String(describing: $0), privacy: .public)")
+      Logger.duplicatePlayDate.error("\($0.debugLogInformation, privacy: .public)")
     }
 
     return (Track.PlaysTable, playRows.sorted(by: { $0.play!.date < $1.play!.date }))

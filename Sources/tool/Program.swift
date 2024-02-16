@@ -57,6 +57,9 @@ struct Program: AsyncParsableCommand {
   @Flag
   var timeTest = false
 
+  @Option(help: "Optional string to add to debug logs for debugging.")
+  var loggingToken: String?
+
   /// Outputfile where data will be writen, if outputDirectory is not specified.
   private var outputFile: URL? {
     guard let outputDirectory else { return nil }
@@ -89,6 +92,8 @@ struct Program: AsyncParsableCommand {
   }
 
   func run() async throws {
+    LoggingToken = loggingToken
+
     guard !timeTest else {
       let result = await testTime()
       if result != 0 { throw ExitCode(Int32(result)) }
