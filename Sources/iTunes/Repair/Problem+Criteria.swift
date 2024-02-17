@@ -16,6 +16,7 @@ extension Problem {
     if let name { result.insert(.song(name)) }
     if let playCount { result.insert(.playCount(playCount)) }
     if let playDate { result.insert(.playDate(playDate)) }
+    if let persistentID { result.insert(.persistentId(persistentID)) }
 
     return result
   }

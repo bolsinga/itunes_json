@@ -12,7 +12,7 @@ import XCTest
 final class RemedyCriteriaValidationTests: XCTestCase {
   let h = CriterionVariantHelper(
     album: "l", artist: "a", song: "s", playCount: 3,
-    playDate: Date(timeIntervalSince1970: Double(1_075_937_542)))
+    playDate: Date(timeIntervalSince1970: Double(1_075_937_542)), persistentID: 123456)
 
   func testIgnore() throws {
     let r = Remedy.ignore
@@ -22,6 +22,7 @@ final class RemedyCriteriaValidationTests: XCTestCase {
     XCTAssertTrue(r.validate(h.songCriterion))
     XCTAssertFalse(r.validate(h.playCountCriterion))
     XCTAssertFalse(r.validate(h.playDateCriterion))
+    XCTAssertTrue(r.validate(h.persistentIDCriterion))
     XCTAssertFalse(r.validate(h.albumPlayDateCriterion))
     XCTAssertFalse(r.validate(h.artistPlayDateCriterion))
     XCTAssertFalse(r.validate(h.songPlayDateCriterion))
@@ -59,6 +60,7 @@ final class RemedyCriteriaValidationTests: XCTestCase {
     XCTAssertTrue(r.validate(h.songCriterion))
     XCTAssertFalse(r.validate(h.playCountCriterion))
     XCTAssertFalse(r.validate(h.playDateCriterion))
+    XCTAssertFalse(r.validate(h.persistentIDCriterion))
     XCTAssertFalse(r.validate(h.albumPlayDateCriterion))
     XCTAssertTrue(r.validate(h.artistPlayDateCriterion))
     XCTAssertTrue(r.validate(h.songPlayDateCriterion))
@@ -96,6 +98,7 @@ final class RemedyCriteriaValidationTests: XCTestCase {
     XCTAssertFalse(r.validate(h.songCriterion))
     XCTAssertFalse(r.validate(h.playCountCriterion))
     XCTAssertFalse(r.validate(h.playDateCriterion))
+    XCTAssertFalse(r.validate(h.persistentIDCriterion))
     XCTAssertFalse(r.validate(h.albumPlayDateCriterion))
     XCTAssertFalse(r.validate(h.artistPlayDateCriterion))
     XCTAssertFalse(r.validate(h.songPlayDateCriterion))
@@ -133,6 +136,7 @@ final class RemedyCriteriaValidationTests: XCTestCase {
     XCTAssertFalse(r.validate(h.songCriterion))
     XCTAssertFalse(r.validate(h.playCountCriterion))
     XCTAssertFalse(r.validate(h.playDateCriterion))
+    XCTAssertFalse(r.validate(h.persistentIDCriterion))
     XCTAssertFalse(r.validate(h.albumPlayDateCriterion))
     XCTAssertFalse(r.validate(h.artistPlayDateCriterion))
     XCTAssertFalse(r.validate(h.songPlayDateCriterion))
@@ -170,6 +174,7 @@ final class RemedyCriteriaValidationTests: XCTestCase {
     XCTAssertFalse(r.validate(h.songCriterion))
     XCTAssertFalse(r.validate(h.playCountCriterion))
     XCTAssertFalse(r.validate(h.playDateCriterion))
+    XCTAssertFalse(r.validate(h.persistentIDCriterion))
     XCTAssertTrue(r.validate(h.albumPlayDateCriterion))
     XCTAssertTrue(r.validate(h.artistPlayDateCriterion))
     XCTAssertFalse(r.validate(h.songPlayDateCriterion))
@@ -207,6 +212,7 @@ final class RemedyCriteriaValidationTests: XCTestCase {
     XCTAssertFalse(r.validate(h.songCriterion))
     XCTAssertFalse(r.validate(h.playCountCriterion))
     XCTAssertFalse(r.validate(h.playDateCriterion))
+    XCTAssertFalse(r.validate(h.persistentIDCriterion))
     XCTAssertFalse(r.validate(h.albumPlayDateCriterion))
     XCTAssertFalse(r.validate(h.artistPlayDateCriterion))
     XCTAssertFalse(r.validate(h.songPlayDateCriterion))
@@ -244,6 +250,7 @@ final class RemedyCriteriaValidationTests: XCTestCase {
     XCTAssertFalse(r.validate(h.songCriterion))
     XCTAssertFalse(r.validate(h.playCountCriterion))
     XCTAssertFalse(r.validate(h.playDateCriterion))
+    XCTAssertFalse(r.validate(h.persistentIDCriterion))
     XCTAssertTrue(r.validate(h.albumPlayDateCriterion))
     XCTAssertFalse(r.validate(h.artistPlayDateCriterion))
     XCTAssertFalse(r.validate(h.songPlayDateCriterion))
@@ -281,6 +288,7 @@ final class RemedyCriteriaValidationTests: XCTestCase {
     XCTAssertTrue(r.validate(h.songCriterion))
     XCTAssertFalse(r.validate(h.playCountCriterion))
     XCTAssertFalse(r.validate(h.playDateCriterion))
+    XCTAssertFalse(r.validate(h.persistentIDCriterion))
     XCTAssertFalse(r.validate(h.albumPlayDateCriterion))
     XCTAssertTrue(r.validate(h.artistPlayDateCriterion))
     XCTAssertTrue(r.validate(h.songPlayDateCriterion))
@@ -318,6 +326,7 @@ final class RemedyCriteriaValidationTests: XCTestCase {
     XCTAssertFalse(r.validate(h.songCriterion))
     XCTAssertFalse(r.validate(h.playCountCriterion))
     XCTAssertFalse(r.validate(h.playDateCriterion))
+    XCTAssertFalse(r.validate(h.persistentIDCriterion))
     XCTAssertFalse(r.validate(h.albumPlayDateCriterion))
     XCTAssertFalse(r.validate(h.artistPlayDateCriterion))
     XCTAssertFalse(r.validate(h.songPlayDateCriterion))
@@ -355,6 +364,7 @@ final class RemedyCriteriaValidationTests: XCTestCase {
     XCTAssertFalse(r.validate(h.songCriterion))
     XCTAssertFalse(r.validate(h.playCountCriterion))
     XCTAssertFalse(r.validate(h.playDateCriterion))
+    XCTAssertFalse(r.validate(h.persistentIDCriterion))
     XCTAssertFalse(r.validate(h.albumPlayDateCriterion))
     XCTAssertFalse(r.validate(h.artistPlayDateCriterion))
     XCTAssertFalse(r.validate(h.songPlayDateCriterion))

@@ -24,6 +24,8 @@ extension Track {
       guard let playDateUTC else { return false }
       let timeInterval = abs(playDateUTC.timeIntervalSince1970 - date.timeIntervalSince1970)
       return timeInterval == 0 || timeInterval == 60 * 60
+    case .persistentId(let uint):
+      return persistentID == uint
     }
   }
 

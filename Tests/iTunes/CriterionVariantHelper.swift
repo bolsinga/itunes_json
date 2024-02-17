@@ -15,6 +15,7 @@ struct CriterionVariantHelper {
   let song: String
   let playCount: Int
   let playDate: Date
+  let persistentID: UInt
 
   var albumCriterion: Set<Criterion> {
     [.album(album)]
@@ -34,6 +35,10 @@ struct CriterionVariantHelper {
 
   var playDateCriterion: Set<Criterion> {
     [.playDate(playDate)]
+  }
+
+  var persistentIDCriterion: Set<Criterion> {
+    [.persistentId(persistentID)]
   }
 
   var albumPlayDateCriterion: Set<Criterion> {
