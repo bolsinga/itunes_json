@@ -12,7 +12,7 @@ import XCTest
 final class CriterionTrackApplicableTests: XCTestCase {
   let h = CriterionVariantHelper(
     album: "l", artist: "a", song: "s", playCount: 3,
-    playDate: Date(timeIntervalSince1970: Double(1_075_937_542)))
+    playDate: Date(timeIntervalSince1970: Double(1_075_937_542)), persistentID: 123456)
 
   func testSong() throws {
     let t = Track(name: h.song, persistentID: 0)
@@ -22,6 +22,7 @@ final class CriterionTrackApplicableTests: XCTestCase {
     XCTAssertTrue(t.criteriaApplies(h.songCriterion))
     XCTAssertFalse(t.criteriaApplies(h.playCountCriterion))
     XCTAssertFalse(t.criteriaApplies(h.playDateCriterion))
+    XCTAssertFalse(t.criteriaApplies(h.persistentIDCriterion))
     XCTAssertFalse(t.criteriaApplies(h.albumPlayDateCriterion))
     XCTAssertFalse(t.criteriaApplies(h.artistPlayDateCriterion))
     XCTAssertFalse(t.criteriaApplies(h.songPlayDateCriterion))
@@ -59,6 +60,7 @@ final class CriterionTrackApplicableTests: XCTestCase {
     XCTAssertTrue(t.criteriaApplies(h.songCriterion))
     XCTAssertFalse(t.criteriaApplies(h.playCountCriterion))
     XCTAssertFalse(t.criteriaApplies(h.playDateCriterion))
+    XCTAssertFalse(t.criteriaApplies(h.persistentIDCriterion))
     XCTAssertFalse(t.criteriaApplies(h.albumPlayDateCriterion))
     XCTAssertFalse(t.criteriaApplies(h.artistPlayDateCriterion))
     XCTAssertFalse(t.criteriaApplies(h.songPlayDateCriterion))
@@ -96,6 +98,7 @@ final class CriterionTrackApplicableTests: XCTestCase {
     XCTAssertTrue(t.criteriaApplies(h.songCriterion))
     XCTAssertFalse(t.criteriaApplies(h.playCountCriterion))
     XCTAssertFalse(t.criteriaApplies(h.playDateCriterion))
+    XCTAssertFalse(t.criteriaApplies(h.persistentIDCriterion))
     XCTAssertFalse(t.criteriaApplies(h.albumPlayDateCriterion))
     XCTAssertFalse(t.criteriaApplies(h.artistPlayDateCriterion))
     XCTAssertFalse(t.criteriaApplies(h.songPlayDateCriterion))
@@ -134,6 +137,7 @@ final class CriterionTrackApplicableTests: XCTestCase {
     XCTAssertTrue(t.criteriaApplies(h.songCriterion))
     XCTAssertTrue(t.criteriaApplies(h.playCountCriterion))
     XCTAssertFalse(t.criteriaApplies(h.playDateCriterion))
+    XCTAssertFalse(t.criteriaApplies(h.persistentIDCriterion))
     XCTAssertFalse(t.criteriaApplies(h.albumPlayDateCriterion))
     XCTAssertFalse(t.criteriaApplies(h.artistPlayDateCriterion))
     XCTAssertFalse(t.criteriaApplies(h.songPlayDateCriterion))
@@ -173,6 +177,7 @@ final class CriterionTrackApplicableTests: XCTestCase {
     XCTAssertTrue(t.criteriaApplies(h.songCriterion))
     XCTAssertTrue(t.criteriaApplies(h.playCountCriterion))
     XCTAssertTrue(t.criteriaApplies(h.playDateCriterion))
+    XCTAssertFalse(t.criteriaApplies(h.persistentIDCriterion))
     XCTAssertTrue(t.criteriaApplies(h.albumPlayDateCriterion))
     XCTAssertTrue(t.criteriaApplies(h.artistPlayDateCriterion))
     XCTAssertTrue(t.criteriaApplies(h.songPlayDateCriterion))
@@ -212,6 +217,7 @@ final class CriterionTrackApplicableTests: XCTestCase {
     XCTAssertTrue(t.criteriaApplies(h.songCriterion))
     XCTAssertTrue(t.criteriaApplies(h.playCountCriterion))
     XCTAssertTrue(t.criteriaApplies(h.playDateCriterion))
+    XCTAssertFalse(t.criteriaApplies(h.persistentIDCriterion))
     XCTAssertTrue(t.criteriaApplies(h.albumPlayDateCriterion))
     XCTAssertTrue(t.criteriaApplies(h.artistPlayDateCriterion))
     XCTAssertTrue(t.criteriaApplies(h.songPlayDateCriterion))
@@ -251,6 +257,7 @@ final class CriterionTrackApplicableTests: XCTestCase {
     XCTAssertTrue(t.criteriaApplies(h.songCriterion))
     XCTAssertTrue(t.criteriaApplies(h.playCountCriterion))
     XCTAssertFalse(t.criteriaApplies(h.playDateCriterion))
+    XCTAssertFalse(t.criteriaApplies(h.persistentIDCriterion))
     XCTAssertFalse(t.criteriaApplies(h.albumPlayDateCriterion))
     XCTAssertFalse(t.criteriaApplies(h.artistPlayDateCriterion))
     XCTAssertFalse(t.criteriaApplies(h.songPlayDateCriterion))
@@ -284,5 +291,11 @@ final class CriterionTrackApplicableTests: XCTestCase {
     let t = Track(name: h.song, persistentID: 0)
 
     XCTAssertTrue(t.criteriaApplies([.playCount(0)]))
+  }
+
+  func testPersistentID() throws {
+    let t = Track(name: h.song, persistentID: 123456)
+
+    XCTAssertTrue(t.criteriaApplies(h.persistentIDCriterion))
   }
 }

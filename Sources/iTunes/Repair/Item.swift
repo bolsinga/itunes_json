@@ -10,13 +10,14 @@ import Foundation
 struct Problem: Codable, Hashable {
   internal init(
     artist: String? = nil, album: String? = nil, name: String? = nil, playCount: Int? = nil,
-    playDate: Date? = nil
+    playDate: Date? = nil, persistentID: UInt? = nil
   ) {
     self.artist = artist
     self.album = album
     self.name = name
     self.playCount = playCount
     self.playDate = playDate
+    self.persistentID = persistentID
   }
 
   let artist: String?
@@ -24,6 +25,7 @@ struct Problem: Codable, Hashable {
   let name: String?
   let playCount: Int?
   let playDate: Date?
+  let persistentID: UInt?
 }
 
 struct Fix: Codable {
