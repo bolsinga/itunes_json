@@ -50,10 +50,7 @@ private func load(url: URL) async throws -> [Item] {
 }
 
 private func printRepairJson(items: [Item]) throws {
-  let encoder = JSONEncoder()
-  encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
-  encoder.dateEncodingStrategy = .iso8601
-  let data = try encoder.encode(items)
+  let data = try items.jsonData()
   if let string = String(data: data, encoding: .utf8) {
     print(string)
   }
