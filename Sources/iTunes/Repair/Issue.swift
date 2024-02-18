@@ -9,8 +9,8 @@ import Foundation
 import os
 
 extension Logger {
-  static let noRemedies = Logger(subsystem: "repair", category: "noRemedies")
-  static let noCriteria = Logger(subsystem: "repair", category: "noCriteria")
+  static let noRemedies = Logger(type: "repair", category: "noRemedies")
+  static let noCriteria = Logger(type: "repair", category: "noCriteria")
 }
 
 struct Issue {

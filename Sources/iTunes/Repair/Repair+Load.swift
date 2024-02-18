@@ -9,7 +9,7 @@ import Foundation
 import os
 
 extension Logger {
-  static let duplicateProblem = Logger(subsystem: "repair", category: "duplicateProblem")
+  static let duplicateProblem = Logger(type: "repair", category: "duplicateProblem")
 }
 
 private enum RepairError: Error {

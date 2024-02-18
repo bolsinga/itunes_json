@@ -9,7 +9,7 @@ import Foundation
 import os
 
 extension Logger {
-  static let noArtist = Logger(subsystem: "validation", category: "noArtist")
+  static let noArtist = Logger(type: "validation", category: "noArtist")
 }
 
 extension Track: RowArtistInterface {

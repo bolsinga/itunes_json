@@ -9,16 +9,16 @@ import Foundation
 import os
 
 extension Logger {
-  static let ignore = Logger(subsystem: "repair", category: "ignore")
-  static let sortArtist = Logger(subsystem: "repair", category: "sortArtist")
-  static let kind = Logger(subsystem: "repair", category: "kind")
-  static let year = Logger(subsystem: "repair", category: "year")
-  static let trackCount = Logger(subsystem: "repair", category: "trackCount")
-  static let trackNumber = Logger(subsystem: "repair", category: "trackNumber")
-  static let album = Logger(subsystem: "repair", category: "album")
-  static let artist = Logger(subsystem: "repair", category: "artist")
-  static let playCount = Logger(subsystem: "repair", category: "playCount")
-  static let playDate = Logger(subsystem: "repair", category: "playDate")
+  static let ignore = Logger(type: "repair", category: "ignore")
+  static let sortArtist = Logger(type: "repair", category: "sortArtist")
+  static let kind = Logger(type: "repair", category: "kind")
+  static let year = Logger(type: "repair", category: "year")
+  static let trackCount = Logger(type: "repair", category: "trackCount")
+  static let trackNumber = Logger(type: "repair", category: "trackNumber")
+  static let album = Logger(type: "repair", category: "album")
+  static let artist = Logger(type: "repair", category: "artist")
+  static let playCount = Logger(type: "repair", category: "playCount")
+  static let playDate = Logger(type: "repair", category: "playDate")
 }
 
 extension Remedy {

@@ -10,16 +10,16 @@ import SQLite3
 import os
 
 extension Logger {
-  static let open = Logger(subsystem: "sql", category: "open")
-  static let close = Logger(subsystem: "sql", category: "close")
-  static let exec = Logger(subsystem: "sql", category: "exec")
-  static let prepare = Logger(subsystem: "sql", category: "prepare")
-  static let step = Logger(subsystem: "sql", category: "step")
-  static let reset = Logger(subsystem: "sql", category: "reset")
-  static let clear = Logger(subsystem: "sql", category: "clear")
-  static let finalize = Logger(subsystem: "sql", category: "finalize")
-  static let bindText = Logger(subsystem: "sql", category: "bindText")
-  static let bindInt64 = Logger(subsystem: "sql", category: "bindInt64")
+  static let open = Logger(type: "sql", category: "open")
+  static let close = Logger(type: "sql", category: "close")
+  static let exec = Logger(type: "sql", category: "exec")
+  static let prepare = Logger(type: "sql", category: "prepare")
+  static let step = Logger(type: "sql", category: "step")
+  static let reset = Logger(type: "sql", category: "reset")
+  static let clear = Logger(type: "sql", category: "clear")
+  static let finalize = Logger(type: "sql", category: "finalize")
+  static let bindText = Logger(type: "sql", category: "bindText")
+  static let bindInt64 = Logger(type: "sql", category: "bindInt64")
 }
 
 enum DatabaseError: Error {

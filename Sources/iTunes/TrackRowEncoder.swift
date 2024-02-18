@@ -9,8 +9,8 @@ import Foundation
 import os
 
 extension Logger {
-  static let duplicateArtist = Logger(subsystem: "validation", category: "duplicateArtist")
-  static let duplicatePlayDate = Logger(subsystem: "validation", category: "duplicatePlayDate")
+  static let duplicateArtist = Logger(type: "validation", category: "duplicateArtist")
+  static let duplicatePlayDate = Logger(type: "validation", category: "duplicatePlayDate")
 }
 
 extension RowAlbum {
