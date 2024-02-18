@@ -70,20 +70,35 @@ trap "echo Exited!; exit;" SIGINT SIGTERM
 #   WHERE (n.date IS NOT NULL AND (o.date IS NULL OR n.date!=o.date))
 #   ORDER BY ndate;
 
+# This finds where plays do not increase in count or date.
+#read -d '' sql << EOF
+#SELECT * 
+#FROM
+#(SELECT 
+#  n.pid AS npid,
+#  o.pid AS opid,
+#  n.date > o.date AS dateCheck,
+#  n.delta > o.delta AS deltaCheck
+#FROM newer.tracks n
+#  LEFT JOIN main.tracks o
+#  ON (n.song=o.song AND n.track=o.track AND n.artist=o.artist AND n.album=o.album)
+#  WHERE (n.date IS NOT NULL AND (o.date IS NULL OR n.date!=o.date))
+#)
+#  WHERE (dateCheck!=1 OR deltaCheck!=1)
+#  ;
+#EOF
+
 read -d '' sql << EOF
-SELECT * 
+SELECT *
 FROM
-(SELECT 
-  n.pid AS npid,
-  o.pid AS opid,
-  n.date > o.date AS dateCheck,
-  n.delta > o.delta AS deltaCheck
+(SELECT
+  n.artist AS nartist,
+  o.artist AS oartist
 FROM newer.tracks n
   LEFT JOIN main.tracks o
-  ON (n.song=o.song AND n.track=o.track AND n.artist=o.artist AND n.album=o.album)
-  WHERE (n.date IS NOT NULL AND (o.date IS NULL OR n.date!=o.date))
+  ON (n.song=o.song AND n.track=o.track AND n.album=o.album)
 )
-  WHERE (dateCheck!=1 OR deltaCheck!=1)
+  GROUP BY nartist
   ;
 EOF
 
