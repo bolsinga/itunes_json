@@ -9,8 +9,8 @@ import Foundation
 import os
 
 extension Logger {
-  static let noPlayDate = Logger(subsystem: "validation", category: "noPlayDate")
-  static let noPlayCount = Logger(subsystem: "validation", category: "noPlayCount")
+  static let noPlayDate = Logger(type: "validation", category: "noPlayDate")
+  static let noPlayCount = Logger(type: "validation", category: "noPlayCount")
 }
 
 extension Track: RowPlayInterface {

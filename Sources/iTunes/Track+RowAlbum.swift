@@ -9,8 +9,8 @@ import Foundation
 import os
 
 extension Logger {
-  static let noAlbum = Logger(subsystem: "validation", category: "noAlbum")
-  static let noTrackCount = Logger(subsystem: "validation", category: "noTrackCount")
+  static let noAlbum = Logger(type: "validation", category: "noAlbum")
+  static let noTrackCount = Logger(type: "validation", category: "noTrackCount")
 }
 
 extension Track: RowAlbumInterface {
