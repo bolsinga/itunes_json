@@ -298,4 +298,19 @@ final class CriterionTrackApplicableTests: XCTestCase {
 
     XCTAssertTrue(t.criteriaApplies(h.persistentIDCriterion))
   }
+
+  func testEmptyAlbum() throws {
+    let t = Track(name: "song", persistentID: 123456)
+
+    XCTAssertFalse(t.criteriaApplies([.album("a")]))
+    XCTAssertTrue(t.criteriaApplies([.album("")]))
+  }
+
+  func testNonMatchingAlbum() throws {
+    let t = Track(album: "b", name: "song", persistentID: 123456)
+
+    XCTAssertTrue(t.criteriaApplies([.album("b")]))
+    XCTAssertFalse(t.criteriaApplies([.album("a")]))
+    XCTAssertFalse(t.criteriaApplies([.album("")]))
+  }
 }

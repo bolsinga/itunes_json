@@ -1,5 +1,5 @@
 //
-//  Track+Repair.swift
+//  Track+Issue.swift
 //
 //
 //  Created by Greg Bolsinga on 2/1/24.
@@ -11,8 +11,7 @@ extension Track {
   internal func criterionApplies(_ criterion: Criterion) -> Bool {
     switch criterion {
     case .album(let string):
-      guard let album else { return false }
-      return album == string
+      return (album ?? "")  == string
     case .artist(let string):
       guard let artist else { return false }
       return artist == string
