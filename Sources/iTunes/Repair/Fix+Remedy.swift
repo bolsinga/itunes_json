@@ -18,7 +18,7 @@ extension Fix {
     if let year { result.insert(.repairEmptyYear(year)) }
     if let trackCount { result.insert(.repairEmptyTrackCount(trackCount)) }
     if let trackNumber { result.insert(.repairEmptyTrackNumber(trackNumber)) }
-    if let album { result.insert(.repairEmptyAlbum(album)) }
+    if let album { result.insert(.replaceAlbum(album)) }
     if let artist { result.insert(.replaceArtist(artist)) }
     if let playCount { result.insert(.replacePlayCount(playCount)) }
     if let playDate { result.insert(.replacePlayDate(playDate)) }

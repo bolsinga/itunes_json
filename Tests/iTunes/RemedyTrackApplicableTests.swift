@@ -14,10 +14,10 @@ final class RemedyTrackApplicableTests: XCTestCase {
     XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.ignore))
   }
 
-  func testRepairEmptyAlbum() throws {
-    XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.repairEmptyAlbum("l")))
-    XCTAssertFalse(
-      Track(album: "a", name: "s", persistentID: 0).remedyApplies(.repairEmptyAlbum("l")))
+  func testReplaceAlbum() throws {
+    XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.replaceAlbum("l")))
+    XCTAssertTrue(
+      Track(album: "a", name: "s", persistentID: 0).remedyApplies(.replaceAlbum("l")))
   }
 
   func testRepairEmptyKind() throws {

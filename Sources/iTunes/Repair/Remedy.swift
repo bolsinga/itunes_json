@@ -9,7 +9,7 @@ import Foundation
 
 enum Remedy: Hashable {
   case ignore
-  case repairEmptyAlbum(String)
+  case replaceAlbum(String)
   case repairEmptyKind(String)
   case replaceSortArtist(String)
   case repairEmptyTrackCount(Int)
@@ -75,7 +75,7 @@ enum Remedy: Hashable {
 
   var album: String? {
     switch self {
-    case .repairEmptyAlbum(let string):
+    case .replaceAlbum(let string):
       return string
     default:
       return nil

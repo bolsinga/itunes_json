@@ -57,8 +57,8 @@ extension Track {
     case .repairEmptyTrackNumber(_):
       guard let trackNumber else { return true }
       return trackNumber == 0
-    case .repairEmptyAlbum(_):
-      return album == nil
+    case .replaceAlbum(_):
+      return true
     case .replaceArtist(_):
       return artist != nil
     case .replacePlayCount(_):
@@ -111,7 +111,7 @@ extension Track {
       return self.update(fixedTrackCount: int)
     case .repairEmptyTrackNumber(let int):
       return self.update(fixedTrackNumber: int)
-    case .repairEmptyAlbum(let string):
+    case .replaceAlbum(let string):
       return self.update(fixedAlbum: string)
     case .replaceArtist(let string):
       return self.update(fixedArtist: string)
