@@ -77,8 +77,8 @@ extension Set where Element == Criterion {
   }
 
   var validForAlbum: Bool {
-    // artist or song
-    !qualifiers.intersection(Qualifier.artistSong).isEmpty
+    // artist AND song
+    qualifiers.intersection(Qualifier.artistSong) == Qualifier.artistSong
   }
 
   var validForArtist: Bool {
