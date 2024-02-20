@@ -19,7 +19,7 @@ final class TrackApplyRemedyTests: XCTestCase {
 
   func testRepairEmptyAlbum() throws {
     let t = Track(name: "s", persistentID: 0)
-    let r = try XCTUnwrap(t.applyRemedy(.repairEmptyAlbum("l")))
+    let r = try XCTUnwrap(t.applyRemedy(.replaceAlbum("l")))
     let f = try XCTUnwrap(r.album)
     XCTAssertEqual(f, "l")
   }

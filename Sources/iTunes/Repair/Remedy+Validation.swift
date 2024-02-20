@@ -54,7 +54,7 @@ extension Remedy {
         Logger.trackNumber.error("\(String(describing: self), privacy: .public)")
         return false
       }
-    case .repairEmptyAlbum(_):
+    case .replaceAlbum(_):
       guard criteria.validForAlbum else {
         Logger.album.error("\(String(describing: self), privacy: .public)")
         return false
