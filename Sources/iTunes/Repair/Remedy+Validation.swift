@@ -44,7 +44,7 @@ extension Remedy {
         Logger.year.error("\(String(describing: self), privacy: .public)")
         return false
       }
-    case .repairEmptyTrackCount(_):
+    case .replaceTrackCount(_):
       guard criteria.validForTrackCount else {
         Logger.trackCount.error("\(String(describing: self), privacy: .public)")
         return false

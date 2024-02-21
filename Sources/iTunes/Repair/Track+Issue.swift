@@ -51,9 +51,8 @@ extension Track {
     case .repairEmptyYear(_):
       guard let year else { return true }
       return year == 0
-    case .repairEmptyTrackCount(_):
-      guard let trackCount else { return true }
-      return trackCount == 0
+    case .replaceTrackCount(_):
+      return true
     case .repairEmptyTrackNumber(_):
       guard let trackNumber else { return true }
       return trackNumber == 0
@@ -107,7 +106,7 @@ extension Track {
       return self.update(fixedKind: string)
     case .repairEmptyYear(let int):
       return self.update(fixedYear: int)
-    case .repairEmptyTrackCount(let int):
+    case .replaceTrackCount(let int):
       return self.update(fixedTrackCount: int)
     case .repairEmptyTrackNumber(let int):
       return self.update(fixedTrackNumber: int)
