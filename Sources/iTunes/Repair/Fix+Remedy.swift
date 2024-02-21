@@ -16,7 +16,7 @@ extension Fix {
     if let sortArtist { result.insert(.replaceSortArtist(sortArtist)) }
     if let kind { result.insert(.repairEmptyKind(kind)) }
     if let year { result.insert(.repairEmptyYear(year)) }
-    if let trackCount { result.insert(.repairEmptyTrackCount(trackCount)) }
+    if let trackCount { result.insert(.replaceTrackCount(trackCount)) }
     if let trackNumber { result.insert(.repairEmptyTrackNumber(trackNumber)) }
     if let album { result.insert(.replaceAlbum(album)) }
     if let artist { result.insert(.replaceArtist(artist)) }
