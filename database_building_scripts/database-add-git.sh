@@ -23,7 +23,7 @@ checkFailure() {
 
 pushd $GIT_DIR
 
-git add -A
+git add itunes.json
 checkFailure $? add
 git commit -m $MESSAGE
 if [ $? -ne 0 ] ; then
