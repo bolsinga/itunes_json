@@ -96,4 +96,8 @@ extension Set where Element == Criterion {
     qualifiers.intersection(Qualifier.artistSongPlayCount)
       == Qualifier.artistSongPlayCount
   }
+
+  var validForSong: Bool {
+    qualifiers.intersection(Qualifier.albumArtistSong) == Qualifier.albumArtistSong
+  }
 }

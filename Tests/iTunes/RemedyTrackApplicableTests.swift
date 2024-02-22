@@ -79,4 +79,9 @@ final class RemedyTrackApplicableTests: XCTestCase {
       Track(name: "s", persistentID: 0).remedyApplies(
         .replacePlayDate(Date(timeIntervalSince1970: Double(1_075_937_542)))))
   }
+
+  func testReplaceSong() throws {
+    XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.replaceSong("t")))
+    XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.replaceSong("s")))
+  }
 }

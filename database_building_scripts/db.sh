@@ -107,6 +107,26 @@ trap "echo Exited!; exit;" SIGINT SIGTERM
 #EOF
 
 # Find changing albums names
+#read -d '' sql << EOF
+#SELECT
+#  n.artist AS nartist,
+#  n.album AS nalbum,
+#  n.song AS nsong,
+#  o.artist AS oartist,
+#  o.album AS oalbum,
+#  o.song AS osong
+#FROM newer.tracks n
+#  LEFT JOIN main.tracks o
+#  ON (n.song=o.song AND n.track=o.track AND n.artist=o.artist)
+#  LEFT JOIN newer.songs ns
+#  ON (n.sid=ns.id)
+#  LEFT JOIN main.songs os
+#  ON (o.sid=os.id)
+#  WHERE (n.album != o.album AND ns.duration=os.duration)
+#  ;
+#EOF
+
+# Find changing song names
 read -d '' sql << EOF
 SELECT
   n.artist AS nartist,
@@ -117,12 +137,12 @@ SELECT
   o.song AS osong
 FROM newer.tracks n
   LEFT JOIN main.tracks o
-  ON (n.song=o.song AND n.track=o.track AND n.artist=o.artist)
+  ON (n.track=o.track AND n.artist=o.artist AND n.album=o.album)
   LEFT JOIN newer.songs ns
   ON (n.sid=ns.id)
   LEFT JOIN main.songs os
   ON (o.sid=os.id)
-  WHERE (n.album != o.album AND ns.duration=os.duration AND n.album NOT LIKE '%Zaireeka%')
+  WHERE (n.song != o.song AND ns.duration=os.duration)
   ;
 EOF
 

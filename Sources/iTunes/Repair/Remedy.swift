@@ -18,6 +18,7 @@ enum Remedy: Hashable {
   case replaceArtist(String)
   case replacePlayCount(Int)
   case replacePlayDate(Date)
+  case replaceSong(String)
 
   var isIgnored: Bool {
     switch self {
@@ -104,6 +105,15 @@ enum Remedy: Hashable {
     switch self {
     case .replacePlayDate(let date):
       return date
+    default:
+      return nil
+    }
+  }
+
+  var song: String? {
+    switch self {
+    case .replaceSong(let string):
+      return string
     default:
       return nil
     }
