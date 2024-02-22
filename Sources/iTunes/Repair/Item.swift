@@ -31,7 +31,7 @@ struct Problem: Codable, Hashable {
 struct Fix: Codable {
   internal init(
     album: String? = nil, artist: String? = nil, kind: String? = nil, playCount: Int? = nil,
-    playDate: Date? = nil, sortArtist: String? = nil, trackCount: Int? = nil,
+    playDate: Date? = nil, song: String? = nil, sortArtist: String? = nil, trackCount: Int? = nil,
     trackNumber: Int? = nil, year: Int? = nil, ignore: Bool? = nil
   ) {
     self.album = album
@@ -39,6 +39,7 @@ struct Fix: Codable {
     self.kind = kind
     self.playCount = playCount
     self.playDate = playDate
+    self.song = song
     self.sortArtist = sortArtist
     self.trackCount = trackCount
     self.trackNumber = trackNumber
@@ -51,6 +52,7 @@ struct Fix: Codable {
   let kind: String?
   let playCount: Int?
   let playDate: Date?
+  let song: String?
   let sortArtist: String?
   let trackCount: Int?
   let trackNumber: Int?

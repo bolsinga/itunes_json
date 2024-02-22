@@ -22,6 +22,7 @@ extension Fix {
     if let artist { result.insert(.replaceArtist(artist)) }
     if let playCount { result.insert(.replacePlayCount(playCount)) }
     if let playDate { result.insert(.replacePlayDate(playDate)) }
+    if let song { result.insert(.replaceSong(song)) }
 
     return result
   }

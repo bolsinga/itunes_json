@@ -63,13 +63,16 @@ extension Track {
       return true
     case .replacePlayDate(_):
       return playDateUTC != nil
+    case .replaceSong(_):
+      return true
     }
   }
 
   private func update(
     fixedAlbum: String? = nil, fixedArtist: String? = nil, fixedKind: String? = nil,
-    fixedPlayCount: Int? = nil, fixedPlayDate: Date? = nil, fixedSortArtist: String? = nil,
-    fixedTrackCount: Int? = nil, fixedTrackNumber: Int? = nil, fixedYear: Int? = nil
+    fixedName: String? = nil, fixedPlayCount: Int? = nil, fixedPlayDate: Date? = nil,
+    fixedSortArtist: String? = nil, fixedTrackCount: Int? = nil, fixedTrackNumber: Int? = nil,
+    fixedYear: Int? = nil
   ) -> Track {
     Track(
       album: fixedAlbum ?? album, albumArtist: albumArtist, albumRating: albumRating,
@@ -80,7 +83,7 @@ extension Track {
       disabled: disabled, discCount: discCount, discNumber: discNumber, episode: episode,
       episodeOrder: episodeOrder, explicit: explicit, genre: genre, grouping: grouping,
       hasVideo: hasVideo, hD: hD, kind: fixedKind ?? kind, location: location, movie: movie,
-      musicVideo: musicVideo, name: name, partOfGaplessAlbum: partOfGaplessAlbum,
+      musicVideo: musicVideo, name: fixedName ?? name, partOfGaplessAlbum: partOfGaplessAlbum,
       persistentID: persistentID, playCount: fixedPlayCount ?? playCount,
       playDateUTC: fixedPlayDate ?? playDateUTC,
       podcast: podcast, protected: protected, purchased: purchased, rating: rating,
@@ -117,6 +120,8 @@ extension Track {
       return self.update(fixedPlayCount: int)
     case .replacePlayDate(let date):
       return self.update(fixedPlayDate: date)
+    case .replaceSong(let string):
+      return self.update(fixedName: string)
     }
   }
 
