@@ -11,7 +11,7 @@ extension Track {
   internal func criterionApplies(_ criterion: Criterion) -> Bool {
     switch criterion {
     case .album(let string):
-      return (album ?? "")  == string
+      return (album ?? "") == string
     case .artist(let string):
       guard let artist else { return false }
       return artist == string
