@@ -19,19 +19,22 @@ struct Repair: Repairing {
   }
 
   internal func fix(_ tracks: [Track]) -> [Track] {
-    let issueTracks = tracks.filter { track in
-      !issues.map { $0.criteria }.filter { track.criteriaApplies($0) }.isEmpty
+    let details = tracks.reduce(into: [Track: [Issue]]()) { partialResult, track in
+      let applicableIssues = issues.filter { track.criteriaApplies($0.criteria) }
+      partialResult[track] = !applicableIssues.isEmpty ? applicableIssues : []
     }
-    let noIssueTracks = Array(Set(tracks).subtracting(issueTracks))
-    let fixedIssueTracks = issueTracks.compactMap { track in
-      var fixedTrack: Track? = track
-      issues.forEach {
-        if let track = fixedTrack {
-          fixedTrack = track.repair($0)
+
+    return tracks.compactMap { track in
+      if let issues = details[track], !issues.isEmpty {
+        var fixedTrack: Track? = track
+        issues.forEach { issue in
+          if let repairedTrack: Track = fixedTrack {
+            fixedTrack = repairedTrack.repair(issue)
+          }
         }
+        return fixedTrack
       }
-      return fixedTrack
+      return track
     }
-    return fixedIssueTracks + noIssueTracks
   }
 }
