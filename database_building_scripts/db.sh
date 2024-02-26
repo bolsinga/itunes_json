@@ -72,19 +72,16 @@ trap "echo Exited!; exit;" SIGINT SIGTERM
 
 # This finds where plays do not increase in count or date.
 #read -d '' sql << EOF
-#SELECT * 
-#FROM
-#(SELECT 
+#SELECT
 #  n.pid AS npid,
 #  o.pid AS opid,
+#  o.song AS song,
 #  n.date > o.date AS dateCheck,
 #  n.delta > o.delta AS deltaCheck
 #FROM newer.tracks n
 #  LEFT JOIN main.tracks o
 #  ON (n.song=o.song AND n.track=o.track AND n.artist=o.artist AND n.album=o.album)
-#  WHERE (n.date IS NOT NULL AND (o.date IS NULL OR n.date!=o.date))
-#)
-#  WHERE (dateCheck!=1 OR deltaCheck!=1)
+#  WHERE (n.date IS NOT NULL AND (o.date IS NULL OR n.date!=o.date) AND (dateCheck!=1 OR deltaCheck!=1))
 #  ;
 #EOF
 
@@ -122,7 +119,7 @@ trap "echo Exited!; exit;" SIGINT SIGTERM
 #  ON (n.sid=ns.id)
 #  LEFT JOIN main.songs os
 #  ON (o.sid=os.id)
-#  WHERE (n.album != o.album AND ns.duration=os.duration)
+#  WHERE (n.album != o.album AND ns.duration=os.duration AND n.album NOT LIKE '%Zaireeka%')
 #  ;
 #EOF
 
