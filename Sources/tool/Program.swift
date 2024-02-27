@@ -60,6 +60,9 @@ struct Program: AsyncParsableCommand {
   @Option(help: "Optional string to add to debug logs for debugging.")
   var loggingToken: String?
 
+  @Option(help: "Optional filter for an Artist Name.")
+  var artistNameFilter: String?
+
   /// Outputfile where data will be writen, if outputDirectory is not specified.
   private var outputFile: URL? {
     guard let outputDirectory else { return nil }
@@ -103,7 +106,9 @@ struct Program: AsyncParsableCommand {
     let tracks = try await {
       let repair =
         isRepairing ? try? await createRepair(url: repairFile, source: repairSource) : nil
-      return try await source.gather(jsonSource, repair: repair)
+      let artistIncluded: ((String) -> Bool)? =
+        (artistNameFilter != nil) ? { $0 == artistNameFilter! } : nil
+      return try await source.gather(jsonSource, repair: repair, artistIncluded: artistIncluded)
     }()
 
     try await destination.emit(tracks, outputFile: outputFile)

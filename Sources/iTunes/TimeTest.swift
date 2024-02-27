@@ -106,9 +106,10 @@ private func validateTimeParsing() async throws {
     throw TimeTestError.jsonParseInvalidError
   }
 
-  let validDateSentinels = try await Source.itunes.gather(nil, repair: nil).filter {
-    $0.isValidDateCheckSentinel
-  }
+  let validDateSentinels = try await Source.itunes.gather(nil, repair: nil, artistIncluded: nil)
+    .filter {
+      $0.isValidDateCheckSentinel
+    }
   if validDateSentinels.isEmpty {
     throw TimeTestError.validDateSentinelMissing
   }
