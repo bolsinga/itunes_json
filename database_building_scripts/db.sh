@@ -76,13 +76,17 @@ trap "echo Exited!; exit;" SIGINT SIGTERM
 #  n.pid AS npid,
 #  o.pid AS opid,
 #  o.song AS song,
-#  n.date > o.date AS dateCheck,
-#  n.delta > o.delta AS deltaCheck
+#  n.date AS ndate,
+#  o.date AS odate,
+#  n.delta AS ndelta,
+#  o.delta AS odelta,
+#  abs(unixepoch(n.date) - unixepoch(o.date)) AS deltaTime,
+#  n.delta > o.delta as deltaCompare
 #FROM newer.tracks n
 #  LEFT JOIN main.tracks o
 #  ON (n.song=o.song AND n.track=o.track AND n.artist=o.artist AND n.album=o.album)
-#  WHERE (n.date IS NOT NULL AND (o.date IS NULL OR n.date!=o.date) AND (dateCheck!=1 OR deltaCheck!=1))
-#  ;
+#  WHERE (n.date IS NOT NULL AND (o.date IS NULL OR n.date!=o.date) AND deltaTime!=0 AND deltaTime!=3600 AND deltaCompare!=1)
+#;
 #EOF
 
 # Find changing artists names
