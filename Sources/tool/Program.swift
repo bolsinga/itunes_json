@@ -106,8 +106,12 @@ struct Program: AsyncParsableCommand {
     let tracks = try await {
       let repair =
         isRepairing ? try? await createRepair(url: repairFile, source: repairSource) : nil
-      let artistIncluded: ((String) -> Bool)? =
-        (artistNameFilter != nil) ? { $0 == artistNameFilter! } : nil
+      let artistIncluded: ((String) -> Bool)? = {
+        if let artistNameFilter, !artistNameFilter.isEmpty {
+          return { $0 == artistNameFilter }
+        }
+        return nil
+      }()
       return try await source.gather(jsonSource, repair: repair, artistIncluded: artistIncluded)
     }()
 
