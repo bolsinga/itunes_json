@@ -20,6 +20,8 @@ extension Logger {
   static let playCount = Logger(type: "repair", category: "playCount")
   static let playDate = Logger(type: "repair", category: "playDate")
   static let song = Logger(type: "repair", category: "song")
+  static let discCount = Logger(type: "repair", category: "discCount")
+  static let discNumber = Logger(type: "repair", category: "discNumber")
 }
 
 extension Remedy {
@@ -78,6 +80,16 @@ extension Remedy {
     case .replaceSong(_):
       guard criteria.validForSong else {
         Logger.song.error("\(String(describing: self), privacy: .public)")
+        return false
+      }
+    case .replaceDiscCount(_):
+      guard criteria.validForDiscCount else {
+        Logger.discCount.error("\(String(describing: self), privacy: .public)")
+        return false
+      }
+    case .replaceDiscNumber(_):
+      guard criteria.validForDiscNumber else {
+        Logger.discNumber.error("\(String(describing: self), privacy: .public)")
         return false
       }
     }

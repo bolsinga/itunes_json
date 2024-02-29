@@ -100,4 +100,12 @@ extension Set where Element == Criterion {
   var validForSong: Bool {
     qualifiers.intersection(Qualifier.albumArtistSong) == Qualifier.albumArtistSong
   }
+
+  var validForDiscCount: Bool {
+    qualifiers == .albumArtistSong
+  }
+
+  var validForDiscNumber: Bool {
+    qualifiers == .albumArtistSong
+  }
 }

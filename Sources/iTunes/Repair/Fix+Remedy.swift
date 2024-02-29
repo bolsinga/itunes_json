@@ -23,6 +23,8 @@ extension Fix {
     if let playCount { result.insert(.replacePlayCount(playCount)) }
     if let playDate { result.insert(.replacePlayDate(playDate)) }
     if let song { result.insert(.replaceSong(song)) }
+    if let discCount { result.insert(.replaceDiscCount(discCount)) }
+    if let discNumber { result.insert(.replaceDiscNumber(discNumber)) }
 
     return result
   }

@@ -84,4 +84,20 @@ final class RemedyTrackApplicableTests: XCTestCase {
     XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.replaceSong("t")))
     XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.replaceSong("s")))
   }
+
+  func testReplaceDiscCount() throws {
+    XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.replaceDiscCount(3)))
+    XCTAssertTrue(
+      Track(discCount: 0, name: "s", persistentID: 0).remedyApplies(.replaceDiscCount(3)))
+    XCTAssertTrue(
+      Track(discCount: 1, name: "s", persistentID: 0).remedyApplies(.replaceDiscCount(3)))
+  }
+
+  func testReplaceDiscNumber() throws {
+    XCTAssertTrue(Track(name: "s", persistentID: 0).remedyApplies(.replaceDiscNumber(3)))
+    XCTAssertTrue(
+      Track(discNumber: 0, name: "s", persistentID: 0).remedyApplies(.replaceDiscNumber(3)))
+    XCTAssertTrue(
+      Track(discNumber: 1, name: "s", persistentID: 0).remedyApplies(.replaceDiscNumber(3)))
+  }
 }
