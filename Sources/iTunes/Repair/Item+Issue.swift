@@ -8,7 +8,7 @@
 import Foundation
 
 extension Item {
-  var issue: Issue? {
-    Issue.create(criteria: problem.criteria, remedies: fix.remedies)
+  func issue(_ loggingToken: String?) -> Issue? {
+    Issue.create(criteria: problem.criteria, remedies: fix.remedies, loggingToken: loggingToken)
   }
 }
