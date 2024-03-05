@@ -9,7 +9,7 @@ import Foundation
 import os
 
 struct Issue {
-  static func create(criteria: Set<Criterion>, remedies: Set<Remedy>, loggingToken: String?)
+  static func create(criteria: Set<Criterion>, remedies: Set<Remedy>, loggingToken: String? = nil)
     -> Issue?
   {
     guard !remedies.isEmpty else {
