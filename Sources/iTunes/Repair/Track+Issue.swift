@@ -65,35 +65,37 @@ extension Track {
       return playDateUTC != nil
     case .replaceSong(_):
       return true
+    case .replaceDiscCount(_):
+      return true
+    case .replaceDiscNumber(_):
+      return true
     }
   }
 
   private func update(
-    fixedAlbum: String? = nil, fixedArtist: String? = nil, fixedKind: String? = nil,
-    fixedName: String? = nil, fixedPlayCount: Int? = nil, fixedPlayDate: Date? = nil,
-    fixedSortArtist: String? = nil, fixedTrackCount: Int? = nil, fixedTrackNumber: Int? = nil,
-    fixedYear: Int? = nil
+    fixedAlbum: String? = nil, fixedArtist: String? = nil, fixedDiscCount: Int? = nil,
+    fixedDiscNumber: Int? = nil, fixedKind: String? = nil, fixedName: String? = nil,
+    fixedPlayCount: Int? = nil, fixedPlayDate: Date? = nil, fixedSortArtist: String? = nil,
+    fixedTrackCount: Int? = nil, fixedTrackNumber: Int? = nil, fixedYear: Int? = nil
   ) -> Track {
     Track(
       album: fixedAlbum ?? album, albumArtist: albumArtist, albumRating: albumRating,
       albumRatingComputed: albumRatingComputed, artist: fixedArtist ?? artist, bitRate: bitRate,
-      bPM: bPM,
-      comments: comments, compilation: compilation, composer: composer,
+      bPM: bPM, comments: comments, compilation: compilation, composer: composer,
       contentRating: contentRating, dateAdded: dateAdded, dateModified: dateModified,
-      disabled: disabled, discCount: discCount, discNumber: discNumber, episode: episode,
-      episodeOrder: episodeOrder, explicit: explicit, genre: genre, grouping: grouping,
-      hasVideo: hasVideo, hD: hD, kind: fixedKind ?? kind, location: location, movie: movie,
+      disabled: disabled, discCount: fixedDiscCount ?? discCount,
+      discNumber: fixedDiscNumber ?? discNumber, episode: episode, episodeOrder: episodeOrder,
+      explicit: explicit, genre: genre, grouping: grouping, hasVideo: hasVideo, hD: hD,
+      kind: fixedKind ?? kind, location: location, movie: movie,
       musicVideo: musicVideo, name: fixedName ?? name, partOfGaplessAlbum: partOfGaplessAlbum,
       persistentID: persistentID, playCount: fixedPlayCount ?? playCount,
-      playDateUTC: fixedPlayDate ?? playDateUTC,
-      podcast: podcast, protected: protected, purchased: purchased, rating: rating,
-      ratingComputed: ratingComputed, releaseDate: releaseDate, sampleRate: sampleRate,
-      season: season, series: series, size: size, skipCount: skipCount, skipDate: skipDate,
-      sortAlbum: sortAlbum, sortAlbumArtist: sortAlbumArtist,
-      sortArtist: fixedSortArtist ?? sortArtist,
-      sortComposer: sortComposer, sortName: sortName, sortSeries: sortSeries,
-      totalTime: totalTime, trackCount: fixedTrackCount ?? trackCount,
-      trackNumber: fixedTrackNumber ?? trackNumber,
+      playDateUTC: fixedPlayDate ?? playDateUTC, podcast: podcast, protected: protected,
+      purchased: purchased, rating: rating, ratingComputed: ratingComputed,
+      releaseDate: releaseDate, sampleRate: sampleRate, season: season, series: series, size: size,
+      skipCount: skipCount, skipDate: skipDate, sortAlbum: sortAlbum,
+      sortAlbumArtist: sortAlbumArtist, sortArtist: fixedSortArtist ?? sortArtist,
+      sortComposer: sortComposer, sortName: sortName, sortSeries: sortSeries, totalTime: totalTime,
+      trackCount: fixedTrackCount ?? trackCount, trackNumber: fixedTrackNumber ?? trackNumber,
       trackType: trackType, tVShow: tVShow, unplayed: unplayed, videoHeight: videoHeight,
       videoWidth: videoWidth, year: fixedYear ?? year)
   }
@@ -122,6 +124,10 @@ extension Track {
       return self.update(fixedPlayDate: date)
     case .replaceSong(let string):
       return self.update(fixedName: string)
+    case .replaceDiscCount(let int):
+      return self.update(fixedDiscCount: int)
+    case .replaceDiscNumber(let int):
+      return self.update(fixedDiscNumber: int)
     }
   }
 

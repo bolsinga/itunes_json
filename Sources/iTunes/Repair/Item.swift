@@ -32,7 +32,8 @@ struct Fix: Codable {
   internal init(
     album: String? = nil, artist: String? = nil, kind: String? = nil, playCount: Int? = nil,
     playDate: Date? = nil, song: String? = nil, sortArtist: String? = nil, trackCount: Int? = nil,
-    trackNumber: Int? = nil, year: Int? = nil, ignore: Bool? = nil
+    trackNumber: Int? = nil, year: Int? = nil, ignore: Bool? = nil, discCount: Int? = nil,
+    discNumber: Int? = nil
   ) {
     self.album = album
     self.artist = artist
@@ -45,6 +46,8 @@ struct Fix: Codable {
     self.trackNumber = trackNumber
     self.year = year
     self.ignore = ignore
+    self.discCount = discCount
+    self.discNumber = discNumber
   }
 
   let album: String?
@@ -58,6 +61,8 @@ struct Fix: Codable {
   let trackNumber: Int?
   let year: Int?
   let ignore: Bool?
+  let discCount: Int?
+  let discNumber: Int?
 }
 
 struct Item: Codable {

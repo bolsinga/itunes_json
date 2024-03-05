@@ -94,4 +94,18 @@ final class TrackApplyRemedyTests: XCTestCase {
     let f = try XCTUnwrap(r.name)
     XCTAssertEqual(f, "t")
   }
+
+  func testReplaceDiscCount() throws {
+    let t = Track(name: "s", persistentID: 0)
+    let r = try XCTUnwrap(t.applyRemedy(.replaceDiscCount(3)))
+    let f = try XCTUnwrap(r.discCount)
+    XCTAssertEqual(f, 3)
+  }
+
+  func testReplaceDiscNumber() throws {
+    let t = Track(name: "s", persistentID: 0)
+    let r = try XCTUnwrap(t.applyRemedy(.replaceDiscNumber(3)))
+    let f = try XCTUnwrap(r.discNumber)
+    XCTAssertEqual(f, 3)
+  }
 }
