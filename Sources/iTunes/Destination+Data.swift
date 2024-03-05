@@ -8,12 +8,12 @@
 import Foundation
 
 extension Destination {
-  public func data(for tracks: [Track]) throws -> Data {
+  public func data(for tracks: [Track], loggingToken: String?) throws -> Data {
     switch self {
     case .json:
       return try tracks.jsonData()
     case .sqlCode:
-      return try tracks.sqlData()
+      return try tracks.sqlData(loggingToken: loggingToken)
     case .db:
       preconditionFailure("No Data for db")
     case .duplicates:

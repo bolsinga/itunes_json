@@ -63,13 +63,13 @@ struct SQLSourceEncoder {
     }
   }
 
-  private func encode(_ tracks: [Track]) throws -> String {
-    let encoder = Encoder(rowEncoder: tracks.rowEncoder)
+  private func encode(_ tracks: [Track], loggingToken: String?) throws -> String {
+    let encoder = Encoder(rowEncoder: tracks.rowEncoder(loggingToken))
     return encoder.sqlStatements
   }
 
-  func encode(_ tracks: [Track]) throws -> Data {
-    guard let data = try encode(tracks).data(using: .utf8) else {
+  func encode(_ tracks: [Track], loggingToken: String?) throws -> Data {
+    guard let data = try encode(tracks, loggingToken: loggingToken).data(using: .utf8) else {
       throw SQLSourceEncoderError.cannotMakeData
     }
     return data

@@ -8,11 +8,6 @@
 import Foundation
 import os
 
-extension Logger {
-  static let duplicateArtist = Logger(type: "validation", category: "duplicateArtist")
-  static let duplicatePlayDate = Logger(type: "validation", category: "duplicatePlayDate")
-}
-
 extension RowAlbum {
   var debugLogInformation: String {
     "name: \(name.name) trackCount: \(trackCount)"
@@ -39,21 +34,24 @@ extension RowPlay {
 
 extension TrackRow {
   var debugLogInformation: String {
-    let na = "n/a"
-    let prefix = LoggingToken != nil ? "\(LoggingToken!): " : ""
-    return prefix
-      + "album: [\(album.debugLogInformation)], artist: (\(artist.debugLogInformation)), song: (\(song.debugLogInformation)), play: (\(play?.debugLogInformation ?? na))"
+    "album: [\(album.debugLogInformation)], artist: (\(artist.debugLogInformation)), song: (\(song.debugLogInformation)), play: (\(play?.debugLogInformation ?? "n/a"))"
   }
 }
 
 struct TrackRowEncoder {
   let rows: [TrackRow]
+  let loggingToken: String?
 
   var artistRows: (table: String, rows: [RowArtist]) {
     let artistRows = Array(Set(rows.map { $0.artist }))
 
-    artistRows.mismatchedSortableNames.forEach {
-      Logger.duplicateArtist.error("\($0, privacy: .public)")
+    let mismatched = artistRows.mismatchedSortableNames
+    if !mismatched.isEmpty {
+      let duplicateArtist = Logger(
+        type: "validation", category: "duplicateArtist", token: loggingToken)
+      mismatched.forEach {
+        duplicateArtist.error("\($0, privacy: .public)")
+      }
     }
 
     return (Track.ArtistTable, artistRows.sorted(by: { $0.name < $1.name }))
@@ -70,8 +68,13 @@ struct TrackRowEncoder {
   var playRows: (table: String, rows: [TrackRow]) {
     let playRows = rows.filter { $0.play != nil }
 
-    playRows.duplicatePlayDates.forEach {
-      Logger.duplicatePlayDate.error("\($0.debugLogInformation, privacy: .public)")
+    let duplicates = playRows.duplicatePlayDates
+    if !duplicates.isEmpty {
+      let duplicatePlayDate = Logger(
+        type: "validation", category: "duplicatePlayDate", token: loggingToken)
+      duplicates.forEach {
+        duplicatePlayDate.error("\($0.debugLogInformation, privacy: .public)")
+      }
     }
 
     return (Track.PlaysTable, playRows.sorted(by: { $0.play!.date < $1.play!.date }))
