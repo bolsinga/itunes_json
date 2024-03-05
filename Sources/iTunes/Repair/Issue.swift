@@ -8,20 +8,19 @@
 import Foundation
 import os
 
-extension Logger {
-  static let noRemedies = Logger(type: "repair", category: "noRemedies")
-  static let noCriteria = Logger(type: "repair", category: "noCriteria")
-}
-
 struct Issue {
-  static func create(criteria: Set<Criterion>, remedies: Set<Remedy>) -> Issue? {
+  static func create(criteria: Set<Criterion>, remedies: Set<Remedy>, loggingToken: String?)
+    -> Issue?
+  {
     guard !remedies.isEmpty else {
-      Logger.noRemedies.error("\(String(describing: self), privacy: .public)")
+      let noRemediesLogger = Logger(type: "repair", category: "noRemedies", token: loggingToken)
+      noRemediesLogger.error("\(String(describing: self), privacy: .public)")
       return nil
     }
 
     guard !criteria.isEmpty else {
-      Logger.noCriteria.error("\(String(describing: self), privacy: .public)")
+      let noCriteriaLogger = Logger(type: "repair", category: "noCriteria", token: loggingToken)
+      noCriteriaLogger.error("\(String(describing: self), privacy: .public)")
       return nil
     }
 

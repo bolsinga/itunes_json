@@ -37,7 +37,7 @@ public func createRepair(url: URL?, source: String?, loggingToken: String?) asyn
     //        try printRepairJson(items: items)
     //      } catch {}
 
-    let issues = items.compactMap { $0.issue }
+    let issues = items.compactMap { $0.issue(loggingToken) }
     return Repair(issues: issues)
   }
   throw RepairError.invalidInput
