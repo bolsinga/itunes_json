@@ -117,6 +117,6 @@ struct Program: AsyncParsableCommand {
       return try await source.gather(jsonSource, repair: repair, artistIncluded: artistIncluded)
     }()
 
-    try await destination.emit(tracks, outputFile: outputFile)
+    try await destination.emit(tracks, outputFile: outputFile, loggingToken: loggingToken)
   }
 }

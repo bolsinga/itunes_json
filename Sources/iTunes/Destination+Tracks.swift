@@ -12,7 +12,7 @@ enum DataExportError: Error {
 }
 
 extension Destination {
-  public func emit(_ tracks: [Track], outputFile: URL?) async throws {
+  public func emit(_ tracks: [Track], outputFile: URL?, loggingToken: String?) async throws {
     guard tracks.count > 0 else {
       throw DataExportError.noTracks
     }
@@ -21,7 +21,7 @@ extension Destination {
 
     switch self {
     case .json, .sqlCode, .duplicates:
-      let data = try self.data(for: tracks)
+      let data = try self.data(for: tracks, loggingToken: loggingToken)
 
       if let outputFile {
         try data.write(to: outputFile, options: .atomic)
@@ -33,7 +33,7 @@ extension Destination {
         preconditionFailure("Should have been caught during ParasableArguments.validate().")
       }
 
-      try await tracks.database(file: outputFile)
+      try await tracks.database(file: outputFile, loggingToken: loggingToken)
     }
   }
 }
