@@ -8,16 +8,14 @@
 import Foundation
 import os
 
-extension Logger {
-  static let duplicateProblem = Logger(type: "repair", category: "duplicateProblem")
-}
-
 private enum RepairError: Error {
   case invalidInput
   case invalidString
 }
 
-public func createRepair(url: URL?, source: String?) async throws -> Repairing {
+public func createRepair(url: URL?, source: String?, loggingToken: String?) async throws
+  -> Repairing
+{
   var items: [Item]?
   if let url { items = try await load(url: url) }
   if let source { items = try load(source: source) }
@@ -26,9 +24,15 @@ public func createRepair(url: URL?, source: String?) async throws -> Repairing {
       $1.count > 1
     }
     .keys
-    duplicateProblems.forEach {
-      Logger.duplicateProblem.error("\(String(describing: $0), privacy: .public)")
+    if !duplicateProblems.isEmpty {
+      let duplicateProblemLogger = Logger(
+        type: "repair", category: "duplicateProblem", token: loggingToken)
+
+      duplicateProblems.forEach {
+        duplicateProblemLogger.error("\(String(describing: $0), privacy: .public)")
+      }
     }
+
     //      do {
     //        try printRepairJson(items: items)
     //      } catch {}
