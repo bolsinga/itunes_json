@@ -105,7 +105,9 @@ struct Program: AsyncParsableCommand {
 
     let tracks = try await {
       let repair =
-        isRepairing ? try? await createRepair(url: repairFile, source: repairSource) : nil
+        isRepairing
+        ? try? await createRepair(url: repairFile, source: repairSource, loggingToken: loggingToken)
+        : nil
       let artistIncluded: ((String) -> Bool)? = {
         if let artistNameFilter, !artistNameFilter.isEmpty {
           return { $0 == artistNameFilter }
