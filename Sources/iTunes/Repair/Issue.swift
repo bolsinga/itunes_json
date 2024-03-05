@@ -25,7 +25,7 @@ struct Issue {
     }
 
     for remedy in remedies {
-      if !remedy.validate(criteria) {
+      if !remedy.validate(criteria, loggingToken: loggingToken) {
         return nil
       }
     }
