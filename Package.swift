@@ -15,7 +15,9 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.2.3")
   ],
   targets: [
-    .target(name: "iTunes"),
+    .target(
+      name: "iTunes",
+      swiftSettings: [.enableExperimentalFeature("StrictConcurrency")]),
     .testTarget(name: "iTunesTests", dependencies: ["iTunes"]),
     .executableTarget(
       name: "tool",
