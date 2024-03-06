@@ -8,8 +8,9 @@
 import Foundation
 
 extension Track {
-  var trackRow: TrackRow {
+  func trackRow(_ loggingToken: String?) -> TrackRow {
     TrackRow(
-      album: RowAlbum(self), artist: RowArtist(self), song: RowSong(self), play: RowPlay(self))
+      album: RowAlbum(self), artist: RowArtist(self), song: RowSong(self),
+      play: RowPlay(self, loggingToken: loggingToken))
   }
 }

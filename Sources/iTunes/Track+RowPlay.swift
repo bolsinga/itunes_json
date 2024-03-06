@@ -8,22 +8,20 @@
 import Foundation
 import os
 
-extension Logger {
-  static let noPlayDate = Logger(type: "validation", category: "noPlayDate")
-  static let noPlayCount = Logger(type: "validation", category: "noPlayCount")
-}
-
 extension Track: RowPlayInterface {
-  var songPlayedInformation: (datePlayedISO8601: String, playCount: Int) {
+  func songPlayedInformation(_ loggingToken: String?) -> (datePlayedISO8601: String, playCount: Int)
+  {
     let datePlayed = datePlayedISO8601
     let playCount = songPlayCount
 
     if datePlayed.isEmpty || playCount == 0 {
       if playCount != 0 {
-        Logger.noPlayDate.error("\(debugLogInformation, privacy: .public)")
+        Logger(type: "validation", category: "noPlayDate", token: loggingToken).error(
+          "\(debugLogInformation, privacy: .public)")
       }
       if !datePlayed.isEmpty {
-        Logger.noPlayCount.error("\(debugLogInformation, privacy: .public)")
+        Logger(type: "validation", category: "noPlayCount", token: loggingToken).error(
+          "\(debugLogInformation, privacy: .public)")
       }
     }
 
