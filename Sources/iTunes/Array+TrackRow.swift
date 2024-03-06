@@ -10,7 +10,8 @@ import Foundation
 extension Array where Element == Track {
   func rowEncoder(_ loggingToken: String?) -> TrackRowEncoder {
     TrackRowEncoder(
-      rows: self.filter { $0.isSQLEncodable }.map { $0.trackRow }, loggingToken: loggingToken)
+      rows: self.filter { $0.isSQLEncodable }.map { $0.trackRow(loggingToken) },
+      loggingToken: loggingToken)
   }
 }
 

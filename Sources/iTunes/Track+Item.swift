@@ -21,7 +21,7 @@ extension TrackRow {
 }
 
 extension Track {
-  func itemWithFixPlayDate(_ playDate: Date) -> Item {
-    trackRow.itemWithFixPlayDate(playDate)
+  func itemWithFixPlayDate(_ playDate: Date, loggingToken: String?) -> Item {
+    trackRow(loggingToken).itemWithFixPlayDate(playDate)
   }
 }
