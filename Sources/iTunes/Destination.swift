@@ -15,6 +15,4 @@ public enum Destination: CaseIterable {
   case sqlCode
   /// Emit a sqlite3 database that represents the Tracks.
   case db
-  /// Emit duplicate play date Track data.
-  case duplicates
 }

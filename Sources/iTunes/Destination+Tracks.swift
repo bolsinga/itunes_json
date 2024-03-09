@@ -20,7 +20,7 @@ extension Destination {
     let tracks = tracks.sorted()
 
     switch self {
-    case .json, .sqlCode, .duplicates:
+    case .json, .sqlCode:
       let data = try self.data(for: tracks, loggingToken: loggingToken)
 
       if let outputFile {
