@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os
 
 protocol RowSongInterface {
   var songPersistentID: UInt { get }
@@ -13,17 +14,18 @@ protocol RowSongInterface {
   var songComments: String { get }
   var dateReleasedISO8601: String { get }
   var songName: SortableName { get }
-  var songTrackNumber: Int { get }
-  var songYear: Int { get }
+  func songTrackNumber(validation: TrackValidation) -> Int
+  func songYear(logger: Logger) -> Int
   var songDuration: Int { get }
   var dateAddedISO8601: String { get }
 }
 
 struct RowSong: Hashable {
-  init(_ song: RowSongInterface) {
+  init(_ song: RowSongInterface, validation: TrackValidation) {
     self.init(
       name: song.songName, itunesid: song.songPersistentID, composer: song.songComposer,
-      trackNumber: song.songTrackNumber, year: song.songYear, duration: song.songDuration,
+      trackNumber: song.songTrackNumber(validation: validation),
+      year: song.songYear(logger: validation.noYear), duration: song.songDuration,
       dateAdded: song.dateAddedISO8601, dateReleased: song.dateReleasedISO8601,
       comments: song.songComments)
   }

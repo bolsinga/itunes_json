@@ -8,14 +8,10 @@
 import Foundation
 import os
 
-extension Logger {
-  static let noArtist = Logger(type: "validation", category: "noArtist")
-}
-
 extension Track: RowArtistInterface {
-  var artistName: SortableName {
+  func artistName(logger: Logger) -> SortableName {
     guard let name = (artist ?? albumArtist ?? nil) else {
-      Logger.noArtist.error("\(debugLogInformation, privacy: .public)")
+      logger.error("\(debugLogInformation, privacy: .public)")
       return SortableName()
     }
     return SortableName(name: name, sorted: (sortArtist ?? sortAlbumArtist) ?? "")

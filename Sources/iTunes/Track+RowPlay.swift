@@ -9,19 +9,18 @@ import Foundation
 import os
 
 extension Track: RowPlayInterface {
-  func songPlayedInformation(_ loggingToken: String?) -> (datePlayedISO8601: String, playCount: Int)
-  {
+  func songPlayedInformation(_ validation: TrackValidation) -> (
+    datePlayedISO8601: String, playCount: Int
+  ) {
     let datePlayed = datePlayedISO8601
     let playCount = songPlayCount
 
     if datePlayed.isEmpty || playCount == 0 {
       if playCount != 0 {
-        Logger(type: "validation", category: "noPlayDate", token: loggingToken).error(
-          "\(debugLogInformation, privacy: .public)")
+        validation.noPlayDate.error("\(debugLogInformation, privacy: .public)")
       }
       if !datePlayed.isEmpty {
-        Logger(type: "validation", category: "noPlayCount", token: loggingToken).error(
-          "\(debugLogInformation, privacy: .public)")
+        validation.noPlayCount.error("\(debugLogInformation, privacy: .public)")
       }
     }
 

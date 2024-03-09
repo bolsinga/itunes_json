@@ -40,17 +40,15 @@ extension TrackRow {
 
 struct TrackRowEncoder {
   let rows: [TrackRow]
-  let loggingToken: String?
+  let validation: TrackValidation
 
   var artistRows: (table: String, rows: [RowArtist]) {
     let artistRows = Array(Set(rows.map { $0.artist }))
 
     let mismatched = artistRows.mismatchedSortableNames
     if !mismatched.isEmpty {
-      let duplicateArtist = Logger(
-        type: "validation", category: "duplicateArtist", token: loggingToken)
       mismatched.forEach {
-        duplicateArtist.error("\($0, privacy: .public)")
+        validation.duplicateArtist.error("\($0, privacy: .public)")
       }
     }
 
@@ -70,10 +68,8 @@ struct TrackRowEncoder {
 
     let duplicates = playRows.duplicatePlayDates
     if !duplicates.isEmpty {
-      let duplicatePlayDate = Logger(
-        type: "validation", category: "duplicatePlayDate", token: loggingToken)
       duplicates.forEach {
-        duplicatePlayDate.error("\($0.debugLogInformation, privacy: .public)")
+        validation.duplicatePlayDate.error("\($0.debugLogInformation, privacy: .public)")
       }
     }
 

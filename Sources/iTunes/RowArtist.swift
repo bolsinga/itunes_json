@@ -6,16 +6,17 @@
 //
 
 import Foundation
+import os
 
 protocol RowArtistInterface {
-  var artistName: SortableName { get }
+  func artistName(logger: Logger) -> SortableName
 }
 
 struct RowArtist: Hashable {
   let name: SortableName
 
-  init(_ artist: RowArtistInterface) {
-    self.init(name: artist.artistName)
+  init(_ artist: RowArtistInterface, validation: TrackValidation) {
+    self.init(name: artist.artistName(logger: validation.noArtist))
   }
 
   init() {

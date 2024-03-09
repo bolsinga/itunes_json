@@ -8,23 +8,18 @@
 import Foundation
 import os
 
-extension Logger {
-  static let noAlbum = Logger(type: "validation", category: "noAlbum")
-  static let noTrackCount = Logger(type: "validation", category: "noTrackCount")
-}
-
 extension Track: RowAlbumInterface {
-  var albumName: SortableName {
+  func albumName(logger: Logger) -> SortableName {
     guard let album else {
-      Logger.noAlbum.error("\(debugLogInformation, privacy: .public)")
+      logger.error("\(debugLogInformation, privacy: .public)")
       return SortableName()
     }
     return SortableName(name: album, sorted: sortAlbum ?? "")
   }
 
-  var albumTrackCount: Int {
+  func albumTrackCount(logger: Logger) -> Int {
     guard let trackCount else {
-      Logger.noTrackCount.error("\(debugLogInformation, privacy: .public)")
+      logger.error("\(debugLogInformation, privacy: .public)")
       return -1
     }
     return trackCount

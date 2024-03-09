@@ -36,21 +36,21 @@ extension Track: RowSongInterface {
     SortableName(name: name, sorted: sortName ?? "")
   }
 
-  var songTrackNumber: Int {
+  func songTrackNumber(validation: TrackValidation) -> Int {
     guard let trackNumber else {
-      Logger.noTrackNumber.error("\(debugLogInformation, privacy: .public)")
+      validation.noTrackNumber.error("\(debugLogInformation, privacy: .public)")
       return -1
     }
     guard trackNumber > 0 else {
-      Logger.badTrackNumber.error("\(debugLogInformation, privacy: .public)")
+      validation.badTrackNumber.error("\(debugLogInformation, privacy: .public)")
       return -1
     }
     return trackNumber
   }
 
-  var songYear: Int {
+  func songYear(logger: Logger) -> Int {
     guard let year else {
-      Logger.noYear.error("\(debugLogInformation, privacy: .public)")
+      logger.error("\(debugLogInformation, privacy: .public)")
       return -1
     }
     return year

@@ -8,12 +8,14 @@
 import Foundation
 
 protocol RowPlayInterface {
-  func songPlayedInformation(_ loggingToken: String?) -> (datePlayedISO8601: String, playCount: Int)
+  func songPlayedInformation(_ validation: TrackValidation) -> (
+    datePlayedISO8601: String, playCount: Int
+  )
 }
 
 struct RowPlay: Hashable {
-  init?(_ play: RowPlayInterface, loggingToken: String?) {
-    let info = play.songPlayedInformation(loggingToken)
+  init?(_ play: RowPlayInterface, validation: TrackValidation) {
+    let info = play.songPlayedInformation(validation)
 
     guard info.playCount > 0 || !info.datePlayedISO8601.isEmpty else { return nil }
 
