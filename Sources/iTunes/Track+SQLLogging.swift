@@ -9,8 +9,6 @@ import Foundation
 
 extension Track {
   var debugLogInformation: String {
-    let prefix = LoggingToken != nil ? "\(LoggingToken!): " : ""
-    return prefix
-      + "album: \(String(describing: album)), artist: \(String(describing: artist)), name: \(name), trackCount: \(String(describing: trackCount)), trackNumber: \(String(describing: trackNumber)), year: \(String(describing: year)), playCount: \(String(describing: playCount)), playDate: \(String(describing: playDateUTC))"
+    "album: \(String(describing: album)), artist: \(String(describing: artist)), name: \(name), trackCount: \(String(describing: trackCount)), trackNumber: \(String(describing: trackNumber)), year: \(String(describing: year)), playCount: \(String(describing: playCount)), playDate: \(String(describing: playDateUTC))"
   }
 }
