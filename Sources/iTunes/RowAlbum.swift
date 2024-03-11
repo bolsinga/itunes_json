@@ -6,20 +6,23 @@
 //
 
 import Foundation
+import os
 
 protocol RowAlbumInterface {
-  var albumName: SortableName { get }
-  var albumTrackCount: Int { get }
+  func albumName(logger: Logger) -> SortableName
+  func albumTrackCount(logger: Logger) -> Int
   var albumDiscCount: Int { get }
   var albumDiscNumber: Int { get }
   var albumIsCompilation: Int { get }
 }
 
 struct RowAlbum: Hashable {
-  init(_ album: RowAlbumInterface) {
+  init(_ album: RowAlbumInterface, validation: TrackValidation) {
     self.init(
-      name: album.albumName, trackCount: album.albumTrackCount, discCount: album.albumDiscCount,
-      discNumber: album.albumDiscNumber, compilation: album.albumIsCompilation)
+      name: album.albumName(logger: validation.noAlbum),
+      trackCount: album.albumTrackCount(logger: validation.noTrackCount),
+      discCount: album.albumDiscCount, discNumber: album.albumDiscNumber,
+      compilation: album.albumIsCompilation)
   }
 
   init() {
