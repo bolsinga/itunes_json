@@ -9,19 +9,6 @@ import Foundation
 import SQLite3
 import os
 
-extension Logger {
-  static let open = Logger(type: "sql", category: "open")
-  static let close = Logger(type: "sql", category: "close")
-  static let exec = Logger(type: "sql", category: "exec")
-  static let prepare = Logger(type: "sql", category: "prepare")
-  static let step = Logger(type: "sql", category: "step")
-  static let reset = Logger(type: "sql", category: "reset")
-  static let clear = Logger(type: "sql", category: "clear")
-  static let finalize = Logger(type: "sql", category: "finalize")
-  static let bindText = Logger(type: "sql", category: "bindText")
-  static let bindInt64 = Logger(type: "sql", category: "bindInt64")
-}
-
 enum DatabaseError: Error {
   case cannotOpen(String)
   case cannotEnableWALJournaling(String)
@@ -54,18 +41,46 @@ actor Database {
     }
   }
 
+  fileprivate struct Logging {
+    let open: Logger
+    let close: Logger
+    let exec: Logger
+    let prepare: Logger
+    let step: Logger
+    let reset: Logger
+    let clear: Logger
+    let finalize: Logger
+    let bindText: Logger
+    let bindInt64: Logger
+
+    init(token: String?) {
+      self.open = Logger(type: "sql", category: "open", token: token)
+      self.close = Logger(type: "sql", category: "close", token: token)
+      self.exec = Logger(type: "sql", category: "exec", token: token)
+      self.prepare = Logger(type: "sql", category: "prepare", token: token)
+      self.step = Logger(type: "sql", category: "step", token: token)
+      self.reset = Logger(type: "sql", category: "reset", token: token)
+      self.clear = Logger(type: "sql", category: "clear", token: token)
+      self.finalize = Logger(type: "sql", category: "finalize", token: token)
+      self.bindText = Logger(type: "sql", category: "bindText", token: token)
+      self.bindInt64 = Logger(type: "sql", category: "bindInt64", token: token)
+    }
+  }
+
   struct Statement {
     private let handle: OpaquePointer
+    private let logging: Logging
 
     static private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
-    init(handle: OpaquePointer) {
+    fileprivate init(handle: OpaquePointer, logging: Logging) {
       self.handle = handle
+      self.logging = logging
     }
 
     func close() {
       let result = sqlite3_finalize(handle)
-      Logger.finalize.log("\(result, privacy: .public)")
+      logging.finalize.log("\(result, privacy: .public)")
     }
 
     private func bind(db: Database, value: Value, index: Int32) throws {
@@ -73,13 +88,13 @@ actor Database {
       case .string(let string):
         let result = sqlite3_bind_text(handle, index, string, -1, Statement.SQLITE_TRANSIENT)
         guard result == SQLITE_OK else {
-          Logger.bindText.error("\(result, privacy: .public)")
+          logging.bindText.error("\(result, privacy: .public)")
           throw DatabaseError.cannotBind("\(db.handle.sqlError) - \(value.description) - \(index)")
         }
       case .integer(let integer):
         let result = sqlite3_bind_int64(handle, index, integer)
         guard result == SQLITE_OK else {
-          Logger.bindInt64.error("\(result, privacy: .public)")
+          logging.bindInt64.error("\(result, privacy: .public)")
           throw DatabaseError.cannotBind("\(db.handle.sqlError) - \(value.description) - \(index)")
         }
       }
@@ -95,13 +110,13 @@ actor Database {
       let result = sqlite3_step(handle)
       defer {
         var result = sqlite3_reset(handle)
-        if result != SQLITE_OK { Logger.reset.error("\(result, privacy: .public)") }
+        if result != SQLITE_OK { logging.reset.error("\(result, privacy: .public)") }
         result = sqlite3_clear_bindings(handle)
-        if result != SQLITE_OK { Logger.clear.error("\(result, privacy: .public)") }
+        if result != SQLITE_OK { logging.clear.error("\(result, privacy: .public)") }
       }
 
       guard result == SQLITE_ROW || result == SQLITE_DONE else {
-        Logger.step.error("\(result, privacy: .public)")
+        logging.step.error("\(result, privacy: .public)")
         throw DatabaseError.cannotStep(db.handle.sqlError)
       }
 
@@ -114,14 +129,17 @@ actor Database {
 
   private let handle: OpaquePointer
   private var statements = [String: Statement]()
+  private let logging: Logging
 
-  init(file: URL) throws {
+  init(file: URL, loggingToken: String?) throws {
+    self.logging = Logging(token: loggingToken)
+
     var handle: OpaquePointer?
     let result = sqlite3_open_v2(
       file.absoluteString, &handle, SQLITE_OPEN_URI | SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
       nil)
 
-    Logger.open.log("\(result, privacy: .public)")
+    logging.open.log("\(result, privacy: .public)")
     guard let handle else { throw DatabaseError.cannotOpen("No handle") }
     guard result == SQLITE_OK else { throw DatabaseError.cannotOpen(handle.sqlError) }
 
@@ -138,12 +156,12 @@ actor Database {
   deinit {
     statements.values.forEach { $0.close() }
     let result = sqlite3_close(handle)
-    Logger.close.log("\(result, privacy: .public)")
+    logging.close.log("\(result, privacy: .public)")
   }
 
   func execute(_ string: String) throws {
     let result = sqlite3_exec(handle, string, nil, nil, nil)
-    Logger.exec.log("\(string, privacy: .public) (result: \(result, privacy: .public))")
+    logging.exec.log("\(string, privacy: .public) (result: \(result, privacy: .public))")
     guard result == SQLITE_OK else { throw DatabaseError.cannotExecute(handle.sqlError) }
   }
 
@@ -154,11 +172,11 @@ actor Database {
     let result = sqlite3_prepare_v3(
       handle, string, -1, UInt32(SQLITE_PREPARE_PERSISTENT), &statementHandle, nil)
 
-    Logger.prepare.log("\(string, privacy: .public) (result: \(result, privacy: .public))")
+    logging.prepare.log("\(string, privacy: .public) (result: \(result, privacy: .public))")
     guard let statementHandle else { throw DatabaseError.cannotPrepare(string) }
     guard result == SQLITE_OK else { throw DatabaseError.cannotPrepare(handle.sqlError) }
 
-    let statement = Statement(handle: statementHandle)
+    let statement = Statement(handle: statementHandle, logging: logging)
     statements[string] = statement
     return statement
   }

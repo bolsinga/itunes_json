@@ -11,8 +11,8 @@ final class DBEncoder {
   private let db: Database
   private let rowEncoder: TrackRowEncoder
 
-  init(file: URL, rowEncoder: TrackRowEncoder) throws {
-    self.db = try Database(file: file)
+  init(file: URL, rowEncoder: TrackRowEncoder, loggingToken: String?) throws {
+    self.db = try Database(file: file, loggingToken: loggingToken)
     self.rowEncoder = rowEncoder
   }
 
