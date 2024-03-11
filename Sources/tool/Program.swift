@@ -95,8 +95,6 @@ struct Program: AsyncParsableCommand {
   }
 
   func run() async throws {
-    LoggingToken = loggingToken
-
     guard !timeTest else {
       let result = await testTime()
       if result != 0 { throw ExitCode(Int32(result)) }
