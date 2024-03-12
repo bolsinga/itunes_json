@@ -1,5 +1,5 @@
 //
-//  RowAlbum+SQLBindable.swift
+//  RowAlbum+SQLBindableInsert.swift
 //
 //
 //  Created by Greg Bolsinga on 1/5/24.
