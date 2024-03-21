@@ -87,6 +87,10 @@ struct Program: AsyncParsableCommand {
     if destination == .db && outputFile == nil {
       throw ValidationError("--db requires outputDirectory to be set")
     }
+
+    if destination == .jsonGit && outputFile == nil {
+      throw ValidationError("--json-git requires outputDirectory to be set")
+    }
   }
 
   /// Indicates if the Track data is going to be repaired.
