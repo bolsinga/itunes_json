@@ -12,6 +12,15 @@ enum DataExportError: Error {
 }
 
 extension Destination {
+  fileprivate var isGit: Bool {
+    switch self {
+    case .jsonGit:
+      return true
+    default:
+      return false
+    }
+  }
+
   public func emit(_ tracks: [Track], outputFile: URL?, loggingToken: String?) async throws {
     guard tracks.count > 0 else {
       throw DataExportError.noTracks
@@ -20,11 +29,15 @@ extension Destination {
     let tracks = tracks.sorted()
 
     switch self {
-    case .json, .sqlCode:
+    case .json, .sqlCode, .jsonGit:
       let data = try self.data(for: tracks, loggingToken: loggingToken)
 
       if let outputFile {
         try data.write(to: outputFile, options: .atomic)
+
+        if self.isGit {
+          try outputFile.gitAddCommitTagPush(message: String.defaultDestinationName)
+        }
       } else {
         print("\(try data.asUTF8String())")
       }
