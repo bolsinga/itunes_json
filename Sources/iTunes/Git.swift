@@ -16,6 +16,8 @@ enum GitError: Error {
   case push(Int32)
   case pushTags(Int32)
   case gc(Int32)
+  case diff(Int32)
+  case contains(Int32)
 }
 
 extension Process {
@@ -86,5 +88,13 @@ struct Git {
 
   func gc() throws {
     try git(["gc", "--prune=now"]) { GitError.gc($0) }
+  }
+
+  func diff() throws {
+    try git(["diff", "--staged", "--name-only", "--exit-code"]) { GitError.diff($0) }
+  }
+
+  func tagContains(_ message: String) throws -> [String] {
+    try git(["tag", "--contains", message]) { GitError.contains($0) }
   }
 }
