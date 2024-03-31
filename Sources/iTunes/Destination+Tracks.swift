@@ -25,11 +25,6 @@ extension Destination {
     }
   }
 
-  fileprivate func fileWriter(_ outputFile: URL) -> DestinationFileWriting {
-    let fileWriter = FileWriter(outputFile: outputFile)
-    return self.isGit ? GitWriter(fileWriter: fileWriter) : fileWriter
-  }
-
   public func emit(_ tracks: [Track], outputFile: URL?, loggingToken: String?) async throws {
     guard tracks.count > 0 else {
       throw DataExportError.noTracks
@@ -42,7 +37,7 @@ extension Destination {
       let data = try self.data(for: tracks, loggingToken: loggingToken)
 
       if let outputFile {
-        try fileWriter(outputFile).write(data: data)
+        try outputFile.fileWriter(isGit: self.isGit).write(data: data)
       } else {
         print("\(try data.asUTF8String())")
       }
