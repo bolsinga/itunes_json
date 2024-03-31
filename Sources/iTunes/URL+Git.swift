@@ -12,25 +12,7 @@ extension URL {
     self.deletingLastPathComponent()
   }
 
-  fileprivate var filename: String {
-    self.lastPathComponent
-  }
-
-  func gitAddCommitTagPush(message: String) throws {
-    let git = Git(directory: self.parentDirectory)
-
-    try git.status()
-    try git.checkoutMain()
-    try git.add(self.filename)
-    var tagName = message
-    do {
-      try git.commit(message)
-    } catch {
-      tagName = tagName + "-empty"
-    }
-    try git.tag(tagName)
-    try git.push()
-    try git.pushTags()
-    try git.gc()
+  var parentDirectoryGit: Git {
+    Git(directory: self.parentDirectory)
   }
 }
