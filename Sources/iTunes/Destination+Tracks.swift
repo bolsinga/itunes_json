@@ -11,6 +11,27 @@ enum DataExportError: Error {
   case noTracks
 }
 
+protocol DestinationFileWriting {
+  func write(data: Data) throws
+}
+
+private struct FileWriter: DestinationFileWriting {
+  let outputFile: URL
+
+  func write(data: Data) throws {
+    try data.write(to: outputFile, options: .atomic)
+  }
+}
+
+private struct GitWriter: DestinationFileWriting {
+  let fileWriter: FileWriter
+
+  func write(data: Data) throws {
+    try fileWriter.write(data: data)
+    try fileWriter.outputFile.gitAddCommitTagPush(message: String.defaultDestinationName)
+  }
+}
+
 extension Destination {
   fileprivate var isGit: Bool {
     switch self {
@@ -19,6 +40,11 @@ extension Destination {
     default:
       return false
     }
+  }
+
+  fileprivate func fileWriter(_ outputFile: URL) -> DestinationFileWriting {
+    let fileWriter = FileWriter(outputFile: outputFile)
+    return self.isGit ? GitWriter(fileWriter: fileWriter) : fileWriter
   }
 
   public func emit(_ tracks: [Track], outputFile: URL?, loggingToken: String?) async throws {
@@ -33,11 +59,7 @@ extension Destination {
       let data = try self.data(for: tracks, loggingToken: loggingToken)
 
       if let outputFile {
-        try data.write(to: outputFile, options: .atomic)
-
-        if self.isGit {
-          try outputFile.gitAddCommitTagPush(message: String.defaultDestinationName)
-        }
+        try fileWriter(outputFile).write(data: data)
       } else {
         print("\(try data.asUTF8String())")
       }
