@@ -15,23 +15,6 @@ protocol DestinationFileWriting {
   func write(data: Data) throws
 }
 
-private struct FileWriter: DestinationFileWriting {
-  let outputFile: URL
-
-  func write(data: Data) throws {
-    try data.write(to: outputFile, options: .atomic)
-  }
-}
-
-private struct GitWriter: DestinationFileWriting {
-  let fileWriter: FileWriter
-
-  func write(data: Data) throws {
-    try fileWriter.write(data: data)
-    try fileWriter.outputFile.gitAddCommitTagPush(message: String.defaultDestinationName)
-  }
-}
-
 extension Destination {
   fileprivate var isGit: Bool {
     switch self {
