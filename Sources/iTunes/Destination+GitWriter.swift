@@ -14,9 +14,12 @@ extension URL {
 }
 
 extension Git {
-  func addCommitTagPush(filename: String, message: String) throws {
+  func validate() throws {
     try status()
     try checkoutMain()
+  }
+
+  func addCommitTagPush(filename: String, message: String) throws {
     try add(filename)
     var tagName = message
     do {
@@ -35,9 +38,11 @@ struct GitWriter: DestinationFileWriting {
   let fileWriter: FileWriter
 
   func write(data: Data) throws {
+    let git = fileWriter.outputFile.parentDirectoryGit
+
+    try git.validate()
     try fileWriter.write(data: data)
 
-    let git = fileWriter.outputFile.parentDirectoryGit
     try git.addCommitTagPush(
       filename: fileWriter.outputFile.filename, message: String.defaultDestinationName)
   }
