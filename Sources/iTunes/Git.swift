@@ -19,10 +19,10 @@ enum GitError: Error {
 }
 
 extension Process {
-  fileprivate static func git(arguments: [String]) throws -> Int32 {
+  fileprivate static func git(arguments: [String], errorBuilder: (Int32) -> Error) throws {
     let git = try Self.run(URL(filePath: "/usr/bin/git"), arguments: arguments)
     git.waitUntilExit()
-    return git.terminationStatus
+    guard git.terminationStatus == 0 else { throw errorBuilder(git.terminationStatus) }
   }
 }
 
@@ -37,47 +37,39 @@ struct Git {
     ["-C", path]
   }
 
-  fileprivate func git(_ arguments: [String]) throws -> Int32 {
-    try Process.git(arguments: gitPathArguments + arguments)
+  fileprivate func git(_ arguments: [String], errorBuilder: (Int32) -> Error) throws {
+    try Process.git(arguments: gitPathArguments + arguments, errorBuilder: errorBuilder)
   }
 
   func status() throws {
-    let terminationStatus = try git(["status"])
-    guard terminationStatus == 0 else { throw GitError.status(terminationStatus) }
+    try git(["status"]) { GitError.status($0) }
   }
 
   func checkoutMain() throws {
-    let terminationStatus = try git(["checkout", "main"])
-    guard terminationStatus == 0 else { throw GitError.main(terminationStatus) }
+    try git(["checkout", "main"]) { GitError.main($0) }
   }
 
   func add(_ filename: String) throws {
-    let terminationStatus = try git(["add", filename])
-    guard terminationStatus == 0 else { throw GitError.add(terminationStatus) }
+    try git(["add", filename]) { GitError.add($0) }
   }
 
   func commit(_ message: String) throws {
-    let terminationStatus = try git(["commit", "-m", message])
-    guard terminationStatus == 0 else { throw GitError.commit(terminationStatus) }
+    try git(["commit", "-m", message]) { GitError.commit($0) }
   }
 
   func tag(_ name: String) throws {
-    let terminationStatus = try git(["tag", name])
-    guard terminationStatus == 0 else { throw GitError.tag(terminationStatus) }
+    try git(["tag", name]) { GitError.tag($0) }
   }
 
   func push() throws {
-    let terminationStatus = try git(["push"])
-    guard terminationStatus == 0 else { throw GitError.push(terminationStatus) }
+    try git(["push"]) { GitError.push($0) }
   }
 
   func pushTags() throws {
-    let terminationStatus = try git(["push", "--tags"])
-    guard terminationStatus == 0 else { throw GitError.pushTags(terminationStatus) }
+    try git(["push", "--tags"]) { GitError.pushTags($0) }
   }
 
   func gc() throws {
-    let terminationStatus = try git(["gc", "--prune=now"])
-    guard terminationStatus == 0 else { throw GitError.gc(terminationStatus) }
+    try git(["gc", "--prune=now"]) { GitError.gc($0) }
   }
 }
