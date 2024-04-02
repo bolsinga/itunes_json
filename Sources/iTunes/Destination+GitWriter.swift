@@ -25,7 +25,7 @@ extension Git {
     do {
       try commit(message)
     } catch {
-      tagName = tagName + "-empty"
+      tagName = tagName.emptyTag
     }
     try tag(tagName)
     try push()
