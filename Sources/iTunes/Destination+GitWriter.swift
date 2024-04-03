@@ -19,17 +19,37 @@ extension Git {
     try checkoutMain()
   }
 
+  fileprivate var latestTags: [String] {
+    guard let latest = try? tagContains("origin/main").sorted() else { return [] }
+    return latest
+  }
+
   func addCommitTagPush(filename: String, message: String) throws {
     try add(filename)
-    var tagName = message
-    do {
-      try commit(message)
-    } catch {
-      tagName = tagName.emptyTag
+
+    let backup = {
+      do {
+        try diff()
+        return GitBackup.noChanges
+      } catch {
+        return GitBackup.changes
+      }
+    }()
+
+    let backupName = backup.backupName(baseName: message, existingNames: latestTags)
+
+    switch backup {
+    case .noChanges:
+      break
+    case .changes:
+      try commit(backupName)
     }
-    try tag(tagName)
+
+    try tag(backupName)
+
     try push()
     try pushTags()
+
     try gc()
   }
 }
