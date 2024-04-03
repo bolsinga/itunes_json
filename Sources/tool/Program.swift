@@ -54,9 +54,6 @@ struct Program: AsyncParsableCommand {
   )
   var fileName: String?
 
-  @Flag
-  var timeTest = false
-
   @Option(help: "Optional string to add to debug logs for debugging.")
   var loggingToken: String?
 
@@ -99,12 +96,6 @@ struct Program: AsyncParsableCommand {
   }
 
   func run() async throws {
-    guard !timeTest else {
-      let result = await testTime()
-      if result != 0 { throw ExitCode(Int32(result)) }
-      return
-    }
-
     let tracks = try await {
       let repair =
         isRepairing
