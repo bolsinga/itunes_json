@@ -69,4 +69,8 @@ final class DBEncoder {
     try await emitPlays(songLookup: songLookup)
     try await db.execute(rowEncoder.views)
   }
+
+  func close() async {
+    await db.close()
+  }
 }

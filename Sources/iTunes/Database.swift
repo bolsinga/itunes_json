@@ -153,7 +153,7 @@ actor Database {
     }
   }
 
-  deinit {
+  func close() {
     statements.values.forEach { $0.close() }
     let result = sqlite3_close(handle)
     logging.close.log("\(result, privacy: .public)")
