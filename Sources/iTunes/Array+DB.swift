@@ -12,5 +12,6 @@ extension Array where Element == Track {
     let encoder = try DBEncoder(
       file: file, rowEncoder: self.rowEncoder(loggingToken), loggingToken: loggingToken)
     try await encoder.encode()
+    await encoder.close()
   }
 }
