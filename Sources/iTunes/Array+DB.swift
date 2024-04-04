@@ -9,13 +9,14 @@ import Foundation
 
 extension Array where Element == Track {
   public func database(file: URL, loggingToken: String?) async throws {
-    let encoder = try DBEncoder(
-      file: file, rowEncoder: self.rowEncoder(loggingToken), loggingToken: loggingToken)
+    var encoder: DBEncoder?
     do {
-      try await encoder.encode()
-      await encoder.close()
+      encoder = try DBEncoder(
+        file: file, rowEncoder: self.rowEncoder(loggingToken), loggingToken: loggingToken)
+      try await encoder?.encode()
+      await encoder?.close()
     } catch {
-      await encoder.close()
+      await encoder?.close()
       throw error
     }
   }
