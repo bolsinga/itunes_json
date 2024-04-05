@@ -37,11 +37,28 @@ actor Database {
     var description: String {
       switch self {
       case .string(let string):
-        "Value: \"\(string)\""
+        "string: \"\(string)\""
       case .integer(let integer):
-        "Value: \(integer)"
+        "integer: \(integer)"
       }
     }
+
+    func bind(statementHandle: StatementHandle, index: Int32, errorStringBuilder: () -> String)
+      throws
+    {
+      let result =
+        switch self {
+        case .string(let string):
+          sqlite3_bind_text(statementHandle, index, string, -1, Self.SQLITE_TRANSIENT)
+        case .integer(let integer):
+          sqlite3_bind_int64(statementHandle, index, integer)
+        }
+      guard result == SQLITE_OK else {
+        throw DatabaseError.cannotBind("\(errorStringBuilder()) - \(self.description) - \(index)")
+      }
+    }
+
+    static private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
   }
 
   fileprivate struct Logging {
@@ -53,8 +70,7 @@ actor Database {
     let reset: Logger
     let clear: Logger
     let finalize: Logger
-    let bindText: Logger
-    let bindInt64: Logger
+    let bind: Logger
 
     init(token: String?) {
       self.open = Logger(type: "sql", category: "open", token: token)
@@ -65,16 +81,13 @@ actor Database {
       self.reset = Logger(type: "sql", category: "reset", token: token)
       self.clear = Logger(type: "sql", category: "clear", token: token)
       self.finalize = Logger(type: "sql", category: "finalize", token: token)
-      self.bindText = Logger(type: "sql", category: "bindText", token: token)
-      self.bindInt64 = Logger(type: "sql", category: "bindInt64", token: token)
+      self.bind = Logger(type: "sql", category: "bind", token: token)
     }
   }
 
   struct Statement {
     private let handle: StatementHandle
     private let logging: Logging
-
-    static private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
     fileprivate init(handle: StatementHandle, logging: Logging) {
       self.handle = handle
@@ -86,26 +99,16 @@ actor Database {
       logging.finalize.log("\(result, privacy: .public)")
     }
 
-    private func bind(db: Database, value: Value, index: Int32) throws {
-      switch value {
-      case .string(let string):
-        let result = sqlite3_bind_text(handle, index, string, -1, Statement.SQLITE_TRANSIENT)
-        guard result == SQLITE_OK else {
-          logging.bindText.error("\(result, privacy: .public)")
-          throw DatabaseError.cannotBind("\(db.handle.sqlError) - \(value.description) - \(index)")
-        }
-      case .integer(let integer):
-        let result = sqlite3_bind_int64(handle, index, integer)
-        guard result == SQLITE_OK else {
-          logging.bindInt64.error("\(result, privacy: .public)")
-          throw DatabaseError.cannotBind("\(db.handle.sqlError) - \(value.description) - \(index)")
-        }
-      }
-    }
-
     func bind(db: Database, count: Int32, binder: (Int32) -> Value) throws {
-      for index in 1...count {
-        try bind(db: db, value: binder(index), index: index)
+      do {
+        for index in 1...count {
+          let value = binder(index)
+          try value.bind(
+            statementHandle: handle, index: index, errorStringBuilder: { db.handle.sqlError })
+        }
+      } catch {
+        logging.bind.error("\(error.localizedDescription, privacy: .public)")
+        throw error
       }
     }
 
