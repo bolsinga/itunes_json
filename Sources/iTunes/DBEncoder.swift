@@ -21,19 +21,21 @@ final class DBEncoder {
   {
     guard !rows.isEmpty else { return [:] }
 
-    try await db.execute(table)
+    return try await db.transaction { db in
+      try db.execute(table)
 
-    let statement = try await db.prepare(T.insertBinding)
+      let statement = try db.prepare(T.insertBinding)
 
-    let ids = ids.isEmpty ? Array(repeating: [], count: rows.count) : ids
+      let ids = ids.isEmpty ? Array(repeating: [], count: rows.count) : ids
 
-    var lookup = [T: Int64](minimumCapacity: rows.count)
-    for (row, ids) in zip(rows, ids) {
-      try row.bindInsert(db: db, statement: statement, ids: ids)
-      try statement.execute(db: db)
-      lookup[row] = await db.lastID
+      var lookup = [T: Int64](minimumCapacity: rows.count)
+      for (row, ids) in zip(rows, ids) {
+        try row.bindInsert(db: db, statement: statement, ids: ids)
+        try statement.execute(db: db)
+        lookup[row] = db.lastID
+      }
+      return lookup
     }
-    return lookup
   }
 
   private func emitArtists() async throws -> [RowArtist: Int64] {

@@ -168,6 +168,19 @@ actor Database {
     guard result == SQLITE_OK else { throw DatabaseError.cannotExecute(handle.sqlError) }
   }
 
+  @discardableResult
+  func transaction<R>(_ action: @Sendable (_ db: isolated Database) throws -> R) throws -> R {
+    try execute("BEGIN TRANSACTION")
+    do {
+      let result = try action(self)
+      try execute("COMMIT TRANSACTION")
+      return result
+    } catch {
+      try execute("ROLLBACK TRANSACTION")
+      throw error
+    }
+  }
+
   func prepare(_ string: String) throws -> Statement {
     if let statement = statements[string] { return statement }
 
