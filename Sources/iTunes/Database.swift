@@ -112,7 +112,7 @@ actor Database {
       }
     }
 
-    func execute(db: Database) throws {
+    func execute(_ errorStringBuilder: () -> String) throws {
       let result = sqlite3_step(handle)
       defer {
         var result = sqlite3_reset(handle)
@@ -123,7 +123,7 @@ actor Database {
 
       guard result == SQLITE_ROW || result == SQLITE_DONE else {
         logging.step.error("\(result, privacy: .public)")
-        throw DatabaseError.cannotStep(db.handle.sqlError)
+        throw DatabaseError.cannotStep(errorStringBuilder())
       }
 
       let columnCount = sqlite3_column_count(handle)
@@ -202,5 +202,9 @@ actor Database {
 
   var lastID: Int64 {
     sqlite3_last_insert_rowid(handle)
+  }
+
+  var errorString: String {
+    handle.sqlError
   }
 }
