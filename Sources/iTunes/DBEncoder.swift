@@ -32,7 +32,7 @@ final class DBEncoder {
 
       var lookup = [T: Int64](minimumCapacity: rows.count)
       for (row, ids) in zip(rows, ids) {
-        try row.bindInsert(db: db, statement: statement, ids: ids)
+        try row.bindInsert(statement: statement, ids: ids, errorStringBuilder: errorStringBuilder)
         try statement.execute(errorStringBuilder)
         lookup[row] = db.lastID
       }

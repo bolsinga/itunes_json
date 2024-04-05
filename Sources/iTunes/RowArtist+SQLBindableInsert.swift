@@ -10,18 +10,22 @@ import Foundation
 extension RowArtist: SQLBindableInsert {
   static var insertBinding: String { Self.bound { RowArtist().insert } }
 
-  func bindInsert(db: Database, statement: Database.Statement, ids: [Int64]) throws {
+  func bindInsert(statement: Database.Statement, ids: [Int64], errorStringBuilder: () -> String)
+    throws
+  {
     guard ids.isEmpty else { throw SQLBindingError.noIDsRequired }
 
-    try statement.bind(db: db, count: 2) { index in
-      switch index {
-      case 1:
-        Database.Value.string(name.name)
-      case 2:
-        Database.Value.string(name.sorted)
-      default:
-        preconditionFailure()
-      }
-    }
+    try statement.bind(
+      count: 2,
+      binder: { index in
+        switch index {
+        case 1:
+          Database.Value.string(name.name)
+        case 2:
+          Database.Value.string(name.sorted)
+        default:
+          preconditionFailure()
+        }
+      }, errorStringBuilder: errorStringBuilder)
   }
 }

@@ -99,12 +99,12 @@ actor Database {
       logging.finalize.log("\(result, privacy: .public)")
     }
 
-    func bind(db: Database, count: Int32, binder: (Int32) -> Value) throws {
+    func bind(count: Int32, binder: (Int32) -> Value, errorStringBuilder: () -> String) throws {
       do {
         for index in 1...count {
           let value = binder(index)
           try value.bind(
-            statementHandle: handle, index: index, errorStringBuilder: { db.handle.sqlError })
+            statementHandle: handle, index: index, errorStringBuilder: errorStringBuilder)
         }
       } catch {
         logging.bind.error("\(error.localizedDescription, privacy: .public)")
