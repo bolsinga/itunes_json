@@ -20,7 +20,7 @@ protocol RowSongInterface {
   var dateAddedISO8601: String { get }
 }
 
-struct RowSong: Hashable {
+struct RowSong: Hashable, Sendable {
   init(_ song: RowSongInterface, validation: TrackValidation) {
     self.init(
       name: song.songName, itunesid: song.songPersistentID, composer: song.songComposer,

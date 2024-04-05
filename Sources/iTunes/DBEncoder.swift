@@ -16,7 +16,7 @@ final class DBEncoder {
     self.rowEncoder = rowEncoder
   }
 
-  private func emit<T: SQLBindableInsert>(table: String, rows: [T], ids: [[Int64]] = [])
+  private func emit<T: SQLBindableInsert & Sendable>(table: String, rows: [T], ids: [[Int64]] = [])
     async throws -> [T: Int64]
   {
     guard !rows.isEmpty else { return [:] }

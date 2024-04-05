@@ -16,7 +16,7 @@ protocol RowAlbumInterface {
   var albumIsCompilation: Int { get }
 }
 
-struct RowAlbum: Hashable {
+struct RowAlbum: Hashable, Sendable {
   init(_ album: RowAlbumInterface, validation: TrackValidation) {
     self.init(
       name: album.albumName(logger: validation.noAlbum),
