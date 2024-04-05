@@ -20,11 +20,14 @@ enum DatabaseError: Error {
   case unexpectedColumns(Int32)
 }
 
-extension OpaquePointer {
+extension DatabaseHandle {
   fileprivate var sqlError: String {
     "\(String(cString: sqlite3_errmsg(self), encoding: .utf8) ?? "unknown") \(sqlite3_errcode(self))"
   }
 }
+
+typealias DatabaseHandle = OpaquePointer
+typealias StatementHandle = OpaquePointer
 
 actor Database {
   enum Value: CustomStringConvertible {
@@ -68,12 +71,12 @@ actor Database {
   }
 
   struct Statement {
-    private let handle: OpaquePointer
+    private let handle: StatementHandle
     private let logging: Logging
 
     static private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
-    fileprivate init(handle: OpaquePointer, logging: Logging) {
+    fileprivate init(handle: StatementHandle, logging: Logging) {
       self.handle = handle
       self.logging = logging
     }
@@ -127,14 +130,14 @@ actor Database {
     }
   }
 
-  private let handle: OpaquePointer
+  private let handle: DatabaseHandle
   private var statements = [String: Statement]()
   private let logging: Logging
 
   init(file: URL, loggingToken: String?) throws {
     self.logging = Logging(token: loggingToken)
 
-    var handle: OpaquePointer?
+    var handle: DatabaseHandle?
     let result = sqlite3_open_v2(
       file.absoluteString, &handle, SQLITE_OPEN_URI | SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
       nil)
@@ -168,7 +171,7 @@ actor Database {
   func prepare(_ string: String) throws -> Statement {
     if let statement = statements[string] { return statement }
 
-    var statementHandle: OpaquePointer?
+    var statementHandle: StatementHandle?
     let result = sqlite3_prepare_v3(
       handle, string, -1, UInt32(SQLITE_PREPARE_PERSISTENT), &statementHandle, nil)
 
