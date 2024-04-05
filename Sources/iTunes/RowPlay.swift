@@ -13,7 +13,7 @@ protocol RowPlayInterface {
   )
 }
 
-struct RowPlay: Hashable {
+struct RowPlay: Hashable, Sendable {
   init?(_ play: RowPlayInterface, validation: TrackValidation) {
     let info = play.songPlayedInformation(validation)
 

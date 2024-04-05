@@ -12,7 +12,7 @@ protocol RowArtistInterface {
   func artistName(logger: Logger) -> SortableName
 }
 
-struct RowArtist: Hashable {
+struct RowArtist: Hashable, Sendable {
   let name: SortableName
 
   init(_ artist: RowArtistInterface, validation: TrackValidation) {
