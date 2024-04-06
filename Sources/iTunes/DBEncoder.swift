@@ -28,10 +28,12 @@ final class DBEncoder {
 
       let ids = ids.isEmpty ? Array(repeating: [], count: rows.count) : ids
 
+      let errorStringBuilder = { db.errorString }
+
       var lookup = [T: Int64](minimumCapacity: rows.count)
       for (row, ids) in zip(rows, ids) {
         try row.bindInsert(db: db, statement: statement, ids: ids)
-        try statement.execute(db: db)
+        try statement.execute(errorStringBuilder)
         lookup[row] = db.lastID
       }
       return lookup
