@@ -19,17 +19,17 @@ struct SQLSourceEncoder {
       self.rowEncoder = rowEncoder
     }
 
-    private var artistStatements: (tableSchema: String, statements: [String]) {
+    private var artistStatements: (tableSchema: String, statements: [Database.Statement]) {
       let rows = rowEncoder.artistRows
       return (rows.tableSchema, rows.rows.map { $0.insert })
     }
 
-    private var albumStatements: (tableSchema: String, statements: [String]) {
+    private var albumStatements: (tableSchema: String, statements: [Database.Statement]) {
       let rows = rowEncoder.albumRows
       return (rows.tableSchema, rows.rows.map { $0.insert })
     }
 
-    private var songStatements: (tableSchema: String, statements: [String]) {
+    private var songStatements: (tableSchema: String, statements: [Database.Statement]) {
       let rows = rowEncoder.songRows
       return (
         rows.tableSchema,
@@ -37,7 +37,7 @@ struct SQLSourceEncoder {
       )
     }
 
-    private var playStatements: (tableSchema: String, statements: [String]) {
+    private var playStatements: (tableSchema: String, statements: [Database.Statement]) {
       let rows = rowEncoder.playRows
       return (
         rows.tableSchema,
@@ -48,7 +48,7 @@ struct SQLSourceEncoder {
       )
     }
 
-    private var tableStatements: [(tableSchema: String, statements: [String])] {
+    private var tableStatements: [(tableSchema: String, statements: [Database.Statement])] {
       [artistStatements, albumStatements, songStatements, playStatements]
     }
 
@@ -56,7 +56,7 @@ struct SQLSourceEncoder {
       (["PRAGMA foreign_keys = ON;"]
         + tableStatements.flatMap {
           var statements = [$0.tableSchema, "BEGIN;"]
-          statements.append(contentsOf: $0.statements.sorted())
+          statements.append(contentsOf: $0.statements.map { "\($0)" }.sorted())
           statements.append("COMMIT;")
           return statements
         } + [rowEncoder.views].compactMap { $0 }).joined(separator: "\n")

@@ -34,7 +34,7 @@ struct RowPlay: Hashable, Sendable {
   let date: String
   let delta: Int
 
-  func insert(songid: String) -> String {
-    "INSERT INTO plays (date, delta, songid) VALUES (\(sql: date, options:.quoteEscaped), \(sql: delta), \(sql: songid));"
+  func insert(songid: Database.Statement) -> Database.Statement {
+    "INSERT INTO plays (date, delta, songid) VALUES (\(date), \(delta), \(songid));"
   }
 }

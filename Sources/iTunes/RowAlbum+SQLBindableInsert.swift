@@ -8,9 +8,7 @@
 import Foundation
 
 extension RowAlbum: SQLBindableInsert {
-  static var insertBinding: String {
-    Self.bound { RowAlbum().insert }
-  }
+  static var insertBinding: Database.Statement { RowAlbum().insert }
 
   func argumentsForInsert(using ids: [Int64]) throws -> [Database.Value] {
     guard ids.isEmpty else { throw SQLBindingError.noIDsRequired }

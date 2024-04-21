@@ -8,8 +8,8 @@
 import Foundation
 
 extension RowSong: SQLBindableInsert {
-  static var insertBinding: String {
-    Self.bound { RowSong().insert(artistID: "", albumID: "") }
+  static var insertBinding: Database.Statement {
+    RowSong().insert(artistID: .empty, albumID: .empty)
   }
 
   func argumentsForInsert(using ids: [Int64]) throws -> [Database.Value] {

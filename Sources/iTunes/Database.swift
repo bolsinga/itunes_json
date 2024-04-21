@@ -30,36 +30,7 @@ typealias DatabaseHandle = OpaquePointer
 typealias StatementHandle = OpaquePointer
 
 actor Database {
-  enum Value: CustomStringConvertible {
-    case string(String)
-    case integer(Int64)
-
-    var description: String {
-      switch self {
-      case .string(let string):
-        "string: \"\(string)\""
-      case .integer(let integer):
-        "integer: \(integer)"
-      }
-    }
-
-    func bind(statementHandle: StatementHandle, index: Int, errorStringBuilder: () -> String)
-      throws
-    {
-      let result =
-        switch self {
-        case .string(let string):
-          sqlite3_bind_text(statementHandle, Int32(index), string, -1, Self.SQLITE_TRANSIENT)
-        case .integer(let integer):
-          sqlite3_bind_int64(statementHandle, Int32(index), integer)
-        }
-      guard result == SQLITE_OK else {
-        throw DatabaseError.cannotBind("\(errorStringBuilder()) - \(self.description) - \(index)")
-      }
-    }
-
-    static private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
-  }
+  typealias Value = Statement.Parameter
 
   fileprivate struct Logging {
     let open: Logger
@@ -85,6 +56,73 @@ actor Database {
     }
   }
 
+  struct Statement {
+    static let empty: Statement = "\(Int(0))"
+
+    var sql: String
+    var parameters: [Parameter]
+
+    init(sql: String = "", parameters: [Parameter] = []) {
+      self.sql = sql
+      self.parameters = parameters
+    }
+
+    enum Parameter: CustomStringConvertible {
+      case integer(Int64)
+      case string(String)
+      case null
+
+      func bind(statementHandle: StatementHandle, index: Int, errorStringBuilder: () -> String)
+        throws
+      {
+        let result =
+          switch self {
+          case .string(let string):
+            sqlite3_bind_text(statementHandle, Int32(index), string, -1, Self.SQLITE_TRANSIENT)
+          case .integer(let integer):
+            sqlite3_bind_int64(statementHandle, Int32(index), integer)
+          case .null:
+            SQLITE_OK
+          }
+
+        guard result == SQLITE_OK else {
+          throw DatabaseError.cannotBind("\(errorStringBuilder()) - \(self.description) - \(index)")
+        }
+      }
+
+      var description: String {
+        switch self {
+        case .integer(let int64):
+          return "\(int64)"
+        case .string(let string):
+          return string
+        case .null:
+          return "NULL"
+        }
+      }
+
+      var sourceDescription: String {
+        switch self {
+        case .string(let string):
+          "'\(string.replacingOccurrences(of: "'", with: "''"))'"
+        default:
+          self.description
+        }
+      }
+
+      static private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+    }
+
+    func description(_ parameterDescriptor: (Parameter) -> String) -> String {
+      let chunks = sql.split(separator: "?")
+      let parameterizedChunks = zip(chunks, parameters.map { parameterDescriptor($0) }).flatMap {
+        [String($0), String($1)]
+      }
+      let remainder = chunks.dropFirst(parameters.count).map { String($0) }
+      return (parameterizedChunks + remainder).joined(separator: "")
+    }
+  }
+
   struct PreparedStatement {
     private let handle: StatementHandle
     private let logging: Logging
@@ -94,7 +132,9 @@ actor Database {
       self.logging = logging
     }
 
-    init(sql string: String, db: isolated Database) throws {
+    init(sql: Statement, db: isolated Database) throws {
+      let string = sql.sql
+
       var statementHandle: StatementHandle?
       let result = sqlite3_prepare_v3(
         db.handle, string, -1, UInt32(SQLITE_PREPARE_PERSISTENT), &statementHandle, nil)
@@ -200,5 +240,73 @@ actor Database {
 
   var errorString: String {
     handle.sqlError
+  }
+}
+
+extension Database.Statement: CustomStringConvertible {
+  var description: String {
+    self.description { $0.sourceDescription }
+  }
+}
+
+protocol SQLiteStatementConvertible {
+  var sqliteStatement: Database.Statement { get }
+}
+
+protocol SQLiteParameterConvertible: SQLiteStatementConvertible {
+  var parameter: Database.Statement.Parameter { get }
+}
+
+extension SQLiteParameterConvertible {
+  var sqliteStatement: Database.Statement {
+    Database.Statement(sql: "?", parameters: [parameter])
+  }
+}
+
+extension Int64: SQLiteParameterConvertible {
+  var parameter: Database.Statement.Parameter { .integer(self) }
+}
+
+extension Int: SQLiteParameterConvertible {
+  var parameter: Database.Statement.Parameter { .integer(Int64(self)) }
+}
+
+extension String: SQLiteParameterConvertible {
+  var parameter: Database.Statement.Parameter { .string(self) }
+}
+
+extension Database.Statement: SQLiteStatementConvertible {
+  var sqliteStatement: Database.Statement { self }
+}
+
+extension Database.Statement: ExpressibleByStringInterpolation {
+  init(stringLiteral value: String) {
+    self.init(sql: value)
+  }
+
+  init(stringInterpolation: StringInterpolation) {
+    self = stringInterpolation.statement
+  }
+
+  struct StringInterpolation: StringInterpolationProtocol {
+    var statement = Database.Statement()
+
+    init(literalCapacity: Int, interpolationCount: Int) {
+      statement.sql.reserveCapacity(literalCapacity + interpolationCount)
+      statement.parameters.reserveCapacity(interpolationCount)
+    }
+
+    mutating func appendLiteral(_ literal: String) {
+      statement.sql += literal
+    }
+
+    mutating func appendInterpolation<T: SQLiteStatementConvertible>(_ value: T?) {
+      statement.sql += value?.sqliteStatement.sql ?? "?"
+      statement.parameters += value?.sqliteStatement.parameters ?? [.null]
+    }
+
+    mutating func appendInterpolation(raw sql: Database.Statement) {
+      appendInterpolation(sql)
+    }
   }
 }
