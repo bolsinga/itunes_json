@@ -16,38 +16,14 @@ final class DBEncoder {
     self.rowEncoder = rowEncoder
   }
 
-  private func emit<T: SQLBindableInsert & Sendable>(table: String, rows: [T], ids: [[Int64]] = [])
-    async throws -> [T: Int64]
-  {
-    guard !rows.isEmpty else { return [:] }
-
-    return try await db.transaction { db in
-      try db.execute(table)
-
-      let statement = try db.prepare(T.insertBinding)
-
-      let ids = ids.isEmpty ? Array(repeating: [], count: rows.count) : ids
-
-      let errorStringBuilder = { db.errorString }
-
-      var lookup = [T: Int64](minimumCapacity: rows.count)
-      for (row, ids) in zip(rows, ids) {
-        try row.bindInsert(statement: statement, ids: ids, errorStringBuilder: errorStringBuilder)
-        try statement.execute(errorStringBuilder)
-        lookup[row] = db.lastID
-      }
-      return lookup
-    }
-  }
-
   private func emitArtists() async throws -> [RowArtist: Int64] {
     let rows = rowEncoder.artistRows
-    return try await emit(table: rows.table, rows: rows.rows)
+    return try await db.createTable(table: rows.table, rows: rows.rows)
   }
 
   private func emitAlbums() async throws -> [RowAlbum: Int64] {
     let rows = rowEncoder.albumRows
-    return try await emit(table: rows.table, rows: rows.rows)
+    return try await db.createTable(table: rows.table, rows: rows.rows)
   }
 
   private func emitSongs(
@@ -55,14 +31,14 @@ final class DBEncoder {
   ) async throws -> [RowSong: Int64] {
     let rows = rowEncoder.songRows
     let ids = rows.rows.map { [artistLookup[$0.artist] ?? -1, albumLookup[$0.album] ?? -1] }
-    return try await emit(table: rows.table, rows: rows.rows.map { $0.song }, ids: ids)
+    return try await db.createTable(table: rows.table, rows: rows.rows.map { $0.song }, ids: ids)
   }
 
   @discardableResult
   private func emitPlays(songLookup: [RowSong: Int64]) async throws -> [RowPlay: Int64] {
     let rows = rowEncoder.playRows
     let ids = rows.rows.map { [songLookup[$0.song] ?? -1] }
-    return try await emit(table: rows.table, rows: rows.rows.map { $0.play! }, ids: ids)
+    return try await db.createTable(table: rows.table, rows: rows.rows.map { $0.play! }, ids: ids)
   }
 
   func encode() async throws {
