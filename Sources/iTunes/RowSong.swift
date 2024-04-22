@@ -9,7 +9,7 @@ import Foundation
 import os
 
 protocol RowSongInterface {
-  var songPersistentID: UInt { get }
+  var songPersistentID: String { get }
   var songComposer: String { get }
   var songComments: String { get }
   var dateReleasedISO8601: String { get }
@@ -31,7 +31,7 @@ struct RowSong: Hashable, Sendable {
   }
 
   private init(
-    name: SortableName, itunesid: UInt, composer: String, trackNumber: Int, year: Int,
+    name: SortableName, itunesid: String, composer: String, trackNumber: Int, year: Int,
     duration: Int, dateAdded: String, dateReleased: String, comments: String
   ) {
     self.name = name
@@ -47,12 +47,12 @@ struct RowSong: Hashable, Sendable {
 
   init() {
     self.init(
-      name: SortableName(), itunesid: 0, composer: "", trackNumber: 0, year: 0, duration: 0,
+      name: SortableName(), itunesid: String(0), composer: "", trackNumber: 0, year: 0, duration: 0,
       dateAdded: "", dateReleased: "", comments: "")
   }
 
   let name: SortableName
-  let itunesid: UInt
+  let itunesid: String
   let composer: String
   let trackNumber: Int
   let year: Int
