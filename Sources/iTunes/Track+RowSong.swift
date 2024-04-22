@@ -9,8 +9,8 @@ import Foundation
 import os
 
 extension Track: RowSongInterface {
-  var songPersistentID: UInt {
-    persistentID
+  var songPersistentID: String {
+    String(persistentID)
   }
 
   var songComposer: String {

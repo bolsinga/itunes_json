@@ -32,10 +32,6 @@ extension DefaultStringInterpolation {
     appendLiteral("'")
   }
 
-  mutating func appendInterpolation(sql number: UInt, options: SQLStringOptions = []) {
-    appendSQLInterpolation(String(number), options: options)
-  }
-
   mutating func appendInterpolation(sql number: Int, options: SQLStringOptions = []) {
     appendSQLInterpolation(String(number), options: options)
   }
