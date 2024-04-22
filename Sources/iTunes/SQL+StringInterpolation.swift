@@ -10,10 +10,7 @@ import Foundation
 struct SQLStringOptions: OptionSet {
   let rawValue: Int
 
-  static let quoted = SQLStringOptions(rawValue: 1 << 0)
-  static let quoteEscaped = SQLStringOptions(rawValue: 1 << 1)
-
-  static let safeQuoted: SQLStringOptions = [.quoted, .quoteEscaped]
+  static let quoteEscaped = SQLStringOptions(rawValue: 1 << 0)
 }
 
 extension DefaultStringInterpolation {
@@ -25,17 +22,14 @@ extension DefaultStringInterpolation {
       return
     }
 
-    let literal =
-      options.contains(.quoteEscaped) ? string.replacingOccurrences(of: "'", with: "''") : string
-
-    guard !options.contains(.quoted) else {
-      appendLiteral("'")
-      appendLiteral(literal)
-      appendLiteral("'")
+    guard options.contains(.quoteEscaped) else {
+      appendLiteral(string)
       return
     }
 
-    appendLiteral(literal)
+    appendLiteral("'")
+    appendLiteral(string.replacingOccurrences(of: "'", with: "''"))
+    appendLiteral("'")
   }
 
   mutating func appendInterpolation(sql number: UInt, options: SQLStringOptions = []) {
