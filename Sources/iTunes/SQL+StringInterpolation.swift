@@ -40,10 +40,6 @@ extension DefaultStringInterpolation {
     appendSQLInterpolation(String(number), options: options)
   }
 
-  mutating func appendInterpolation(sql number: UInt64, options: SQLStringOptions = []) {
-    appendSQLInterpolation(String(number), options: options)
-  }
-
   mutating func appendInterpolation(sql string: String, options: SQLStringOptions = []) {
     appendSQLInterpolation(string, options: options)
   }
