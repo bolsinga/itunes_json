@@ -62,10 +62,10 @@ struct RowSong: Hashable, Sendable {
   let comments: String
 
   func selectID(artistID: String, albumID: String) -> String {
-    "(SELECT id FROM songs WHERE name = \(sql: name.name, options:.safeQuoted) AND itunesid = \(sql: itunesid, options: .quoted) AND artistid = \(sql: artistID) AND albumid = \(sql: albumID) AND tracknumber = \(sql: trackNumber) AND year = \(sql: year) AND duration = \(sql: duration) AND dateadded = \(sql: dateAdded, options: .quoted))"
+    "(SELECT id FROM songs WHERE name = \(sql: name.name, options:.quoteEscaped) AND itunesid = \(sql: itunesid, options: .quoteEscaped) AND artistid = \(sql: artistID) AND albumid = \(sql: albumID) AND tracknumber = \(sql: trackNumber) AND year = \(sql: year) AND duration = \(sql: duration) AND dateadded = \(sql: dateAdded, options: .quoteEscaped))"
   }
 
   func insert(artistID: String, albumID: String) -> String {
-    "INSERT INTO songs (name, sortname, itunesid, composer, tracknumber, year, duration, dateadded, datereleased, comments, artistid, albumid) VALUES (\(sql: name.name, options:.safeQuoted), \(sql: name.sorted, options:.safeQuoted), \(sql: itunesid, options: .quoted), \(sql: composer, options:.safeQuoted), \(sql: trackNumber), \(sql: year), \(sql: duration), \(sql: dateAdded, options:.quoted), \(sql: dateReleased, options:.quoted), \(sql: comments, options:.safeQuoted), \(sql: artistID), \(sql: albumID));"
+    "INSERT INTO songs (name, sortname, itunesid, composer, tracknumber, year, duration, dateadded, datereleased, comments, artistid, albumid) VALUES (\(sql: name.name, options:.quoteEscaped), \(sql: name.sorted, options:.quoteEscaped), \(sql: itunesid, options: .quoteEscaped), \(sql: composer, options:.quoteEscaped), \(sql: trackNumber), \(sql: year), \(sql: duration), \(sql: dateAdded, options:.quoteEscaped), \(sql: dateReleased, options:.quoteEscaped), \(sql: comments, options:.quoteEscaped), \(sql: artistID), \(sql: albumID));"
   }
 }

@@ -46,10 +46,10 @@ struct RowAlbum: Hashable, Sendable {
   let compilation: Int
 
   var selectID: String {
-    "(SELECT id FROM albums WHERE name = \(sql: name.name, options:.safeQuoted) AND trackcount = \(sql: trackCount) AND disccount = \(sql: discCount) AND discnumber = \(sql: discNumber) AND compilation = \(sql: compilation))"
+    "(SELECT id FROM albums WHERE name = \(sql: name.name, options:.quoteEscaped) AND trackcount = \(sql: trackCount) AND disccount = \(sql: discCount) AND discnumber = \(sql: discNumber) AND compilation = \(sql: compilation))"
   }
 
   var insert: String {
-    "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES (\(sql: name.name, options:.safeQuoted), \(sql: name.sorted, options:.safeQuoted), \(sql: trackCount), \(sql: discCount), \(sql: discNumber), \(sql: compilation));"
+    "INSERT INTO albums (name, sortname, trackcount, disccount, discnumber, compilation) VALUES (\(sql: name.name, options:.quoteEscaped), \(sql: name.sorted, options:.quoteEscaped), \(sql: trackCount), \(sql: discCount), \(sql: discNumber), \(sql: compilation));"
   }
 }
