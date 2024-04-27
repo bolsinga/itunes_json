@@ -20,28 +20,30 @@ struct SQLSourceEncoder {
     }
 
     private var artistStatements: (tableSchema: String, statements: [Database.Statement]) {
-      let rows = rowEncoder.artistRows
-      return (rows.tableSchema, rows.rows.map { $0.insert })
+      let builder = rowEncoder.artistTableBuilder
+      return (builder.schema, builder.rows.map { $0.insert })
     }
 
     private var albumStatements: (tableSchema: String, statements: [Database.Statement]) {
-      let rows = rowEncoder.albumRows
-      return (rows.tableSchema, rows.rows.map { $0.insert })
+      let builder = rowEncoder.albumTableBuilder
+      return (builder.schema, builder.rows.map { $0.insert })
     }
 
     private var songStatements: (tableSchema: String, statements: [Database.Statement]) {
-      let rows = rowEncoder.songRows
+      let builder = rowEncoder.songTableBuilder()
       return (
-        rows.tableSchema,
-        rows.rows.map { $0.song.insert(artistID: $0.artist.selectID, albumID: $0.album.selectID) }
+        builder.schema,
+        builder.tracks.map {
+          $0.song.insert(artistID: $0.artist.selectID, albumID: $0.album.selectID)
+        }
       )
     }
 
     private var playStatements: (tableSchema: String, statements: [Database.Statement]) {
-      let rows = rowEncoder.playRows
+      let builder = rowEncoder.playTableBuilder()
       return (
-        rows.tableSchema,
-        rows.rows.map {
+        builder.schema,
+        builder.tracks.map {
           $0.play!.insert(
             songid: $0.song.selectID(artistID: $0.artist.selectID, albumID: $0.album.selectID))
         }
