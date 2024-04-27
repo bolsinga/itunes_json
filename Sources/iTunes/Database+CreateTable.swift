@@ -8,13 +8,15 @@
 import Foundation
 
 extension Database {
-  func createTable<T: SQLBindableInsert & Sendable>(table: String, rows: [T], ids: [[Int64]] = [])
+  func createTable<T: SQLBindableInsert & Sendable>(
+    tableSchema: String, rows: [T], ids: [[Int64]] = []
+  )
     async throws -> [T: Int64]
   {
     guard !rows.isEmpty else { return [:] }
 
     return try self.transaction { db in
-      try db.execute(table)
+      try db.execute(tableSchema)
 
       let statement = try db.prepare(T.insertBinding)
 
