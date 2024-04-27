@@ -42,7 +42,7 @@ struct TrackRowEncoder {
   let rows: [TrackRow]
   let validation: TrackValidation
 
-  var artistRows: (table: String, rows: [RowArtist]) {
+  var artistRows: (tableSchema: String, rows: [RowArtist]) {
     let artistRows = Array(Set(rows.map { $0.artist }))
 
     let mismatched = artistRows.mismatchedSortableNames
@@ -55,15 +55,15 @@ struct TrackRowEncoder {
     return (Track.ArtistTable, artistRows.sorted(by: { $0.name < $1.name }))
   }
 
-  var albumRows: (table: String, rows: [RowAlbum]) {
+  var albumRows: (tableSchema: String, rows: [RowAlbum]) {
     (Track.AlbumTable, Array(Set(rows.map { $0.album })).sorted(by: { $0.name < $1.name }))
   }
 
-  var songRows: (table: String, rows: [TrackRow]) {
+  var songRows: (tableSchema: String, rows: [TrackRow]) {
     (Track.SongTable, rows.sorted(by: { $0.song.name < $1.song.name }))
   }
 
-  var playRows: (table: String, rows: [TrackRow]) {
+  var playRows: (tableSchema: String, rows: [TrackRow]) {
     let playRows = rows.filter { $0.play != nil }
 
     let duplicates = playRows.duplicatePlayDates

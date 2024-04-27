@@ -19,28 +19,28 @@ struct SQLSourceEncoder {
       self.rowEncoder = rowEncoder
     }
 
-    private var artistStatements: (table: String, statements: [String]) {
+    private var artistStatements: (tableSchema: String, statements: [String]) {
       let rows = rowEncoder.artistRows
-      return (rows.table, rows.rows.map { $0.insert })
+      return (rows.tableSchema, rows.rows.map { $0.insert })
     }
 
-    private var albumStatements: (table: String, statements: [String]) {
+    private var albumStatements: (tableSchema: String, statements: [String]) {
       let rows = rowEncoder.albumRows
-      return (rows.table, rows.rows.map { $0.insert })
+      return (rows.tableSchema, rows.rows.map { $0.insert })
     }
 
-    private var songStatements: (table: String, statements: [String]) {
+    private var songStatements: (tableSchema: String, statements: [String]) {
       let rows = rowEncoder.songRows
       return (
-        rows.table,
+        rows.tableSchema,
         rows.rows.map { $0.song.insert(artistID: $0.artist.selectID, albumID: $0.album.selectID) }
       )
     }
 
-    private var playStatements: (table: String, statements: [String]) {
+    private var playStatements: (tableSchema: String, statements: [String]) {
       let rows = rowEncoder.playRows
       return (
-        rows.table,
+        rows.tableSchema,
         rows.rows.map {
           $0.play!.insert(
             songid: $0.song.selectID(artistID: $0.artist.selectID, albumID: $0.album.selectID))
@@ -48,14 +48,14 @@ struct SQLSourceEncoder {
       )
     }
 
-    private var tableStatements: [(table: String, statements: [String])] {
+    private var tableStatements: [(tableSchema: String, statements: [String])] {
       [artistStatements, albumStatements, songStatements, playStatements]
     }
 
     fileprivate var sqlStatements: String {
       (["PRAGMA foreign_keys = ON;"]
         + tableStatements.flatMap {
-          var statements = [$0.table, "BEGIN;"]
+          var statements = [$0.tableSchema, "BEGIN;"]
           statements.append(contentsOf: $0.statements.sorted())
           statements.append("COMMIT;")
           return statements

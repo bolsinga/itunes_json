@@ -18,12 +18,12 @@ final class DBEncoder {
 
   private func emitArtists() async throws -> [RowArtist: Int64] {
     let rows = rowEncoder.artistRows
-    return try await db.createTable(table: rows.table, rows: rows.rows)
+    return try await db.createTable(tableSchema: rows.tableSchema, rows: rows.rows)
   }
 
   private func emitAlbums() async throws -> [RowAlbum: Int64] {
     let rows = rowEncoder.albumRows
-    return try await db.createTable(table: rows.table, rows: rows.rows)
+    return try await db.createTable(tableSchema: rows.tableSchema, rows: rows.rows)
   }
 
   private func emitSongs(
@@ -31,14 +31,16 @@ final class DBEncoder {
   ) async throws -> [RowSong: Int64] {
     let rows = rowEncoder.songRows
     let ids = rows.rows.map { [artistLookup[$0.artist] ?? -1, albumLookup[$0.album] ?? -1] }
-    return try await db.createTable(table: rows.table, rows: rows.rows.map { $0.song }, ids: ids)
+    return try await db.createTable(
+      tableSchema: rows.tableSchema, rows: rows.rows.map { $0.song }, ids: ids)
   }
 
   @discardableResult
   private func emitPlays(songLookup: [RowSong: Int64]) async throws -> [RowPlay: Int64] {
     let rows = rowEncoder.playRows
     let ids = rows.rows.map { [songLookup[$0.song] ?? -1] }
-    return try await db.createTable(table: rows.table, rows: rows.rows.map { $0.play! }, ids: ids)
+    return try await db.createTable(
+      tableSchema: rows.tableSchema, rows: rows.rows.map { $0.play! }, ids: ids)
   }
 
   func encode() async throws {
