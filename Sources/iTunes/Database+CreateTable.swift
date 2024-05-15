@@ -26,7 +26,12 @@ extension Database {
 
       var lookup = [T: Int64](minimumCapacity: rows.count)
       for (row, ids) in zip(rows, ids) {
-        try row.bindInsert(statement: statement, ids: ids, errorStringBuilder: errorStringBuilder)
+        let arguments = try row.argumentsForInsert(using: ids)
+
+        try statement.bind(
+          count: Int32(arguments.count), binder: { arguments[Int($0) - 1] },
+          errorStringBuilder: errorStringBuilder)
+
         try statement.execute(errorStringBuilder)
         lookup[row] = db.lastID
       }

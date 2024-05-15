@@ -26,6 +26,5 @@ enum SQLBindingError: Error {
 protocol SQLBindableInsert: SQLBindableStatement {
   static var insertBinding: String { get }
 
-  func bindInsert(statement: Database.Statement, ids: [Int64], errorStringBuilder: () -> String)
-    throws
+  func argumentsForInsert(using ids: [Int64]) throws -> [Database.Value]
 }
