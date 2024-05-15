@@ -43,15 +43,15 @@ actor Database {
       }
     }
 
-    func bind(statementHandle: StatementHandle, index: Int32, errorStringBuilder: () -> String)
+    func bind(statementHandle: StatementHandle, index: Int, errorStringBuilder: () -> String)
       throws
     {
       let result =
         switch self {
         case .string(let string):
-          sqlite3_bind_text(statementHandle, index, string, -1, Self.SQLITE_TRANSIENT)
+          sqlite3_bind_text(statementHandle, Int32(index), string, -1, Self.SQLITE_TRANSIENT)
         case .integer(let integer):
-          sqlite3_bind_int64(statementHandle, index, integer)
+          sqlite3_bind_int64(statementHandle, Int32(index), integer)
         }
       guard result == SQLITE_OK else {
         throw DatabaseError.cannotBind("\(errorStringBuilder()) - \(self.description) - \(index)")
@@ -99,10 +99,10 @@ actor Database {
       logging.finalize.log("\(result, privacy: .public)")
     }
 
-    func bind(count: Int32, binder: (Int32) -> Value, errorStringBuilder: () -> String) throws {
+    func bind(arguments: [Value], errorStringBuilder: () -> String) throws {
       do {
-        for index in 1...count {
-          let value = binder(index)
+        for index in 1...arguments.count {
+          let value = arguments[index - 1]
           try value.bind(
             statementHandle: handle, index: index, errorStringBuilder: errorStringBuilder)
         }
