@@ -44,6 +44,14 @@ final class GitBackupNameTests: XCTestCase {
       "B.01-empty",
       GitBackup.noChanges.backupName(baseName: BasicName, existingNames: [PreviousName, BasicName]))
     XCTAssertEqual(
+      "B.01-empty",
+      GitBackup.noChanges.backupName(
+        baseName: BasicName, existingNames: [PreviousName, BasicName, "\(BasicName)-empty"]))
+    XCTAssertEqual(
+      "B.02-empty",
+      GitBackup.noChanges.backupName(
+        baseName: BasicName, existingNames: [PreviousName, BasicName, "\(BasicName).01-empty"]))
+    XCTAssertEqual(
       "B.02-empty",
       GitBackup.noChanges.backupName(
         baseName: BasicName, existingNames: [PreviousName, BasicName, "\(BasicName).01"]))
