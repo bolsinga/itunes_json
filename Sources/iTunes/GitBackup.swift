@@ -14,7 +14,11 @@ enum GitBackup {
 
 extension GitBackup {
   fileprivate func calculateBackupName(baseName: String, existingNames: [String]) -> String {
-    let existingBaseNames = existingNames.filter { $0.starts(with: baseName) }.sorted().reversed()
+    let existingBaseNames = Set(
+      existingNames.filter { $0.starts(with: baseName) }.map {
+        $0.replacingOccurrences(of: String.emptySuffix, with: "")
+      }
+    ).sorted().reversed()
     guard !existingBaseNames.isEmpty else { return baseName }
     return existingBaseNames.first!.nextTag
   }

@@ -8,8 +8,10 @@
 import Foundation
 
 extension String {
+  static let emptySuffix = "-empty"
+
   var emptyTag: String {
-    return self + "-empty"
+    return self + Self.emptySuffix
   }
 
   fileprivate func appendValue(_ value: Int) -> String {
