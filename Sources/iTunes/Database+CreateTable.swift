@@ -18,7 +18,8 @@ extension Database {
     return try self.transaction { db in
       try db.execute(tableSchema)
 
-      let statement = try db.prepare(T.insertBinding)
+      let statement = try Statement(sql: T.insertBinding, db: db)
+      defer { statement.close() }
 
       let ids = ids.isEmpty ? Array(repeating: [], count: rows.count) : ids
 
