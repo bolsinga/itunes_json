@@ -94,6 +94,18 @@ actor Database {
       self.logging = logging
     }
 
+    init(sql string: String, db: isolated Database) throws {
+      var statementHandle: StatementHandle?
+      let result = sqlite3_prepare_v3(
+        db.handle, string, -1, UInt32(SQLITE_PREPARE_PERSISTENT), &statementHandle, nil)
+
+      db.logging.prepare.log("\(string, privacy: .public) (result: \(result, privacy: .public))")
+      guard let statementHandle else { throw DatabaseError.cannotPrepare(string) }
+      guard result == SQLITE_OK else { throw DatabaseError.cannotPrepare(db.handle.sqlError) }
+
+      self.init(handle: statementHandle, logging: db.logging)
+    }
+
     func close() {
       let result = sqlite3_finalize(handle)
       logging.finalize.log("\(result, privacy: .public)")
@@ -134,7 +146,6 @@ actor Database {
   }
 
   private let handle: DatabaseHandle
-  private var statements = [String: Statement]()
   private let logging: Logging
 
   init(file: URL, loggingToken: String?) throws {
@@ -160,7 +171,6 @@ actor Database {
   }
 
   func close() {
-    statements.values.forEach { $0.close() }
     let result = sqlite3_close(handle)
     logging.close.log("\(result, privacy: .public)")
   }
@@ -182,22 +192,6 @@ actor Database {
       try execute("ROLLBACK TRANSACTION")
       throw error
     }
-  }
-
-  func prepare(_ string: String) throws -> Statement {
-    if let statement = statements[string] { return statement }
-
-    var statementHandle: StatementHandle?
-    let result = sqlite3_prepare_v3(
-      handle, string, -1, UInt32(SQLITE_PREPARE_PERSISTENT), &statementHandle, nil)
-
-    logging.prepare.log("\(string, privacy: .public) (result: \(result, privacy: .public))")
-    guard let statementHandle else { throw DatabaseError.cannotPrepare(string) }
-    guard result == SQLITE_OK else { throw DatabaseError.cannotPrepare(handle.sqlError) }
-
-    let statement = Statement(handle: statementHandle, logging: logging)
-    statements[string] = statement
-    return statement
   }
 
   var lastID: Int64 {
