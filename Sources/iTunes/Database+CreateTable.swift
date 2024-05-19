@@ -7,6 +7,13 @@
 
 import Foundation
 
+extension Database.Result {
+  func insert(_ arguments: [Database.Value], into db: isolated Database) throws -> Int64 {
+    try self.execute(with: arguments) { db.errorString }
+    return db.lastID
+  }
+}
+
 extension Database {
   func createTable<T: SQLBindableInsert & Sendable>(
     tableSchema: String, rows: [T], ids: [[Int64]] = []
@@ -21,16 +28,13 @@ extension Database {
       let statement = try Statement(sql: T.insertBinding, db: db)
       defer { statement.close() }
 
-      let ids = ids.isEmpty ? Array(repeating: [], count: rows.count) : ids
+      let result = Result(statement: statement)
 
-      let errorStringBuilder = { db.errorString }
+      let ids = ids.isEmpty ? Array(repeating: [], count: rows.count) : ids
 
       var lookup = [T: Int64](minimumCapacity: rows.count)
       for (row, ids) in zip(rows, ids) {
-        let arguments = try row.argumentsForInsert(using: ids)
-        try statement.bind(arguments: arguments, errorStringBuilder: errorStringBuilder)
-        try statement.execute(errorStringBuilder)
-        lookup[row] = db.lastID
+        lookup[row] = try result.insert(try row.argumentsForInsert(using: ids), into: db)
       }
       return lookup
     }
