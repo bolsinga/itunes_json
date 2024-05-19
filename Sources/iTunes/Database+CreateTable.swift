@@ -7,9 +7,11 @@
 
 import Foundation
 
-extension Database.Result {
+extension Database.Statement {
   func insert(_ arguments: [Database.Value], into db: isolated Database) throws -> Int64 {
-    try self.execute(with: arguments) { db.errorString }
+    let errorStringBuilder = { db.errorString }
+    try bind(arguments: arguments, errorStringBuilder: errorStringBuilder)
+    try execute(errorStringBuilder)
     return db.lastID
   }
 }
@@ -28,13 +30,11 @@ extension Database {
       let statement = try Statement(sql: T.insertBinding, db: db)
       defer { statement.close() }
 
-      let result = Result(statement: statement)
-
       let ids = ids.isEmpty ? Array(repeating: [], count: rows.count) : ids
 
       var lookup = [T: Int64](minimumCapacity: rows.count)
       for (row, ids) in zip(rows, ids) {
-        lookup[row] = try result.insert(try row.argumentsForInsert(using: ids), into: db)
+        lookup[row] = try statement.insert(try row.argumentsForInsert(using: ids), into: db)
       }
       return lookup
     }

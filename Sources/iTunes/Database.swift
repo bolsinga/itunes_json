@@ -145,19 +145,6 @@ actor Database {
     }
   }
 
-  struct Result {
-    let statement: Statement
-
-    init(statement: Statement) {
-      self.statement = statement
-    }
-
-    func execute(with arguments: [Value], errorStringBuilder: () -> String) throws {
-      try statement.bind(arguments: arguments, errorStringBuilder: errorStringBuilder)
-      try statement.execute(errorStringBuilder)
-    }
-  }
-
   private let handle: DatabaseHandle
   private let logging: Logging
 
