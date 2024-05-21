@@ -31,11 +31,11 @@ struct RowArtist: Hashable, Sendable {
     name.name
   }
 
-  var selectID: String {
-    "(SELECT id FROM artists WHERE name = \(sql: name.name, options:.quoteEscaped))"
+  var selectID: Database.Statement {
+    "(SELECT id FROM artists WHERE name = \(name.name))"
   }
 
-  var insert: String {
-    "INSERT INTO artists (name, sortname) VALUES (\(sql: name.name, options:.quoteEscaped), \(sql: name.sorted, options:.quoteEscaped));"
+  var insert: Database.Statement {
+    "INSERT INTO artists (name, sortname) VALUES (\(name.name), \(name.sorted));"
   }
 }
