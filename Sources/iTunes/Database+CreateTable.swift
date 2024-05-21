@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Database.Statement {
+extension Database.PreparedStatement {
   func insert(_ arguments: [Database.Value], into db: isolated Database) throws -> Int64 {
     let errorStringBuilder = { db.errorString }
     try bind(arguments: arguments, errorStringBuilder: errorStringBuilder)
@@ -27,7 +27,7 @@ extension Database {
     return try self.transaction { db in
       try db.execute(tableSchema)
 
-      let statement = try Statement(sql: T.insertBinding, db: db)
+      let statement = try PreparedStatement(sql: T.insertBinding, db: db)
       defer { statement.close() }
 
       let ids = ids.isEmpty ? Array(repeating: [], count: rows.count) : ids

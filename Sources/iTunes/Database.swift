@@ -85,7 +85,7 @@ actor Database {
     }
   }
 
-  struct Statement {
+  struct PreparedStatement {
     private let handle: StatementHandle
     private let logging: Logging
 
