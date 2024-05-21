@@ -32,11 +32,9 @@ extension Database {
 
       let ids = ids.isEmpty ? Array(repeating: [], count: rows.count) : ids
 
-      var lookup = [T: Int64](minimumCapacity: rows.count)
-      for (row, ids) in zip(rows, ids) {
-        lookup[row] = try statement.insert(try row.argumentsForInsert(using: ids), into: db)
+      return try zip(rows, ids).reduce(into: [T: Int64](minimumCapacity: rows.count)) {
+        $0[$1.0] = try statement.insert(try $1.0.argumentsForInsert(using: $1.1), into: db)
       }
-      return lookup
     }
   }
 }
