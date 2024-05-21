@@ -18,29 +18,50 @@ final class DBEncoder {
 
   private func emitArtists() async throws -> [RowArtist: Int64] {
     let rows = rowEncoder.artistRows
-    return try await db.createTable(tableSchema: rows.tableSchema, rows: rows.rows)
+    return try await db.createTable(tableSchema: rows.tableSchema, rows: rows.rows) {
+      $0.insert.parameters
+    }
   }
 
   private func emitAlbums() async throws -> [RowAlbum: Int64] {
     let rows = rowEncoder.albumRows
-    return try await db.createTable(tableSchema: rows.tableSchema, rows: rows.rows)
+    return try await db.createTable(tableSchema: rows.tableSchema, rows: rows.rows) {
+      $0.insert.parameters
+    }
   }
 
   private func emitSongs(
     artistLookup: [RowArtist: Int64], albumLookup: [RowAlbum: Int64]
   ) async throws -> [RowSong: Int64] {
     let rows = rowEncoder.songRows
-    let ids = rows.rows.map { [artistLookup[$0.artist] ?? -1, albumLookup[$0.album] ?? -1] }
+    let artistIDs = rows.rows.reduce(into: [RowSong: Int64]()) {
+      $0[$1.song] = artistLookup[$1.artist] ?? -1
+    }
+
+    let albumIDs = rows.rows.reduce(into: [RowSong: Int64]()) {
+      $0[$1.song] = albumLookup[$1.album] ?? -1
+    }
+
     return try await db.createTable(
-      tableSchema: rows.tableSchema, rows: rows.rows.map { $0.song }, ids: ids)
+      tableSchema: rows.tableSchema, rows: rows.rows.map { $0.song }
+    ) {
+      $0.insert(artistID: "\(artistIDs[$0])", albumID: "\(albumIDs[$0])").parameters
+    }
   }
 
   @discardableResult
   private func emitPlays(songLookup: [RowSong: Int64]) async throws -> [RowPlay: Int64] {
     let rows = rowEncoder.playRows
-    let ids = rows.rows.map { [songLookup[$0.song] ?? -1] }
+
+    let songIDs = rows.rows.reduce(into: [RowPlay: Int64]()) {
+      $0[$1.play] = songLookup[$1.song] ?? -1
+    }
+
     return try await db.createTable(
-      tableSchema: rows.tableSchema, rows: rows.rows.map { $0.play! }, ids: ids)
+      tableSchema: rows.tableSchema, rows: rows.rows.map { $0.play! }
+    ) {
+      $0.insert(songid: "\(songIDs[$0])").parameters
+    }
   }
 
   func encode() async throws {
