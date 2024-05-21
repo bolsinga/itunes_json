@@ -19,9 +19,7 @@ extension Database.PreparedStatement {
 extension Database {
   func createTable<T: SQLBindableInsert & Sendable>(
     tableSchema: String, rows: [T], ids: [[Int64]] = []
-  )
-    async throws -> [T: Int64]
-  {
+  ) throws -> [T: Int64] {
     guard !rows.isEmpty else { return [:] }
 
     return try self.transaction { db in
