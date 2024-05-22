@@ -18,7 +18,7 @@ extension Database.PreparedStatement {
 
 extension Database {
   func createTable<T: SQLBindableInsert & Sendable>(
-    tableSchema: String, rows: [T], ids: [[Int64]] = []
+    tableSchema: String, rows: [T], arguments: @Sendable (T) -> [Database.Value]
   ) throws -> [T: Int64] {
     guard !rows.isEmpty else { return [:] }
 
@@ -28,10 +28,8 @@ extension Database {
       let statement = try PreparedStatement(sql: T.insertBinding, db: db)
       defer { statement.close() }
 
-      let ids = ids.isEmpty ? Array(repeating: [], count: rows.count) : ids
-
-      return try zip(rows, ids).reduce(into: [T: Int64](minimumCapacity: rows.count)) {
-        $0[$1.0] = try statement.insert(try $1.0.argumentsForInsert(using: $1.1), into: db)
+      return try rows.reduce(into: [T: Int64](minimumCapacity: rows.count)) {
+        $0[$1] = try statement.insert(arguments($1), into: db)
       }
     }
   }
