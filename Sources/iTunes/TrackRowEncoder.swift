@@ -45,11 +45,8 @@ struct TrackRowEncoder {
   var artistRows: (tableSchema: String, rows: [RowArtist]) {
     let artistRows = Array(Set(rows.map { $0.artist }))
 
-    let mismatched = artistRows.mismatchedSortableNames
-    if !mismatched.isEmpty {
-      mismatched.forEach {
-        validation.duplicateArtist.error("\($0, privacy: .public)")
-      }
+    artistRows.mismatchedSortableNames.forEach {
+      validation.duplicateArtist.error("\($0, privacy: .public)")
     }
 
     return (Track.ArtistTable, artistRows.sorted(by: { $0.name < $1.name }))
@@ -66,11 +63,8 @@ struct TrackRowEncoder {
   var playRows: (tableSchema: String, rows: [TrackRow]) {
     let playRows = rows.filter { $0.play != nil }
 
-    let duplicates = playRows.duplicatePlayDates
-    if !duplicates.isEmpty {
-      duplicates.forEach {
-        validation.duplicatePlayDate.error("\($0.debugLogInformation, privacy: .public)")
-      }
+    playRows.duplicatePlayDates.forEach {
+      validation.duplicatePlayDate.error("\($0.debugLogInformation, privacy: .public)")
     }
 
     return (Track.PlaysTable, playRows.sorted(by: { $0.play!.date < $1.play!.date }))
