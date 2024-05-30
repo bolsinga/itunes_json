@@ -42,32 +42,38 @@ struct TrackRowEncoder {
   let rows: [TrackRow]
   let validation: TrackValidation
 
-  var artistRows: (tableSchema: String, rows: [RowArtist]) {
+  var artistTableBuilder: ArtistTableBuilder {
     let artistRows = Array(Set(rows.map { $0.artist }))
 
     artistRows.mismatchedSortableNames.forEach {
       validation.duplicateArtist.error("\($0, privacy: .public)")
     }
 
-    return (Track.ArtistTable, artistRows.sorted(by: { $0.name < $1.name }))
+    return ArtistTableBuilder(rows: artistRows)
   }
 
-  var albumRows: (tableSchema: String, rows: [RowAlbum]) {
-    (Track.AlbumTable, Array(Set(rows.map { $0.album })).sorted(by: { $0.name < $1.name }))
+  var albumTableBuilder: AlbumTableBuilder {
+    AlbumTableBuilder(rows: Array(Set(rows.map { $0.album })))
   }
 
-  var songRows: (tableSchema: String, rows: [TrackRow]) {
-    (Track.SongTable, rows.sorted(by: { $0.song.name < $1.song.name }))
+  func songTableBuilder(
+    artistLookup: [RowArtist: Int64]? = nil, albumLookup: [RowAlbum: Int64]? = nil
+  )
+    -> SongTableBuilder
+  {
+    SongTableBuilder(tracks: rows, artistLookup: artistLookup, albumLookup: albumLookup)
   }
 
-  var playRows: (tableSchema: String, rows: [TrackRow]) {
+  func playTableBuilder(_ songLookup: [RowSong: Int64]? = nil)
+    -> PlayTableBuilder
+  {
     let playRows = rows.filter { $0.play != nil }
 
     playRows.duplicatePlayDates.forEach {
       validation.duplicatePlayDate.error("\($0.debugLogInformation, privacy: .public)")
     }
 
-    return (Track.PlaysTable, playRows.sorted(by: { $0.play!.date < $1.play!.date }))
+    return PlayTableBuilder(tracks: playRows, songLookup: songLookup)
   }
 
   var views = """
