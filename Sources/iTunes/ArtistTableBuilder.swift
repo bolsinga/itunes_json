@@ -28,4 +28,6 @@ struct ArtistTableBuilder: TableBuilder {
   var argumentBuilder: (@Sendable (Row) -> [Database.Value])? {
     { $0.insert.parameters }
   }
+
+  var statements: [Database.Statement] { rows.map { $0.insert } }
 }

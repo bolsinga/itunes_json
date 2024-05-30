@@ -14,6 +14,7 @@ protocol TableBuilder {
   var rows: [Row] { get }
 
   var argumentBuilder: (@Sendable (Row) -> [Database.Value])? { get }
+  var statements: [Database.Statement] { get }
 }
 
 extension TableBuilder {

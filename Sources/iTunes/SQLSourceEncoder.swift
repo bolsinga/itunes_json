@@ -19,45 +19,17 @@ struct SQLSourceEncoder {
       self.rowEncoder = rowEncoder
     }
 
-    private var artistStatements: (tableSchema: String, statements: [Database.Statement]) {
-      let builder = rowEncoder.artistTableBuilder
-      return (builder.schema, builder.rows.map { $0.insert })
-    }
-
-    private var albumStatements: (tableSchema: String, statements: [Database.Statement]) {
-      let builder = rowEncoder.albumTableBuilder
-      return (builder.schema, builder.rows.map { $0.insert })
-    }
-
-    private var songStatements: (tableSchema: String, statements: [Database.Statement]) {
-      let builder = rowEncoder.songTableBuilder()
-      return (
-        builder.schema,
-        builder.tracks.map {
-          $0.song.insert(artistID: $0.artist.selectID, albumID: $0.album.selectID)
-        }
-      )
-    }
-
-    private var playStatements: (tableSchema: String, statements: [Database.Statement]) {
-      let builder = rowEncoder.playTableBuilder()
-      return (
-        builder.schema,
-        builder.tracks.map {
-          $0.play!.insert(
-            songid: $0.song.selectID(artistID: $0.artist.selectID, albumID: $0.album.selectID))
-        }
-      )
-    }
-
-    private var tableStatements: [(tableSchema: String, statements: [Database.Statement])] {
-      [artistStatements, albumStatements, songStatements, playStatements]
+    private var tableBuilders: [any TableBuilder] {
+      [
+        rowEncoder.artistTableBuilder, rowEncoder.albumTableBuilder, rowEncoder.songTableBuilder(),
+        rowEncoder.playTableBuilder(),
+      ]
     }
 
     fileprivate var sqlStatements: String {
       (["PRAGMA foreign_keys = ON;"]
-        + tableStatements.flatMap {
-          var statements = [$0.tableSchema]
+        + tableBuilders.flatMap {
+          var statements = [$0.schema]
           statements.append(contentsOf: $0.statements.map { "\($0)" }.sorted())
           return statements
         } + [rowEncoder.views].compactMap { $0 }).joined(separator: "\n")
