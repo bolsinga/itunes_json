@@ -36,4 +36,11 @@ struct PlayTableBuilder: TableBuilder {
       self.argumentBuilder = { $0.insert(songid: "\(songIDs[$0])").parameters }
     }
   }
+
+  var statements: [Database.Statement] {
+    tracks.map {
+      $0.play!.insert(
+        songid: $0.song.selectID(artistID: $0.artist.selectID, albumID: $0.album.selectID))
+    }
+  }
 }
