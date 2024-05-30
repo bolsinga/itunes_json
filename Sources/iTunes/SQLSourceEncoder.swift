@@ -57,9 +57,8 @@ struct SQLSourceEncoder {
     fileprivate var sqlStatements: String {
       (["PRAGMA foreign_keys = ON;"]
         + tableStatements.flatMap {
-          var statements = [$0.tableSchema, "BEGIN;"]
+          var statements = [$0.tableSchema]
           statements.append(contentsOf: $0.statements.map { "\($0)" }.sorted())
-          statements.append("COMMIT;")
           return statements
         } + [rowEncoder.views].compactMap { $0 }).joined(separator: "\n")
     }
