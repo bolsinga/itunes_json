@@ -24,7 +24,7 @@ extension Array where Element == Track {
 }
 
 extension Track {
-  var isValidDateCheckSentinel: Bool {
+  private var isValidDateCheckSentinel: Bool {
     // "Yesterday" by Chet Atkins has not been played since before this data has been saved.
     persistentID == 17_859_820_717_873_205_520
   }
@@ -33,7 +33,7 @@ extension Track {
     playDateUTC?.timeIntervalSince1970 == Double.timeIntervalSince1970ValidSentinel
   }
 
-  var datesAreAheadOneHour: Bool {
+  fileprivate var datesAreAheadOneHour: Bool {
     isValidDateCheckSentinel && !playDateUTCIsSentinelDate
   }
 
