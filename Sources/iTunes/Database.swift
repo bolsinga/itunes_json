@@ -185,11 +185,10 @@ actor Database {
     }
 
     @discardableResult
-    func executeAndClose<B: TableBuilder, R>(
-      builder: B, db: isolated Database,
-      _ action: @Sendable (B, PreparedStatement, isolated Database) throws -> R
+    func executeAndClose<R>(
+      _ db: isolated Database, action: @Sendable (PreparedStatement, isolated Database) throws -> R
     ) throws -> R {
-      let result = try action(builder, self, db)
+      let result = try action(self, db)
       close()
       return result
     }
