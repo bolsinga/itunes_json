@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol TableBuilder {
+protocol TableBuilder : Sendable {
   associatedtype Row: SQLBindableInsert & Hashable & Sendable
 
   var schema: String { get }
