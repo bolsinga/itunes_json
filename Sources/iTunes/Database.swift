@@ -185,7 +185,7 @@ actor Database {
     }
 
     @discardableResult
-    func bindAndExecute<B: TableBuilder, R>(
+    func executeAndClose<B: TableBuilder, R>(
       builder: B, db: isolated Database,
       _ action: @Sendable (B, PreparedStatement, isolated Database) throws -> R
     ) throws -> R {
