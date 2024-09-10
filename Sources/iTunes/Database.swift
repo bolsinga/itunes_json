@@ -222,7 +222,7 @@ actor Database {
   }
 
   @discardableResult
-  func transaction<R>(_ action: @Sendable (_ db: isolated Database) throws -> R) throws -> R {
+  func transaction<R>(_ action: @Sendable (isolated Database) throws -> R) throws -> R {
     try execute("BEGIN TRANSACTION")
     do {
       let result = try action(self)
