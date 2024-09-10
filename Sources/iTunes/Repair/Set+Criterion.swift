@@ -7,25 +7,25 @@
 
 import Foundation
 
+private struct Qualifier: OptionSet {
+  let rawValue: Int
+
+  static let album = Qualifier(rawValue: 1 << 0)
+  static let artist = Qualifier(rawValue: 1 << 1)
+  static let song = Qualifier(rawValue: 1 << 2)
+  static let playCount = Qualifier(rawValue: 1 << 3)
+  static let playDate = Qualifier(rawValue: 1 << 4)
+  static let persistentID = Qualifier(rawValue: 1 << 5)
+
+  static let albumArtistSong: Qualifier = [.album, .artist, .song]
+  static let artistSong: Qualifier = [.artist, .song]
+  static let albumArtist: Qualifier = [.album, .artist]
+
+  static let artistSongPlayCountPlayDate: Qualifier = [.artist, .song, .playCount, .playDate]
+  static let artistSongPlayCount: Qualifier = [.artist, .song, .playCount]
+}
+
 extension Set where Element == Criterion {
-  fileprivate struct Qualifier: OptionSet {
-    let rawValue: Int
-
-    static let album = Qualifier(rawValue: 1 << 0)
-    static let artist = Qualifier(rawValue: 1 << 1)
-    static let song = Qualifier(rawValue: 1 << 2)
-    static let playCount = Qualifier(rawValue: 1 << 3)
-    static let playDate = Qualifier(rawValue: 1 << 4)
-    static let persistentID = Qualifier(rawValue: 1 << 5)
-
-    static let albumArtistSong: Qualifier = [.album, .artist, .song]
-    static let artistSong: Qualifier = [.artist, .song]
-    static let albumArtist: Qualifier = [.album, .artist]
-
-    static let artistSongPlayCountPlayDate: Qualifier = [.artist, .song, .playCount, .playDate]
-    static let artistSongPlayCount: Qualifier = [.artist, .song, .playCount]
-  }
-
   fileprivate var qualifiers: Qualifier {
     self.reduce(into: Qualifier()) { partialResult, criteria in
       switch criteria {
