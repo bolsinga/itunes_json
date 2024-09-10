@@ -23,13 +23,15 @@ func readSTDIN() -> String? {
 
 var text: String?
 
-if CommandLine.arguments.last == "-" {
-  CommandLine.arguments.removeLast()
+var arguments = CommandLine.arguments
+
+if arguments.last == "-" {
+  arguments.removeLast()
 
   text = readSTDIN()
 }
 
-var arguments = Array(CommandLine.arguments.dropFirst())
+arguments.removeFirst()
 if let text = text {
   arguments.insert(text, at: 0)
 }
