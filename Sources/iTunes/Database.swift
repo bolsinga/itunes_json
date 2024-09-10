@@ -183,6 +183,16 @@ actor Database {
         throw DatabaseError.unexpectedColumns(columnCount)
       }
     }
+
+    @discardableResult
+    func bindAndExecute<B: TableBuilder, R>(
+      builder: B, db: isolated Database,
+      _ action: @Sendable (B, PreparedStatement, isolated Database) throws -> R
+    ) throws -> R {
+      let result = try action(builder, self, db)
+      close()
+      return result
+    }
   }
 
   private let handle: DatabaseHandle

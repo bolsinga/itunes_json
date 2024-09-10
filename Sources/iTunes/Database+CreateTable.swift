@@ -47,10 +47,11 @@ extension Database {
       try db.execute(builder.schema)
 
       let statement = try builder.preparedStatement(using: db)
-      defer { statement.close() }
 
-      return try builder.rows.reduce(into: [B.Row: Int64](minimumCapacity: builder.rows.count)) {
-        $0[$1] = try statement.insert(builder.arguments(for: $1), into: db)
+      return try statement.bindAndExecute(builder: builder, db: db) { builder, statement, db in
+        try builder.rows.reduce(into: [B.Row: Int64](minimumCapacity: builder.rows.count)) {
+          $0[$1] = try statement.insert(builder.arguments(for: $1), into: db)
+        }
       }
     }
   }
