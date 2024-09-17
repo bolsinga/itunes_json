@@ -5,113 +5,115 @@
 //  Created by Greg Bolsinga on 2/9/24.
 //
 
-import XCTest
+import Foundation
+import Testing
 
 @testable import iTunes
 
-final class ProblemCriteriaTests: XCTestCase {
-  private var playDate: Date {
+struct ProblemCriteriaTests {
+  private var mockPlayDate: Date {
     // "2004-02-04T23:32:22Z"
     Date(timeIntervalSince1970: Double(1_075_937_542))
   }
 
-  func testEmpty() throws {
+  @Test func empty() {
     let p = Problem()
     let c = p.criteria
 
-    XCTAssertTrue(c.isEmpty)
+    #expect(c.isEmpty)
   }
 
-  func testArtist() throws {
+  @Test func artist() {
     let p = Problem(artist: "a")
     let c = p.criteria
 
-    XCTAssertEqual(c.count, 1)
-    XCTAssertTrue(c.filter { $0.matchesAlbum("a") }.isEmpty)
-    XCTAssertTrue(!c.filter { $0.matchesArtist("a") }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesSong("a") }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesPlayCount(3) }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesPlayDate(playDate) }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesPersistentId(123456) }.isEmpty)
+    #expect(c.count == 1)
+    #expect(c.filter { $0.matchesAlbum("a") }.isEmpty)
+    #expect(!c.filter { $0.matchesArtist("a") }.isEmpty)
+    #expect(c.filter { $0.matchesSong("a") }.isEmpty)
+    #expect(c.filter { $0.matchesPlayCount(3) }.isEmpty)
+    #expect(c.filter { $0.matchesPlayDate(mockPlayDate) }.isEmpty)
+    #expect(c.filter { $0.matchesPersistentId(123456) }.isEmpty)
   }
 
-  func testAlbum() throws {
+  @Test func album() {
     let p = Problem(album: "a")
     let c = p.criteria
 
-    XCTAssertEqual(c.count, 1)
-    XCTAssertTrue(!c.filter { $0.matchesAlbum("a") }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesArtist("a") }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesSong("a") }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesPlayCount(3) }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesPlayDate(playDate) }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesPersistentId(123456) }.isEmpty)
+    #expect(c.count == 1)
+    #expect(!c.filter { $0.matchesAlbum("a") }.isEmpty)
+    #expect(c.filter { $0.matchesArtist("a") }.isEmpty)
+    #expect(c.filter { $0.matchesSong("a") }.isEmpty)
+    #expect(c.filter { $0.matchesPlayCount(3) }.isEmpty)
+    #expect(c.filter { $0.matchesPlayDate(mockPlayDate) }.isEmpty)
+    #expect(c.filter { $0.matchesPersistentId(123456) }.isEmpty)
   }
 
-  func testName() throws {
+  @Test func name() {
     let p = Problem(name: "a")
     let c = p.criteria
 
-    XCTAssertEqual(c.count, 1)
-    XCTAssertTrue(c.filter { $0.matchesAlbum("a") }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesArtist("a") }.isEmpty)
-    XCTAssertTrue(!c.filter { $0.matchesSong("a") }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesPlayCount(3) }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesPlayDate(playDate) }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesPersistentId(123456) }.isEmpty)
+    #expect(c.count == 1)
+    #expect(c.filter { $0.matchesAlbum("a") }.isEmpty)
+    #expect(c.filter { $0.matchesArtist("a") }.isEmpty)
+    #expect(!c.filter { $0.matchesSong("a") }.isEmpty)
+    #expect(c.filter { $0.matchesPlayCount(3) }.isEmpty)
+    #expect(c.filter { $0.matchesPlayDate(mockPlayDate) }.isEmpty)
+    #expect(c.filter { $0.matchesPersistentId(123456) }.isEmpty)
   }
 
-  func testPlayCount() throws {
+  @Test func playCount() {
     let p = Problem(playCount: 3)
     let c = p.criteria
 
-    XCTAssertEqual(c.count, 1)
-    XCTAssertTrue(c.filter { $0.matchesAlbum("a") }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesArtist("a") }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesSong("a") }.isEmpty)
-    XCTAssertTrue(!c.filter { $0.matchesPlayCount(3) }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesPlayDate(playDate) }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesPersistentId(123456) }.isEmpty)
+    #expect(c.count == 1)
+    #expect(c.filter { $0.matchesAlbum("a") }.isEmpty)
+    #expect(c.filter { $0.matchesArtist("a") }.isEmpty)
+    #expect(c.filter { $0.matchesSong("a") }.isEmpty)
+    #expect(!c.filter { $0.matchesPlayCount(3) }.isEmpty)
+    #expect(c.filter { $0.matchesPlayDate(mockPlayDate) }.isEmpty)
+    #expect(c.filter { $0.matchesPersistentId(123456) }.isEmpty)
   }
 
-  func testPlayDate() throws {
-    let p = Problem(playDate: playDate)
+  @Test func playDate() {
+    let p = Problem(playDate: mockPlayDate)
     let c = p.criteria
 
-    XCTAssertEqual(c.count, 1)
-    XCTAssertTrue(c.filter { $0.matchesAlbum("a") }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesArtist("a") }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesSong("a") }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesPlayCount(3) }.isEmpty)
-    XCTAssertTrue(!c.filter { $0.matchesPlayDate(playDate) }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesPersistentId(123456) }.isEmpty)
+    #expect(c.count == 1)
+    #expect(c.filter { $0.matchesAlbum("a") }.isEmpty)
+    #expect(c.filter { $0.matchesArtist("a") }.isEmpty)
+    #expect(c.filter { $0.matchesSong("a") }.isEmpty)
+    #expect(c.filter { $0.matchesPlayCount(3) }.isEmpty)
+    #expect(!c.filter { $0.matchesPlayDate(mockPlayDate) }.isEmpty)
+    #expect(c.filter { $0.matchesPersistentId(123456) }.isEmpty)
   }
 
-  func testPersistentID() throws {
+  @Test func persistentID() {
     let p = Problem(persistentID: 123456)
     let c = p.criteria
 
-    XCTAssertEqual(c.count, 1)
-    XCTAssertTrue(c.filter { $0.matchesAlbum("a") }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesArtist("a") }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesSong("a") }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesPlayCount(3) }.isEmpty)
-    XCTAssertTrue(c.filter { $0.matchesPlayDate(playDate) }.isEmpty)
-    XCTAssertTrue(!c.filter { $0.matchesPersistentId(123456) }.isEmpty)
+    #expect(c.count == 1)
+    #expect(c.filter { $0.matchesAlbum("a") }.isEmpty)
+    #expect(c.filter { $0.matchesArtist("a") }.isEmpty)
+    #expect(c.filter { $0.matchesSong("a") }.isEmpty)
+    #expect(c.filter { $0.matchesPlayCount(3) }.isEmpty)
+    #expect(c.filter { $0.matchesPlayDate(mockPlayDate) }.isEmpty)
+    #expect(!c.filter { $0.matchesPersistentId(123456) }.isEmpty)
   }
 
-  func testAllSet() throws {
+  @Test func allSet() {
     let p = Problem(
-      artist: "a", album: "l", name: "n", playCount: 3, playDate: playDate, persistentID: 123456)
+      artist: "a", album: "l", name: "n", playCount: 3, playDate: mockPlayDate, persistentID: 123456
+    )
 
     let c = p.criteria
 
-    XCTAssertEqual(c.count, 6)
-    XCTAssertTrue(!c.filter { $0.matchesAlbum("l") }.isEmpty)
-    XCTAssertTrue(!c.filter { $0.matchesArtist("a") }.isEmpty)
-    XCTAssertTrue(!c.filter { $0.matchesSong("n") }.isEmpty)
-    XCTAssertTrue(!c.filter { $0.matchesPlayCount(3) }.isEmpty)
-    XCTAssertTrue(!c.filter { $0.matchesPlayDate(playDate) }.isEmpty)
-    XCTAssertTrue(!c.filter { $0.matchesPersistentId(123456) }.isEmpty)
+    #expect(c.count == 6)
+    #expect(!c.filter { $0.matchesAlbum("l") }.isEmpty)
+    #expect(!c.filter { $0.matchesArtist("a") }.isEmpty)
+    #expect(!c.filter { $0.matchesSong("n") }.isEmpty)
+    #expect(!c.filter { $0.matchesPlayCount(3) }.isEmpty)
+    #expect(!c.filter { $0.matchesPlayDate(mockPlayDate) }.isEmpty)
+    #expect(!c.filter { $0.matchesPersistentId(123456) }.isEmpty)
   }
 }
