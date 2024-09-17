@@ -5,32 +5,32 @@
 //  Created by Greg Bolsinga on 2/4/24.
 //
 
-import XCTest
+import Testing
 
 @testable import iTunes
 
-final class IssueValidationTests: XCTestCase {
-  func testNoRemedies() throws {
+struct IssueValidationTests {
+  @Test func noRemedies() {
     let i = Issue.create(criteria: [.artist("a")], remedies: [])
 
-    XCTAssertNil(i)
+    #expect(i == nil)
   }
 
-  func testNoCriteria() throws {
+  @Test func noCriteria() {
     let i = Issue.create(criteria: [], remedies: [.ignore])
 
-    XCTAssertNil(i)
+    #expect(i == nil)
   }
 
-  func testCriteriaRemedyInvalid() throws {
+  @Test func criteriaRemedyInvalid() {
     let i = Issue.create(criteria: [.album("l")], remedies: [.ignore])
 
-    XCTAssertNil(i)
+    #expect(i == nil)
   }
 
-  func testCriteriaRemedyValid() throws {
+  @Test func criteriaRemedyValid() {
     let i = Issue.create(criteria: [.artist("a")], remedies: [.ignore])
 
-    XCTAssertNotNil(i)
+    #expect(i != nil)
   }
 }

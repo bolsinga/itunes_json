@@ -5,53 +5,53 @@
 //  Created by Greg Bolsinga on 2/4/24.
 //
 
-import XCTest
+import Testing
 
 @testable import iTunes
 
-final class RepairTrackIssueTests: XCTestCase {
-  func testIssueCriteriaDoesNotApply() throws {
+struct RepairTrackIssueTests {
+  @Test func issueCriteriaDoesNotApply() throws {
     let t = Track(album: "l", artist: "a", name: "s", persistentID: 0)
 
-    let i = try XCTUnwrap(
+    let i = try #require(
       Issue.create(
         criteria: [.album("l"), .artist("a"), .song("nomatch")], remedies: [.repairEmptyKind("k")]))
 
     let f = t.repair(i)
 
-    XCTAssertEqual(f, t)
+    #expect(f == t)
   }
 
-  func testIssueCriteriaAppliesNoRemedies() throws {
+  @Test func issueCriteriaAppliesNoRemedies() throws {
     let t = Track(album: "l", artist: "a", kind: "k", name: "s", persistentID: 0)
 
-    let i = try XCTUnwrap(
+    let i = try #require(
       Issue.create(
         criteria: [.album("l"), .artist("a"), .song("s")], remedies: [.repairEmptyKind("k")]))
 
     let f = t.repair(i)
 
-    XCTAssertEqual(f, t)
+    #expect(f == t)
   }
 
-  func testIssueCriteriaAppliesIgnoreOnly() throws {
+  @Test func issueCriteriaAppliesIgnoreOnly() throws {
     let t = Track(album: "l", artist: "a", name: "s", persistentID: 0)
 
-    let i = try XCTUnwrap(Issue.create(criteria: [.artist("a")], remedies: [.ignore]))
+    let i = try #require(Issue.create(criteria: [.artist("a")], remedies: [.ignore]))
 
     let f = t.repair(i)
 
-    XCTAssertNil(f)
+    #expect(f == nil)
   }
 
-  func testIssueCriteriaAppliesIgnoreAndMore() throws {
+  @Test func issueCriteriaAppliesIgnoreAndMore() throws {
     let t = Track(album: "l", artist: "a", name: "s", persistentID: 0)
 
-    let i = try XCTUnwrap(
+    let i = try #require(
       Issue.create(criteria: [.artist("a")], remedies: [.ignore, .replaceSortArtist("sa")]))
 
     let f = t.repair(i)
 
-    XCTAssertNil(f)
+    #expect(f == nil)
   }
 }

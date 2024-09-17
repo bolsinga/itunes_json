@@ -5,107 +5,108 @@
 //  Created by Greg Bolsinga on 2/10/24.
 //
 
-import XCTest
+import Foundation
+import Testing
 
 @testable import iTunes
 
-final class TrackApplyRemedyTests: XCTestCase {
-  func testIgnore() throws {
+struct TrackApplyRemedyTests {
+  @Test func ignore() {
     let t = Track(name: "s", persistentID: 0)
     let r = t.applyRemedy(.ignore)
 
-    XCTAssertNil(r)
+    #expect(r == nil)
   }
 
-  func testRepairEmptyAlbum() throws {
+  @Test func repairEmptyAlbum() throws {
     let t = Track(name: "s", persistentID: 0)
-    let r = try XCTUnwrap(t.applyRemedy(.replaceAlbum("l")))
-    let f = try XCTUnwrap(r.album)
-    XCTAssertEqual(f, "l")
+    let r = try #require(t.applyRemedy(.replaceAlbum("l")))
+    let f = try #require(r.album)
+    #expect(f == "l")
   }
 
-  func testRepairEmptyKind() throws {
+  @Test func repairEmptyKind() throws {
     let t = Track(name: "s", persistentID: 0)
-    let r = try XCTUnwrap(t.applyRemedy(.repairEmptyKind("k")))
-    let f = try XCTUnwrap(r.kind)
-    XCTAssertEqual(f, "k")
+    let r = try #require(t.applyRemedy(.repairEmptyKind("k")))
+    let f = try #require(r.kind)
+    #expect(f == "k")
   }
 
-  func testReplaceSortArtist() throws {
+  @Test func replaceSortArtist() throws {
     let t = Track(name: "s", persistentID: 0)
-    let r = try XCTUnwrap(t.applyRemedy(.replaceSortArtist("s")))
-    let f = try XCTUnwrap(r.sortArtist)
-    XCTAssertEqual(f, "s")
+    let r = try #require(t.applyRemedy(.replaceSortArtist("s")))
+    let f = try #require(r.sortArtist)
+    #expect(f == "s")
   }
 
-  func testReplaceTrackCount() throws {
+  @Test func replaceTrackCount() throws {
     let t = Track(name: "s", persistentID: 0)
-    let r = try XCTUnwrap(t.applyRemedy(.replaceTrackCount(3)))
-    let f = try XCTUnwrap(r.trackCount)
-    XCTAssertEqual(f, 3)
+    let r = try #require(t.applyRemedy(.replaceTrackCount(3)))
+    let f = try #require(r.trackCount)
+    #expect(f == 3)
   }
 
-  func testReplaceTrackCount_alredySet() throws {
+  @Test func replaceTrackCount_alredySet() throws {
     let t = Track(name: "s", persistentID: 0, trackCount: 8)
-    let r = try XCTUnwrap(t.applyRemedy(.replaceTrackCount(3)))
-    let f = try XCTUnwrap(r.trackCount)
-    XCTAssertEqual(f, 3)
+    let r = try #require(t.applyRemedy(.replaceTrackCount(3)))
+    let f = try #require(r.trackCount)
+    #expect(f == 3)
   }
 
-  func testRepairEmptyTrackNumber() throws {
+  @Test func repairEmptyTrackNumber() throws {
     let t = Track(name: "s", persistentID: 0)
-    let r = try XCTUnwrap(t.applyRemedy(.repairEmptyTrackNumber(3)))
-    let f = try XCTUnwrap(r.trackNumber)
-    XCTAssertEqual(f, 3)
+    let r = try #require(t.applyRemedy(.repairEmptyTrackNumber(3)))
+    let f = try #require(r.trackNumber)
+    #expect(f == 3)
   }
 
-  func testRepairEmptyYear() throws {
+  @Test func repairEmptyYear() throws {
     let t = Track(name: "s", persistentID: 0)
-    let r = try XCTUnwrap(t.applyRemedy(.repairEmptyYear(1970)))
-    let f = try XCTUnwrap(r.year)
-    XCTAssertEqual(f, 1970)
+    let r = try #require(t.applyRemedy(.repairEmptyYear(1970)))
+    let f = try #require(r.year)
+    #expect(f == 1970)
   }
 
-  func testReplaceArtist() throws {
+  @Test func replaceArtist() throws {
     let t = Track(name: "s", persistentID: 0)
-    let r = try XCTUnwrap(t.applyRemedy(.replaceArtist("a")))
-    let f = try XCTUnwrap(r.artist)
-    XCTAssertEqual(f, "a")
+    let r = try #require(t.applyRemedy(.replaceArtist("a")))
+    let f = try #require(r.artist)
+    #expect(f == "a")
   }
 
-  func testReplacePlayCount() throws {
+  @Test func replacePlayCount() throws {
     let t = Track(name: "s", persistentID: 0)
-    let r = try XCTUnwrap(t.applyRemedy(.replacePlayCount(3)))
-    let f = try XCTUnwrap(r.playCount)
-    XCTAssertEqual(f, 3)
+    let r = try #require(t.applyRemedy(.replacePlayCount(3)))
+    let f = try #require(r.playCount)
+    #expect(f == 3)
   }
 
-  func testReplacePlayDate() throws {
+  @Test func replacePlayDate() throws {
     let t = Track(name: "s", persistentID: 0)
-    let r = try XCTUnwrap(
+    let r = try #require(
       t.applyRemedy(.replacePlayDate(Date(timeIntervalSince1970: Double(1_075_937_542)))))
-    let f = try XCTUnwrap(r.playDateUTC)
-    XCTAssertEqual(f, Date(timeIntervalSince1970: Double(1_075_937_542)))
+    let f = try #require(r.playDateUTC)
+    #expect(f == Date(timeIntervalSince1970: Double(1_075_937_542)))
   }
 
-  func testReplaceSong() throws {
+  @Test func replaceSong() throws {
     let t = Track(name: "s", persistentID: 0)
-    let r = try XCTUnwrap(t.applyRemedy(.replaceSong("t")))
-    let f = try XCTUnwrap(r.name)
-    XCTAssertEqual(f, "t")
+    let r = try #require(t.applyRemedy(.replaceSong("t")))
+    let f = try #require(r.name)
+    #expect(f == "t")
   }
 
-  func testReplaceDiscCount() throws {
+  @Test func replaceDiscCount() throws {
     let t = Track(name: "s", persistentID: 0)
-    let r = try XCTUnwrap(t.applyRemedy(.replaceDiscCount(3)))
-    let f = try XCTUnwrap(r.discCount)
-    XCTAssertEqual(f, 3)
+    let r = try #require(t.applyRemedy(.replaceDiscCount(3)))
+    let f = try #require(r.discCount)
+    #expect(f == 3)
   }
 
-  func testReplaceDiscNumber() throws {
+  @Test func replaceDiscNumber() throws {
     let t = Track(name: "s", persistentID: 0)
-    let r = try XCTUnwrap(t.applyRemedy(.replaceDiscNumber(3)))
-    let f = try XCTUnwrap(r.discNumber)
-    XCTAssertEqual(f, 3)
+    let r = try #require(t.applyRemedy(.replaceDiscNumber(3)))
+    let f = try #require(r.discNumber)
+    #expect(f == 3)
   }
 }
