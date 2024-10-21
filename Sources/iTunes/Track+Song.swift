@@ -9,9 +9,7 @@ import Foundation
 import MusicKit
 
 extension Track {
-  init(_ song: Song) {
-    //    let refinedSong = try await song.with([.albums], preferredSource: .library)
-
+  init(section album: MusicLibrarySection<Album, Song>, song: Song) {
     self.album = song.albumTitle
     self.albumArtist = song.artistName
     //      self.albumRating = album.rating
@@ -20,9 +18,11 @@ extension Track {
     //      self.bitRate = song.bitrate
     //      self.bPM = song.beatsPerMinute
     //      self.comments = comments
-    //      self.compilation = album.isCompilation
+    if let isCompilation = album.isCompilation, isCompilation {
+      self.compilation = true
+    }
     self.composer = song.composerName
-    //      self.contentRating = contentRating
+    //      self.contentRating = contentRating // tv
     self.dateAdded = song.libraryAddedDate
     //      self.dateModified = date
     //      self.disabled = song.isUserDisabled
@@ -63,8 +63,7 @@ extension Track {
     if let duration = song.duration {
       self.totalTime = Int(duration)
     }
-    //
-    //    self.trackCount = album.trackCount
+    self.trackCount = album.trackCount
     self.trackNumber = song.trackNumber
     //      self.trackType = "File"
     //      self.trackType = "URL"
@@ -110,8 +109,10 @@ extension Track {
   static public func gatherWithMusicKit() async throws -> [Track] {
     await requestAccess()
 
-    let request = MusicLibraryRequest<Song>()
+    let request = MusicLibrarySectionedRequest<Album, Song>()
     let response = try await request.response()
-    return response.items.map { Track($0) }
+    return response.sections.flatMap { section in
+      section.items.map { Track(section: section, song: $0) }
+    }
   }
 }
