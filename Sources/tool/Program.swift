@@ -95,19 +95,21 @@ struct Program: AsyncParsableCommand {
     repairFile != nil || (repairSource != nil && !repairSource!.isEmpty)
   }
 
+  private func repairing() async throws -> Repairing? {
+    guard isRepairing else { return nil }
+    return try await createRepair(url: repairFile, source: repairSource, loggingToken: loggingToken)
+  }
+
   func run() async throws {
     let tracks = try await {
-      let repair =
-        isRepairing
-        ? try? await createRepair(url: repairFile, source: repairSource, loggingToken: loggingToken)
-        : nil
       let artistIncluded: ((String) -> Bool)? = {
         if let artistNameFilter, !artistNameFilter.isEmpty {
           return { $0 == artistNameFilter }
         }
         return nil
       }()
-      return try await source.gather(jsonSource, repair: repair, artistIncluded: artistIncluded)
+      return try await source.gather(
+        jsonSource, repair: try await repairing(), artistIncluded: artistIncluded)
     }()
 
     try await destination.emit(tracks, outputFile: outputFile, loggingToken: loggingToken)
