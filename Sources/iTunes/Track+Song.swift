@@ -45,7 +45,11 @@ extension Track {
     self.name = song.title
     //      self.partOfGaplessAlbum = album.isGapless
     //
-    self.persistentID = UInt(song.id.rawValue) ?? 0
+    if let value = Int(song.id.rawValue) {
+      self.persistentID = UInt(bitPattern: value)
+    } else {
+      self.persistentID = 0
+    }
     self.playCount = song.playCount
     self.playDateUTC = song.lastPlayedDate
     //      self.protected = song.isDRMProtected
