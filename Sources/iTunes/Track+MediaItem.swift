@@ -16,18 +16,20 @@ extension Track {
     if let name = album.title, name.count > 0 {
       self.album = name
     }
-    if let name = album.albumArtist {
-      self.albumArtist = name
-    }
     if album.rating != 0 {
       self.albumRating = album.rating
     }
     if album.isRatingComputed {
       self.albumRatingComputed = mediaItem.isRatingComputed
     }
-    if let name = artist?.name {
-      self.artist = name
+
+    if let artistName = artist?.name {
+      self.artist = artistName
+      if let albumArtistName = album.albumArtist, artistName != albumArtistName {
+        self.albumArtist = albumArtistName
+      }
     }
+
     //    self.ARTWORK_COUNT = mediaItem.ARTWORK_COUNT
     if mediaItem.bitrate != 0 {
       self.bitRate = mediaItem.bitrate

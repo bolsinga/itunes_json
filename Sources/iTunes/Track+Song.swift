@@ -11,10 +11,12 @@ import MusicKit
 extension Track {
   init(section album: MusicLibrarySection<Album, Song>, song: Song) {
     self.album = song.albumTitle
-    self.albumArtist = song.artistName
+    self.artist = song.artistName
+    if !album.artistName.isEmpty, self.artist != album.artistName {
+      self.albumArtist = album.artistName
+    }
     //      self.albumRating = album.rating
     //      self.albumRatingComputed = song.isRatingComputed
-    self.artist = song.artistName
     //      self.bitRate = song.bitrate
     //      self.bPM = song.beatsPerMinute
     //      self.comments = comments
