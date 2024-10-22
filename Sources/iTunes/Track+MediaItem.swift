@@ -16,20 +16,18 @@ extension Track {
     if let name = album.title, !name.isEmpty {
       self.album = name
     }
+    if let name = album.albumArtist {
+      self.albumArtist = name
+    }
     if album.rating != 0 {
       self.albumRating = album.rating
     }
     if album.isRatingComputed {
       self.albumRatingComputed = mediaItem.isRatingComputed
     }
-
-    if let artistName = artist?.name {
-      self.artist = artistName
-      if let albumArtistName = album.albumArtist, artistName != albumArtistName {
-        self.albumArtist = albumArtistName
-      }
+    if let name = artist?.name {
+      self.artist = name
     }
-
     //    self.ARTWORK_COUNT = mediaItem.ARTWORK_COUNT
     if mediaItem.bitrate != 0 {
       self.bitRate = mediaItem.bitrate
@@ -135,7 +133,7 @@ extension Track {
     if let sortComposer = mediaItem.sortComposer {
       self.sortComposer = sortComposer
     }
-    if let sortName = mediaItem.sortTitle, sortName != mediaItem.title {
+    if let sortName = mediaItem.sortTitle {
       self.sortName = sortName
     }
     self.totalTime = mediaItem.totalTime

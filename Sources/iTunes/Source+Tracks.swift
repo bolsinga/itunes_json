@@ -13,7 +13,7 @@ extension Source {
   )
     async throws -> [Track]
   {
-    let tracks = try await gather(source, artistIncluded)
+    let tracks = try await gather(source, artistIncluded).map { $0.duplicateSortFieldsRemoved }
     guard let repair else { return reduce ? tracks.compactMap { $0.reducedTrack } : tracks }
     return repair.repair(tracks).compactMap { $0.reducedTrack }
   }
