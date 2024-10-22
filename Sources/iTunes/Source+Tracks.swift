@@ -13,9 +13,14 @@ extension Source {
   )
     async throws -> [Track]
   {
-    let tracks = try await gather(source, artistIncluded).map { $0.duplicateSortFieldsRemoved }
-    guard let repair else { return reduce ? tracks.compactMap { $0.reducedTrack } : tracks }
-    return repair.repair(tracks).compactMap { $0.reducedTrack }
+    _repair(tracks: try await gather(source, artistIncluded), repair: repair).compactMap {
+      reduce ? $0.reducedTrack : $0
+    }.map { $0.duplicateSortFieldsRemoved }
+  }
+
+  private func _repair(tracks: [Track], repair: Repairing?) -> [Track] {
+    guard let repair else { return tracks }
+    return repair.repair(tracks)
   }
 
   private func gather(_ source: String?, _ artistIncluded: ((String) -> Bool)?) async throws
