@@ -16,18 +16,14 @@ extension Track {
     if let name = album.title, !name.isEmpty {
       self.album = name
     }
-    if let name = album.albumArtist {
-      self.albumArtist = name
-    }
+    self.albumArtist = album.albumArtist
     if album.rating != 0 {
       self.albumRating = album.rating
     }
     if album.isRatingComputed {
       self.albumRatingComputed = mediaItem.isRatingComputed
     }
-    if let name = artist?.name {
-      self.artist = name
-    }
+    self.artist = artist?.name
     //    self.ARTWORK_COUNT = mediaItem.ARTWORK_COUNT
     if mediaItem.bitrate != 0 {
       self.bitRate = mediaItem.bitrate
@@ -35,9 +31,7 @@ extension Track {
     if mediaItem.beatsPerMinute != 0 {
       self.bPM = mediaItem.beatsPerMinute
     }
-    if let comments = mediaItem.comments {
-      self.comments = comments
-    }
+    self.comments = mediaItem.comments
     if album.isCompilation {
       self.compilation = album.isCompilation
     }
@@ -47,12 +41,8 @@ extension Track {
     if let contentRating = mediaItem.contentRating {
       self.contentRating = contentRating
     }
-    if let date = mediaItem.addedDate {
-      self.dateAdded = date
-    }
-    if let date = mediaItem.modifiedDate {
-      self.dateModified = date
-    }
+    self.dateAdded = mediaItem.addedDate
+    self.dateModified = mediaItem.modifiedDate
     if mediaItem.isUserDisabled {
       self.disabled = mediaItem.isUserDisabled
     }
@@ -74,9 +64,7 @@ extension Track {
     if mediaItem.isVideo {
       self.hasVideo = true
     }
-    if let kind = mediaItem.kind {
-      self.kind = kind
-    }
+    self.kind = mediaItem.kind
     if let location = mediaItem.location {
       self.location = location.absoluteString
     }
@@ -95,9 +83,7 @@ extension Track {
     }
     self.persistentID = mediaItem.persistentID.uintValue  // Hex?
     self.playCount = mediaItem.playCount
-    if let date = mediaItem.lastPlayedDate {
-      self.playDateUTC = date
-    }
+    self.playDateUTC = mediaItem.lastPlayedDate
     if mediaItem.isDRMProtected {
       self.protected = mediaItem.isDRMProtected
     }
@@ -110,32 +96,18 @@ extension Track {
     if mediaItem.isRatingComputed {
       self.ratingComputed = mediaItem.isRatingComputed
     }
-    if let date = mediaItem.releaseDate {
-      self.releaseDate = date
-    }
+    self.releaseDate = mediaItem.releaseDate
     self.sampleRate = mediaItem.sampleRate
     self.size = mediaItem.fileSize
     if mediaItem.skipCount != 0 {
       self.skipCount = mediaItem.skipCount
     }
-    if let date = mediaItem.skipDate {
-      self.skipDate = date
-    }
-    if let name = album.sortTitle {
-      self.sortAlbum = name
-    }
-    if let name = album.sortAlbumArtist {
-      self.sortAlbumArtist = name
-    }
-    if let name = artist?.sortName {
-      self.sortArtist = name
-    }
-    if let sortComposer = mediaItem.sortComposer {
-      self.sortComposer = sortComposer
-    }
-    if let sortName = mediaItem.sortTitle {
-      self.sortName = sortName
-    }
+    self.skipDate = mediaItem.skipDate
+    self.sortAlbum = album.sortTitle
+    self.sortAlbumArtist = album.sortAlbumArtist
+    self.sortArtist = artist?.sortName
+    self.sortComposer = mediaItem.sortComposer
+    self.sortName = mediaItem.sortTitle
     self.totalTime = mediaItem.totalTime
     if album.trackCount != 0 {
       self.trackCount = album.trackCount
