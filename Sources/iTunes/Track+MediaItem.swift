@@ -13,9 +13,7 @@ extension Track {
     let artist = mediaItem.artist
     let album = mediaItem.album
 
-    if let name = album.title, !name.isEmpty {
-      self.album = name
-    }
+    self.album = album.title
     self.albumArtist = album.albumArtist
     if album.rating != 0 {
       self.albumRating = album.rating
@@ -35,9 +33,7 @@ extension Track {
     if album.isCompilation {
       self.compilation = album.isCompilation
     }
-    if !mediaItem.composer.isEmpty {
-      self.composer = mediaItem.composer
-    }
+    self.composer = mediaItem.composer
     if let contentRating = mediaItem.contentRating {
       self.contentRating = contentRating
     }
@@ -55,9 +51,7 @@ extension Track {
     if mediaItem.lyricsContentRating == .explicit {
       self.explicit = true
     }
-    if !mediaItem.genre.isEmpty {
-      self.genre = mediaItem.genre
-    }
+    self.genre = mediaItem.genre
     if let grouping = mediaItem.grouping {
       self.grouping = grouping
     }

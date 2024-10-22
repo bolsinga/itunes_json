@@ -12,9 +12,7 @@ extension Track {
   init(section album: MusicLibrarySection<Album, Song>, song: Song) {
     self.album = song.albumTitle
     self.artist = song.artistName
-    if !album.artistName.isEmpty, self.artist != album.artistName {
-      self.albumArtist = album.artistName
-    }
+    self.albumArtist = album.artistName
     //      self.albumRating = album.rating
     //      self.albumRatingComputed = song.isRatingComputed
     //      self.bitRate = song.bitrate

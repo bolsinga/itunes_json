@@ -15,7 +15,7 @@ extension Source {
   {
     _repair(tracks: try await gather(source, artistIncluded), repair: repair).compactMap {
       reduce ? $0.reducedTrack : $0
-    }.map { $0.duplicateSortFieldsRemoved }
+    }.map { $0.duplicateAndEmptyFieldsRemoved }
   }
 
   private func _repair(tracks: [Track], repair: Repairing?) -> [Track] {
