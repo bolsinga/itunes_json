@@ -9,6 +9,10 @@ import Foundation
 
 extension String {
   func uniqueNonEmptyString(_ other: String?) -> String? {
-    (self == other) ? nil : (self.isEmpty ? nil : self)
+    (self == other) ? nil : self.nonEmptyString
+  }
+
+  var nonEmptyString: String? {
+    self.isEmpty ? nil : self
   }
 }
