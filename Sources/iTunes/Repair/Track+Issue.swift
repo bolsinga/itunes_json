@@ -97,7 +97,7 @@ extension Track {
       sortComposer: sortComposer, sortName: sortName, sortSeries: sortSeries, totalTime: totalTime,
       trackCount: fixedTrackCount ?? trackCount, trackNumber: fixedTrackNumber ?? trackNumber,
       trackType: trackType, tVShow: tVShow, unplayed: unplayed, videoHeight: videoHeight,
-      videoWidth: videoWidth, year: fixedYear ?? year)
+      videoWidth: videoWidth, year: fixedYear ?? year, isrc: isrc)
   }
 
   internal func applyRemedy(_ remedy: Remedy) -> Track? {

@@ -74,6 +74,7 @@ extension Track {
       unplayed: unplayed,
       videoHeight: videoHeight,
       videoWidth: videoWidth,
-      year: year)
+      year: year,
+      isrc: isrc?.nonEmptyString)
   }
 }

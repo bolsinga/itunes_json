@@ -101,6 +101,7 @@ extension Track {
     //        self.videoWidth = videoInfo.videoWidth
     //      }
     //    }
+    self.isrc = song.isrc
   }
 }
 

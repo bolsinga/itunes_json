@@ -68,4 +68,5 @@ public struct Track: Codable, Hashable {
   var videoHeight: Int? = nil  // "Video Height"
   var videoWidth: Int? = nil  // "Video Width"
   var year: Int? = nil  // "Year"
+  var isrc: String?  // https://en.wikipedia.org/wiki/International_Standard_Recording_Code
 }

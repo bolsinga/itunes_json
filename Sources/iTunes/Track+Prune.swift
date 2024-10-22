@@ -26,6 +26,6 @@ extension Track {
       sortComposer: nil, sortName: sortName, sortSeries: nil,
       totalTime: totalTime, trackCount: trackCount, trackNumber: trackNumber,
       trackType: nil, tVShow: nil, unplayed: nil, videoHeight: nil,
-      videoWidth: nil, year: year)
+      videoWidth: nil, year: year, isrc: isrc)
   }
 }
