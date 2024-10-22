@@ -11,7 +11,7 @@ struct Repair: Repairing {
   let issues: [Issue]
 
   public func repair(_ tracks: [Track]) -> [Track] {
-    fix(adjustDates(tracks)).filter { $0.isSQLEncodable }.map { $0.pruned }
+    fix(adjustDates(tracks))
   }
 
   private func adjustDates(_ tracks: [Track]) -> [Track] {
