@@ -9,13 +9,11 @@ import Foundation
 
 extension Track {
   var duplicateSortFieldsRemoved: Track {
-    let rSortAlbum = (self.album == self.sortAlbum) ? nil : self.sortAlbum
-    let rSortAlbumArtist =
-      (self.artist == self.sortAlbumArtist)
-      ? nil : ((self.sortArtist == self.sortAlbumArtist) ? nil : self.sortAlbumArtist)
-    let rSortArtist = (self.artist == self.sortArtist) ? nil : self.sortArtist
-    let rSortComposer = (self.composer == self.sortComposer) ? nil : self.sortComposer
-    let rSortName = (self.name == self.sortName) ? nil : self.sortName
+    let rSortAlbum = self.sortAlbum?.uniqueNonEmptyString(self.album)
+    let rSortArtist = self.sortArtist?.uniqueNonEmptyString(self.artist)
+    let rSortAlbumArtist = self.sortAlbumArtist?.uniqueNonEmptyString(rSortArtist)
+    let rSortComposer = self.sortComposer?.uniqueNonEmptyString(self.composer)
+    let rSortName = self.sortName?.uniqueNonEmptyString(self.name)
 
     return Track(
       album: album, albumArtist: albumArtist, albumRating: albumRating,
