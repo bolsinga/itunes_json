@@ -12,6 +12,11 @@ struct Program: AsyncParsableCommand {
   /// Output destination type.
   @Flag(help: "Output Destination type. Format Track data will be written out as.") var destination:
     Destination = .json
+  /// Should Tracks be reduced
+  @Flag(
+    help:
+      "Reduce Tracks to minimum required fields and music related only. Defaults to false, unless repairing."
+  ) var reduce: Bool = false
 
   /// Optional Output Directory for output file.
   @Option(
@@ -100,6 +105,10 @@ struct Program: AsyncParsableCommand {
     return try await createRepair(url: repairFile, source: repairSource, loggingToken: loggingToken)
   }
 
+  private var isReducing: Bool {
+    isRepairing || reduce
+  }
+
   func run() async throws {
     let tracks = try await {
       let artistIncluded: ((String) -> Bool)? = {
@@ -109,7 +118,8 @@ struct Program: AsyncParsableCommand {
         return nil
       }()
       return try await source.gather(
-        jsonSource, repair: try await repairing(), artistIncluded: artistIncluded)
+        jsonSource, repair: try await repairing(), artistIncluded: artistIncluded,
+        reduce: isReducing)
     }()
 
     try await destination.emit(tracks, outputFile: outputFile, loggingToken: loggingToken)

@@ -8,11 +8,14 @@
 import Foundation
 
 extension Source {
-  public func gather(_ source: String?, repair: Repairing?, artistIncluded: ((String) -> Bool)?)
+  public func gather(
+    _ source: String?, repair: Repairing?, artistIncluded: ((String) -> Bool)?, reduce: Bool
+  )
     async throws -> [Track]
   {
     let tracks = try await gather(source, artistIncluded)
-    return repair != nil ? repair!.repair(tracks) : tracks
+    guard let repair else { return tracks.compactMap { $0.reducedTrack } }
+    return repair.repair(tracks).compactMap { $0.reducedTrack }
   }
 
   private func gather(_ source: String?, _ artistIncluded: ((String) -> Bool)?) async throws
