@@ -26,7 +26,7 @@ extension Destination {
   }
 
   public func emit(_ tracks: [Track], outputFile: URL?, loggingToken: String?) async throws {
-    guard tracks.count > 0 else {
+    guard !tracks.isEmpty else {
       throw DataExportError.noTracks
     }
 
