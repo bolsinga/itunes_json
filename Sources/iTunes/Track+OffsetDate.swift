@@ -76,6 +76,6 @@ extension Track {
       sortComposer: sortComposer, sortName: sortName, sortSeries: sortSeries,
       totalTime: totalTime, trackCount: trackCount, trackNumber: trackNumber,
       trackType: trackType, tVShow: tVShow, unplayed: unplayed, videoHeight: videoHeight,
-      videoWidth: videoWidth, year: year)
+      videoWidth: videoWidth, year: year, isrc: isrc)
   }
 }
