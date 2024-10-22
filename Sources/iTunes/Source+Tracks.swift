@@ -14,7 +14,7 @@ extension Source {
     async throws -> [Track]
   {
     let tracks = try await gather(source, artistIncluded)
-    guard let repair else { return tracks.compactMap { $0.reducedTrack } }
+    guard let repair else { return reduce ? tracks.compactMap { $0.reducedTrack } : tracks }
     return repair.repair(tracks).compactMap { $0.reducedTrack }
   }
 
