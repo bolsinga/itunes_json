@@ -135,7 +135,7 @@ extension Track {
     if let sortComposer = mediaItem.sortComposer {
       self.sortComposer = sortComposer
     }
-    if let sortName = mediaItem.sortTitle {
+    if let sortName = mediaItem.sortTitle, sortName != mediaItem.title {
       self.sortName = sortName
     }
     self.totalTime = mediaItem.totalTime
