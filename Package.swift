@@ -15,12 +15,10 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0")
   ],
   targets: [
-    .target(name: "iTunes"),
+    .target(
+      name: "iTunes",
+      dependencies: [.product(name: "ArgumentParser", package: "swift-argument-parser")]),
     .testTarget(name: "iTunesTests", dependencies: ["iTunes"]),
-    .executableTarget(
-      name: "tool",
-      dependencies: [
-        .byName(name: "iTunes"), .product(name: "ArgumentParser", package: "swift-argument-parser"),
-      ]),
+    .executableTarget(name: "tool", dependencies: [.byName(name: "iTunes")]),
   ]
 )
