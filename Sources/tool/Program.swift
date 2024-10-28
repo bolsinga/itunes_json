@@ -124,4 +124,41 @@ struct Program: AsyncParsableCommand {
 
     try await destination.emit(tracks, outputFile: outputFile, loggingToken: loggingToken)
   }
+
+  private static func readSTDIN() -> String? {
+    var input: String = ""
+
+    while let line = readLine() {
+      if input.isEmpty {
+        input = line
+      } else {
+        input += "\n" + line
+      }
+    }
+
+    return input
+  }
+
+  static public func parseStandardInAndArgumentsOrExit(arguments: [String]) async {
+    var text: String?
+    var arguments = arguments
+
+    if arguments.last == "-" {
+      arguments.removeLast()
+
+      text = Self.readSTDIN()
+    }
+
+    arguments.removeFirst()
+    if let text = text {
+      arguments.insert(text, at: 0)
+    }
+
+    let command = Self.parseOrExit(arguments)
+    do {
+      try await command.run()
+    } catch {
+      Self.exit(withError: error)
+    }
+  }
 }
