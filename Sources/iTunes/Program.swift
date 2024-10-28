@@ -1,11 +1,10 @@
 import ArgumentParser
 import Foundation
-import iTunes
 
 extension Source: EnumerableFlag {}
 extension Destination: EnumerableFlag {}
 
-struct Program: AsyncParsableCommand {
+public struct Program: AsyncParsableCommand {
   /// Input source type.
   @Flag(help: "Input Source type. Where Track data is being read from.") var source: Source =
     .itunes
@@ -73,7 +72,7 @@ struct Program: AsyncParsableCommand {
   }
 
   /// Validates the input matrix.
-  mutating func validate() throws {
+  public mutating func validate() throws {
     if jsonSource != nil && source != .jsonString {
       throw ValidationError("Passing JSON Source requires --json-string to be passed. \(source)")
     }
@@ -109,7 +108,7 @@ struct Program: AsyncParsableCommand {
     isRepairing || reduce
   }
 
-  func run() async throws {
+  public func run() async throws {
     let tracks = try await {
       let artistIncluded: ((String) -> Bool)? = {
         if let artistNameFilter, !artistNameFilter.isEmpty {
@@ -161,4 +160,6 @@ struct Program: AsyncParsableCommand {
       Self.exit(withError: error)
     }
   }
+
+  public init() {}  // This is public and empty to help the compiler.
 }
