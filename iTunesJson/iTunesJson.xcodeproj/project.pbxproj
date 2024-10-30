@@ -326,8 +326,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/bolsinga/itunes_json";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = exactVersion;
+				version = 1.7.5;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
