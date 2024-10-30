@@ -5,4 +5,6 @@
 //  Created by Greg Bolsinga on 10/30/24.
 //
 
-print("Hello World!")
+import iTunes
+
+await Program.parseStandardInAndArgumentsOrExit(arguments: CommandLine.arguments)

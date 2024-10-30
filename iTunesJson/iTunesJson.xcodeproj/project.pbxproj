@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		FE8291312CD28EE500AA6AC6 /* iTunes in Frameworks */ = {isa = PBXBuildFile; productRef = FE8291302CD28EE500AA6AC6 /* iTunes */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		FE82911D2CD28D4D00AA6AC6 /* iTunesJson.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iTunesJson.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE8291312CD28EE500AA6AC6 /* iTunes in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = iTunesJson;
 			packageProductDependencies = (
+				FE8291302CD28EE500AA6AC6 /* iTunes */,
 			);
 			productName = iTunesJson;
 			productReference = FE82911D2CD28D4D00AA6AC6 /* iTunesJson.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = FE8291142CD28D4D00AA6AC6;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FE82912F2CD28EE500AA6AC6 /* XCRemoteSwiftPackageReference "itunes_json" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FE82911E2CD28D4D00AA6AC6 /* Products */;
 			projectDirPath = "";
@@ -251,12 +260,13 @@
 				DEVELOPMENT_TEAM = "$(inherited)";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "$(PRODUCT_NAME) uses Apple Music to track listening data.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.7.5;
 				PRODUCT_BUNDLE_IDENTIFIER = gdb.iTunesJson;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -274,12 +284,13 @@
 				DEVELOPMENT_TEAM = "$(inherited)";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "$(PRODUCT_NAME) uses Apple Music to track listening data.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.7.5;
 				PRODUCT_BUNDLE_IDENTIFIER = gdb.iTunesJson;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -309,6 +320,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FE82912F2CD28EE500AA6AC6 /* XCRemoteSwiftPackageReference "itunes_json" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/bolsinga/itunes_json";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FE8291302CD28EE500AA6AC6 /* iTunes */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FE82912F2CD28EE500AA6AC6 /* XCRemoteSwiftPackageReference "itunes_json" */;
+			productName = iTunes;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FE8291152CD28D4D00AA6AC6 /* Project object */;
 }
