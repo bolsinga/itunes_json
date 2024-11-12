@@ -11,11 +11,7 @@ struct Repair: Repairing {
   let issues: [Issue]
 
   public func repair(_ tracks: [Track]) -> [Track] {
-    fix(adjustDates(tracks))
-  }
-
-  private func adjustDates(_ tracks: [Track]) -> [Track] {
-    tracks.datesAreAheadOneHour ? tracks.map { $0.moveDatesBackOneHour() } : tracks
+    fix(tracks)
   }
 
   internal func fix(_ tracks: [Track]) -> [Track] {
