@@ -14,9 +14,9 @@ extension URL {
 }
 
 extension Git {
-  func validate() throws {
+  func validateAndCheckout(branch: String) throws {
     try status()
-    try checkoutMain()
+    try checkout(branch: branch)
   }
 
   fileprivate var latestTags: [String] {
@@ -55,15 +55,17 @@ extension Git {
 }
 
 struct GitWriter: DestinationFileWriting {
-  let fileWriter: FileWriter
+  let fileWriter: DestinationFileWriting
+  let branch: String
+
+  var outputFile: URL { fileWriter.outputFile }
 
   func write(data: Data) throws {
-    let git = fileWriter.outputFile.parentDirectoryGit
+    let git = outputFile.parentDirectoryGit
 
-    try git.validate()
+    try git.validateAndCheckout(branch: branch)
     try fileWriter.write(data: data)
 
-    try git.addCommitTagPush(
-      filename: fileWriter.outputFile.filename, message: String.defaultDestinationName)
+    try git.addCommitTagPush(filename: outputFile.filename, message: String.defaultDestinationName)
   }
 }
