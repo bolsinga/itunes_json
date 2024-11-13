@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct SortableName: Equatable, Hashable, Sendable {
+struct SortableName: Codable, Equatable, Hashable, Sendable {
   let name: String
   let sorted: String
 
