@@ -13,10 +13,3 @@ extension Destination {
     return directory.appending(path: "\(name).\(self.filenameExtension)")
   }
 }
-
-extension URL {
-  func fileWriter(isGit: Bool) -> DestinationFileWriting {
-    let fileWriter = FileWriter(outputFile: self)
-    return isGit ? GitWriter(fileWriter: fileWriter) : fileWriter
-  }
-}

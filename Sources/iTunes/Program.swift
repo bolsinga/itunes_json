@@ -121,7 +121,8 @@ public struct Program: AsyncParsableCommand {
         reduce: isReducing)
     }()
 
-    try await destination.emit(tracks, outputFile: outputFile, loggingToken: loggingToken)
+    try await destination.emit(
+      tracks, outputFile: outputFile, loggingToken: loggingToken, branch: "main")
   }
 
   private static func readSTDIN() -> String? {

@@ -12,20 +12,24 @@ enum DataExportError: Error {
 }
 
 protocol DestinationFileWriting {
+  var outputFile: URL { get }
   func write(data: Data) throws
 }
 
 extension Destination {
-  fileprivate var isGit: Bool {
+  fileprivate func fileWriter(for outputFile: URL, branch: String) -> DestinationFileWriting {
+    let fileWriter: DestinationFileWriting = FileWriter(outputFile: outputFile)
     switch self {
     case .jsonGit:
-      return true
+      return GitWriter(fileWriter: fileWriter, branch: branch)
     default:
-      return false
+      return fileWriter
     }
   }
 
-  public func emit(_ tracks: [Track], outputFile: URL?, loggingToken: String?) async throws {
+  public func emit(_ tracks: [Track], outputFile: URL?, loggingToken: String?, branch: String)
+    async throws
+  {
     guard !tracks.isEmpty else {
       throw DataExportError.noTracks
     }
@@ -37,7 +41,7 @@ extension Destination {
       let data = try self.data(for: tracks, loggingToken: loggingToken)
 
       if let outputFile {
-        try outputFile.fileWriter(isGit: self.isGit).write(data: data)
+        try self.fileWriter(for: outputFile, branch: branch).write(data: data)
       } else {
         print("\(try data.asUTF8String())")
       }
