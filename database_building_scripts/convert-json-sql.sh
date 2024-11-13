@@ -16,7 +16,7 @@ fi
 
 ARTIST_FILTER="$3"
 
-JSON_TOOL=~/Applications/itunes_json/Products/usr/local/bin/itunes_json
+JSON_TOOL=~/Applications/iTunesJson.app/Contents/MacOS/iTunesJson
 
 mkdir -p $DST_DIR
 

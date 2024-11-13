@@ -14,7 +14,7 @@ if [ -z "$DST_DIR" ] ; then
     exit 1
 fi
 
-JSON_TOOL=~/Applications/itunes_json/Products/usr/local/bin/itunes_json
+JSON_TOOL=~/Applications/iTunesJson.app/Contents/MacOS/iTunesJson
 
 SUFFIX=".json.gz"
 
