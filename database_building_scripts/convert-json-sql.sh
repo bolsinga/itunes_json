@@ -26,7 +26,7 @@ REPAIR=`cat $REPAIR_FILE`
 pushd $BKUP_DIR
 
 COUNT=0
-for NAME in $(git tag --list | grep -v empty | sort) ; do
+for NAME in $(git tag --list | grep "^iTunes-\d\d\d\d-\d\d-\d\d\.\?\d\?\d\?$" | sort) ; do
   echo "Processing $NAME"
   git checkout $NAME
   cat itunes.json | $JSON_TOOL --artist-name-filter "${ARTIST_FILTER}" --logging-token $NAME --repair-source "$REPAIR" --json-string --sql-code - | tee >(gzip -c > $DST_DIR/$NAME.sql.gz) | sqlite3 $DST_DIR/$NAME.db &
