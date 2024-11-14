@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/zsh
 
 #  ~/bin/itunes-db-snapshot.sh | sqlite3 /tmp/now.db
 

@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/zsh
 
 trap "echo Exited!; exit;" SIGINT SIGTERM
 
