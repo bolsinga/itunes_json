@@ -3,6 +3,7 @@ import Foundation
 
 extension Source: EnumerableFlag {}
 extension Destination: EnumerableFlag {}
+extension SchemaConstraints: EnumerableFlag {}
 
 public struct Program: AsyncParsableCommand {
   /// Input source type.
@@ -16,6 +17,10 @@ public struct Program: AsyncParsableCommand {
     help:
       "Reduce Tracks to minimum required fields and music related only. Defaults to false, unless repairing."
   ) var reduce: Bool = false
+
+  /// Database schema constraints. Only applicable with --sql-code or --db.
+  @Flag(help: "Database schema constraints. Only applicable with --sql-code or --db.")
+  var schemaConstraints: SchemaConstraints = .strict
 
   /// Optional Output Directory for output file.
   @Option(
@@ -122,7 +127,8 @@ public struct Program: AsyncParsableCommand {
     }()
 
     try await destination.emit(
-      tracks, outputFile: outputFile, loggingToken: loggingToken, branch: "main")
+      tracks, outputFile: outputFile, loggingToken: loggingToken, branch: "main",
+      schemaConstraints: schemaConstraints)
   }
 
   private static func readSTDIN() -> String? {

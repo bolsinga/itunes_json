@@ -8,8 +8,22 @@
 import Foundation
 
 struct SongTableBuilder: TableBuilder {
-  // itunesid is TEXT since UInt is bigger than Int64 in sqlite
-  private let SongTable = """
+  private let strictSchema: String = """
+    CHECK(name != sortname),
+    CHECK(tracknumber > 0),
+    CHECK(year >= 0),
+    CHECK(duration > 0)
+    """
+
+  private let laxSchema: String = """
+    CHECK(name != sortname)
+    """
+
+  let tracks: [TrackRow]
+
+  func schema(constraints: SchemaConstraints) -> String {
+    // itunesid is TEXT since UInt is bigger than Int64 in sqlite
+    """
     CREATE TABLE songs (
       id INTEGER PRIMARY KEY,
       name TEXT NOT NULL,
@@ -28,15 +42,11 @@ struct SongTableBuilder: TableBuilder {
       FOREIGN KEY(artistid) REFERENCES artists(id),
       FOREIGN KEY(albumid) REFERENCES albums(id),
       CHECK(length(name) > 0),
-      CHECK(name != sortname),
-      CHECK(tracknumber > 0),
-      CHECK(year >= 0),
-      CHECK(duration > 0)
+      \(constraints == .strict ? strictSchema : laxSchema)
     );
     """
+  }
 
-  let tracks: [TrackRow]
-  var schema: String { SongTable }
   var rows: [RowSong] { tracks.map { $0.song } }
   var argumentBuilder: (@Sendable (Row) -> [Database.Value])?
 

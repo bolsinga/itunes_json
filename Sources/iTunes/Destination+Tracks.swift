@@ -27,7 +27,10 @@ extension Destination {
     }
   }
 
-  public func emit(_ tracks: [Track], outputFile: URL?, loggingToken: String?, branch: String)
+  public func emit(
+    _ tracks: [Track], outputFile: URL?, loggingToken: String?, branch: String,
+    schemaConstraints: SchemaConstraints
+  )
     async throws
   {
     guard !tracks.isEmpty else {
@@ -38,7 +41,8 @@ extension Destination {
 
     switch self {
     case .json, .sqlCode, .jsonGit:
-      let data = try self.data(for: tracks, loggingToken: loggingToken)
+      let data = try self.data(
+        for: tracks, loggingToken: loggingToken, schemaConstraints: schemaConstraints)
 
       if let outputFile {
         try self.fileWriter(for: outputFile, branch: branch).write(data: data)
@@ -50,7 +54,8 @@ extension Destination {
         preconditionFailure("Should have been caught during ParasableArguments.validate().")
       }
 
-      try await tracks.database(file: outputFile, loggingToken: loggingToken)
+      try await tracks.database(
+        file: outputFile, loggingToken: loggingToken, schemaConstrainsts: schemaConstraints)
     }
   }
 }

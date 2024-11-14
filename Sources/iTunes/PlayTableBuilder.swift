@@ -8,22 +8,32 @@
 import Foundation
 
 struct PlayTableBuilder: TableBuilder {
-  private let PlaysTable = """
+  private let strictSchema: String = """
+    UNIQUE(date),
+    FOREIGN KEY(songid) REFERENCES songs(id),
+    CHECK(length(date) > 0),
+    CHECK(delta > 0)
+    """
+
+  private let laxSchema: String = """
+    FOREIGN KEY(songid) REFERENCES songs(id)
+    """
+
+  let tracks: [TrackRow]
+
+  func schema(constraints: SchemaConstraints) -> String {
+    """
     CREATE TABLE plays (
       id INTEGER PRIMARY KEY,
       songid TEXT NOT NULL,
       date TEXT NOT NULL,
       delta INTEGER NOT NULL,
       UNIQUE(songid, date, delta),
-      UNIQUE(date),
-      FOREIGN KEY(songid) REFERENCES songs(id),
-      CHECK(length(date) > 0),
-      CHECK(delta > 0)
+      \(constraints == .strict ? strictSchema : laxSchema)
     );
     """
+  }
 
-  let tracks: [TrackRow]
-  var schema: String { PlaysTable }
   var rows: [RowPlay] { tracks.map { $0.play! } }
   var argumentBuilder: (@Sendable (Row) -> [Database.Value])?
 

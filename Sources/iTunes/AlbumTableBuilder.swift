@@ -8,7 +8,14 @@
 import Foundation
 
 struct AlbumTableBuilder: TableBuilder {
-  private let AlbumTable = """
+  private let strictSchema: String = """
+    CHECK(length(name) > 0),
+    CHECK(name != sortname),
+    CHECK(trackcount > 0),
+    """
+
+  func schema(constraints: SchemaConstraints) -> String {
+    """
     CREATE TABLE albums (
       id INTEGER PRIMARY KEY,
       name TEXT NOT NULL,
@@ -18,16 +25,14 @@ struct AlbumTableBuilder: TableBuilder {
       discnumber INTEGER NOT NULL,
       compilation INTEGER NOT NULL,
       UNIQUE(name, trackcount, disccount, discnumber, compilation),
-      CHECK(length(name) > 0),
-      CHECK(name != sortname),
-      CHECK(trackcount > 0),
+      \(constraints == .strict ? strictSchema : "")
       CHECK(disccount > 0),
       CHECK(discnumber > 0),
       CHECK(compilation = 0 OR compilation = 1)
     );
     """
+  }
 
-  var schema: String { AlbumTable }
   let rows: [RowAlbum]
 
   init(rows: [RowAlbum]) {
