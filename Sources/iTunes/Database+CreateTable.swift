@@ -10,7 +10,7 @@ import Foundation
 protocol TableBuilder: Sendable {
   associatedtype Row: SQLBindableInsert & Hashable & Sendable
 
-  var schema: String { get }
+  func schema(constraints: SchemaConstraints) -> String
   var rows: [Row] { get }
 
   var argumentBuilder: (@Sendable (Row) -> [Database.Value])? { get }
@@ -40,11 +40,13 @@ extension Database.PreparedStatement {
 }
 
 extension Database {
-  func createTable<B: TableBuilder>(_ builder: B) throws -> [B.Row: Int64] {
+  func createTable<B: TableBuilder>(_ builder: B, schemaConstraints: SchemaConstraints) throws -> [B
+    .Row: Int64]
+  {
     guard !builder.rows.isEmpty else { return [:] }
 
     return try self.transaction { db in
-      try db.execute(builder.schema)
+      try db.execute(builder.schema(constraints: schemaConstraints))
 
       let statement = try builder.preparedStatement(using: db)
 

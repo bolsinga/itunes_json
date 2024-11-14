@@ -8,17 +8,27 @@
 import Foundation
 
 struct ArtistTableBuilder: TableBuilder {
-  private let ArtistTable = """
-    CREATE TABLE artists (
-      id INTEGER PRIMARY KEY,
-      name TEXT NOT NULL UNIQUE,
-      sortname TEXT NOT NULL DEFAULT '',
-      CHECK(length(name) > 0),
-      CHECK(name != sortname)
-    );
+  private let strictSchema: String = """
+    name TEXT NOT NULL UNIQUE,
+    sortname TEXT NOT NULL DEFAULT '',
+    CHECK(length(name) > 0),
+    CHECK(name != sortname)
     """
 
-  var schema: String { ArtistTable }
+  private let laxSchema: String = """
+    name TEXT NOT NULL,
+    sortname TEXT NOT NULL DEFAULT ''
+    """
+
+  func schema(constraints: SchemaConstraints) -> String {
+    """
+    CREATE TABLE artists (
+      id INTEGER PRIMARY KEY,
+      \(constraints == .strict ? strictSchema : laxSchema)
+    );
+    """
+  }
+
   let rows: [RowArtist]
 
   init(rows: [RowArtist]) {
