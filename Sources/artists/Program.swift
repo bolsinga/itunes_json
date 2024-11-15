@@ -70,7 +70,8 @@ struct Program: AsyncParsableCommand {
   public func run() async throws {
     let tracks = try await source.gather(
       jsonSource, repair: nil, artistIncluded: nil, reduce: false)
-    try await destination.emitArtists(for: tracks, outputFile: outputFile)
+    try await destination.emitSortableNames(
+      for: tracks, outputFile: outputFile, descriptiveName: "artists")
   }
 
   private static func readSTDIN() -> String? {

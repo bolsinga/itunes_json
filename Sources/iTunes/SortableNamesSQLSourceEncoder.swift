@@ -11,7 +11,7 @@ extension SortableName: SQLBindableInsert {
   static var insertBinding: Database.Statement { SortableName().insert }
 
   var insert: Database.Statement {
-    "INSERT INTO artists (name, sortname) VALUES (\(name), \(sorted));"
+    "INSERT INTO current (name, sortname) VALUES (\(name), \(sorted));"
   }
 }
 
@@ -20,8 +20,10 @@ struct SortableNamesSQLSourceEncoder {
     case cannotMakeData
   }
 
-  func encode(_ names: [SortableName]) throws -> Data {
-    guard let data = SortableNamesTableBuilder(rows: names).encode().data(using: .utf8)
+  func encode(_ names: [SortableName], tableName: String) throws -> Data {
+    guard
+      let data = SortableNamesTableBuilder(rows: names, tableName: tableName).encode().data(
+        using: .utf8)
     else { throw SourceEncoderError.cannotMakeData }
     return data
   }

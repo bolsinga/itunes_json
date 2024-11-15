@@ -9,27 +9,29 @@ import Foundation
 import os
 
 extension Destination {
-  public func emitArtists(for tracks: [Track], outputFile: URL?) async throws {
-    let logger = Logger(type: "validation", category: "artist", token: nil)
+  public func emitSortableNames(for tracks: [Track], outputFile: URL?, descriptiveName: String)
+    async throws
+  {
+    let logger = Logger(type: "validation", category: descriptiveName, token: nil)
     let names = Array(
       Set(tracks.filter { $0.isSQLEncodable }.map { $0.artistName(logger: logger) }))
-    try await self.emit(names, outputFile: outputFile, branch: "artists") {
-      try self.data(for: $0)
+    try await self.emit(names, outputFile: outputFile, branch: descriptiveName) {
+      try self.data(for: $0, tableName: descriptiveName)
     } databaseBuilder: {
       guard let outputFile else {
         preconditionFailure("Should have been caught during ParasableArguments.validate().")
       }
 
-      try await $0.database(file: outputFile)
+      try await $0.database(file: outputFile, tableName: descriptiveName)
     }
   }
 
-  func data(for items: [SortableName]) throws -> Data {
+  func data(for items: [SortableName], tableName: String) throws -> Data {
     switch self {
     case .json:
       return try items.jsonData()
     case .sqlCode:
-      return try items.sqlData()
+      return try items.sqlData(tableName: tableName)
     case .db, .jsonGit:
       preconditionFailure("No Data for \(self)")
     }

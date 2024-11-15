@@ -14,15 +14,15 @@ extension Array where Element == SortableName {
     return try encoder.encode(self)
   }
 
-  func sqlData() throws -> Data {
-    try SortableNamesSQLSourceEncoder().encode(self)
+  func sqlData(tableName: String) throws -> Data {
+    try SortableNamesSQLSourceEncoder().encode(self, tableName: tableName)
   }
 
-  func database(file: URL) async throws {
+  func database(file: URL, tableName: String) async throws {
     var encoder: SortableNamesDBEncoder?
     do {
       encoder = try SortableNamesDBEncoder(
-        file: file, tableBuilder: SortableNamesTableBuilder(rows: self))
+        file: file, tableBuilder: SortableNamesTableBuilder(rows: self, tableName: tableName))
       try await encoder?.encode()
       await encoder?.close()
     } catch {
