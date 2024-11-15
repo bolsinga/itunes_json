@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct SQLSourceEncoder {
-  enum SQLSourceEncoderError: Error {
+struct TracksSQLSourceEncoder {
+  enum TracksSQLSourceEncoderError: Error {
     case cannotMakeData
   }
 
@@ -51,7 +51,7 @@ struct SQLSourceEncoder {
         tracks, loggingToken: loggingToken, schemaConstraints: schemaConstraints
       ).data(using: .utf8)
     else {
-      throw SQLSourceEncoderError.cannotMakeData
+      throw TracksSQLSourceEncoderError.cannotMakeData
     }
     return data
   }
