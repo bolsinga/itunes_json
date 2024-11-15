@@ -38,7 +38,7 @@ struct TracksSQLSourceEncoder {
 
   private func encode(
     _ tracks: [Track], loggingToken: String?, schemaConstraints: SchemaConstraints
-  ) throws -> String {
+  ) -> String {
     let encoder = Encoder(rowEncoder: tracks.rowEncoder(loggingToken))
     return encoder.sqlStatements(schemaConstraints: schemaConstraints)
   }
@@ -47,9 +47,8 @@ struct TracksSQLSourceEncoder {
     -> Data
   {
     guard
-      let data = try encode(
-        tracks, loggingToken: loggingToken, schemaConstraints: schemaConstraints
-      ).data(using: .utf8)
+      let data = encode(tracks, loggingToken: loggingToken, schemaConstraints: schemaConstraints)
+        .data(using: .utf8)
     else {
       throw TracksSQLSourceEncoderError.cannotMakeData
     }
