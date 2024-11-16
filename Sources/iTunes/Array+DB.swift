@@ -11,9 +11,9 @@ extension Array where Element == Track {
   public func database(file: URL, loggingToken: String?, schemaConstrainsts: SchemaConstraints)
     async throws
   {
-    var encoder: DBEncoder?
+    var encoder: TracksDBEncoder?
     do {
-      encoder = try DBEncoder(
+      encoder = try TracksDBEncoder(
         file: file, rowEncoder: self.rowEncoder(loggingToken), loggingToken: loggingToken)
       try await encoder?.encode(schemaConstrainsts: schemaConstrainsts)
       await encoder?.close()
