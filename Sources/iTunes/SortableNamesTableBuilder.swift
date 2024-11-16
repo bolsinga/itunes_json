@@ -22,7 +22,7 @@ struct SortableNamesTableBuilder: TableBuilder {
       sortname TEXT NOT NULL DEFAULT '',
       CHECK(length(name) > 0),
       CHECK(name != sortname)
-    )
+    );
     """
   }
 
