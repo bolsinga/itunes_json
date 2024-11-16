@@ -1,5 +1,5 @@
 //
-//  DBEncoder.swift
+//  TracksDBEncoder.swift
 //
 //
 //  Created by Greg Bolsinga on 1/2/24.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class DBEncoder {
+final class TracksDBEncoder {
   private let db: Database
   private let rowEncoder: TrackRowEncoder
 
