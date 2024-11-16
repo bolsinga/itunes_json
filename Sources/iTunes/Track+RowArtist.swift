@@ -9,7 +9,7 @@ import Foundation
 import os
 
 extension Track: RowArtistInterface {
-  public func artistName(logger: Logger) -> SortableName {
+  func artistName(logger: Logger) -> SortableName {
     guard let name = (artist ?? albumArtist ?? nil) else {
       logger.error("\(debugLogInformation, privacy: .public)")
       return SortableName()

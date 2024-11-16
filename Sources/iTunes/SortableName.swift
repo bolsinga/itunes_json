@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct SortableName: Hashable, Sendable {
+struct SortableName: Equatable, Hashable, Sendable {
   let name: String
   let sorted: String
 
@@ -22,7 +22,7 @@ extension SortableName: Comparable {
     !sorted.isEmpty ? sorted : name
   }
 
-  public static func < (lhs: SortableName, rhs: SortableName) -> Bool {
+  static func < (lhs: SortableName, rhs: SortableName) -> Bool {
     lhs.sort < rhs.sort
   }
 }
