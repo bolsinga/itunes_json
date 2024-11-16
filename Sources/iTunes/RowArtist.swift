@@ -8,7 +8,7 @@
 import Foundation
 import os
 
-public protocol RowArtistInterface {
+protocol RowArtistInterface {
   func artistName(logger: Logger) -> SortableName
 }
 
