@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class TracksDBEncoder {
+struct TracksDBEncoder {
   private let db: Database
   private let rowEncoder: TrackRowEncoder
 
