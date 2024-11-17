@@ -18,7 +18,9 @@ struct SortableNamesDBEncoder {
 
   @discardableResult
   func encode() async throws -> [SortableName: Int64] {
-    try await db.createTable(tableBuilder, schemaConstraints: .strict)
+    let result = try await db.createTable(tableBuilder, schemaConstraints: .strict)
+    for sql in tableBuilder.dropStatements { try await db.execute(sql) }
+    return result
   }
 
   func close() async {
