@@ -126,7 +126,8 @@ public struct Program: AsyncParsableCommand {
         reduce: isReducing)
     }()
 
-    try await destination.emit(tracks, outputFile: outputFile, branch: "main") {
+    try await destination.emit(tracks, outputFile: outputFile, branch: "main", tagPrefix: "iTunes")
+    {
       try destination.data(
         for: $0, loggingToken: loggingToken, schemaConstraints: schemaConstraints)
     } databaseBuilder: {

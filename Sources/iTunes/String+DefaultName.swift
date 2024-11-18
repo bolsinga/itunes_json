@@ -8,10 +8,10 @@
 import Foundation
 
 extension String {
-  static var defaultDestinationName: String {
+  var defaultDestinationName: String {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy-MM-dd"
     let dateString = dateFormatter.string(from: Date())
-    return "iTunes-\(dateString)"
+    return "\(self)-\(dateString)"
   }
 }
