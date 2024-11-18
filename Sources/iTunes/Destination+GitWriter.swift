@@ -16,7 +16,7 @@ extension URL {
 extension Git {
   func validateAndCheckout(branch: String) throws {
     try status()
-    try checkout(branch: branch)
+    try checkout(commit: branch)
   }
 
   fileprivate var latestTags: [String] {
