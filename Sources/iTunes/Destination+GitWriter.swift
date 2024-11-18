@@ -57,6 +57,7 @@ extension Git {
 struct GitWriter: DestinationFileWriting {
   let fileWriter: DestinationFileWriting
   let branch: String
+  let tagPrefix: String
 
   var outputFile: URL { fileWriter.outputFile }
 
@@ -66,6 +67,7 @@ struct GitWriter: DestinationFileWriting {
     try git.validateAndCheckout(branch: branch)
     try fileWriter.write(data: data)
 
-    try git.addCommitTagPush(filename: outputFile.filename, message: String.defaultDestinationName)
+    try git.addCommitTagPush(
+      filename: outputFile.filename, message: tagPrefix.defaultDestinationName)
   }
 }
