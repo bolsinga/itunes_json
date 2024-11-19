@@ -12,6 +12,10 @@ private enum JSONDecodingError: Error {
 }
 
 extension Track {
+  static public func createFromURL(_ url: URL) throws -> [Track] {
+    try createFromData(try Data(contentsOf: url, options: .mappedIfSafe))
+  }
+
   static public func createFromData(_ data: Data) throws -> [Track] {
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
