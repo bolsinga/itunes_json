@@ -1,5 +1,5 @@
 //
-//  Destination+GitWriter.swift
+//  GitBackupWriter.swift
 //
 //
 //  Created by Greg Bolsinga on 3/31/24.
@@ -14,7 +14,7 @@ extension URL {
 }
 
 extension Git {
-  func validateAndCheckout(branch: String) throws {
+  fileprivate func validateAndCheckout(branch: String) throws {
     try status()
     try checkout(commit: branch)
   }
@@ -24,7 +24,7 @@ extension Git {
     return latest
   }
 
-  func addCommitTagPush(filename: String, message: String) throws {
+  fileprivate func addCommitTagPush(filename: String, message: String) throws {
     try add(filename)
 
     let backup = {
@@ -54,7 +54,7 @@ extension Git {
   }
 }
 
-struct GitWriter: DestinationFileWriting {
+struct GitBackupWriter: DestinationFileWriting {
   let fileWriter: DestinationFileWriting
   let branch: String
   let tagPrefix: String
