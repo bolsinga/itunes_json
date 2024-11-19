@@ -23,7 +23,9 @@ enum GitError: Error {
 
 extension Process {
   @discardableResult
-  fileprivate static func git(arguments: [String], errorBuilder: (Int32) -> Error) throws
+  fileprivate static func git(
+    arguments: [String], errorBuilder: (Int32) -> Error, suppressStandardErr: Bool
+  ) throws
     -> [String]
   {
     let git = Self.init()
@@ -31,6 +33,7 @@ extension Process {
     git.arguments = arguments
     let standardOutputPipe = Pipe()
     git.standardOutput = standardOutputPipe
+    if suppressStandardErr { git.standardError = nil }
     try git.run()
     git.waitUntilExit()
     guard git.terminationStatus == 0 else { throw errorBuilder(git.terminationStatus) }
@@ -45,9 +48,11 @@ extension Process {
 
 struct Git {
   private let path: String
+  private let suppressStandardErr: Bool
 
-  init(directory: URL) {
+  init(directory: URL, suppressStandardErr: Bool = false) {
     self.path = directory.path(percentEncoded: false)
+    self.suppressStandardErr = suppressStandardErr
   }
 
   fileprivate var gitPathArguments: [String] {
@@ -56,7 +61,9 @@ struct Git {
 
   @discardableResult
   fileprivate func git(_ arguments: [String], errorBuilder: (Int32) -> Error) throws -> [String] {
-    try Process.git(arguments: gitPathArguments + arguments, errorBuilder: errorBuilder)
+    try Process.git(
+      arguments: gitPathArguments + arguments, errorBuilder: errorBuilder,
+      suppressStandardErr: suppressStandardErr)
   }
 
   func status() throws {
