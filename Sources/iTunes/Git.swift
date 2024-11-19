@@ -62,8 +62,8 @@ struct Git {
     try git(["status"]) { GitError.status($0) }
   }
 
-  func checkout(branch: String) throws {
-    try git(["checkout", branch]) { GitError.main($0) }
+  func checkout(commit: String) throws {
+    try git(["checkout", commit]) { GitError.main($0) }
   }
 
   func add(_ filename: String) throws {
