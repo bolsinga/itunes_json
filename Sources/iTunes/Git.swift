@@ -43,9 +43,11 @@ extension Process {
 }
 
 struct Git {
+  let directory: URL
   private let path: String
 
   init(directory: URL) {
+    self.directory = directory
     self.path = directory.path(percentEncoded: false)
   }
 
