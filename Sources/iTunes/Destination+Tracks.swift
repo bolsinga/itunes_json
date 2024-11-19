@@ -23,7 +23,7 @@ extension Destination {
     let fileWriter: DestinationFileWriting = FileWriter(outputFile: outputFile)
     switch self {
     case .jsonGit:
-      return GitWriter(fileWriter: fileWriter, branch: branch, tagPrefix: tagPrefix)
+      return GitBackupWriter(fileWriter: fileWriter, branch: branch, tagPrefix: tagPrefix)
     default:
       return fileWriter
     }
