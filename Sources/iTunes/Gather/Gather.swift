@@ -16,14 +16,14 @@ extension Logger {
 }
 
 extension Array where Element == Track {
-  var artistNames: [SortableName] {
+  fileprivate var artistNames: [SortableName] {
     [SortableName](
       Set(self.filter { $0.isSQLEncodable }.compactMap { $0.artistName }))
   }
 }
 
 extension URL {
-  var itunes: URL { self.appending(path: "itunes.json") }
+  fileprivate var itunes: URL { self.appending(path: "itunes.json") }
 }
 
 private func currentArtists() async throws -> [SortableName] {
@@ -53,7 +53,7 @@ private func trackData(from directory: URL, tagPrefix: String) throws -> [Data] 
   return tagData
 }
 
-func gatherAllKnownArtists(from gitDirectory: URL) async throws -> Set<SortableName> {
+private func gatherAllKnownArtists(from gitDirectory: URL) async throws -> Set<SortableName> {
   var tagData = try trackData(from: gitDirectory, tagPrefix: mainPrefix)
 
   return try await withThrowingTaskGroup(of: Set<SortableName>.self) { group in
@@ -72,7 +72,7 @@ func gatherAllKnownArtists(from gitDirectory: URL) async throws -> Set<SortableN
   }
 }
 
-func gatherUnknownArtists(from gitDirectory: URL) async throws -> [SortableName] {
+private func gatherUnknownArtists(from gitDirectory: URL) async throws -> [SortableName] {
   async let currentArtists = try await currentArtists()
 
   let allKnownArtists = try await gatherAllKnownArtists(from: gitDirectory)
