@@ -18,7 +18,7 @@ extension Logger {
 extension Array where Element == Track {
   var artistNames: [SortableName] {
     [SortableName](
-      Set(self.filter { $0.isSQLEncodable }.map { $0.artistName(logger: Logger.gather) }))
+      Set(self.filter { $0.isSQLEncodable }.compactMap { $0.artistName }))
   }
 }
 
