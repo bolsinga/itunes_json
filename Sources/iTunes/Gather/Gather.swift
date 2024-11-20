@@ -42,23 +42,31 @@ private func currentArtists() async throws -> [SortableName] {
   return tracks.artistNames
 }
 
-func gatherUnknownArtists(from gitDirectory: URL) async throws -> [SortableName] {
-  let git = Git(directory: gitDirectory, suppressStandardErr: true)
+private func trackData(from directory: URL, tagPrefix: String) throws -> [Data] {
+  let git = Git(directory: directory, suppressStandardErr: true)
 
   try git.status()
 
-  let currentArtists = try await currentArtists()
-
   var tagData: [Data] = []
 
-  let tags = try git.tags().matchingFormattedTag(prefix: mainPrefix).sorted()
+  let tags = try git.tags().matchingFormattedTag(prefix: tagPrefix).sorted()
   for tag in tags {
     Logger.gather.info("tag: \(tag)")
 
     try git.checkout(commit: tag)
 
-    tagData.append(try Data(contentsOf: gitDirectory.itunes))
+    tagData.append(try Data(contentsOf: directory.itunes))
   }
+
+  try git.checkout(commit: "main")
+
+  return tagData
+}
+
+func gatherUnknownArtists(from gitDirectory: URL) async throws -> [SortableName] {
+  let currentArtists = try await currentArtists()
+
+  var tagData = try trackData(from: gitDirectory, tagPrefix: mainPrefix)
 
   let unknownArtists: Set<SortableName> = try await withThrowingTaskGroup(
     of: Set<SortableName>.self
@@ -76,8 +84,6 @@ func gatherUnknownArtists(from gitDirectory: URL) async throws -> [SortableName]
     }
     return unknownArtists
   }
-
-  try git.checkout(commit: "main")
 
   return Array(unknownArtists)
 }
