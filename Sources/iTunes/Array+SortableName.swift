@@ -8,12 +8,6 @@
 import Foundation
 
 extension Array where Element == SortableName {
-  func jsonData() throws -> Data {
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-    return try encoder.encode(self)
-  }
-
   func sqlData(tableName: String) throws -> Data {
     try SortableNamesSQLSourceEncoder().encode(self, tableName: tableName)
   }
