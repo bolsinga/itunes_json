@@ -1,18 +1,17 @@
 //
-//  Array+ItemJsonData.swift
+//  Array+Codable.swift
 //
 //
-//  Created by Greg Bolsinga on 2/16/24.
+//  Created by Greg Bolsinga on 12/7/23.
 //
 
 import Foundation
 
-extension Array where Element == Item {
-  internal func jsonData() throws -> Data {
+extension Array where Element: Codable {
+  public func jsonData() throws -> Data {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     encoder.dateEncodingStrategy = .iso8601
-
     return try encoder.encode(self)
   }
 }
