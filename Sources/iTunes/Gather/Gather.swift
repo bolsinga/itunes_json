@@ -47,18 +47,35 @@ func gatherUnknownArtists(from gitDirectory: URL) async throws -> [SortableName]
 
   try git.status()
 
-  async let currentArtists = try await currentArtists()
+  let currentArtists = try await currentArtists()
 
-  var unknownArtists: Set<SortableName> = []
+  var tagData: [Data] = []
 
   let tags = try git.tags().matchingFormattedTag(prefix: mainPrefix).sorted()
   for tag in tags {
     Logger.gather.info("tag: \(tag)")
+
     try git.checkout(commit: tag)
 
-    let artists = Set(try Track.createFromURL(gitDirectory.itunes).artistNames)
-    unknownArtists = unknownArtists.union(artists.subtracting(try await currentArtists))
+    tagData.append(try Data(contentsOf: gitDirectory.itunes))
   }
+
+  let unknownArtists: Set<SortableName> = try await withThrowingTaskGroup(
+    of: Set<SortableName>.self
+  ) { group in
+    for data in tagData {
+      group.addTask {
+        Set(try Track.createFromData(data).artistNames)
+      }
+    }
+
+    var unknownArtists: Set<SortableName> = []
+    for try await artists in group {
+      unknownArtists = unknownArtists.union(artists.subtracting(currentArtists))
+    }
+    return unknownArtists
+  }
+
   try git.checkout(commit: "main")
 
   return Array(unknownArtists)
