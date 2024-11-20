@@ -53,14 +53,10 @@ private func trackData(from directory: URL, tagPrefix: String) throws -> [Data] 
   return tagData
 }
 
-func gatherUnknownArtists(from gitDirectory: URL) async throws -> [SortableName] {
-  let currentArtists = try await currentArtists()
-
+func gatherAllKnownArtists(from gitDirectory: URL) async throws -> Set<SortableName> {
   var tagData = try trackData(from: gitDirectory, tagPrefix: mainPrefix)
 
-  let unknownArtists: Set<SortableName> = try await withThrowingTaskGroup(
-    of: Set<SortableName>.self
-  ) { group in
+  return try await withThrowingTaskGroup(of: Set<SortableName>.self) { group in
     for data in tagData.reversed() {
       tagData.removeLast()
       group.addTask {
@@ -68,14 +64,20 @@ func gatherUnknownArtists(from gitDirectory: URL) async throws -> [SortableName]
       }
     }
 
-    var unknownArtists: Set<SortableName> = []
-    for try await artists in group {
-      unknownArtists = unknownArtists.union(artists.subtracting(currentArtists))
+    var allArtistNames: Set<SortableName> = []
+    for try await artistNames in group {
+      allArtistNames = allArtistNames.union(artistNames)
     }
-    return unknownArtists
+    return allArtistNames
   }
+}
 
-  return Array(unknownArtists)
+func gatherUnknownArtists(from gitDirectory: URL) async throws -> [SortableName] {
+  async let currentArtists = try await currentArtists()
+
+  let allKnownArtists = try await gatherAllKnownArtists(from: gitDirectory)
+
+  return Array(allKnownArtists.subtracting(try await currentArtists))
 }
 
 public func gatherUnknownArtists(_ gitDirectory: URL) async throws {
