@@ -83,5 +83,6 @@ func gatherUnknownArtists(from gitDirectory: URL) async throws -> [SortableName]
 }
 
 public func gatherUnknownArtists(_ gitDirectory: URL) async throws {
-  try await gatherUnknownArtists(from: gitDirectory).sorted().forEach { print($0) }
+  let data = try await gatherUnknownArtists(from: gitDirectory).sorted().jsonData()
+  print("\(try data.asUTF8String())")
 }
