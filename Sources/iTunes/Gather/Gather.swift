@@ -63,7 +63,8 @@ func gatherUnknownArtists(from gitDirectory: URL) async throws -> [SortableName]
   let unknownArtists: Set<SortableName> = try await withThrowingTaskGroup(
     of: Set<SortableName>.self
   ) { group in
-    for data in tagData {
+    for data in tagData.reversed() {
+      tagData.removeLast()
       group.addTask {
         Set(try Track.createFromData(data).artistNames)
       }
