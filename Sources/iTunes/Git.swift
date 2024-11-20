@@ -21,31 +21,6 @@ enum GitError: Error {
   case tags(Int32)
 }
 
-extension Process {
-  @discardableResult
-  fileprivate static func git(
-    arguments: [String], errorBuilder: (Int32) -> Error, suppressStandardErr: Bool
-  ) throws
-    -> [String]
-  {
-    let git = Self.init()
-    git.executableURL = URL(filePath: "/usr/bin/git")
-    git.arguments = arguments
-    let standardOutputPipe = Pipe()
-    git.standardOutput = standardOutputPipe
-    if suppressStandardErr { git.standardError = nil }
-    try git.run()
-    git.waitUntilExit()
-    guard git.terminationStatus == 0 else { throw errorBuilder(git.terminationStatus) }
-
-    let standardOutputData = try standardOutputPipe.fileHandleForReading.readToEnd()
-    guard let standardOutputData else { return [] }
-
-    guard let standardOutput = String(data: standardOutputData, encoding: .utf8) else { return [] }
-    return standardOutput.components(separatedBy: "\n").filter { !$0.isEmpty }
-  }
-}
-
 struct Git {
   private let path: String
   private let suppressStandardErr: Bool
@@ -61,9 +36,23 @@ struct Git {
 
   @discardableResult
   fileprivate func git(_ arguments: [String], errorBuilder: (Int32) -> Error) throws -> [String] {
-    try Process.git(
-      arguments: gitPathArguments + arguments, errorBuilder: errorBuilder,
-      suppressStandardErr: suppressStandardErr)
+    let gitArguments = gitPathArguments + arguments
+
+    let git = Process()
+    git.executableURL = URL(filePath: "/usr/bin/git")
+    git.arguments = gitArguments
+    let standardOutputPipe = Pipe()
+    git.standardOutput = standardOutputPipe
+    if suppressStandardErr { git.standardError = nil }
+    try git.run()
+    git.waitUntilExit()
+    guard git.terminationStatus == 0 else { throw errorBuilder(git.terminationStatus) }
+
+    let standardOutputData = try standardOutputPipe.fileHandleForReading.readToEnd()
+    guard let standardOutputData else { return [] }
+
+    guard let standardOutput = String(data: standardOutputData, encoding: .utf8) else { return [] }
+    return standardOutput.components(separatedBy: "\n").filter { !$0.isEmpty }
   }
 
   func status() throws {
