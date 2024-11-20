@@ -26,16 +26,6 @@ extension URL {
   var itunes: URL { self.appending(path: "itunes.json") }
 }
 
-extension SortableName: CustomStringConvertible {
-  var description: String {
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = [.sortedKeys]
-    guard let data = try? encoder.encode(self), let value = String(data: data, encoding: .utf8)
-    else { return "" }
-    return value
-  }
-}
-
 private func currentArtists() async throws -> [SortableName] {
   let tracks = try await Source.itunes.gather(
     nil, repair: nil, artistIncluded: nil, reduce: false)
