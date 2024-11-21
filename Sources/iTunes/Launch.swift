@@ -17,6 +17,7 @@ import Foundation
 ///   - input: Data to pass to the tool’s `stdin`; defaults to empty.
 ///   - completionHandler: Called on the main queue when the tool has terminated.
 
+@MainActor
 func launch(
   tool: URL, arguments: [String] = [], input: Data = Data(), suppressStandardErr: Bool = false,
   completionHandler: @escaping CompletionHandler
@@ -167,6 +168,7 @@ func launch(
 typealias CompletionHandler = (_ result: Result<Int32, Error>, _ output: Data) -> Void
 
 /// async version of the above.
+@MainActor
 func launch(
   tool: URL, arguments: [String] = [], input: Data = Data(), suppressStandardErr: Bool = false
 ) async throws -> (Int32, Data) {
