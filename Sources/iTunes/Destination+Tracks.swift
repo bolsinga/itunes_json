@@ -13,7 +13,7 @@ enum DataExportError: Error {
 
 protocol DestinationFileWriting {
   var outputFile: URL { get }
-  func write(data: Data) throws
+  func write(data: Data) async throws
 }
 
 extension Destination {
@@ -46,7 +46,8 @@ extension Destination {
     case .json, .sqlCode, .jsonGit:
       let data = try dataBuilder(items)
       if let outputFile {
-        try self.fileWriter(for: outputFile, branch: branch, tagPrefix: tagPrefix).write(data: data)
+        try await self.fileWriter(for: outputFile, branch: branch, tagPrefix: tagPrefix).write(
+          data: data)
       } else {
         print("\(try data.asUTF8String())")
       }
