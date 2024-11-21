@@ -32,29 +32,29 @@ private func currentArtists() async throws -> [SortableName] {
   return tracks.artistNames
 }
 
-private func trackData(from directory: URL, tagPrefix: String) throws -> [Data] {
+private func trackData(from directory: URL, tagPrefix: String) async throws -> [Data] {
   let git = Git(directory: directory, suppressStandardErr: true)
 
-  try git.status()
+  try await git.status()
 
   var tagData: [Data] = []
 
-  let tags = try git.tags().matchingFormattedTag(prefix: tagPrefix).sorted()
+  let tags = try await git.tags().matchingFormattedTag(prefix: tagPrefix).sorted()
   for tag in tags {
     Logger.gather.info("tag: \(tag)")
 
-    try git.checkout(commit: tag)
+    try await git.checkout(commit: tag)
 
     tagData.append(try Data(contentsOf: directory.itunes))
   }
 
-  try git.checkout(commit: "main")
+  try await git.checkout(commit: "main")
 
   return tagData
 }
 
 private func gatherAllKnownArtists(from gitDirectory: URL) async throws -> Set<SortableName> {
-  var tagData = try trackData(from: gitDirectory, tagPrefix: mainPrefix)
+  var tagData = try await trackData(from: gitDirectory, tagPrefix: mainPrefix)
 
   return try await withThrowingTaskGroup(of: Set<SortableName>.self) { group in
     for data in tagData.reversed() {

@@ -14,43 +14,43 @@ extension URL {
 }
 
 extension Git {
-  fileprivate func validateAndCheckout(branch: String) throws {
-    try status()
-    try checkout(commit: branch)
+  fileprivate func validateAndCheckout(branch: String) async throws {
+    try await status()
+    try await checkout(commit: branch)
   }
 
-  fileprivate var latestTags: [String] {
-    guard let latest = try? tagContains("origin/main").sorted() else { return [] }
+  fileprivate func latestTags() async -> [String] {
+    guard let latest = try? await tagContains("origin/main").sorted() else { return [] }
     return latest
   }
 
-  fileprivate func addCommitTagPush(filename: String, message: String) throws {
-    try add(filename)
+  fileprivate func addCommitTagPush(filename: String, message: String) async throws {
+    try await add(filename)
 
-    let backup = {
+    let backup = await {
       do {
-        try diff()
+        try await diff()
         return GitBackup.noChanges
       } catch {
         return GitBackup.changes
       }
     }()
 
-    let backupName = backup.backupName(baseName: message, existingNames: latestTags)
+    let backupName = backup.backupName(baseName: message, existingNames: await latestTags())
 
     switch backup {
     case .noChanges:
       break
     case .changes:
-      try commit(backupName)
+      try await commit(backupName)
     }
 
-    try tag(backupName)
+    try await tag(backupName)
 
-    try push()
-    try pushTags()
+    try await push()
+    try await pushTags()
 
-    try gc()
+    try await gc()
   }
 }
 
@@ -61,13 +61,13 @@ struct GitBackupWriter: DestinationFileWriting {
 
   var outputFile: URL { fileWriter.outputFile }
 
-  func write(data: Data) throws {
+  func write(data: Data) async throws {
     let git = outputFile.parentDirectoryGit
 
-    try git.validateAndCheckout(branch: branch)
-    try fileWriter.write(data: data)
+    try await git.validateAndCheckout(branch: branch)
+    try await fileWriter.write(data: data)
 
-    try git.addCommitTagPush(
+    try await git.addCommitTagPush(
       filename: outputFile.filename, message: tagPrefix.defaultDestinationName)
   }
 }
