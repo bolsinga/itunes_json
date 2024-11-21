@@ -167,7 +167,6 @@ func launch(
 typealias CompletionHandler = (_ result: Result<Int32, Error>, _ output: Data) -> Void
 
 /// async version of the above.
-@MainActor
 func launch(
   tool: URL, arguments: [String] = [], input: Data = Data(), suppressStandardErr: Bool = false
 ) async throws -> (Int32, Data) {
