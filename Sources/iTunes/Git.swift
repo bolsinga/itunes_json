@@ -40,20 +40,12 @@ struct Git {
   {
     let gitArguments = gitPathArguments + arguments
 
-    let git = Process()
-    git.executableURL = URL(filePath: "/usr/bin/git")
-    git.arguments = gitArguments
-    let standardOutputPipe = Pipe()
-    git.standardOutput = standardOutputPipe
-    if suppressStandardErr { git.standardError = nil }
-    try git.run()
-    git.waitUntilExit()
-    guard git.terminationStatus == 0 else { throw errorBuilder(git.terminationStatus) }
+    let result = try await launch(
+      tool: URL(filePath: "/usr/bin/git"), arguments: gitArguments,
+      suppressStandardErr: suppressStandardErr)
+    guard result.0 == 0 else { throw errorBuilder(result.0) }
 
-    let standardOutputData = try standardOutputPipe.fileHandleForReading.readToEnd()
-    guard let standardOutputData else { return [] }
-
-    guard let standardOutput = String(data: standardOutputData, encoding: .utf8) else { return [] }
+    guard let standardOutput = String(data: result.1, encoding: .utf8) else { return [] }
     return standardOutput.components(separatedBy: "\n").filter { !$0.isEmpty }
   }
 
