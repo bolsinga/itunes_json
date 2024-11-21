@@ -102,6 +102,6 @@ struct Git {
   }
 
   func show(commit: String, path: String) async throws -> Data {
-    try await gitData(["--no-pager", "show", "\(commit):\(path)"]) { GitError.show($0) }
+    try await gitData(["show", "\(commit):\(path)"]) { GitError.show($0) }
   }
 }
