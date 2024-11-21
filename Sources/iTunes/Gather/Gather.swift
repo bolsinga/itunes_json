@@ -9,6 +9,7 @@ import Foundation
 import os
 
 let mainPrefix = "iTunes"
+let fileName = "itunes.json"
 
 extension Logger {
   fileprivate static let gather = Logger(
@@ -20,10 +21,6 @@ extension Array where Element == Track {
     [SortableName](
       Set(self.filter { $0.isSQLEncodable }.compactMap { $0.artistName }))
   }
-}
-
-extension URL {
-  fileprivate var itunes: URL { self.appending(path: "itunes.json") }
 }
 
 private func currentArtists() async throws -> [SortableName] {
@@ -43,12 +40,8 @@ private func trackData(from directory: URL, tagPrefix: String) async throws -> [
   for tag in tags {
     Logger.gather.info("tag: \(tag)")
 
-    try await git.checkout(commit: tag)
-
-    tagData.append(try Data(contentsOf: directory.itunes))
+    tagData.append(try await git.show(commit: tag, path: fileName))
   }
-
-  try await git.checkout(commit: "main")
 
   return tagData
 }

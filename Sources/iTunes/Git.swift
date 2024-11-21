@@ -19,6 +19,7 @@ enum GitError: Error {
   case diff(Int32)
   case contains(Int32)
   case tags(Int32)
+  case show(Int32)
 }
 
 struct Git {
@@ -35,8 +36,8 @@ struct Git {
   }
 
   @discardableResult
-  fileprivate func git(_ arguments: [String], errorBuilder: (Int32) -> Error) async throws
-    -> [String]
+  fileprivate func gitData(_ arguments: [String], errorBuilder: (Int32) -> Error) async throws
+    -> Data
   {
     let gitArguments = gitPathArguments + arguments
 
@@ -44,8 +45,15 @@ struct Git {
       tool: URL(filePath: "/usr/bin/git"), arguments: gitArguments,
       suppressStandardErr: suppressStandardErr)
     guard result.0 == 0 else { throw errorBuilder(result.0) }
+    return result.1
+  }
 
-    guard let standardOutput = String(data: result.1, encoding: .utf8) else { return [] }
+  @discardableResult
+  fileprivate func git(_ arguments: [String], errorBuilder: (Int32) -> Error) async throws
+    -> [String]
+  {
+    let data = try await gitData(arguments, errorBuilder: errorBuilder)
+    guard let standardOutput = String(data: data, encoding: .utf8) else { return [] }
     return standardOutput.components(separatedBy: "\n").filter { !$0.isEmpty }
   }
 
@@ -91,5 +99,9 @@ struct Git {
 
   func tags() async throws -> [String] {
     try await git(["tag"]) { GitError.tags(($0)) }
+  }
+
+  func show(commit: String, path: String) async throws -> Data {
+    try await gitData(["show", "\(commit):\(path)"]) { GitError.show($0) }
   }
 }
