@@ -2,36 +2,123 @@
 //  Launch.swift
 //
 //  Copied from https://developer.apple.com/forums/thread/690310
-//  Added async option using withCheckedThrowingContinuation. Also added the option to suppress the standardError.
+//  Added the option to suppress the standardError.
+//  Re-written using Swift Concurrency GroupTasks and Continuations.
 //
 
 import Foundation
 
+private func posixErr(_ error: Int32) -> Error {
+  NSError(domain: NSPOSIXErrorDomain, code: Int(error), userInfo: nil)
+}
+
+extension DispatchIO {
+  fileprivate convenience init(readingPipe: Pipe, queue: DispatchQueue) {
+    self.init(
+      type: .stream, fileDescriptor: readingPipe.fileHandleForReading.fileDescriptor, queue: queue
+    ) { _ in
+      // `FileHandle` will automatically close the underlying file
+      // descriptor when you release the last reference to it.  By holding
+      // on to `readingPipe` until here, we ensure that doesn’t happen. And
+      // as we have to hold a reference anyway, we might as well close it
+      // explicitly.
+      try! readingPipe.fileHandleForReading.close()
+    }
+  }
+
+  fileprivate convenience init(writingPipe: Pipe, queue: DispatchQueue) {
+    self.init(
+      type: .stream, fileDescriptor: writingPipe.fileHandleForWriting.fileDescriptor, queue: queue
+    ) { _ in
+      // `FileHandle` will automatically close the underlying file
+      // descriptor when you release the last reference to it.  By holding
+      // on to `readingPipe` until here, we ensure that doesn’t happen. And
+      // as we have to hold a reference anyway, we might as well close it
+      // explicitly.
+      try! writingPipe.fileHandleForWriting.close()
+    }
+  }
+}
+
+private func write(
+  dispatchIO: DispatchIO, data: Data, queue: DispatchQueue,
+  completionHandler: @escaping (Error?) -> Void
+) {
+  let inputDD = data.withUnsafeBytes { DispatchData(bytes: $0) }
+  dispatchIO.write(offset: 0, data: inputDD, queue: queue) { isDone, _, err in
+    if isDone || err != 0 {
+      dispatchIO.close()
+      var error: Error?
+      if err != 0 { error = posixErr(err) }
+      completionHandler(error)
+    }
+  }
+}
+
+private func write(dispatchIO: DispatchIO, data: Data, queue: DispatchQueue) async throws {
+  let _: Bool = try await withCheckedThrowingContinuation { continuation in
+    write(dispatchIO: dispatchIO, data: data, queue: queue) { error in
+      if let error {
+        continuation.resume(throwing: error)
+      } else {
+        continuation.resume(returning: true)
+      }
+    }
+  }
+}
+
+private func read(
+  dispatchIO: DispatchIO, queue: DispatchQueue, dataHandler: @escaping (DispatchData) -> Void,
+  completionHandler: @escaping (Error?) -> Void
+) {
+  dispatchIO.read(offset: 0, length: .max, queue: queue) { isDone, chunkQ, err in
+    dataHandler(chunkQ ?? .empty)
+    if isDone || err != 0 {
+      dispatchIO.close()
+      var error: Error?
+      if err != 0 { error = posixErr(err) }
+      completionHandler(error)
+    }
+  }
+}
+
+private func read(dispatchIO: DispatchIO, queue: DispatchQueue) async throws -> Data {
+  try await withCheckedThrowingContinuation { continuation in
+    var data = Data()
+    read(dispatchIO: dispatchIO, queue: queue) {
+      data.append(contentsOf: $0)
+    } completionHandler: { error in
+      if let error {
+        continuation.resume(throwing: error)
+      } else {
+        continuation.resume(returning: data)
+      }
+    }
+  }
+}
+
+extension Process {
+  func waitUntilTerminated() async -> Int32 {
+    await withCheckedContinuation { continuation in
+      self.terminationHandler = { process in
+        continuation.resume(returning: process.terminationStatus)
+      }
+    }
+  }
+}
+
 /// Runs the specified tool as a child process, supplying `stdin` and capturing `stdout`.
-///
-/// - important: Must be run on the main queue.
 ///
 /// - Parameters:
 ///   - tool: The tool to run.
 ///   - arguments: The command-line arguments to pass to that tool; defaults to the empty array.
 ///   - input: Data to pass to the tool’s `stdin`; defaults to empty.
-///   - completionHandler: Called on the main queue when the tool has terminated.
-
-@MainActor
+///   - suppressStandardErr: boolean to suppress the tool's `stderr`; defaults to false.
 func launch(
-  tool: URL, arguments: [String] = [], input: Data = Data(), suppressStandardErr: Bool = false,
-  completionHandler: @escaping CompletionHandler
-) {
-  // This precondition is important; read the comment near the `run()` call to
-  // understand why.
-  dispatchPrecondition(condition: .onQueue(.main))
-
-  let group = DispatchGroup()
+  tool: URL, arguments: [String] = [], input: Data = Data(), suppressStandardErr: Bool = false
+) async throws -> (Int32, Data) {
   let inputPipe = Pipe()
   let outputPipe = Pipe()
-
-  var errorQ: Error? = nil
-  var output = Data()
 
   let proc = Process()
   proc.executableURL = tool
@@ -39,148 +126,64 @@ func launch(
   proc.standardInput = inputPipe
   proc.standardOutput = outputPipe
   if suppressStandardErr { proc.standardError = nil }
-  group.enter()
-  proc.terminationHandler = { _ in
-    // This bounce to the main queue is important; read the comment near the
-    // `run()` call to understand why.
-    DispatchQueue.main.async {
-      group.leave()
-    }
+
+  // All three tasks must return, and each returns one of these.
+  // This enum is used with associated types since it seemed the
+  // simplest way to have the tasks return different results with
+  // a single type.
+  enum LaunchResult {
+    case terminate(Int32)
+    case write
+    case read(Data)
   }
 
-  // This runs the supplied block when all three events have completed (task
-  // termination and the end of both I/O channels).
-  //
-  // - important: If the process was never launched, requesting its
-  // termination status raises an Objective-C exception (ouch!).  So, we only
-  // read `terminationStatus` if `errorQ` is `nil`.
+  // If you write to a pipe whose remote end has closed, the OS raises a
+  // `SIGPIPE` signal whose default disposition is to terminate your
+  // process.  Helpful!  `F_SETNOSIGPIPE` disables that feature, causing
+  // the write to fail with `EPIPE` instead.
 
-  group.notify(queue: .main) {
-    if let error = errorQ {
-      completionHandler(.failure(error), output)
-    } else {
-      completionHandler(.success(proc.terminationStatus), output)
-    }
-  }
+  let fcntlResult = fcntl(inputPipe.fileHandleForWriting.fileDescriptor, F_SETNOSIGPIPE, 1)
+  guard fcntlResult >= 0 else { throw posixErr(errno) }
 
-  do {
-    func posixErr(_ error: Int32) -> Error {
-      NSError(domain: NSPOSIXErrorDomain, code: Int(error), userInfo: nil)
+  return try await withThrowingTaskGroup(of: LaunchResult.self, returning: (Int32, Data).self) {
+    group in
+
+    // These group tasks will throw any errors that result from launching and tracking the
+    // subprocess. The return value from the tool is return from the task group.
+    group.addTask {
+      try proc.run()
+      return .terminate(await proc.waitUntilTerminated())
     }
 
-    // If you write to a pipe whose remote end has closed, the OS raises a
-    // `SIGPIPE` signal whose default disposition is to terminate your
-    // process.  Helpful!  `F_SETNOSIGPIPE` disables that feature, causing
-    // the write to fail with `EPIPE` instead.
-
-    let fcntlResult = fcntl(inputPipe.fileHandleForWriting.fileDescriptor, F_SETNOSIGPIPE, 1)
-    guard fcntlResult >= 0 else { throw posixErr(errno) }
-
-    // Actually run the process.
-
-    try proc.run()
-
-    // At this point the termination handler could run and leave the group
-    // before we have a chance to enter the group for each of the I/O
-    // handlers.  I avoid this problem by having the termination handler
-    // dispatch to the main thread.  We are running on the main thread, so
-    // the termination handler can’t run until we return, at which point we
-    // have already entered the group for each of the I/O handlers.
-    //
-    // An alternative design would be to enter the group at the top of this
-    // block and then leave it in the error hander.  I decided on this
-    // design because it has the added benefit of all my code running on the
-    // main queue and thus I can access shared mutable state, like `errorQ`,
-    // without worrying about thread safety.
-
-    // Enter the group and then set up a Dispatch I/O channel to write our
-    // data to the child’s `stdin`.  When that’s done, record any error and
-    // leave the group.
-    //
-    // Note that we ignore the residual value passed to the
-    // `write(offset:data:queue:ioHandler:)` completion handler.  Earlier
-    // versions of this code passed it along to our completion handler but
-    // the reality is that it’s not very useful. The pipe buffer is big
-    // enough that it usually soaks up all our data, so the residual is a
-    // very poor indication of how much data was actually read by the
-    // client.
-
-    group.enter()
-    let writeIO = DispatchIO(
-      type: .stream, fileDescriptor: inputPipe.fileHandleForWriting.fileDescriptor, queue: .main
-    ) { _ in
-      // `FileHandle` will automatically close the underlying file
-      // descriptor when you release the last reference to it.  By holidng
-      // on to `inputPipe` until here, we ensure that doesn’t happen. And
-      // as we have to hold a reference anyway, we might as well close it
-      // explicitly.
-      //
-      // We apply the same logic to `readIO` below.
-      try! inputPipe.fileHandleForWriting.close()
+    group.addTask {
+      let queue = DispatchQueue.global()
+      let writeIO = DispatchIO(writingPipe: inputPipe, queue: queue)
+      try await write(dispatchIO: writeIO, data: input, queue: queue)
+      return .write
     }
-    let inputDD = input.withUnsafeBytes { DispatchData(bytes: $0) }
-    writeIO.write(offset: 0, data: inputDD, queue: .main) { isDone, _, error in
-      if isDone || error != 0 {
-        writeIO.close()
-        if errorQ == nil && error != 0 { errorQ = posixErr(error) }
-        group.leave()
+
+    group.addTask {
+      let queue = DispatchQueue.global()
+      let readIO = DispatchIO(readingPipe: outputPipe, queue: queue)
+      let data = try await read(dispatchIO: readIO, queue: queue)
+      return .read(data)
+    }
+
+    // This is the return value from the tool, and its standard out as Data.
+    var result: (status: Int32, data: Data) = (0, Data())
+
+    // Build the return value from the tasks' results.
+    for try await launchResult in group {
+      switch launchResult {
+      case .terminate(let status):
+        result.status = status
+      case .write:
+        break
+      case .read(let data):
+        result.data = data
       }
     }
 
-    // Enter the group and then set up a Dispatch I/O channel to read data
-    // from the child’s `stdin`.  When that’s done, record any error and
-    // leave the group.
-
-    group.enter()
-    let readIO = DispatchIO(
-      type: .stream, fileDescriptor: outputPipe.fileHandleForReading.fileDescriptor, queue: .main
-    ) { _ in
-      try! outputPipe.fileHandleForReading.close()
-    }
-    readIO.read(offset: 0, length: .max, queue: .main) { isDone, chunkQ, error in
-      output.append(contentsOf: chunkQ ?? .empty)
-      if isDone || error != 0 {
-        readIO.close()
-        if errorQ == nil && error != 0 { errorQ = posixErr(error) }
-        group.leave()
-      }
-    }
-  } catch {
-    // If either the `fcntl` or the `run()` call threw, we set the error
-    // and manually call the termination handler.  Note that we’ve only
-    // entered the group once at this point, so the single leave done by the
-    // termination handler is enough to run the notify block and call the
-    // client’s completion handler.
-    errorQ = error
-    proc.terminationHandler!(proc)
-  }
-}
-
-/// Called when the tool has terminated.
-///
-/// This must be run on the main queue.
-///
-/// - Parameters:
-///   - result: Either the tool’s termination status or, if something went
-///   wrong, an error indicating what that was.
-///   - output: Data captured from the tool’s `stdout`.
-
-typealias CompletionHandler = (_ result: Result<Int32, Error>, _ output: Data) -> Void
-
-/// async version of the above.
-@MainActor
-func launch(
-  tool: URL, arguments: [String] = [], input: Data = Data(), suppressStandardErr: Bool = false
-) async throws -> (Int32, Data) {
-  try await withCheckedThrowingContinuation { continuation in
-    launch(tool: tool, arguments: arguments, input: input, suppressStandardErr: suppressStandardErr)
-    { result, output in
-      switch result {
-      case .success(let status):
-        continuation.resume(returning: (status, output))
-      case .failure(let error):
-        continuation.resume(throwing: error)
-      }
-    }
+    return result
   }
 }
