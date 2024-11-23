@@ -18,9 +18,15 @@ extension Track {
       && kind == "AAC audio file")
   }
 
+  fileprivate var isATVShow: Bool {
+    guard let tVShow else { return false }
+    return tVShow
+  }
+
   var isSQLEncodable: Bool {
     guard !isPodcast else { return false }
     guard !isVoiceMemo else { return false }
+    guard !isATVShow else { return false }
 
     let kind: String = kind?.lowercased() ?? ""
     guard !kind.contains(" app") else { return false }
