@@ -36,19 +36,31 @@ extension Array where Element == SortableName {
   }
 
   fileprivate func similarName(to other: Element) -> Element? {
-    let similarNames = self.similarNames(to: other)
-    guard similarNames.count == 1, let similarName = similarNames.first else {
-      Logger.gather.log("Candidates (\(similarNames.count)) for \(String(describing: other))")
-      return nil
-    }
-    return similarName
+    // 'self' contains the current names here.
+    var similarNames = self.similarNames(to: other)
+    let originalCount = similarNames.count
+    var keepLooking = true
+    repeat {
+      if similarNames.count == 1, let similarName = similarNames.first {
+        return similarName
+      } else {
+        let previousCount = similarNames.count
+        similarNames = similarNames.filter { !$0.sorted.isEmpty }
+        if similarNames.count == previousCount {
+          keepLooking = false
+        }
+      }
+    } while keepLooking
+
+    Logger.gather.log("Candidates (\(originalCount)) for \(String(describing: other))")
+    return nil
   }
 
-  fileprivate func repairableNames(current other: [Element]) async -> [RepairableName] {
+  fileprivate func repairableNames(currentNames: [Element]) async -> [RepairableName] {
     await withTaskGroup(of: RepairableName.self) { group in
       self.forEach { element in
         group.addTask {
-          RepairableName(invalid: element, valid: other.similarName(to: element))
+          RepairableName(invalid: element, valid: currentNames.similarName(to: element))
         }
       }
       var repairableNames: [RepairableName] = []
@@ -109,7 +121,7 @@ private func gatherRepairableNames(from gitDirectory: URL) async throws -> [Repa
 
   let unknownArtists = Array(allKnownArtists.subtracting(try await currentArtists)).sorted()
 
-  return await unknownArtists.repairableNames(current: try await currentArtists)
+  return await unknownArtists.repairableNames(currentNames: try await currentArtists)
 }
 
 public func emitRepairableArtistNames(_ gitDirectory: URL) async throws {
