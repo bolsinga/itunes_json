@@ -20,6 +20,6 @@ struct Program: AsyncParsableCommand {
   var gitDirectory: URL
 
   public func run() async throws {
-    try await gatherUnknownArtists(gitDirectory)
+    try await emitRepairableArtistNames(gitDirectory)
   }
 }
