@@ -26,9 +26,11 @@ extension String {
     return String(self.trimmingPrefix(regex))
   }
 
-  var trimmedForSimilarity: String {
-    self.removeCommonInitialWords.trimmingCharacters(
-      in: .whitespacesAndNewlines.union(.punctuationCharacters))
+  internal var trimmedForSimilarity: String {
+    var interim = self.removeCommonInitialWords.trimmingCharacters(
+      in: .whitespacesAndNewlines)
+    interim.unicodeScalars.removeAll(where: { CharacterSet.alphanumerics.inverted.contains($0) })
+    return interim
   }
 
   func isSimilar(to other: String) -> Bool {

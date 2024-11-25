@@ -18,8 +18,8 @@ struct StringSimilarTests {
         "Bonnie \"Prince\" Billy",
       ],
       [
-        "3D's", "Oh Sees", "B-52's", "TORRES", "OFF", "Matt Sweeney & Bonnie 'Prince' Billy",
-        "Bonnie \"Prince\" Billy",
+        "3Ds", "OhSees", "B52s", "TORRES", "OFF", "MattSweeneyBonniePrinceBilly",
+        "BonniePrinceBilly",
       ]))
   func trimForSimilariity(original: String, expected: String) async throws {
     #expect(original.trimmedForSimilarity == expected)
@@ -29,27 +29,16 @@ struct StringSimilarTests {
     "IsSimilarTo",
     arguments: zip(
       [
-        "3D's", "Oh Sees ", "The B-52's", "TORRES", "OFF!", "Matt Sweeney & Bonnie 'Prince' Billy",
-        "Bonnie \"Prince\" Billy",
+        "3D's", "3D's", "Oh Sees ", "The B-52's", "The B-52's", "TORRES", "OFF!",
+        "Matt Sweeney & Bonnie 'Prince' Billy",
+        "Bonnie \"Prince\" Billy", "Bonnie \"Prince\" Billy",
       ],
       [
-        "The 3D's", "Oh Sees ", "B-52's", "Torres", "OFF", "Matt Sweeney & Bonnie 'Prince' Billy",
-        "Bonnie \"Prince\" Billy",
+        "The 3D's", "The 3Ds", "Oh Sees ", "B-52's", "B52's", "Torres", "OFF",
+        "Matt Sweeney & Bonnie 'Prince' Billy",
+        "Bonnie \"Prince\" Billy", "Bonnie 'Prince' Billy",
       ]))
   func isSimilarTo(original: String, other: String) async throws {
     #expect(original.isSimilar(to: other))
-  }
-
-  @Test(
-    "IsSimilarTo.Negated",
-    arguments: zip(
-      [
-        "3D's", "The B-52's", "Bonnie \"Prince\" Billy",
-      ],
-      [
-        "The 3Ds", "B52's", "Bonnie 'Prince' Billy",
-      ]))
-  func isNotSimilarTo(original: String, other: String) async throws {
-    #expect(!original.isSimilar(to: other))
   }
 }
