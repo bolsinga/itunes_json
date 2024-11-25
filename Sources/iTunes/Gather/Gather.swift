@@ -24,39 +24,6 @@ extension Array where Element == Track {
   }
 }
 
-extension String {
-  private var removeCommonInitialWords: String {
-    let regex = Regex {
-      Optionally {
-        ChoiceOf {
-          "The"
-          "A"
-          "An"
-        }
-        OneOrMore {
-          .whitespace
-        }
-      }
-    }.ignoresCase()
-
-    return String(self.trimmingPrefix(regex))
-  }
-
-  private var trimmedForSimilarity: String {
-    self.removeCommonInitialWords.trimmingCharacters(
-      in: .whitespacesAndNewlines.union(.punctuationCharacters))
-  }
-
-  fileprivate func isSimilar(to other: String) -> Bool {
-    var options = String.CompareOptions()
-    options.insert(.caseInsensitive)
-    options.insert(.diacriticInsensitive)
-
-    return self.trimmedForSimilarity.compare(other.trimmedForSimilarity, options: options)
-      == ComparisonResult.orderedSame
-  }
-}
-
 extension SortableName {
   fileprivate func isSimilar(to other: SortableName) -> Bool {
     self.name.isSimilar(to: other.name)
