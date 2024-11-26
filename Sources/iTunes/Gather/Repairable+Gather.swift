@@ -22,6 +22,10 @@ extension Array where Element == Track {
     [SortableName](
       Set(self.filter { $0.isSQLEncodable }.compactMap { $0.artistName }))
   }
+
+  fileprivate var albumNames: [SortableName] {
+    [SortableName](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumName }))
+  }
 }
 
 extension SortableName {
@@ -78,6 +82,12 @@ private func currentArtists() async throws -> [SortableName] {
   return tracks.artistNames
 }
 
+private func currentAlbums() async throws -> [SortableName] {
+  let tracks = try await Source.itunes.gather(
+    nil, repair: nil, artistIncluded: nil, reduce: false)
+  return tracks.albumNames
+}
+
 private func trackData(from directory: URL, tagPrefix: String) async throws -> [Data] {
   let git = Git(directory: directory, suppressStandardErr: true)
 
@@ -129,10 +139,6 @@ private func gatherRepairableNames(
   return await unknownNames.repairableNames(currentNames: try await currentNames)
 }
 
-private enum RepairableError: Error {
-  case notImplemented
-}
-
 extension Repairable {
   func gather(_ gitDirectory: URL) async throws -> [RepairableName] {
     switch self {
@@ -143,7 +149,11 @@ extension Repairable {
         $0.artistNames
       }
     case .albums:
-      throw RepairableError.notImplemented
+      return try await gatherRepairableNames(from: gitDirectory) {
+        try await currentAlbums()
+      } namer: {
+        $0.albumNames
+      }
     }
   }
 
