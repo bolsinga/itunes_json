@@ -2,8 +2,13 @@ import ArgumentParser
 import Foundation
 import iTunes
 
+extension Repairable: EnumerableFlag {}
+
 @main
 struct Program: AsyncParsableCommand {
+  /// Input source type.
+  @Flag(help: "Repairable type to build.") var repairable: Repairable = .artists
+
   /// Git Directory to read and write data from.
   @Option(
     help: "The path for the git directory to work with.",
@@ -20,6 +25,6 @@ struct Program: AsyncParsableCommand {
   var gitDirectory: URL
 
   public func run() async throws {
-    try await emitRepairableArtistNames(gitDirectory)
+    try await repairable.emit(gitDirectory)
   }
 }

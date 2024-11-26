@@ -124,7 +124,22 @@ private func gatherRepairableNames(from gitDirectory: URL) async throws -> [Repa
   return await unknownArtists.repairableNames(currentNames: try await currentArtists)
 }
 
-public func emitRepairableArtistNames(_ gitDirectory: URL) async throws {
+private func emitRepairableArtistNames(_ gitDirectory: URL) async throws {
   let names = try await gatherRepairableNames(from: gitDirectory)
   print("\(try names.jsonData().asUTF8String())")
+}
+
+private enum RepairableError: Error {
+  case notImplemented
+}
+
+extension Repairable {
+  public func emit(_ gitDirectory: URL) async throws {
+    switch self {
+    case .artists:
+      try await emitRepairableArtistNames(gitDirectory)
+    case .albums:
+      throw RepairableError.notImplemented
+    }
+  }
 }
