@@ -95,38 +95,38 @@ private func trackData(from directory: URL, tagPrefix: String) async throws -> [
   return tagData
 }
 
-private func gatherAllKnownArtists(from gitDirectory: URL) async throws -> Set<SortableName> {
+private func gatherAllKnownNames(
+  from gitDirectory: URL, namer: @escaping @Sendable ([Track]) -> [SortableName]
+) async throws -> Set<SortableName> {
   var tagData = try await trackData(from: gitDirectory, tagPrefix: mainPrefix)
 
   return try await withThrowingTaskGroup(of: Set<SortableName>.self) { group in
     for data in tagData.reversed() {
       tagData.removeLast()
       group.addTask {
-        Set(try Track.createFromData(data).artistNames)
+        Set(namer(try Track.createFromData(data)))
       }
     }
 
-    var allArtistNames: Set<SortableName> = []
-    for try await artistNames in group {
-      allArtistNames = allArtistNames.union(artistNames)
+    var allNames: Set<SortableName> = []
+    for try await tracksNames in group {
+      allNames = allNames.union(tracksNames)
     }
-    return allArtistNames
+    return allNames
   }
 }
 
-private func gatherRepairableNames(from gitDirectory: URL) async throws -> [RepairableName] {
-  async let currentArtists = try await currentArtists()
+private func gatherRepairableNames(
+  from gitDirectory: URL, gatherCurrentNames: @Sendable () async throws -> [SortableName],
+  namer: @escaping @Sendable ([Track]) -> [SortableName]
+) async throws -> [RepairableName] {
+  async let currentNames = try await gatherCurrentNames()
 
-  let allKnownArtists = try await gatherAllKnownArtists(from: gitDirectory)
+  let allKnownNames = try await gatherAllKnownNames(from: gitDirectory, namer: namer)
 
-  let unknownArtists = Array(allKnownArtists.subtracting(try await currentArtists)).sorted()
+  let unknownNames = Array(allKnownNames.subtracting(try await currentNames)).sorted()
 
-  return await unknownArtists.repairableNames(currentNames: try await currentArtists)
-}
-
-private func emitRepairableArtistNames(_ gitDirectory: URL) async throws {
-  let names = try await gatherRepairableNames(from: gitDirectory)
-  print("\(try names.jsonData().asUTF8String())")
+  return await unknownNames.repairableNames(currentNames: try await currentNames)
 }
 
 private enum RepairableError: Error {
@@ -134,12 +134,20 @@ private enum RepairableError: Error {
 }
 
 extension Repairable {
-  public func emit(_ gitDirectory: URL) async throws {
+  func gather(_ gitDirectory: URL) async throws -> [RepairableName] {
     switch self {
     case .artists:
-      try await emitRepairableArtistNames(gitDirectory)
+      return try await gatherRepairableNames(from: gitDirectory) {
+        try await currentArtists()
+      } namer: {
+        $0.artistNames
+      }
     case .albums:
       throw RepairableError.notImplemented
     }
+  }
+
+  public func emit(_ gitDirectory: URL) async throws {
+    print(try await self.gather(gitDirectory).jsonData().asUTF8String())
   }
 }
