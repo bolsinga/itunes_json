@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct RepairableName: Codable, Hashable {
+struct RepairableName: Codable, Hashable, Sendable {
   let invalid: SortableName
   let valid: SortableName?
 }
