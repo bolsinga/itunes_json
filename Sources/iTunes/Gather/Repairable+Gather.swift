@@ -28,7 +28,7 @@ extension Array where Element == Track {
   }
 }
 
-private protocol Similar {
+private protocol Similar: Sendable {
   func isSimilar(to other: Self) -> Bool
   var cullable: Bool { get }
 }
@@ -40,6 +40,12 @@ extension SortableName: Similar {
 
   fileprivate func isSimilar(to other: SortableName) -> Bool {
     self.name.isSimilar(to: other.name)
+  }
+}
+
+extension SortableName {
+  func create(_ currentNames: [Self]) -> RepairableName {
+    RepairableName(invalid: self, valid: currentNames.similarName(to: self))
   }
 }
 
@@ -68,21 +74,17 @@ extension Array where Element: Similar {
     Logger.gather.log("Candidates (\(originalCount)) for \(String(describing: other))")
     return nil
   }
-}
 
-extension Array where Element == SortableName {
-  fileprivate func repairableNames(currentNames: [Element]) async -> [RepairableName] {
-    await withTaskGroup(of: RepairableName.self) { group in
+  fileprivate func mendables<T: Sendable>(mend: @escaping @Sendable (Element) -> T) async -> [T] {
+    await withTaskGroup(of: T.self) { group in
       self.forEach { element in
-        group.addTask {
-          RepairableName(invalid: element, valid: currentNames.similarName(to: element))
-        }
+        group.addTask { mend(element) }
       }
-      var repairableNames: [RepairableName] = []
-      for await repairableName in group {
-        repairableNames.append(repairableName)
+      var mendables: [T] = []
+      for await mendable in group {
+        mendables.append(mendable)
       }
-      return repairableNames
+      return mendables
     }
   }
 }
@@ -145,9 +147,11 @@ private func gatherRepairableNames(
 
   let allKnownNames = try await gatherAllKnownNames(from: gitDirectory, namer: namer)
 
-  let unknownNames = Array(allKnownNames.subtracting(try await currentNames)).sorted()
+  let knownNames = try await currentNames
 
-  return await unknownNames.repairableNames(currentNames: try await currentNames)
+  let unknownNames = Array(allKnownNames.subtracting(knownNames)).sorted()
+
+  return await unknownNames.mendables { $0.create(knownNames) }
 }
 
 extension Repairable {
