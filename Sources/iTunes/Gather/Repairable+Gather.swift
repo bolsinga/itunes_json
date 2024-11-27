@@ -28,13 +28,22 @@ extension Array where Element == Track {
   }
 }
 
-extension SortableName {
+private protocol Similar {
+  func isSimilar(to other: Self) -> Bool
+  var cullable: Bool { get }
+}
+
+extension SortableName: Similar {
+  fileprivate var cullable: Bool {
+    sorted.isEmpty
+  }
+
   fileprivate func isSimilar(to other: SortableName) -> Bool {
     self.name.isSimilar(to: other.name)
   }
 }
 
-extension Array where Element == SortableName {
+extension Array where Element: Similar {
   fileprivate func similarNames(to other: Element) -> [Element] {
     self.filter { $0.isSimilar(to: other) }
   }
@@ -49,7 +58,7 @@ extension Array where Element == SortableName {
         return similarName
       } else {
         let previousCount = similarNames.count
-        similarNames = similarNames.filter { !$0.sorted.isEmpty }
+        similarNames = similarNames.filter { !$0.cullable }
         if similarNames.count == previousCount {
           keepLooking = false
         }
@@ -59,7 +68,9 @@ extension Array where Element == SortableName {
     Logger.gather.log("Candidates (\(originalCount)) for \(String(describing: other))")
     return nil
   }
+}
 
+extension Array where Element == SortableName {
   fileprivate func repairableNames(currentNames: [Element]) async -> [RepairableName] {
     await withTaskGroup(of: RepairableName.self) { group in
       self.forEach { element in
