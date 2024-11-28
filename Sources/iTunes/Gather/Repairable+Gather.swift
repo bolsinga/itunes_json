@@ -139,9 +139,10 @@ private func gatherAllKnown<Name: Hashable & Sendable>(
   }
 }
 
-private func gatherRepairableNames(
-  from gitDirectory: URL, gatherCurrentNames: @Sendable () async throws -> [SortableName],
-  namer: @escaping @Sendable ([Track]) -> [SortableName]
+private func gatherRepairable<Name: Comparable & Hashable & Similar>(
+  from gitDirectory: URL, gatherCurrentNames: @Sendable () async throws -> [Name],
+  namer: @escaping @Sendable ([Track]) -> [Name],
+  mend: @escaping @Sendable (Name, [Name]) -> RepairableArtist
 ) async throws -> [RepairableArtist] {
   async let asyncCurrentNames = try await gatherCurrentNames()
 
@@ -151,23 +152,27 @@ private func gatherRepairableNames(
 
   let unknownNames = Array(allKnownNames.subtracting(currentNames)).sorted()
 
-  return await unknownNames.mendables { $0.create(currentNames) }
+  return await unknownNames.mendables { mend($0, currentNames) }
 }
 
 extension Repairable {
   func gather(_ gitDirectory: URL) async throws -> [RepairableArtist] {
     switch self {
     case .artists:
-      return try await gatherRepairableNames(from: gitDirectory) {
+      return try await gatherRepairable(from: gitDirectory) {
         try await currentArtists()
       } namer: {
         $0.artistNames
+      } mend: {
+        $0.create($1)
       }
     case .albums:
-      return try await gatherRepairableNames(from: gitDirectory) {
+      return try await gatherRepairable(from: gitDirectory) {
         try await currentAlbums()
       } namer: {
         $0.albumNames
+      } mend: {
+        $0.create($1)
       }
     }
   }
