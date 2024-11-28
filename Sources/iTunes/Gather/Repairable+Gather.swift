@@ -118,12 +118,12 @@ private func trackData(from directory: URL, tagPrefix: String) async throws -> [
   return tagData
 }
 
-private func gatherAllKnownNames(
-  from gitDirectory: URL, namer: @escaping @Sendable ([Track]) -> [SortableName]
-) async throws -> Set<SortableName> {
+private func gatherAllKnown<Name: Hashable & Sendable>(
+  from gitDirectory: URL, namer: @escaping @Sendable ([Track]) -> [Name]
+) async throws -> Set<Name> {
   var tagData = try await trackData(from: gitDirectory, tagPrefix: mainPrefix)
 
-  return try await withThrowingTaskGroup(of: Set<SortableName>.self) { group in
+  return try await withThrowingTaskGroup(of: Set<Name>.self) { group in
     for data in tagData.reversed() {
       tagData.removeLast()
       group.addTask {
@@ -131,7 +131,7 @@ private func gatherAllKnownNames(
       }
     }
 
-    var allNames: Set<SortableName> = []
+    var allNames: Set<Name> = []
     for try await tracksNames in group {
       allNames = allNames.union(tracksNames)
     }
@@ -143,15 +143,15 @@ private func gatherRepairableNames(
   from gitDirectory: URL, gatherCurrentNames: @Sendable () async throws -> [SortableName],
   namer: @escaping @Sendable ([Track]) -> [SortableName]
 ) async throws -> [RepairableArtist] {
-  async let currentNames = try await gatherCurrentNames()
+  async let asyncCurrentNames = try await gatherCurrentNames()
 
-  let allKnownNames = try await gatherAllKnownNames(from: gitDirectory, namer: namer)
+  let allKnownNames = try await gatherAllKnown(from: gitDirectory, namer: namer)
 
-  let knownNames = try await currentNames
+  let currentNames = try await asyncCurrentNames
 
-  let unknownNames = Array(allKnownNames.subtracting(knownNames)).sorted()
+  let unknownNames = Array(allKnownNames.subtracting(currentNames)).sorted()
 
-  return await unknownNames.mendables { $0.create(knownNames) }
+  return await unknownNames.mendables { $0.create(currentNames) }
 }
 
 extension Repairable {
