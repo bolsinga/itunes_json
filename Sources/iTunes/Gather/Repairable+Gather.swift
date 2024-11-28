@@ -44,8 +44,8 @@ extension SortableName: Similar {
 }
 
 extension SortableName {
-  func create(_ currentNames: [Self]) -> RepairableName {
-    RepairableName(invalid: self, valid: currentNames.similarName(to: self))
+  func create(_ currentNames: [Self]) -> RepairableArtist {
+    RepairableArtist(invalid: self, valid: currentNames.similarName(to: self))
   }
 }
 
@@ -142,7 +142,7 @@ private func gatherAllKnownNames(
 private func gatherRepairableNames(
   from gitDirectory: URL, gatherCurrentNames: @Sendable () async throws -> [SortableName],
   namer: @escaping @Sendable ([Track]) -> [SortableName]
-) async throws -> [RepairableName] {
+) async throws -> [RepairableArtist] {
   async let currentNames = try await gatherCurrentNames()
 
   let allKnownNames = try await gatherAllKnownNames(from: gitDirectory, namer: namer)
@@ -155,7 +155,7 @@ private func gatherRepairableNames(
 }
 
 extension Repairable {
-  func gather(_ gitDirectory: URL) async throws -> [RepairableName] {
+  func gather(_ gitDirectory: URL) async throws -> [RepairableArtist] {
     switch self {
     case .artists:
       return try await gatherRepairableNames(from: gitDirectory) {
