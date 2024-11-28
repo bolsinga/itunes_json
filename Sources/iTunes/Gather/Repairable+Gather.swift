@@ -139,7 +139,7 @@ private func gatherAllKnown<Name: Hashable & Sendable>(
   }
 }
 
-private func gatherRepairable<Name: Comparable & Hashable & Similar>(
+private func gatherRepairable<Name: Hashable & Similar>(
   from gitDirectory: URL, gatherCurrentNames: @Sendable () async throws -> [Name],
   namer: @escaping @Sendable ([Track]) -> [Name],
   mend: @escaping @Sendable (Name, [Name]) -> RepairableArtist
@@ -150,7 +150,7 @@ private func gatherRepairable<Name: Comparable & Hashable & Similar>(
 
   let currentNames = try await asyncCurrentNames
 
-  let unknownNames = Array(allKnownNames.subtracting(currentNames)).sorted()
+  let unknownNames = Array(allKnownNames.subtracting(currentNames))
 
   return await unknownNames.mendables { mend($0, currentNames) }
 }
@@ -178,6 +178,6 @@ extension Repairable {
   }
 
   public func emit(_ gitDirectory: URL) async throws {
-    print(try await self.gather(gitDirectory).jsonData().asUTF8String())
+    print(try await self.gather(gitDirectory).sorted().jsonData().asUTF8String())
   }
 }

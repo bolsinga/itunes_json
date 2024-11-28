@@ -11,3 +11,9 @@ struct RepairableArtist: Codable, Hashable, Sendable {
   let invalid: SortableName
   let valid: SortableName?
 }
+
+extension RepairableArtist: Comparable {
+  static func < (lhs: RepairableArtist, rhs: RepairableArtist) -> Bool {
+    lhs.invalid < rhs.invalid
+  }
+}
