@@ -133,11 +133,11 @@ private func gatherAllKnown<Name: Hashable & Sendable>(
   }
 }
 
-private func gatherRepairable<Name: Hashable & Similar>(
+private func gatherRepairable<Name: Hashable & Similar, Repairable: Sendable>(
   from gitDirectory: URL, gatherCurrentNames: @Sendable () async throws -> [Name],
   namer: @escaping @Sendable ([Track]) -> [Name],
-  mend: @escaping @Sendable (Name, [Name]) -> RepairableArtist
-) async throws -> [RepairableArtist] {
+  mend: @escaping @Sendable (Name, [Name]) -> Repairable
+) async throws -> [Repairable] {
   async let asyncCurrentNames = try await gatherCurrentNames()
 
   let allKnownNames = try await gatherAllKnown(from: gitDirectory, namer: namer)
