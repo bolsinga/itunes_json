@@ -118,12 +118,12 @@ private func trackData(from directory: URL, tagPrefix: String) async throws -> [
   return tagData
 }
 
-private func gatherAllKnownNames(
-  from gitDirectory: URL, namer: @escaping @Sendable ([Track]) -> [SortableName]
-) async throws -> Set<SortableName> {
+private func gatherAllKnownNames<N: Hashable & Sendable>(
+  from gitDirectory: URL, namer: @escaping @Sendable ([Track]) -> [N]
+) async throws -> Set<N> {
   var tagData = try await trackData(from: gitDirectory, tagPrefix: mainPrefix)
 
-  return try await withThrowingTaskGroup(of: Set<SortableName>.self) { group in
+  return try await withThrowingTaskGroup(of: Set<N>.self) { group in
     for data in tagData.reversed() {
       tagData.removeLast()
       group.addTask {
@@ -131,7 +131,7 @@ private func gatherAllKnownNames(
       }
     }
 
-    var allNames: Set<SortableName> = []
+    var allNames: Set<N> = []
     for try await tracksNames in group {
       allNames = allNames.union(tracksNames)
     }
