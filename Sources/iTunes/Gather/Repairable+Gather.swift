@@ -43,12 +43,6 @@ extension SortableName: Similar {
   }
 }
 
-extension SortableName {
-  func create(_ currentNames: [Self]) -> RepairableArtist {
-    RepairableArtist(invalid: self, valid: currentNames.similarName(to: self))
-  }
-}
-
 extension Array where Element: Similar {
   fileprivate func similarNames(to other: Element) -> [Element] {
     self.filter { $0.isSimilar(to: other) }
@@ -164,7 +158,7 @@ extension Repairable {
       } namer: {
         $0.artistNames
       } mend: {
-        $0.create($1)
+        RepairableArtist(invalid: $0, valid: $1.similarName(to: $0))
       }
     case .albums:
       return try await gatherRepairable(from: gitDirectory) {
@@ -172,7 +166,7 @@ extension Repairable {
       } namer: {
         $0.albumNames
       } mend: {
-        $0.create($1)
+        RepairableArtist(invalid: $0, valid: $1.similarName(to: $0))
       }
     }
   }
