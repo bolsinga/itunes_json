@@ -145,11 +145,11 @@ private func gatherRepairableNames(
 ) async throws -> [RepairableArtist] {
   async let asyncCurrentNames = try await gatherCurrentNames()
 
-  let allKnown = try await gatherAllKnown(from: gitDirectory, namer: namer)
+  let allKnownNames = try await gatherAllKnown(from: gitDirectory, namer: namer)
 
   let currentNames = try await asyncCurrentNames
 
-  let unknownNames = Array(allKnown.subtracting(currentNames)).sorted()
+  let unknownNames = Array(allKnownNames.subtracting(currentNames)).sorted()
 
   return await unknownNames.mendables { $0.create(currentNames) }
 }
