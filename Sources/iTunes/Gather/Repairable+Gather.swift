@@ -150,7 +150,7 @@ private func gatherRepairable<Name: Hashable & Similar, Mendable: Sendable>(
 }
 
 extension Repairable {
-  func gather(_ gitDirectory: URL) async throws -> [RepairableArtist] {
+  func gather(_ gitDirectory: URL) async throws -> [ArtistPatch] {
     switch self {
     case .artists:
       return try await gatherRepairable(from: gitDirectory) {
@@ -158,7 +158,7 @@ extension Repairable {
       } namer: {
         $0.artistNames
       } mend: {
-        RepairableArtist(invalid: $0, valid: $1.similarName(to: $0))
+        ArtistPatch(invalid: $0, valid: $1.similarName(to: $0))
       }
     case .albums:
       return try await gatherRepairable(from: gitDirectory) {
@@ -166,7 +166,7 @@ extension Repairable {
       } namer: {
         $0.albumNames
       } mend: {
-        RepairableArtist(invalid: $0, valid: $1.similarName(to: $0))
+        ArtistPatch(invalid: $0, valid: $1.similarName(to: $0))
       }
     }
   }
