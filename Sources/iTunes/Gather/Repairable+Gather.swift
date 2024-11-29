@@ -149,29 +149,40 @@ private func gatherRepairable<Name: Hashable & Similar, Mendable: Sendable>(
   return await unknownNames.mendables { mend($0, currentNames) }
 }
 
+extension Patch {
+  var jsonString: String {
+    switch self {
+    case .artists(let artists):
+      return (try? (try? artists.sorted().jsonData())?.asUTF8String()) ?? ""
+    }
+  }
+}
+
 extension Repairable {
-  func gather(_ gitDirectory: URL) async throws -> [ArtistPatch] {
+  func gather(_ gitDirectory: URL) async throws -> Patch {
     switch self {
     case .artists:
-      return try await gatherRepairable(from: gitDirectory) {
-        try await currentArtists()
-      } namer: {
-        $0.artistNames
-      } mend: {
-        ArtistPatch(invalid: $0, valid: $1.similarName(to: $0))
-      }
+      return .artists(
+        try await gatherRepairable(from: gitDirectory) {
+          try await currentArtists()
+        } namer: {
+          $0.artistNames
+        } mend: {
+          ArtistPatch(invalid: $0, valid: $1.similarName(to: $0))
+        })
     case .albums:
-      return try await gatherRepairable(from: gitDirectory) {
-        try await currentAlbums()
-      } namer: {
-        $0.albumNames
-      } mend: {
-        ArtistPatch(invalid: $0, valid: $1.similarName(to: $0))
-      }
+      return .artists(
+        try await gatherRepairable(from: gitDirectory) {
+          try await currentAlbums()
+        } namer: {
+          $0.albumNames
+        } mend: {
+          ArtistPatch(invalid: $0, valid: $1.similarName(to: $0))
+        })
     }
   }
 
   public func emit(_ gitDirectory: URL) async throws {
-    print(try await self.gather(gitDirectory).sorted().jsonData().asUTF8String())
+    print(try await self.gather(gitDirectory).jsonString)
   }
 }
