@@ -128,27 +128,12 @@ private func currentAlbums() async throws -> [AlbumArtistName] {
   return tracks.albumNames
 }
 
-private func trackData(from directory: URL, tagPrefix: String) async throws -> [Data] {
-  let git = Git(directory: directory, suppressStandardErr: true)
-
-  try await git.status()
-
-  var tagData: [Data] = []
-
-  let tags = try await git.tags().matchingFormattedTag(prefix: tagPrefix).sorted()
-  for tag in tags {
-    Logger.gather.info("tag: \(tag)")
-
-    tagData.append(try await git.show(commit: tag, path: fileName))
-  }
-
-  return tagData
-}
-
 private func gatherAllKnown<Name: Hashable & Sendable>(
   from gitDirectory: URL, namer: @escaping @Sendable ([Track]) -> [Name]
 ) async throws -> Set<Name> {
-  var tagData = try await trackData(from: gitDirectory, tagPrefix: mainPrefix)
+  var tagData = try await GitTagDataSequence(
+    directory: gitDirectory, tagPrefix: mainPrefix, fileName: fileName
+  ).data()
 
   return try await withThrowingTaskGroup(of: Set<Name>.self) { group in
     for data in tagData.reversed() {
