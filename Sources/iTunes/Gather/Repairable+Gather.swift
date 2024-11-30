@@ -128,29 +128,6 @@ private func currentAlbums() async throws -> [AlbumArtistName] {
   return tracks.albumNames
 }
 
-private func gatherAllKnown<Name: Hashable & Sendable>(
-  from gitDirectory: URL, namer: @escaping @Sendable ([Track]) -> [Name]
-) async throws -> Set<Name> {
-  var tagData = try await GitTagDataSequence(
-    directory: gitDirectory, tagPrefix: mainPrefix, fileName: fileName
-  ).data()
-
-  return try await withThrowingTaskGroup(of: Set<Name>.self) { group in
-    for data in tagData.reversed() {
-      tagData.removeLast()
-      group.addTask {
-        Set(namer(try Track.createFromData(data)))
-      }
-    }
-
-    var allNames: Set<Name> = []
-    for try await tracksNames in group {
-      allNames = allNames.union(tracksNames)
-    }
-    return allNames
-  }
-}
-
 private func gatherRepairable<Name: Hashable & Similar, Mendable: Sendable>(
   from gitDirectory: URL, gatherCurrentNames: @Sendable () async throws -> [Name],
   namer: @escaping @Sendable ([Track]) -> [Name],
@@ -158,7 +135,9 @@ private func gatherRepairable<Name: Hashable & Similar, Mendable: Sendable>(
 ) async throws -> [Mendable] {
   async let asyncCurrentNames = try await gatherCurrentNames()
 
-  let allKnownNames = try await gatherAllKnown(from: gitDirectory, namer: namer)
+  let allKnownNames = try await GitTagDataSequence(
+    directory: gitDirectory, tagPrefix: mainPrefix, fileName: fileName
+  ).transformTracks(namer)
 
   let currentNames = try await asyncCurrentNames
 
