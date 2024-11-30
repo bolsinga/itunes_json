@@ -7,4 +7,5 @@
 
 enum Patch {
   case artists([ArtistPatch])
+  case albums([AlbumPatch])
 }

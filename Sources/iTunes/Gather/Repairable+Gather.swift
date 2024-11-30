@@ -17,14 +17,36 @@ extension Logger {
     subsystem: Bundle.main.bundleIdentifier ?? "unknown", category: "gather")
 }
 
+extension Track {
+  private var isCompilation: Bool {
+    guard let compilation else { return false }
+    return compilation
+  }
+
+  private var albumType: AlbumArtistName.AlbumType {
+    if isCompilation {
+      return .compilation
+    } else if let artistName = artistName {
+      return .artist(artistName.name)
+    } else {
+      return .unknown
+    }
+  }
+
+  var albumArtistName: AlbumArtistName? {
+    guard let albumName else { return nil }
+    return AlbumArtistName(name: albumName, type: albumType)
+  }
+}
+
 extension Array where Element == Track {
   fileprivate var artistNames: [SortableName] {
     [SortableName](
       Set(self.filter { $0.isSQLEncodable }.compactMap { $0.artistName }))
   }
 
-  fileprivate var albumNames: [SortableName] {
-    [SortableName](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumName }))
+  fileprivate var albumNames: [AlbumArtistName] {
+    [AlbumArtistName](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumArtistName }))
   }
 }
 
@@ -40,6 +62,17 @@ extension SortableName: Similar {
 
   fileprivate func isSimilar(to other: SortableName) -> Bool {
     self.name.isSimilar(to: other.name)
+  }
+}
+
+extension AlbumArtistName: Similar {
+  fileprivate var cullable: Bool {
+    true  // FIXME
+  }
+
+  fileprivate func isSimilar(to other: AlbumArtistName) -> Bool {
+    // self is the current here.
+    self.name.isSimilar(to: other.name) && self.type.isSimilar(to: other.type)
   }
 }
 
@@ -89,7 +122,7 @@ private func currentArtists() async throws -> [SortableName] {
   return tracks.artistNames
 }
 
-private func currentAlbums() async throws -> [SortableName] {
+private func currentAlbums() async throws -> [AlbumArtistName] {
   let tracks = try await Source.itunes.gather(
     nil, repair: nil, artistIncluded: nil, reduce: false)
   return tracks.albumNames
@@ -154,6 +187,8 @@ extension Patch {
     switch self {
     case .artists(let artists):
       return (try? (try? artists.sorted().jsonData())?.asUTF8String()) ?? ""
+    case .albums(let items):
+      return (try? (try? items.sorted().jsonData())?.asUTF8String()) ?? ""
     }
   }
 }
@@ -171,13 +206,13 @@ extension Repairable {
           ArtistPatch(invalid: $0, valid: $1.similarName(to: $0))
         })
     case .albums:
-      return .artists(
+      return .albums(
         try await gatherRepairable(from: gitDirectory) {
           try await currentAlbums()
         } namer: {
           $0.albumNames
         } mend: {
-          ArtistPatch(invalid: $0, valid: $1.similarName(to: $0))
+          AlbumPatch(invalid: $0, valid: $1.similarName(to: $0))
         })
     }
   }
