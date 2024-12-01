@@ -5,7 +5,7 @@
 //  Created by Greg Bolsinga on 11/28/24.
 //
 
-struct AlbumArtistName: Codable, Hashable, Sendable {
+public struct AlbumArtistName: Codable, Hashable, Sendable {
   enum AlbumType: Codable, Hashable {
     case compilation
     case artist(String)

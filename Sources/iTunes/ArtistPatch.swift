@@ -7,11 +7,16 @@
 
 import Foundation
 
-struct ArtistPatch: Codable, Comparable, Hashable, Sendable {
+public struct ArtistPatch: Codable, Comparable, Hashable, Sendable {
   let invalid: SortableName
   let valid: SortableName?
 
-  static func < (lhs: ArtistPatch, rhs: ArtistPatch) -> Bool {
+  public init(invalid: SortableName, valid: SortableName? = nil) {
+    self.invalid = invalid
+    self.valid = valid
+  }
+
+  public static func < (lhs: ArtistPatch, rhs: ArtistPatch) -> Bool {
     lhs.invalid < rhs.invalid
   }
 }

@@ -13,28 +13,28 @@ extension Logger {
     subsystem: Bundle.main.bundleIdentifier ?? "unknown", category: "gitTagData")
 }
 
-struct GitTagDataSequence: AsyncSequence {
-  typealias Element = Data
+public struct GitTagDataSequence: AsyncSequence {
+  public typealias Element = Data
 
   let git: Git
   let tags: [String]
   let fileName: String
 
-  init(directory: URL, tagPrefix: String, fileName: String) async throws {
+  public init(directory: URL, tagPrefix: String, fileName: String) async throws {
     self.git = Git(directory: directory, suppressStandardErr: true)
     try await self.git.status()
     self.tags = try await self.git.tags().matchingFormattedTag(prefix: tagPrefix).sorted()
     self.fileName = fileName
   }
 
-  struct AsyncIterator: AsyncIteratorProtocol {
+  public struct AsyncIterator: AsyncIteratorProtocol {
     let git: Git
     let tags: [String]
     let fileName: String
 
     var index = 0
 
-    mutating func next() async throws -> Data? {
+    mutating public func next() async throws -> Data? {
       guard !Task.isCancelled else { return nil }
 
       guard index < tags.count else { return nil }
@@ -51,7 +51,7 @@ struct GitTagDataSequence: AsyncSequence {
     }
   }
 
-  func makeAsyncIterator() -> AsyncIterator {
+  public func makeAsyncIterator() -> AsyncIterator {
     AsyncIterator(git: git, tags: tags, fileName: fileName)
   }
 

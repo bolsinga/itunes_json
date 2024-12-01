@@ -30,12 +30,12 @@ extension Track {
 }
 
 extension Array where Element == Track {
-  var albumNames: Set<AlbumArtistName> {
+  public var albumNames: Set<AlbumArtistName> {
     Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumArtistName })
   }
 }
 
-func currentAlbums() async throws -> Set<AlbumArtistName> {
+public func currentAlbums() async throws -> Set<AlbumArtistName> {
   let tracks = try await Source.itunes.gather(
     nil, repair: nil, artistIncluded: nil, reduce: false)
   return tracks.albumNames

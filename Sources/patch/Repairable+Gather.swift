@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import iTunes
 
 let mainPrefix = "iTunes"
 let fileName = "itunes.json"
@@ -29,7 +30,7 @@ private func changes<Guide: Hashable & Similar, Change: Sendable>(
 }
 
 extension Patch {
-  var jsonString: String {
+  fileprivate var jsonString: String {
     switch self {
     case .artists(let artists):
       return (try? (try? artists.sorted().jsonData())?.asUTF8String()) ?? ""
@@ -40,7 +41,7 @@ extension Patch {
 }
 
 extension Repairable {
-  func gather(_ gitDirectory: URL) async throws -> Patch {
+  fileprivate func gather(_ gitDirectory: URL) async throws -> Patch {
     switch self {
     case .artists:
       return .artists(

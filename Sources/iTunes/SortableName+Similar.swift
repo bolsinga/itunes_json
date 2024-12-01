@@ -6,11 +6,11 @@
 //
 
 extension SortableName: Similar {
-  var cullable: Bool {
+  public var cullable: Bool {
     sorted.isEmpty
   }
 
-  func isSimilar(to other: SortableName) -> Bool {
+  public func isSimilar(to other: SortableName) -> Bool {
     self.name.isSimilar(to: other.name)
   }
 }
