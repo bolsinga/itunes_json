@@ -8,19 +8,16 @@
 import Foundation
 import iTunes
 
-let mainPrefix = "iTunes"
-let fileName = "itunes.json"
-
 private func changes<Guide: Hashable & Similar, Change: Sendable>(
-  from gitDirectory: URL, currentGuides: @Sendable () async throws -> Set<Guide>,
+  configuration: GitTagDataSequence.Configuration,
+  currentGuides: @Sendable () async throws -> Set<Guide>,
   createGuide: @escaping @Sendable ([Track]) -> Set<Guide>,
   createChange: @escaping @Sendable (Guide, Set<Guide>) -> Change
 ) async throws -> [Change] {
   async let asyncCurrentGuides = try await currentGuides()
 
-  let allKnownGuides = try await GitTagDataSequence(
-    directory: gitDirectory, tagPrefix: mainPrefix, fileName: fileName
-  ).transformTracks(createGuide)
+  let allKnownGuides = try await GitTagDataSequence(configuration: configuration).transformTracks(
+    createGuide)
 
   let currentGuides = try await asyncCurrentGuides
 
@@ -41,11 +38,11 @@ extension Patch {
 }
 
 extension Repairable {
-  fileprivate func gather(_ gitDirectory: URL) async throws -> Patch {
+  fileprivate func gather(_ configuration: GitTagDataSequence.Configuration) async throws -> Patch {
     switch self {
     case .artists:
       return .artists(
-        try await changes(from: gitDirectory) {
+        try await changes(configuration: configuration) {
           try await currentArtists()
         } createGuide: {
           $0.artistNames
@@ -54,7 +51,7 @@ extension Repairable {
         })
     case .albums:
       return .albums(
-        try await changes(from: gitDirectory) {
+        try await changes(configuration: configuration) {
           try await currentAlbums()
         } createGuide: {
           $0.albumNames
@@ -64,7 +61,7 @@ extension Repairable {
     }
   }
 
-  public func emit(_ gitDirectory: URL) async throws {
-    print(try await self.gather(gitDirectory).jsonString)
+  public func emit(_ configuration: GitTagDataSequence.Configuration) async throws {
+    print(try await self.gather(configuration).jsonString)
   }
 }
