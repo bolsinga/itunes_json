@@ -6,16 +6,9 @@
 //
 
 import Foundation
-import RegexBuilder
-import os
 
 let mainPrefix = "iTunes"
 let fileName = "itunes.json"
-
-extension Logger {
-  fileprivate static let gather = Logger(
-    subsystem: Bundle.main.bundleIdentifier ?? "unknown", category: "gather")
-}
 
 extension Track {
   private var isCompilation: Bool {
@@ -49,58 +42,28 @@ extension Array where Element == Track {
   }
 }
 
-private protocol Similar: Sendable {
-  func isSimilar(to other: Self) -> Bool
-  var cullable: Bool { get }
-}
-
 extension SortableName: Similar {
-  fileprivate var cullable: Bool {
+  var cullable: Bool {
     sorted.isEmpty
   }
 
-  fileprivate func isSimilar(to other: SortableName) -> Bool {
+  func isSimilar(to other: SortableName) -> Bool {
     self.name.isSimilar(to: other.name)
   }
 }
 
 extension AlbumArtistName: Similar {
-  fileprivate var cullable: Bool {
+  var cullable: Bool {
     true  // FIXME
   }
 
-  fileprivate func isSimilar(to other: AlbumArtistName) -> Bool {
+  func isSimilar(to other: AlbumArtistName) -> Bool {
     // self is the current here.
     self.name.isSimilar(to: other.name) && self.type.isSimilar(to: other.type)
   }
 }
 
 extension Collection where Element: Similar {
-  fileprivate func similarNames(to other: Element) -> [Element] {
-    self.filter { $0.isSimilar(to: other) }
-  }
-
-  fileprivate func similarName(to other: Element) -> Element? {
-    // 'self' contains the current names here.
-    var similarNames = self.similarNames(to: other)
-    let originalCount = similarNames.count
-    var keepLooking = true
-    repeat {
-      if similarNames.count == 1, let similarName = similarNames.first {
-        return similarName
-      } else {
-        let previousCount = similarNames.count
-        similarNames = similarNames.filter { !$0.cullable }
-        if similarNames.count == previousCount {
-          keepLooking = false
-        }
-      }
-    } while keepLooking
-
-    Logger.gather.log("Candidates (\(originalCount)) for \(String(describing: other))")
-    return nil
-  }
-
   fileprivate func mendables<T: Sendable>(mend: @escaping @Sendable (Element) -> T) async -> [T] {
     await withTaskGroup(of: T.self) { group in
       self.forEach { element in
