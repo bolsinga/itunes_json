@@ -63,21 +63,6 @@ extension AlbumArtistName: Similar {
   }
 }
 
-extension Collection where Element: Similar {
-  fileprivate func mendables<T: Sendable>(mend: @escaping @Sendable (Element) -> T) async -> [T] {
-    await withTaskGroup(of: T.self) { group in
-      self.forEach { element in
-        group.addTask { mend(element) }
-      }
-      var mendables: [T] = []
-      for await mendable in group {
-        mendables.append(mendable)
-      }
-      return mendables
-    }
-  }
-}
-
 private func currentArtists() async throws -> Set<SortableName> {
   let tracks = try await Source.itunes.gather(
     nil, repair: nil, artistIncluded: nil, reduce: false)
@@ -90,22 +75,22 @@ private func currentAlbums() async throws -> Set<AlbumArtistName> {
   return tracks.albumNames
 }
 
-private func gatherRepairable<Name: Hashable & Similar, Mendable: Sendable>(
-  from gitDirectory: URL, gatherCurrentNames: @Sendable () async throws -> Set<Name>,
-  namer: @escaping @Sendable ([Track]) -> Set<Name>,
-  mend: @escaping @Sendable (Name, Set<Name>) -> Mendable
-) async throws -> [Mendable] {
-  async let asyncCurrentNames = try await gatherCurrentNames()
+private func changes<Guide: Hashable & Similar, Change: Sendable>(
+  from gitDirectory: URL, currentGuides: @Sendable () async throws -> Set<Guide>,
+  createGuide: @escaping @Sendable ([Track]) -> Set<Guide>,
+  createChange: @escaping @Sendable (Guide, Set<Guide>) -> Change
+) async throws -> [Change] {
+  async let asyncCurrentGuides = try await currentGuides()
 
-  let allKnownNames = try await GitTagDataSequence(
+  let allKnownGuides = try await GitTagDataSequence(
     directory: gitDirectory, tagPrefix: mainPrefix, fileName: fileName
-  ).transformTracks(namer)
+  ).transformTracks(createGuide)
 
-  let currentNames = try await asyncCurrentNames
+  let currentGuides = try await asyncCurrentGuides
 
-  let unknownNames = Array(allKnownNames.subtracting(currentNames))
+  let unknownGuides = Array(allKnownGuides.subtracting(currentGuides))
 
-  return await unknownNames.mendables { mend($0, currentNames) }
+  return await unknownGuides.changes { createChange($0, currentGuides) }
 }
 
 extension Patch {
@@ -124,20 +109,20 @@ extension Repairable {
     switch self {
     case .artists:
       return .artists(
-        try await gatherRepairable(from: gitDirectory) {
+        try await changes(from: gitDirectory) {
           try await currentArtists()
-        } namer: {
+        } createGuide: {
           $0.artistNames
-        } mend: {
+        } createChange: {
           ArtistPatch(invalid: $0, valid: $1.similarName(to: $0))
         })
     case .albums:
       return .albums(
-        try await gatherRepairable(from: gitDirectory) {
+        try await changes(from: gitDirectory) {
           try await currentAlbums()
-        } namer: {
+        } createGuide: {
           $0.albumNames
-        } mend: {
+        } createChange: {
           AlbumPatch(invalid: $0, valid: $1.similarName(to: $0))
         })
     }
