@@ -2,6 +2,8 @@ import ArgumentParser
 import Foundation
 import iTunes
 
+let fileName = "itunes.json"
+
 extension Repairable: EnumerableFlag {}
 
 @main
@@ -24,7 +26,11 @@ struct PatchMusic: AsyncParsableCommand {
   )
   var gitDirectory: URL
 
+  @Option(help: "The prefix to use for the git tags.") var sourceTagPrefix: String = "iTunes"
+
   public func run() async throws {
-    try await repairable.emit(gitDirectory)
+    let configuration = GitTagDataSequence.Configuration(
+      directory: gitDirectory, tagPrefix: sourceTagPrefix, fileName: fileName)
+    try await repairable.emit(configuration)
   }
 }

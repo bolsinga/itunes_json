@@ -16,15 +16,28 @@ extension Logger {
 public struct GitTagDataSequence: AsyncSequence {
   public typealias Element = Data
 
+  public struct Configuration {
+    let directory: URL
+    let tagPrefix: String
+    let fileName: String
+
+    public init(directory: URL, tagPrefix: String, fileName: String) {
+      self.directory = directory
+      self.tagPrefix = tagPrefix
+      self.fileName = fileName
+    }
+  }
+
   let git: Git
   let tags: [String]
   let fileName: String
 
-  public init(directory: URL, tagPrefix: String, fileName: String) async throws {
-    self.git = Git(directory: directory, suppressStandardErr: true)
+  public init(configuration: Configuration) async throws {
+    self.git = Git(directory: configuration.directory, suppressStandardErr: true)
     try await self.git.status()
-    self.tags = try await self.git.tags().matchingFormattedTag(prefix: tagPrefix).sorted()
-    self.fileName = fileName
+    self.tags = try await self.git.tags().matchingFormattedTag(prefix: configuration.tagPrefix)
+      .sorted()
+    self.fileName = configuration.fileName
   }
 
   public struct AsyncIterator: AsyncIteratorProtocol {
