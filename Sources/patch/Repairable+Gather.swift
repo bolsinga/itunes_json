@@ -26,19 +26,8 @@ private func changes<Guide: Hashable & Similar, Change: Sendable>(
   return await unknownGuides.changes { createChange($0, currentGuides) }
 }
 
-extension Patch {
-  fileprivate var jsonString: String {
-    switch self {
-    case .artists(let artists):
-      return (try? (try? artists.sorted().jsonData())?.asUTF8String()) ?? ""
-    case .albums(let items):
-      return (try? (try? items.sorted().jsonData())?.asUTF8String()) ?? ""
-    }
-  }
-}
-
 extension Repairable {
-  fileprivate func gather(_ configuration: GitTagDataSequence.Configuration) async throws -> Patch {
+  func gather(_ configuration: GitTagDataSequence.Configuration) async throws -> Patch {
     switch self {
     case .artists:
       return .artists(
@@ -59,9 +48,5 @@ extension Repairable {
           AlbumPatch(invalid: $0, valid: $1.similarName(to: $0))
         })
     }
-  }
-
-  public func emit(_ configuration: GitTagDataSequence.Configuration) async throws {
-    print(try await self.gather(configuration).jsonString)
   }
 }
