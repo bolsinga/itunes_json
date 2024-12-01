@@ -8,7 +8,7 @@
 import Foundation
 
 extension GitTagDataSequence {
-  func transformTracks<Transform: Hashable & Sendable>(
+  public func transformTracks<Transform: Hashable & Sendable>(
     _ transform: @escaping @Sendable ([Track]) -> Set<Transform>
   ) async throws -> Set<Transform> {
     var tagData = try await self.data()

@@ -5,7 +5,7 @@ import iTunes
 extension Repairable: EnumerableFlag {}
 
 @main
-struct Program: AsyncParsableCommand {
+struct PatchMusic: AsyncParsableCommand {
   /// Input source type.
   @Flag(help: "Repairable type to build.") var repairable: Repairable = .artists
 
