@@ -8,8 +8,8 @@
 import Foundation
 
 extension GitTagDataSequence {
-  func transformTracks<Transform: Sendable>(
-    _ transform: @escaping @Sendable ([Track]) -> [Transform]
+  func transformTracks<Transform: Hashable & Sendable>(
+    _ transform: @escaping @Sendable ([Track]) -> Set<Transform>
   ) async throws -> Set<Transform> {
     var tagData = try await self.data()
 
@@ -17,7 +17,7 @@ extension GitTagDataSequence {
       for data in tagData.reversed() {
         tagData.removeLast()
         group.addTask {
-          Set(transform(try Track.createFromData(data)))
+          transform(try Track.createFromData(data))
         }
       }
 

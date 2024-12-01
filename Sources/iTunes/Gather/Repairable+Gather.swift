@@ -40,13 +40,12 @@ extension Track {
 }
 
 extension Array where Element == Track {
-  fileprivate var artistNames: [SortableName] {
-    [SortableName](
-      Set(self.filter { $0.isSQLEncodable }.compactMap { $0.artistName }))
+  fileprivate var artistNames: Set<SortableName> {
+    Set(self.filter { $0.isSQLEncodable }.compactMap { $0.artistName })
   }
 
-  fileprivate var albumNames: [AlbumArtistName] {
-    [AlbumArtistName](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumArtistName }))
+  fileprivate var albumNames: Set<AlbumArtistName> {
+    Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumArtistName })
   }
 }
 
@@ -76,7 +75,7 @@ extension AlbumArtistName: Similar {
   }
 }
 
-extension Array where Element: Similar {
+extension Collection where Element: Similar {
   fileprivate func similarNames(to other: Element) -> [Element] {
     self.filter { $0.isSimilar(to: other) }
   }
@@ -116,22 +115,22 @@ extension Array where Element: Similar {
   }
 }
 
-private func currentArtists() async throws -> [SortableName] {
+private func currentArtists() async throws -> Set<SortableName> {
   let tracks = try await Source.itunes.gather(
     nil, repair: nil, artistIncluded: nil, reduce: false)
   return tracks.artistNames
 }
 
-private func currentAlbums() async throws -> [AlbumArtistName] {
+private func currentAlbums() async throws -> Set<AlbumArtistName> {
   let tracks = try await Source.itunes.gather(
     nil, repair: nil, artistIncluded: nil, reduce: false)
   return tracks.albumNames
 }
 
 private func gatherRepairable<Name: Hashable & Similar, Mendable: Sendable>(
-  from gitDirectory: URL, gatherCurrentNames: @Sendable () async throws -> [Name],
-  namer: @escaping @Sendable ([Track]) -> [Name],
-  mend: @escaping @Sendable (Name, [Name]) -> Mendable
+  from gitDirectory: URL, gatherCurrentNames: @Sendable () async throws -> Set<Name>,
+  namer: @escaping @Sendable ([Track]) -> Set<Name>,
+  mend: @escaping @Sendable (Name, Set<Name>) -> Mendable
 ) async throws -> [Mendable] {
   async let asyncCurrentNames = try await gatherCurrentNames()
 
