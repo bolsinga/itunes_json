@@ -6,18 +6,25 @@
 //
 
 import Foundation
+import os
+
+extension Logger {
+  fileprivate static let transform = Logger(
+    subsystem: Bundle.main.bundleIdentifier ?? "unknown", category: "transform")
+}
 
 extension GitTagDataSequence {
   public func transformTracks<Transform: Hashable & Sendable>(
     _ transform: @escaping @Sendable ([Track]) -> Set<Transform>
   ) async throws -> Set<Transform> {
-    var tagData = try await self.data()
+    var tagDatum = try await self.tagDatum()
 
     return try await withThrowingTaskGroup(of: Set<Transform>.self) { group in
-      for data in tagData.reversed() {
-        tagData.removeLast()
+      for tagData in tagDatum.reversed() {
+        tagDatum.removeLast()
         group.addTask {
-          transform(try Track.createFromData(data))
+          Logger.transform.info("transform: \(tagData.tag)")
+          return transform(try Track.createFromData(tagData.data))
         }
       }
 
