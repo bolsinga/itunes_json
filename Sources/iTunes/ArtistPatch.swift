@@ -19,4 +19,6 @@ public struct ArtistPatch: Codable, Comparable, Hashable, Sendable {
   public static func < (lhs: ArtistPatch, rhs: ArtistPatch) -> Bool {
     lhs.invalid < rhs.invalid
   }
+
+  public var isValid: Bool { valid != nil }
 }

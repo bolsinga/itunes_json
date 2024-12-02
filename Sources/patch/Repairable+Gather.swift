@@ -39,7 +39,7 @@ extension Repairable {
           $0.artistNames
         } createChange: {
           ArtistPatch(invalid: $0, valid: $1.correctedSimilarName(to: $0, corrections: corrections))
-        })
+        }.filter { $0.isValid })
     case .albums:
       return .albums(
         try await changes(configuration: configuration) {
