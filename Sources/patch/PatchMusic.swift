@@ -28,9 +28,21 @@ struct PatchMusic: AsyncParsableCommand {
 
   @Option(help: "The prefix to use for the git tags.") var sourceTagPrefix: String = "iTunes"
 
+  /// Optional corrections to use when creating this patch.
+  @Option(
+    help: "The corrections to apply when creating this patch (as a JSON string).",
+    transform: ({
+      guard let data = $0.data(using: .utf8) else {
+        throw ValidationError("Invalid Correction String: \($0)")
+      }
+      return try JSONDecoder().decode(Dictionary<String, String>.self, from: data)
+    })
+  )
+  var correction: [String: String] = [:]
+
   public func run() async throws {
     let configuration = GitTagDataSequence.Configuration(
       directory: gitDirectory, tagPrefix: sourceTagPrefix, fileName: fileName)
-    print(try await repairable.gather(configuration))
+    print(try await repairable.gather(configuration, corrections: correction))
   }
 }
