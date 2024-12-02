@@ -20,6 +20,7 @@ enum GitError: Error {
   case contains(Int32)
   case tags(Int32)
   case show(Int32)
+  case createBranch(Int32)
 }
 
 struct Git {
@@ -103,5 +104,9 @@ struct Git {
 
   func show(commit: String, path: String) async throws -> Data {
     try await gitData(["show", "\(commit):\(path)"]) { GitError.show($0) }
+  }
+
+  func createBranch(named name: String, initialCommit: String) async throws {
+    try await git(["checkout", "-b", name, initialCommit]) { GitError.createBranch($0) }
   }
 }
