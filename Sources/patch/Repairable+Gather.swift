@@ -27,7 +27,9 @@ private func changes<Guide: Hashable & Similar, Change: Sendable>(
 }
 
 extension Repairable {
-  func gather(_ configuration: GitTagDataSequence.Configuration) async throws -> Patch {
+  func gather(_ configuration: GitTagDataSequence.Configuration, corrections: [String: String])
+    async throws -> Patch
+  {
     switch self {
     case .artists:
       return .artists(
@@ -36,7 +38,7 @@ extension Repairable {
         } createGuide: {
           $0.artistNames
         } createChange: {
-          ArtistPatch(invalid: $0, valid: $1.similarName(to: $0))
+          ArtistPatch(invalid: $0, valid: $1.correctedSimilarName(to: $0, corrections: corrections))
         })
     case .albums:
       return .albums(
