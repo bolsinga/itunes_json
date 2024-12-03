@@ -24,7 +24,7 @@ extension GitTagDataSequence {
         tagDatum.removeLast()
         group.addTask {
           Logger.transform.info("transform: \(tagData.tag)")
-          return transform(try Track.createFromData(tagData.data))
+          return transform(try Track.array(from: tagData.data))
         }
       }
 
