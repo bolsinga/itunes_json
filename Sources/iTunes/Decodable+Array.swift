@@ -1,5 +1,5 @@
 //
-//  Track+String.swift
+//  Decodable+Array.swift
 //
 //
 //  Created by Greg Bolsinga on 12/11/23.
@@ -11,23 +11,23 @@ private enum JSONDecodingError: Error {
   case stringEncodingError
 }
 
-extension Track {
-  static public func createFromURL(_ url: URL) throws -> [Track] {
-    try createFromData(try Data(contentsOf: url, options: .mappedIfSafe))
+extension Decodable {
+  static public func array(from url: URL) throws -> [Self] {
+    try array(from: try Data(contentsOf: url, options: .mappedIfSafe))
   }
 
-  static public func createFromData(_ data: Data) throws -> [Track] {
+  static public func array(from data: Data) throws -> [Self] {
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
-    return try decoder.decode([Track].self, from: data)
+    return try decoder.decode([Self].self, from: data)
   }
 
-  static public func createFromString(_ source: String?) throws -> [Track] {
+  static public func array(from source: String?) throws -> [Self] {
     guard let source else {
       preconditionFailure("Should have been caught during ParsableArguments.validate().")
     }
     guard let data = source.data(using: .utf8) else { throw JSONDecodingError.stringEncodingError }
 
-    return try createFromData(data)
+    return try array(from: data)
   }
 }
