@@ -12,7 +12,7 @@ private func changes<Guide: Hashable & Similar, Change: Sendable>(
   configuration: GitTagDataSequence.Configuration,
   currentGuides: @Sendable () async throws -> Set<Guide>,
   createGuide: @escaping @Sendable ([Track]) -> Set<Guide>,
-  createChange: @escaping @Sendable (Guide, Set<Guide>) -> Change
+  createChange: @escaping @Sendable (Guide, Set<Guide>) -> Change?
 ) async throws -> [Change] {
   async let asyncCurrentGuides = try await currentGuides()
 
@@ -38,8 +38,11 @@ extension Repairable {
         } createGuide: {
           $0.artistNames
         } createChange: {
-          ArtistPatch(invalid: $0, valid: $1.correctedSimilarName(to: $0, corrections: corrections))
-        }.filter { $0.isValid })
+          guard let valid = $1.correctedSimilarName(to: $0, corrections: corrections) else {
+            return nil
+          }
+          return ArtistPatch(invalid: $0, valid: valid)
+        })
     case .albums:
       return .albums(
         try await changes(configuration: configuration) {
@@ -47,7 +50,10 @@ extension Repairable {
         } createGuide: {
           $0.albumNames
         } createChange: {
-          AlbumPatch(invalid: $0, valid: $1.similarName(to: $0))
+          guard let valid = $1.similarName(to: $0) else {
+            return nil
+          }
+          return AlbumPatch(invalid: $0, valid: valid)
         })
     }
   }

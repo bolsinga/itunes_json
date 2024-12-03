@@ -7,9 +7,9 @@
 
 public struct AlbumPatch: Codable, Comparable, Hashable, Sendable {
   let invalid: AlbumArtistName
-  let valid: AlbumArtistName?
+  let valid: AlbumArtistName
 
-  public init(invalid: AlbumArtistName, valid: AlbumArtistName? = nil) {
+  public init(invalid: AlbumArtistName, valid: AlbumArtistName) {
     self.invalid = invalid
     self.valid = valid
   }
