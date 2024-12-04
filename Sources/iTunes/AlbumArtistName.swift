@@ -5,6 +5,8 @@
 //  Created by Greg Bolsinga on 11/28/24.
 //
 
+import Foundation
+
 public struct AlbumArtistName: Codable, Comparable, Hashable, Sendable {
   enum AlbumType: Codable, Hashable {
     case compilation
@@ -34,5 +36,15 @@ public struct AlbumArtistName: Codable, Comparable, Hashable, Sendable {
 
   public static func < (lhs: AlbumArtistName, rhs: AlbumArtistName) -> Bool {
     lhs.name < rhs.name
+  }
+}
+
+extension AlbumArtistName: CustomStringConvertible {
+  public var description: String {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys]
+    encoder.dateEncodingStrategy = .iso8601
+    guard let data = try? encoder.encode(self) else { return "" }
+    return (try? data.asUTF8String()) ?? ""
   }
 }
