@@ -20,3 +20,13 @@ public struct ArtistPatch: Codable, Comparable, Hashable, Sendable {
     lhs.invalid < rhs.invalid
   }
 }
+
+extension ArtistPatch: CustomStringConvertible {
+  public var description: String {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys]
+    encoder.dateEncodingStrategy = .iso8601
+    guard let data = try? encoder.encode(self) else { return "" }
+    return (try? data.asUTF8String()) ?? ""
+  }
+}
