@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum Patch {
+public enum Patch: Sendable {
   case artists([ArtistPatch])
   case albums([AlbumPatch])
 }
