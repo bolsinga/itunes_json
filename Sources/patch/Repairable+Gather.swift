@@ -32,7 +32,7 @@ extension Repairable {
   {
     switch self {
     case .artists:
-      return .artists(
+      .artists(
         try await changes(configuration: configuration) {
           try await currentArtists()
         } createGuide: {
@@ -41,10 +41,16 @@ extension Repairable {
           guard let valid = $1.correctedSimilarName(to: $0, corrections: corrections) else {
             return nil
           }
-          return ArtistPatch(invalid: $0, valid: valid)
+          return ($0, valid)
+        }.reduce(into: ArtistPatchLookup()) {
+          (partialResult: inout ArtistPatchLookup, pair: ArtistPatchLookup.Element) in
+          guard partialResult[pair.key] == nil else {
+            preconditionFailure("unexpected duplicate name: \(pair.key)")
+          }
+          partialResult[pair.key] = pair.value
         })
     case .albums:
-      return .albums(
+      .albums(
         try await changes(configuration: configuration) {
           try await currentAlbums()
         } createGuide: {
@@ -53,7 +59,13 @@ extension Repairable {
           guard let valid = $1.similarName(to: $0) else {
             return nil
           }
-          return AlbumPatch(invalid: $0, valid: valid)
+          return ($0, valid)
+        }.reduce(into: AlbumPatchLookup()) {
+          (partialResult: inout AlbumPatchLookup, pair: AlbumPatchLookup.Element) in
+          guard partialResult[pair.key] == nil else {
+            preconditionFailure("unexpected duplicate name: \(pair.key)")
+          }
+          partialResult[pair.key] = pair.value
         })
     }
   }
