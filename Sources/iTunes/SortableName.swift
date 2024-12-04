@@ -26,3 +26,13 @@ extension SortableName: Comparable {
     lhs.sort < rhs.sort
   }
 }
+
+extension SortableName: CustomStringConvertible {
+  public var description: String {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys]
+    encoder.dateEncodingStrategy = .iso8601
+    guard let data = try? encoder.encode(self) else { return "" }
+    return (try? data.asUTF8String()) ?? ""
+  }
+}
