@@ -13,6 +13,12 @@ extension Logger {
     subsystem: Bundle.main.bundleIdentifier ?? "unknown", category: "transform")
 }
 
+extension TagData {
+  fileprivate func tracks() throws -> [Track] {
+    try Track.array(from: self.data)
+  }
+}
+
 extension GitTagDataSequence {
   public func transformTracks<Transform: Hashable & Sendable>(
     _ transform: @escaping @Sendable ([Track]) -> Set<Transform>
@@ -24,7 +30,7 @@ extension GitTagDataSequence {
         tagDatum.removeLast()
         group.addTask {
           Logger.transform.info("transform: \(tagData.tag)")
-          return transform(try Track.array(from: tagData.data))
+          return transform(try tagData.tracks())
         }
       }
 
