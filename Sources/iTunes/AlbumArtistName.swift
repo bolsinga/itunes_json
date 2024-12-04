@@ -5,7 +5,7 @@
 //  Created by Greg Bolsinga on 11/28/24.
 //
 
-public struct AlbumArtistName: Codable, Hashable, Sendable {
+public struct AlbumArtistName: Codable, Comparable, Hashable, Sendable {
   enum AlbumType: Codable, Hashable {
     case compilation
     case artist(String)
@@ -28,6 +28,11 @@ public struct AlbumArtistName: Codable, Hashable, Sendable {
       }
     }
   }
+
   let name: SortableName
   let type: AlbumType
+
+  public static func < (lhs: AlbumArtistName, rhs: AlbumArtistName) -> Bool {
+    lhs.name < rhs.name
+  }
 }
