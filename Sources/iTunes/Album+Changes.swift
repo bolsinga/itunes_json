@@ -15,15 +15,15 @@ extension Track {
 
   private var albumType: AlbumArtistName.AlbumType {
     if isCompilation {
-      return .compilation
+      .compilation
     } else if let artistName = artistName {
-      return .artist(artistName.name)
+      .artist(artistName.name)
     } else {
-      return .unknown
+      .unknown
     }
   }
 
-  fileprivate var albumArtistName: AlbumArtistName? {
+  var albumArtistName: AlbumArtistName? {
     guard let albumName else { return nil }
     return AlbumArtistName(name: albumName, type: albumType)
   }
