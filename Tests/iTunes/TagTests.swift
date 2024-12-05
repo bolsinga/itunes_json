@@ -137,7 +137,7 @@ struct TagTests {
   }
 
   @Test func noPrefix() throws {
-    #expect(["-2024-10-25"].matchingFormattedTag(prefix: "").count == 1)
+    #expect(["-2024-10-25"].matchingFormattedTag(prefix: "").count == 0)
     #expect(["2024-10-25"].matchingFormattedTag(prefix: "").count == 0)
   }
 }

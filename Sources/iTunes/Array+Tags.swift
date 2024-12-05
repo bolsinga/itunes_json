@@ -10,6 +10,8 @@ import RegexBuilder
 
 extension Array where Element == String {
   func matchingFormattedTag(prefix: String) -> [Element] {
+    guard !prefix.isEmpty else { return [] }
+
     let regex = Regex {
       prefix
       "-"
