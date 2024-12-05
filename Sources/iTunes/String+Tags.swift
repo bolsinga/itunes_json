@@ -14,7 +14,7 @@ extension String {
 
     let regex = Regex {
       Capture {
-        ZeroOrMore {
+        OneOrMore {
           ChoiceOf {
             OneOrMore { .word }
             "."
