@@ -132,4 +132,16 @@ struct TagTests {
   @Test func replace() throws {
     #expect("tag-2024-12-05".replacePrefix(newPrefix: "X") == "X-2024-12-05")
   }
+
+  @Test func appendInvalid() throws {
+    #expect("-2024-12-05".appendToPrefix(appendix: "x") == nil)
+  }
+
+  @Test func appendNonConforming() throws {
+    #expect("xxxxx".appendToPrefix(appendix: "x") == nil)
+  }
+
+  @Test func append() throws {
+    #expect("tag-2024-12-05".appendToPrefix(appendix: "x") == "tag.x-2024-12-05")
+  }
 }
