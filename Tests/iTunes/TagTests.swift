@@ -78,4 +78,66 @@ struct TagTests {
     #expect(["ZZZ.A.B-2024-10-25.01"].matchingFormattedTag(prefix: "ZZZ.A.B").count == 1)
     #expect(["ZZZ.A.B-2024-10-25-empty"].matchingFormattedTag(prefix: "ZZZ.A.B").count == 0)
   }
+
+  @Test func leadingHyphen() throws {
+    #expect(["-ZZZ-2024-10-25"].matchingFormattedTag(prefix: "-ZZZ").count == 1)
+    #expect(["-ZZZ-2024-10-25.01"].matchingFormattedTag(prefix: "-ZZZ").count == 1)
+    #expect(["-ZZZ-2024-10-25-empty"].matchingFormattedTag(prefix: "-ZZZ").count == 0)
+
+    #expect(["-ZZZ-2024-10-25"].matchingFormattedTag(prefix: "ZZZ").count == 0)
+    #expect(["-ZZZ-2024-10-25.01"].matchingFormattedTag(prefix: "ZZZ").count == 0)
+    #expect(["-ZZZ-2024-10-25-empty"].matchingFormattedTag(prefix: "ZZZ").count == 0)
+  }
+
+  @Test func doubleTrailingHyphen() throws {
+    #expect(["ZZZ--2024-10-25"].matchingFormattedTag(prefix: "ZZZ-").count == 1)
+    #expect(["ZZZ--2024-10-25.01"].matchingFormattedTag(prefix: "ZZZ-").count == 1)
+    #expect(["ZZZ--2024-10-25-empty"].matchingFormattedTag(prefix: "ZZZ-").count == 0)
+
+    #expect(["ZZZ--2024-10-25"].matchingFormattedTag(prefix: "ZZZ").count == 0)
+    #expect(["ZZZ--2024-10-25.01"].matchingFormattedTag(prefix: "ZZZ").count == 0)
+    #expect(["ZZZ--2024-10-25-empty"].matchingFormattedTag(prefix: "ZZZ").count == 0)
+  }
+
+  @Test func tripleTrailingHyphen() throws {
+    #expect(["ZZZ---2024-10-25"].matchingFormattedTag(prefix: "ZZZ--").count == 1)
+    #expect(["ZZZ---2024-10-25.01"].matchingFormattedTag(prefix: "ZZZ--").count == 1)
+    #expect(["ZZZ---2024-10-25-empty"].matchingFormattedTag(prefix: "ZZZ--").count == 0)
+
+    #expect(["ZZZ---2024-10-25"].matchingFormattedTag(prefix: "ZZZ").count == 0)
+    #expect(["ZZZ---2024-10-25.01"].matchingFormattedTag(prefix: "ZZZ").count == 0)
+    #expect(["ZZZ---2024-10-25-empty"].matchingFormattedTag(prefix: "ZZZ").count == 0)
+  }
+
+  @Test func leadingPeriod() throws {
+    #expect([".ZZZ-2024-10-25"].matchingFormattedTag(prefix: ".ZZZ").count == 1)
+    #expect([".ZZZ-2024-10-25.01"].matchingFormattedTag(prefix: ".ZZZ").count == 1)
+    #expect([".ZZZ-2024-10-25-empty"].matchingFormattedTag(prefix: ".ZZZ").count == 0)
+
+    #expect([".ZZZ-2024-10-25"].matchingFormattedTag(prefix: "ZZZ").count == 0)
+    #expect([".ZZZ-2024-10-25.01"].matchingFormattedTag(prefix: "ZZZ").count == 0)
+    #expect([".ZZZ-2024-10-25-empty"].matchingFormattedTag(prefix: "ZZZ").count == 0)
+  }
+
+  @Test func doubleTrailingPeriod() throws {
+    #expect(["ZZZ..-2024-10-25"].matchingFormattedTag(prefix: "ZZZ..").count == 1)
+    #expect(["ZZZ..-2024-10-25.01"].matchingFormattedTag(prefix: "ZZZ..").count == 1)
+    #expect(["ZZZ..-2024-10-25-empty"].matchingFormattedTag(prefix: "ZZZ..").count == 0)
+
+    #expect(["ZZZ..-2024-10-25"].matchingFormattedTag(prefix: "ZZZ").count == 0)
+    #expect(["ZZZ..-2024-10-25.01"].matchingFormattedTag(prefix: "ZZZ").count == 0)
+    #expect(["ZZZ..-2024-10-25-empty"].matchingFormattedTag(prefix: "ZZZ").count == 0)
+  }
+
+  @Test func weirdPrefixes() throws {
+    #expect([".-2024-10-25"].matchingFormattedTag(prefix: ".").count == 1)
+    #expect(["..-2024-10-25"].matchingFormattedTag(prefix: "..").count == 1)
+    #expect(["--2024-10-25.01"].matchingFormattedTag(prefix: "-").count == 1)
+    #expect(["---2024-10-25.01"].matchingFormattedTag(prefix: "--").count == 1)
+  }
+
+  @Test func noPrefix() throws {
+    #expect(["-2024-10-25"].matchingFormattedTag(prefix: "").count == 1)
+    #expect(["2024-10-25"].matchingFormattedTag(prefix: "").count == 0)
+  }
 }
