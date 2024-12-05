@@ -1,5 +1,5 @@
 //
-//  Array+Tags.swift
+//  String+Tags.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 11/18/24.
@@ -8,9 +8,9 @@
 import Foundation
 import RegexBuilder
 
-extension Array where Element == String {
-  func matchingFormattedTag(prefix: String) -> [Element] {
-    guard !prefix.isEmpty else { return [] }
+extension String {
+  func matchingFormattedTag(prefix: String) -> Bool {
+    guard !prefix.isEmpty else { return false }
 
     let regex = Regex {
       Capture {
@@ -40,12 +40,10 @@ extension Array where Element == String {
       Optionally(.digit)
     }
 
-    return self.filter {
-      if let match = try? regex.wholeMatch(in: $0) {
-        String(match.output.1) == prefix
-      } else {
-        false
-      }
+    if let match = try? regex.wholeMatch(in: self) {
+      return String(match.output.1) == prefix
+    } else {
+      return false
     }
   }
 }

@@ -40,8 +40,9 @@ public struct GitTagDataSequence: AsyncSequence {
   public init(configuration: Configuration) async throws {
     self.git = Git(directory: configuration.directory, suppressStandardErr: true)
     try await self.git.status()
-    self.tags = try await self.git.tags().matchingFormattedTag(prefix: configuration.tagPrefix)
-      .sorted()
+    self.tags = try await self.git.tags().filter {
+      $0.matchingFormattedTag(prefix: configuration.tagPrefix)
+    }.sorted()
     self.fileName = configuration.fileName
   }
 
