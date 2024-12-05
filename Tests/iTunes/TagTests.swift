@@ -122,11 +122,11 @@ struct TagTests {
   }
 
   @Test func replaceInvalid() throws {
-    #expect("-2024-12-05".replacePrefix(newPrefix: "X") == "-2024-12-05")
+    #expect("-2024-12-05".replacePrefix(newPrefix: "X") == nil)
   }
 
   @Test func replaceNonConforming() throws {
-    #expect("xxxxx".replacePrefix(newPrefix: "X") == "xxxxx")
+    #expect("xxxxx".replacePrefix(newPrefix: "X") == nil)
   }
 
   @Test func replace() throws {
