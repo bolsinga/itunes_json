@@ -120,4 +120,16 @@ struct TagTests {
   @Test func matchingPrefix() throws {
     #expect("tag-2024-12-05".matchingFormattedTag(prefix: "tag"))
   }
+
+  @Test func replaceInvalid() throws {
+    #expect("-2024-12-05".replacePrefix(newPrefix: "X") == "-2024-12-05")
+  }
+
+  @Test func replaceNonConforming() throws {
+    #expect("xxxxx".replacePrefix(newPrefix: "X") == "xxxxx")
+  }
+
+  @Test func replace() throws {
+    #expect("tag-2024-12-05".replacePrefix(newPrefix: "X") == "X-2024-12-05")
+  }
 }

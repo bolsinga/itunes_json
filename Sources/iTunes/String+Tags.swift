@@ -51,4 +51,10 @@ extension String {
 
     return existingPrefix == prefix
   }
+
+  func replacePrefix(newPrefix: String) -> String {
+    guard let prefix = tagPrefix() else { return self }
+
+    return self.replacing(prefix, with: newPrefix)
+  }
 }
