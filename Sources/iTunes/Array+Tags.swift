@@ -13,7 +13,15 @@ extension Array where Element == String {
     guard !prefix.isEmpty else { return [] }
 
     let regex = Regex {
-      prefix
+      Capture {
+        ZeroOrMore {
+          ChoiceOf {
+            OneOrMore { .word }
+            "."
+            "-"
+          }
+        }
+      }
       "-"
       One(.digit)
       One(.digit)
@@ -32,6 +40,12 @@ extension Array where Element == String {
       Optionally(.digit)
     }
 
-    return self.filter { (try? regex.wholeMatch(in: $0)) != nil }
+    return self.filter {
+      if let match = try? regex.wholeMatch(in: $0) {
+        String(match.output.1) == prefix
+      } else {
+        false
+      }
+    }
   }
 }
