@@ -144,4 +144,8 @@ struct TagTests {
   @Test func append() throws {
     #expect("tag-2024-12-05".appendToPrefix(appendix: "x") == "tag.x-2024-12-05")
   }
+
+  @Test func bad() throws {
+    #expect("iTunes-2024-05-12-empty.01-empty".tagPrefix() == nil)
+  }
 }

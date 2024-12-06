@@ -37,6 +37,7 @@ extension String {
       Optionally(.digit)
       Optionally(.digit)
     }
+    .repetitionBehavior(.reluctant)
 
     if let match = try? regex.wholeMatch(in: self) {
       return String(match.output.1)
