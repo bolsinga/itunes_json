@@ -19,7 +19,7 @@ extension TagData {
   }
 }
 
-extension GitTagDataSequence {
+extension GitTagData {
   public func transformTracks<Transform: Hashable & Sendable>(
     _ transform: @escaping @Sendable ([Track]) -> Set<Transform>
   ) async throws -> Set<Transform> {

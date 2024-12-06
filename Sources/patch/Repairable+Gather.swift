@@ -9,14 +9,14 @@ import Foundation
 import iTunes
 
 private func changes<Guide: Hashable & Similar, Change: Sendable>(
-  configuration: GitTagDataSequence.Configuration,
+  configuration: GitTagData.Configuration,
   currentGuides: @Sendable () async throws -> Set<Guide>,
   createGuide: @escaping @Sendable ([Track]) -> Set<Guide>,
   createChange: @escaping @Sendable (Guide, Set<Guide>) -> Change?
 ) async throws -> [Change] {
   async let asyncCurrentGuides = try await currentGuides()
 
-  let allKnownGuides = try await GitTagDataSequence(configuration: configuration).transformTracks(
+  let allKnownGuides = try await GitTagData(configuration: configuration).transformTracks(
     createGuide)
 
   let currentGuides = try await asyncCurrentGuides
@@ -27,7 +27,7 @@ private func changes<Guide: Hashable & Similar, Change: Sendable>(
 }
 
 extension Repairable {
-  func gather(_ configuration: GitTagDataSequence.Configuration, corrections: [String: String])
+  func gather(_ configuration: GitTagData.Configuration, corrections: [String: String])
     async throws -> Patch
   {
     switch self {
