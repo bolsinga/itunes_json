@@ -41,7 +41,7 @@ struct PatchMusic: AsyncParsableCommand {
   var correction: [String: String] = [:]
 
   public func run() async throws {
-    let configuration = GitTagDataSequence.Configuration(
+    let configuration = GitTagData.Configuration(
       directory: gitDirectory, tagPrefix: sourceTagPrefix, fileName: fileName)
     print(try await repairable.gather(configuration, corrections: correction))
   }
