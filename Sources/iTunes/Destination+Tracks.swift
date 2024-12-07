@@ -27,28 +27,35 @@ extension Destination {
     }
   }
 
-  public func emit<T: Comparable>(
-    _ items: [T], outputFile: URL?, branch: String, dataBuilder: ([T]) throws -> Data,
-    databaseBuilder: ([T]) async throws -> Void
+  public func emit(
+    _ tracks: [Track], outputFile: URL?, loggingToken: String?, branch: String,
+    schemaConstraints: SchemaConstraints
   )
     async throws
   {
-    guard !items.isEmpty else {
+    guard !tracks.isEmpty else {
       throw DataExportError.noTracks
     }
 
-    let items = items.sorted()
+    let tracks = tracks.sorted()
 
     switch self {
     case .json, .sqlCode, .jsonGit:
-      let data = try dataBuilder(items)
+      let data = try self.data(
+        for: tracks, loggingToken: loggingToken, schemaConstraints: schemaConstraints)
+
       if let outputFile {
         try self.fileWriter(for: outputFile, branch: branch).write(data: data)
       } else {
         print("\(try data.asUTF8String())")
       }
     case .db:
-      try await databaseBuilder(items)
+      guard let outputFile else {
+        preconditionFailure("Should have been caught during ParasableArguments.validate().")
+      }
+
+      try await tracks.database(
+        file: outputFile, loggingToken: loggingToken, schemaConstrainsts: schemaConstraints)
     }
   }
 }

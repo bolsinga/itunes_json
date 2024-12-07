@@ -126,17 +126,9 @@ public struct Program: AsyncParsableCommand {
         reduce: isReducing)
     }()
 
-    try await destination.emit(tracks, outputFile: outputFile, branch: "main") {
-      try destination.data(
-        for: $0, loggingToken: loggingToken, schemaConstraints: schemaConstraints)
-    } databaseBuilder: {
-      guard let outputFile else {
-        preconditionFailure("Should have been caught during ParasableArguments.validate().")
-      }
-
-      try await $0.database(
-        file: outputFile, loggingToken: loggingToken, schemaConstrainsts: schemaConstraints)
-    }
+    try await destination.emit(
+      tracks, outputFile: outputFile, loggingToken: loggingToken, branch: "main",
+      schemaConstraints: schemaConstraints)
   }
 
   private static func readSTDIN() -> String? {
