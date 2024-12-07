@@ -18,16 +18,66 @@ public struct TagData: Sendable {
   let data: Data
 }
 
+extension TagData {
+  fileprivate func add(to git: Git, file: URL) async throws {
+    Logger.gitTagData.info("Write: \(tag)")
+
+    // this makes memory shoot up, unexpectedly.
+    try data.write(to: file)
+
+    try await git.add(file.lastPathComponent)
+
+    let hasChanges = await {
+      do {
+        try await git.diff()
+        Logger.gitTagData.info("Empty Tag: \(tag)")
+        return false
+      } catch {
+        return true
+      }
+    }()
+
+    if hasChanges {
+      try await git.commit(tag)
+      try await git.tag(tag)
+    }
+  }
+}
+
+extension String {
+  fileprivate func appendTag(appendix: String) -> String {
+    appendToPrefix(appendix: appendix) ?? "\(self)-Could-Not-Properly-Append-\(appendix)"
+  }
+}
+
+extension Array where Element == TagData {
+  public func addTagAppendix(tagAppendix: String) -> [Element] {
+    self.map { TagData(tag: $0.tag.appendTag(appendix: tagAppendix), data: $0.data) }
+  }
+
+  public var initialCommit: String? {
+    self.sorted(by: { $0.tag < $1.tag }).first?.tag
+  }
+}
+
 public struct GitTagData {
   public struct Configuration {
     let directory: URL
     let tagPrefix: String
+    let branch: String?
     let fileName: String
 
-    public init(directory: URL, tagPrefix: String = "", fileName: String) {
+    public init(
+      directory: URL, tagPrefix: String = "", branch: String? = nil, fileName: String
+    ) {
       self.directory = directory
       self.tagPrefix = tagPrefix
+      self.branch = branch
       self.fileName = fileName
+    }
+
+    var file: URL {
+      directory.appending(path: fileName)
     }
   }
 
@@ -92,5 +142,29 @@ public struct GitTagData {
       tagDatum.append(tagData)
     }
     return tagDatum
+  }
+
+  public func write(tagDatum: [TagData], initialCommit: String) async throws {
+    enum WriteError: Error {
+      case noBranch
+    }
+
+    guard let branch = configuration.branch else { throw WriteError.noBranch }
+
+    try await git.status()
+
+    try await git.createBranch(named: branch, initialCommit: initialCommit)
+
+    var tagDatum = tagDatum.sorted(by: { $0.tag > $1.tag })  // latest to oldest.
+
+    for tagData in tagDatum.reversed() {
+      tagDatum.removeLast()
+
+      try await tagData.add(to: git, file: configuration.file)
+    }
+
+    //    try await git.push()
+    //    try await git.pushTags()
+    //    try await git.gc()
   }
 }

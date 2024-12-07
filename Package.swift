@@ -11,6 +11,7 @@ let package = Package(
     .library(name: "iTunes", targets: ["iTunes"]),
     .executable(name: "itunes_json", targets: ["tool"]),
     .executable(name: "patch", targets: ["patch"]),
+    .executable(name: "repair", targets: ["repair"]),
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0")
@@ -22,5 +23,6 @@ let package = Package(
     .testTarget(name: "iTunesTests", dependencies: ["iTunes"]),
     .executableTarget(name: "tool", dependencies: [.byName(name: "iTunes")]),
     .executableTarget(name: "patch", dependencies: [.byName(name: "iTunes")]),
+    .executableTarget(name: "repair", dependencies: [.byName(name: "iTunes")]),
   ]
 )

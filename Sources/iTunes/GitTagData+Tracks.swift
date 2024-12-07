@@ -41,4 +41,26 @@ extension GitTagData {
       return allNames
     }
   }
+
+  public func transformTaggedTracks(transform: @escaping @Sendable ([Track]) async throws -> Data)
+    async throws -> [TagData]
+  {
+    var tagDatum = try await self.tagDatum()
+
+    return try await withThrowingTaskGroup(of: TagData.self) { group in
+      for tagData in tagDatum.reversed() {
+        tagDatum.removeLast()
+        group.addTask {
+          Logger.transform.info("Transform Tag: \(tagData.tag)")
+          return TagData(tag: tagData.tag, data: try await transform(try tagData.tracks()))
+        }
+      }
+
+      var tagDatum: [TagData] = []
+      for try await tagData in group {
+        tagDatum.append(tagData)
+      }
+      return tagDatum
+    }
+  }
 }
