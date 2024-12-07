@@ -127,8 +127,7 @@ public struct Program: AsyncParsableCommand {
     }()
 
     try await destination.emit(
-      tracks, outputFile: outputFile, loggingToken: loggingToken, branch: "main",
-      schemaConstraints: schemaConstraints)
+      tracks, outputFile: outputFile, loggingToken: loggingToken, branch: "main", tagPrefix: "iTunes", schemaConstraints: schemaConstraints)
   }
 
   private static func readSTDIN() -> String? {
