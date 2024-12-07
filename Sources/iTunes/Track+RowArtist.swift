@@ -9,11 +9,16 @@ import Foundation
 import os
 
 extension Track: RowArtistInterface {
+  var artistName: SortableName? {
+    guard let name = (artist ?? albumArtist ?? nil) else { return nil }
+    return SortableName(name: name, sorted: (sortArtist ?? sortAlbumArtist) ?? "")
+  }
+
   func artistName(logger: Logger) -> SortableName {
-    guard let name = (artist ?? albumArtist ?? nil) else {
+    guard let artistName = self.artistName else {
       logger.error("\(debugLogInformation, privacy: .public)")
       return SortableName()
     }
-    return SortableName(name: name, sorted: (sortArtist ?? sortAlbumArtist) ?? "")
+    return artistName
   }
 }

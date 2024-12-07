@@ -45,7 +45,7 @@ extension Source {
     case .musickit:
       return try await Track.gatherWithMusicKit()
     case .jsonString:
-      return try Track.createFromString(source)
+      return try Track.array(from: source)
     }
   }
 }

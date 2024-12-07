@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct SortableName: Codable, Equatable, Hashable, Sendable {
+public struct SortableName: Codable, Equatable, Hashable, Sendable {
   let name: String
   let sorted: String
 
@@ -22,7 +22,17 @@ extension SortableName: Comparable {
     !sorted.isEmpty ? sorted : name
   }
 
-  static func < (lhs: SortableName, rhs: SortableName) -> Bool {
+  public static func < (lhs: SortableName, rhs: SortableName) -> Bool {
     lhs.sort < rhs.sort
+  }
+}
+
+extension SortableName: CustomStringConvertible {
+  public var description: String {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys]
+    encoder.dateEncodingStrategy = .iso8601
+    guard let data = try? encoder.encode(self) else { return "" }
+    return (try? data.asUTF8String()) ?? ""
   }
 }

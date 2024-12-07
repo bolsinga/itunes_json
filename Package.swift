@@ -10,7 +10,8 @@ let package = Package(
   products: [
     .library(name: "iTunes", targets: ["iTunes"]),
     .executable(name: "itunes_json", targets: ["tool"]),
-    .executable(name: "unknowns", targets: ["unknowns"]),
+    .executable(name: "patch", targets: ["patch"]),
+    .executable(name: "repair", targets: ["repair"]),
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0")
@@ -21,6 +22,7 @@ let package = Package(
       dependencies: [.product(name: "ArgumentParser", package: "swift-argument-parser")]),
     .testTarget(name: "iTunesTests", dependencies: ["iTunes"]),
     .executableTarget(name: "tool", dependencies: [.byName(name: "iTunes")]),
-    .executableTarget(name: "unknowns", dependencies: [.byName(name: "iTunes")]),
+    .executableTarget(name: "patch", dependencies: [.byName(name: "iTunes")]),
+    .executableTarget(name: "repair", dependencies: [.byName(name: "iTunes")]),
   ]
 )

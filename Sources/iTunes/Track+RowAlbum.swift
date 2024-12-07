@@ -9,12 +9,17 @@ import Foundation
 import os
 
 extension Track: RowAlbumInterface {
+  var albumName: SortableName? {
+    guard let album else { return nil }
+    return SortableName(name: album, sorted: sortAlbum ?? "")
+  }
+
   func albumName(logger: Logger) -> SortableName {
-    guard let album else {
+    guard let albumName = self.albumName else {
       logger.error("\(debugLogInformation, privacy: .public)")
       return SortableName()
     }
-    return SortableName(name: album, sorted: sortAlbum ?? "")
+    return albumName
   }
 
   func albumTrackCount(logger: Logger) -> Int {

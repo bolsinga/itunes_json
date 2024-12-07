@@ -19,31 +19,8 @@ enum GitError: Error {
   case diff(Int32)
   case contains(Int32)
   case tags(Int32)
-}
-
-extension Process {
-  @discardableResult
-  fileprivate static func git(
-    arguments: [String], errorBuilder: (Int32) -> Error, suppressStandardErr: Bool
-  ) throws
-    -> [String]
-  {
-    let git = Self.init()
-    git.executableURL = URL(filePath: "/usr/bin/git")
-    git.arguments = arguments
-    let standardOutputPipe = Pipe()
-    git.standardOutput = standardOutputPipe
-    if suppressStandardErr { git.standardError = nil }
-    try git.run()
-    git.waitUntilExit()
-    guard git.terminationStatus == 0 else { throw errorBuilder(git.terminationStatus) }
-
-    let standardOutputData = try standardOutputPipe.fileHandleForReading.readToEnd()
-    guard let standardOutputData else { return [] }
-
-    guard let standardOutput = String(data: standardOutputData, encoding: .utf8) else { return [] }
-    return standardOutput.components(separatedBy: "\n").filter { !$0.isEmpty }
-  }
+  case show(Int32)
+  case createBranch(Int32)
 }
 
 struct Git {
@@ -60,53 +37,76 @@ struct Git {
   }
 
   @discardableResult
-  fileprivate func git(_ arguments: [String], errorBuilder: (Int32) -> Error) throws -> [String] {
-    try Process.git(
-      arguments: gitPathArguments + arguments, errorBuilder: errorBuilder,
+  fileprivate func gitData(_ arguments: [String], errorBuilder: (Int32) -> Error) async throws
+    -> Data
+  {
+    let gitArguments = gitPathArguments + arguments
+
+    let result = try await launch(
+      tool: URL(filePath: "/usr/bin/git"), arguments: gitArguments,
       suppressStandardErr: suppressStandardErr)
+    guard result.0 == 0 else { throw errorBuilder(result.0) }
+    return result.1
   }
 
-  func status() throws {
-    try git(["status"]) { GitError.status($0) }
+  @discardableResult
+  fileprivate func git(_ arguments: [String], errorBuilder: (Int32) -> Error) async throws
+    -> [String]
+  {
+    let data = try await gitData(arguments, errorBuilder: errorBuilder)
+    guard let standardOutput = String(data: data, encoding: .utf8) else { return [] }
+    return standardOutput.components(separatedBy: "\n").filter { !$0.isEmpty }
   }
 
-  func checkout(commit: String) throws {
-    try git(["checkout", commit]) { GitError.main($0) }
+  func status() async throws {
+    try await git(["status"]) { GitError.status($0) }
   }
 
-  func add(_ filename: String) throws {
-    try git(["add", filename]) { GitError.add($0) }
+  func checkout(commit: String) async throws {
+    try await git(["checkout", commit]) { GitError.main($0) }
   }
 
-  func commit(_ message: String) throws {
-    try git(["commit", "-m", message]) { GitError.commit($0) }
+  func add(_ filename: String) async throws {
+    try await git(["add", filename]) { GitError.add($0) }
   }
 
-  func tag(_ name: String) throws {
-    try git(["tag", name]) { GitError.tag($0) }
+  func commit(_ message: String) async throws {
+    try await git(["commit", "-m", message]) { GitError.commit($0) }
   }
 
-  func push() throws {
-    try git(["push"]) { GitError.push($0) }
+  func tag(_ name: String) async throws {
+    try await git(["tag", name]) { GitError.tag($0) }
   }
 
-  func pushTags() throws {
-    try git(["push", "--tags"]) { GitError.pushTags($0) }
+  func push() async throws {
+    try await git(["push"]) { GitError.push($0) }
   }
 
-  func gc() throws {
-    try git(["gc", "--prune=now"]) { GitError.gc($0) }
+  func pushTags() async throws {
+    try await git(["push", "--tags"]) { GitError.pushTags($0) }
   }
 
-  func diff() throws {
-    try git(["diff", "--staged", "--name-only", "--exit-code"]) { GitError.diff($0) }
+  func gc() async throws {
+    try await git(["gc", "--prune=now"]) { GitError.gc($0) }
   }
 
-  func tagContains(_ message: String) throws -> [String] {
-    try git(["tag", "--contains", message]) { GitError.contains($0) }
+  func diff() async throws {
+    try await git(["diff", "--staged", "--name-only", "--exit-code"]) { GitError.diff($0) }
   }
 
-  func tags() throws -> [String] {
-    try git(["tag"]) { GitError.tags(($0)) }
+  func tagContains(_ message: String) async throws -> [String] {
+    try await git(["tag", "--contains", message]) { GitError.contains($0) }
+  }
+
+  func tags() async throws -> [String] {
+    try await git(["tag"]) { GitError.tags(($0)) }
+  }
+
+  func show(commit: String, path: String) async throws -> Data {
+    try await gitData(["show", "\(commit):\(path)"]) { GitError.show($0) }
+  }
+
+  func createBranch(named name: String, initialCommit: String) async throws {
+    try await git(["checkout", "-b", name, initialCommit]) { GitError.createBranch($0) }
   }
 }
