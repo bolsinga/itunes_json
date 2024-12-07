@@ -17,21 +17,18 @@ protocol DestinationFileWriting {
 }
 
 extension Destination {
-  fileprivate func fileWriter(for outputFile: URL, branch: String, tagPrefix: String)
-    -> DestinationFileWriting
-  {
+  fileprivate func fileWriter(for outputFile: URL, branch: String) -> DestinationFileWriting {
     let fileWriter: DestinationFileWriting = FileWriter(outputFile: outputFile)
     switch self {
     case .jsonGit:
-      return GitBackupWriter(fileWriter: fileWriter, branch: branch, tagPrefix: tagPrefix)
+      return GitBackupWriter(fileWriter: fileWriter, branch: branch)
     default:
       return fileWriter
     }
   }
 
   public func emit<T: Comparable>(
-    _ items: [T], outputFile: URL?, branch: String, tagPrefix: String,
-    dataBuilder: ([T]) throws -> Data,
+    _ items: [T], outputFile: URL?, branch: String, dataBuilder: ([T]) throws -> Data,
     databaseBuilder: ([T]) async throws -> Void
   )
     async throws
@@ -46,8 +43,7 @@ extension Destination {
     case .json, .sqlCode, .jsonGit:
       let data = try dataBuilder(items)
       if let outputFile {
-        try await self.fileWriter(for: outputFile, branch: branch, tagPrefix: tagPrefix).write(
-          data: data)
+        try self.fileWriter(for: outputFile, branch: branch).write(data: data)
       } else {
         print("\(try data.asUTF8String())")
       }

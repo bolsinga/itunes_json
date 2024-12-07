@@ -9,7 +9,7 @@ import Foundation
 
 extension Destination {
   public func outputFile(using directory: URL, name: String?) -> URL? {
-    let name = name ?? "iTunes".defaultDestinationName
+    let name = name ?? String.defaultDestinationName
     return directory.appending(path: "\(name).\(self.filenameExtension)")
   }
 }
