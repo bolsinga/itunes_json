@@ -29,8 +29,8 @@ extension Destination {
     switch self {
     case .json(let output), .jsonGit(let output), .sqlCode(let output):
       output.url
-    case .db(let url):
-      url
+    case .db(let storage):
+      storage.url
     }
   }
 

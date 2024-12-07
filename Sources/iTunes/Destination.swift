@@ -16,5 +16,5 @@ public enum Destination {
   /// Emit SQLite code that represents the Tracks.
   case sqlCode(Output)
   /// Emit a sqlite3 database that represents the Tracks.
-  case db(URL)
+  case db(DatabaseStorage)
 }
