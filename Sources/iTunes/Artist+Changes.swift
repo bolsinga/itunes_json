@@ -14,7 +14,7 @@ extension Array where Element == Track {
 }
 
 public func currentArtists() async throws -> Set<SortableName> {
-  let tracks = try await Source.itunes.gather(
-    nil, repair: nil, artistIncluded: nil, reduce: false)
+  let tracks = try await SourceContext.itunes.gather(
+    repair: nil, artistIncluded: nil, reduce: false)
   return tracks.artistNames
 }
