@@ -8,11 +8,11 @@
 import Foundation
 
 /// The source of the data to be converted into a Track.
-public enum Source: CaseIterable {
+public enum SourceContext {
   /// Retreive Track data using the iTunesLibrary.
   case itunes
   /// Retreive Track data using MusicKit.
   case musickit
   /// Retreive Track data using existing Track JSON strings.
-  case jsonString
+  case jsonString(String)
 }

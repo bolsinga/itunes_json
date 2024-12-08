@@ -17,7 +17,9 @@ protocol DestinationFileWriting {
 }
 
 extension Destination {
-  fileprivate func fileWriter(for outputFile: URL, branch: String, tagPrefix: String) -> DestinationFileWriting {
+  fileprivate func fileWriter(for outputFile: URL, branch: String, tagPrefix: String)
+    -> DestinationFileWriting
+  {
     let fileWriter: DestinationFileWriting = FileWriter(outputFile: outputFile)
     switch self {
     case .jsonGit:
@@ -45,7 +47,8 @@ extension Destination {
         for: tracks, loggingToken: loggingToken, schemaConstraints: schemaConstraints)
 
       if let outputFile {
-        try await self.fileWriter(for: outputFile, branch: branch, tagPrefix: tagPrefix).write(data: data)
+        try await self.fileWriter(for: outputFile, branch: branch, tagPrefix: tagPrefix).write(
+          data: data)
       } else {
         print("\(try data.asUTF8String())")
       }

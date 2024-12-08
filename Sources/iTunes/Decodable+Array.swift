@@ -22,10 +22,7 @@ extension Decodable {
     return try decoder.decode([Self].self, from: data)
   }
 
-  static public func array(from source: String?) throws -> [Self] {
-    guard let source else {
-      preconditionFailure("Should have been caught during ParsableArguments.validate().")
-    }
+  static public func array(from source: String) throws -> [Self] {
     guard let data = source.data(using: .utf8) else { throw JSONDecodingError.stringEncodingError }
 
     return try array(from: data)
