@@ -198,12 +198,12 @@ actor Database {
   private let handle: DatabaseHandle
   private let logging: Logging
 
-  init(file: URL, loggingToken: String?) throws {
+  init(storage: DatabaseStorage, loggingToken: String?) throws {
     self.logging = Logging(token: loggingToken)
 
     var handle: DatabaseHandle?
     let result = sqlite3_open_v2(
-      file.absoluteString, &handle, SQLITE_OPEN_URI | SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
+      storage.name, &handle, SQLITE_OPEN_URI | SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
       nil)
 
     logging.open.log("\(result, privacy: .public)")

@@ -54,7 +54,8 @@ extension Destination {
       }
     case .db(let outputFile):
       try await tracks.database(
-        file: outputFile, loggingToken: loggingToken, schemaConstrainsts: schemaConstraints)
+        storage: .file(outputFile), loggingToken: loggingToken,
+        schemaConstrainsts: schemaConstraints)
     }
   }
 }
