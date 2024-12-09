@@ -11,13 +11,16 @@ extension Destination {
   public func data(for tracks: [Track], loggingToken: String?, schemaConstraints: SchemaConstraints)
     throws -> Data
   {
+    enum DestinationDataError: Error {
+      case notImplemented
+    }
     switch self {
     case .json, .jsonGit:
       return try tracks.jsonData()
     case .sqlCode:
       return try tracks.sqlData(loggingToken: loggingToken, schemaConstraints: schemaConstraints)
     case .db:
-      preconditionFailure("No Data for db")
+      throw DestinationDataError.notImplemented
     }
   }
 }
