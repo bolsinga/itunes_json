@@ -53,9 +53,9 @@ extension Destination {
         print("\(try data.asUTF8String())")
       }
     case .db(let outputFile):
-      try await tracks.database(
-        storage: .file(outputFile), loggingToken: loggingToken,
-        schemaConstrainsts: schemaConstraints)
+      let data = try await tracks.database(
+        storage: .memory, loggingToken: loggingToken, schemaConstrainsts: schemaConstraints)
+      try FileWriter(outputFile: outputFile).write(data: data)
     }
   }
 }
