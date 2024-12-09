@@ -16,11 +16,10 @@ extension SortableName: SQLBindableInsert {
 }
 
 struct SortableNamesSQLSourceEncoder {
-  enum SourceEncoderError: Error {
-    case cannotMakeData
-  }
-
   func encode(_ names: [SortableName], tableName: String) throws -> Data {
+    enum SourceEncoderError: Error {
+      case cannotMakeData
+    }
     guard
       let data = SortableNamesTableBuilder(rows: names, tableName: tableName).encode().data(
         using: .utf8)

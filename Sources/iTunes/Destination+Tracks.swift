@@ -7,10 +7,6 @@
 
 import Foundation
 
-enum DataExportError: Error {
-  case noTracks
-}
-
 protocol DestinationFileWriting {
   var outputFile: URL { get }
   func write(data: Data) async throws
@@ -35,6 +31,10 @@ extension Destination {
   )
     async throws
   {
+    enum DataExportError: Error {
+      case noTracks
+    }
+
     guard !tracks.isEmpty else {
       throw DataExportError.noTracks
     }
