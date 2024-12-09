@@ -30,7 +30,7 @@ extension Destination {
   }
 
   public func emit(
-    _ tracks: [Track], outputFile: URL?, loggingToken: String?, branch: String, tagPrefix: String,
+    _ tracks: [Track], loggingToken: String?, branch: String, tagPrefix: String,
     schemaConstraints: SchemaConstraints
   )
     async throws
@@ -42,21 +42,17 @@ extension Destination {
     let tracks = tracks.sorted()
 
     switch self {
-    case .json, .sqlCode, .jsonGit:
+    case .json(let output), .sqlCode(let output), .jsonGit(let output):
       let data = try self.data(
         for: tracks, loggingToken: loggingToken, schemaConstraints: schemaConstraints)
 
-      if let outputFile {
+      if let outputFile = output.url {
         try await self.fileWriter(for: outputFile, branch: branch, tagPrefix: tagPrefix).write(
           data: data)
       } else {
         print("\(try data.asUTF8String())")
       }
-    case .db:
-      guard let outputFile else {
-        preconditionFailure("Should have been caught during ParasableArguments.validate().")
-      }
-
+    case .db(let outputFile):
       try await tracks.database(
         file: outputFile, loggingToken: loggingToken, schemaConstrainsts: schemaConstraints)
     }

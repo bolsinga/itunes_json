@@ -27,7 +27,61 @@ enum Source: CaseIterable, EnumerableFlag {
   }
 }
 
-extension Destination: EnumerableFlag {}
+/// The destination type for the Track data.
+enum DestinationContext: EnumerableFlag {
+  /// Emit a JSON string representing the Tracks.
+  case json
+  /// Emit JSON representing the Tracks and add to a git repository
+  case jsonGit
+  /// Emit SQLite code that represents the Tracks.
+  case sqlCode
+  /// Emit a sqlite3 database that represents the Tracks.
+  case db
+
+  func context(outputFile: URL?) throws -> Destination {
+    enum DestinationError: Error {
+      case noDBOutputFile
+    }
+
+    let output: Output = {
+      guard let outputFile else { return .standardOut }
+      return .file(outputFile)
+    }()
+
+    switch self {
+    case .json:
+      return .json(output)
+    case .jsonGit:
+      return .jsonGit(output)
+    case .sqlCode:
+      return .sqlCode(output)
+    case .db:
+      switch output {
+      case .file(let outputFile):
+        return .db(outputFile)
+      default:
+        throw DestinationError.noDBOutputFile
+      }
+    }
+  }
+
+  func outputFile(using directory: URL, name: String?) -> URL? {
+    let name = name ?? "iTunes".defaultDestinationName
+    return directory.appending(path: "\(name).\(self.filenameExtension)")
+  }
+
+  var filenameExtension: String {
+    switch self {
+    case .json, .jsonGit:
+      "json"
+    case .sqlCode:
+      "sql"
+    case .db:
+      "db"
+    }
+  }
+}
+
 extension SchemaConstraints: EnumerableFlag {}
 
 public struct Program: AsyncParsableCommand {
@@ -36,7 +90,7 @@ public struct Program: AsyncParsableCommand {
     .itunes
   /// Output destination type.
   @Flag(help: "Output Destination type. Format Track data will be written out as.") var destination:
-    Destination = .json
+    DestinationContext = .json
   /// Should Tracks be reduced
   @Flag(
     help:
@@ -150,8 +204,8 @@ public struct Program: AsyncParsableCommand {
         repair: try await repairing(), artistIncluded: artistIncluded, reduce: isReducing)
     }()
 
-    try await destination.emit(
-      tracks, outputFile: outputFile, loggingToken: loggingToken, branch: "main",
+    try await destination.context(outputFile: outputFile).emit(
+      tracks, loggingToken: loggingToken, branch: "main",
       tagPrefix: "iTunes", schemaConstraints: schemaConstraints)
   }
 
