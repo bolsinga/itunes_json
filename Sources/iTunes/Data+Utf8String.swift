@@ -7,12 +7,11 @@
 
 import Foundation
 
-private enum DataUTF8Error: Error {
-  case cannotConvertToUTF8String
-}
-
 extension Data {
   public func asUTF8String() throws -> String {
+    enum DataUTF8Error: Error {
+      case cannotConvertToUTF8String
+    }
     guard let s = String(data: self, encoding: .utf8) else {
       throw DataUTF8Error.cannotConvertToUTF8String
     }
