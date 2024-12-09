@@ -1,5 +1,5 @@
 //
-//  SourceContext+Tracks.swift
+//  Source+Tracks.swift
 //
 //
 //  Created by Greg Bolsinga on 12/7/23.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension SourceContext {
+extension Source {
   public func gather(
     repair: Repairing?, artistIncluded: ((String) -> Bool)?, reduce: Bool
   )
