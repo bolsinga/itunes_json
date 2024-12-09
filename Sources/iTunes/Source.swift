@@ -8,7 +8,7 @@
 import Foundation
 
 /// The source of the data to be converted into a Track.
-public enum SourceContext {
+public enum Source {
   /// Retreive Track data using the iTunesLibrary.
   case itunes
   /// Retreive Track data using MusicKit.

@@ -2,7 +2,7 @@ import ArgumentParser
 import Foundation
 
 /// The source of the data to be converted into a Track.
-enum Source: CaseIterable, EnumerableFlag {
+enum SourceContext: CaseIterable, EnumerableFlag {
   /// Retreive Track data using the iTunesLibrary.
   case itunes
   /// Retreive Track data using MusicKit.
@@ -10,16 +10,16 @@ enum Source: CaseIterable, EnumerableFlag {
   /// Retreive Track data using existing Track JSON strings.
   case jsonString
 
-  func context(source: String?) throws -> SourceContext {
+  func context(source: String?) throws -> Source {
     enum SourceError: Error {
       case noSource
     }
 
     switch self {
     case .itunes:
-      return SourceContext.itunes
+      return .itunes
     case .musickit:
-      return SourceContext.musickit
+      return .musickit
     case .jsonString:
       guard let source else { throw SourceError.noSource }
       return .jsonString(source)
@@ -86,7 +86,7 @@ extension SchemaConstraints: EnumerableFlag {}
 
 public struct Program: AsyncParsableCommand {
   /// Input source type.
-  @Flag(help: "Input Source type. Where Track data is being read from.") var source: Source =
+  @Flag(help: "Input Source type. Where Track data is being read from.") var source: SourceContext =
     .itunes
   /// Output destination type.
   @Flag(help: "Output Destination type. Format Track data will be written out as.") var destination:
