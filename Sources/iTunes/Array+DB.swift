@@ -10,17 +10,14 @@ import Foundation
 extension Array where Element == Track {
   func database(
     storage: DatabaseStorage, loggingToken: String?, schemaConstrainsts: SchemaConstraints
-  )
-    async throws
-  {
-    var encoder: TracksDBEncoder?
+  ) async throws {
+    let dbEncoder = try TracksDBEncoder(
+      storage: storage, rowEncoder: self.rowEncoder(loggingToken), loggingToken: loggingToken)
     do {
-      encoder = try TracksDBEncoder(
-        storage: storage, rowEncoder: self.rowEncoder(loggingToken), loggingToken: loggingToken)
-      try await encoder?.encode(schemaConstrainsts: schemaConstrainsts)
-      await encoder?.close()
+      try await dbEncoder.encode(schemaConstrainsts: schemaConstrainsts)
+      await dbEncoder.close()
     } catch {
-      await encoder?.close()
+      await dbEncoder.close()
       throw error
     }
   }
