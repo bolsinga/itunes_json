@@ -55,4 +55,8 @@ struct TracksDBEncoder {
   func close() async {
     await db.close()
   }
+
+  func data() async throws -> Data {
+    try await db.data()
+  }
 }

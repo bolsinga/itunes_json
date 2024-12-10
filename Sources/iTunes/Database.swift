@@ -18,6 +18,7 @@ enum DatabaseError: Error {
   case cannotBind(String)
   case cannotStep(String)
   case unexpectedColumns(Int32)
+  case cannotSerialize
 }
 
 extension DatabaseHandle {
@@ -249,6 +250,16 @@ actor Database {
 
   var errorString: String {
     handle.sqlError
+  }
+
+  func data() throws -> Data {
+    var size: sqlite3_int64 = 0
+    guard let bytes = sqlite3_serialize(handle, "main", &size, 0) else {
+      throw DatabaseError.cannotSerialize
+    }
+    let data = Data(bytes: bytes, count: Int(size))
+    sqlite3_free(bytes)
+    return data
   }
 }
 
