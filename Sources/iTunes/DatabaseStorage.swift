@@ -19,4 +19,13 @@ public enum DatabaseStorage: Sendable {
       ":memory:"
     }
   }
+
+  var url: URL? {
+    switch self {
+    case .file(let url):
+      url
+    case .memory:
+      nil
+    }
+  }
 }
