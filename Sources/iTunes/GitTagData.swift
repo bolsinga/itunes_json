@@ -20,7 +20,7 @@ public struct TagData: Sendable {
 
 extension TagData {
   fileprivate func add(to git: Git, file: URL) async throws {
-    Logger.gitTagData.info("Write: \(tag)")
+    Logger.gitTagData.info("Add: \(tag)")
 
     // this makes memory shoot up, unexpectedly.
     try data.write(to: file)
@@ -41,6 +41,13 @@ extension TagData {
       try await git.commit(tag)
       try await git.tag(tag)
     }
+  }
+
+  public func write(to directory: URL, pathExtension: String) throws {
+    Logger.gitTagData.info("Write: \(tag)")
+
+    let url = directory.appending(path: tag).appendingPathExtension(pathExtension)
+    try data.write(to: url)
   }
 }
 
