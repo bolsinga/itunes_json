@@ -9,18 +9,16 @@ import Foundation
 
 extension Destination {
   public func data(for tracks: [Track], loggingToken: String?, schemaConstraints: SchemaConstraints)
-    throws -> Data
+    async throws -> Data
   {
-    enum DestinationDataError: Error {
-      case notImplemented
-    }
     switch self {
     case .json, .jsonGit:
-      return try tracks.jsonData()
+      try tracks.jsonData()
     case .sqlCode:
-      return try tracks.sqlData(loggingToken: loggingToken, schemaConstraints: schemaConstraints)
+      try tracks.sqlData(loggingToken: loggingToken, schemaConstraints: schemaConstraints)
     case .db:
-      throw DestinationDataError.notImplemented
+      try await tracks.database(
+        storage: .memory, loggingToken: loggingToken, schemaConstrainsts: schemaConstraints)
     }
   }
 }
