@@ -8,13 +8,15 @@
 import Foundation
 
 extension Array where Element == Track {
-  public func database(file: URL, loggingToken: String?, schemaConstrainsts: SchemaConstraints)
+  func database(
+    storage: DatabaseStorage, loggingToken: String?, schemaConstrainsts: SchemaConstraints
+  )
     async throws
   {
     var encoder: TracksDBEncoder?
     do {
       encoder = try TracksDBEncoder(
-        file: file, rowEncoder: self.rowEncoder(loggingToken), loggingToken: loggingToken)
+        storage: storage, rowEncoder: self.rowEncoder(loggingToken), loggingToken: loggingToken)
       try await encoder?.encode(schemaConstrainsts: schemaConstrainsts)
       await encoder?.close()
     } catch {

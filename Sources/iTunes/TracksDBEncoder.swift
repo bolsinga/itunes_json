@@ -11,8 +11,8 @@ struct TracksDBEncoder {
   private let db: Database
   private let rowEncoder: TrackRowEncoder
 
-  init(file: URL, rowEncoder: TrackRowEncoder, loggingToken: String?) throws {
-    self.db = try Database(file: file, loggingToken: loggingToken)
+  init(storage: DatabaseStorage, rowEncoder: TrackRowEncoder, loggingToken: String?) throws {
+    self.db = try Database(storage: storage, loggingToken: loggingToken)
     self.rowEncoder = rowEncoder
   }
 
