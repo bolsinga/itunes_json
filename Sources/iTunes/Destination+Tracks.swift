@@ -25,6 +25,15 @@ extension Destination {
     }
   }
 
+  fileprivate var url: URL? {
+    switch self {
+    case .json(let output), .jsonGit(let output), .sqlCode(let output):
+      output.url
+    case .db(let url):
+      url
+    }
+  }
+
   public func emit(
     _ tracks: [Track], loggingToken: String?, branch: String, tagPrefix: String,
     schemaConstraints: SchemaConstraints
@@ -41,21 +50,14 @@ extension Destination {
 
     let tracks = tracks.sorted()
 
-    switch self {
-    case .json(let output), .sqlCode(let output), .jsonGit(let output):
-      let data = try self.data(
-        for: tracks, loggingToken: loggingToken, schemaConstraints: schemaConstraints)
+    let data = try await self.data(
+      for: tracks, loggingToken: loggingToken, schemaConstraints: schemaConstraints)
 
-      if let outputFile = output.url {
-        try await self.fileWriter(for: outputFile, branch: branch, tagPrefix: tagPrefix).write(
-          data: data)
-      } else {
-        print("\(try data.asUTF8String())")
-      }
-    case .db(let outputFile):
-      let data = try await tracks.database(
-        storage: .memory, loggingToken: loggingToken, schemaConstrainsts: schemaConstraints)
-      try FileWriter(outputFile: outputFile).write(data: data)
+    if let outputFile = self.url {
+      try await self.fileWriter(for: outputFile, branch: branch, tagPrefix: tagPrefix).write(
+        data: data)
+    } else {
+      print("\(try data.asUTF8String())")
     }
   }
 }
