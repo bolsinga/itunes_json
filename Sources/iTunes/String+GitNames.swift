@@ -38,7 +38,7 @@ extension String {
       guard let value = Int(lastPart) else {
         return self.appendValue(1)
       }
-      return self.replacingOccurrences(of: lastPart, with: Self.twoDigits(value + 1))
+      return self.replacingOccurrences(of: ".\(lastPart)", with: ".\(Self.twoDigits(value + 1))")
     default:
       return self
     }
