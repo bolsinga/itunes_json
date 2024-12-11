@@ -9,6 +9,7 @@ import Foundation
 
 struct AlbumTableBuilder: TableBuilder {
   private let strictSchema: String = """
+    UNIQUE(name, trackcount, disccount, discnumber, compilation),
     CHECK(length(name) > 0),
     CHECK(name != sortname),
     CHECK(trackcount > 0),
@@ -24,7 +25,6 @@ struct AlbumTableBuilder: TableBuilder {
       disccount INTEGER NOT NULL,
       discnumber INTEGER NOT NULL,
       compilation INTEGER NOT NULL,
-      UNIQUE(name, trackcount, disccount, discnumber, compilation),
       \(constraints == .strict ? strictSchema : "")
       CHECK(disccount > 0),
       CHECK(discnumber > 0),
