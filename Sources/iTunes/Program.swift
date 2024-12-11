@@ -148,6 +148,8 @@ public struct Program: AsyncParsableCommand {
   @Option(help: "Optional filter for an Artist Name.")
   var artistNameFilter: String?
 
+  @Option(help: "The prefix to use for the git tags.") var tagPrefix: String = "iTunes"
+
   /// Outputfile where data will be writen, if outputDirectory is not specified.
   private var outputFile: URL? {
     guard let outputDirectory else { return nil }
@@ -206,7 +208,7 @@ public struct Program: AsyncParsableCommand {
 
     try await destination.context(outputFile: outputFile).emit(
       tracks, loggingToken: loggingToken, branch: "main",
-      tagPrefix: "iTunes", schemaConstraints: schemaConstraints)
+      tagPrefix: tagPrefix, schemaConstraints: schemaConstraints)
   }
 
   private static func readSTDIN() -> String? {
