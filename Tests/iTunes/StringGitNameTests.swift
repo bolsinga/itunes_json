@@ -43,4 +43,8 @@ struct StringGitNameTests {
     #expect("name.02.02" == "name.01.01".nextTag)  // Bug
     #expect("name.01.02" != "name.01.01".nextTag)  // Desired
   }
+
+  @Test func next_whee() {
+    #expect("iTunes.artists-2024-12-11.03" == "iTunes.artists-2024-12-11.02".nextTag)
+  }
 }
