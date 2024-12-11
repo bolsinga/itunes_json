@@ -19,12 +19,21 @@ extension Git {
     try await checkout(commit: branch)
   }
 
-  fileprivate func latestTags() async -> [String] {
-    guard let latest = try? await tagContains("origin/main").sorted() else { return [] }
+  fileprivate func latestTags(matching tagPrefix: String) async -> [String] {
+    guard let allTags = try? await tags() else { return [] }
+
+    let latest = allTags.filter {
+      guard let prefix = $0.tagPrefix() else {
+        return false
+      }
+      return prefix.starts(with: tagPrefix)
+    }.sorted()
     return latest
   }
 
-  fileprivate func addCommitTagPush(filename: String, message: String) async throws {
+  fileprivate func addCommitTagPush(filename: String, tagPrefix: String) async throws {
+    let message = tagPrefix.defaultDestinationName
+
     try await add(filename)
 
     let backup = await {
@@ -36,7 +45,8 @@ extension Git {
       }
     }()
 
-    let backupName = backup.backupName(baseName: message, existingNames: await latestTags())
+    let backupName = backup.backupName(
+      baseName: message, existingNames: await latestTags(matching: tagPrefix))
 
     switch backup {
     case .noChanges:
@@ -67,7 +77,6 @@ struct GitBackupWriter: DestinationFileWriting {
     try await git.validateAndCheckout(branch: branch)
     try await fileWriter.write(data: data)
 
-    try await git.addCommitTagPush(
-      filename: outputFile.filename, message: tagPrefix.defaultDestinationName)
+    try await git.addCommitTagPush(filename: outputFile.filename, tagPrefix: tagPrefix)
   }
 }

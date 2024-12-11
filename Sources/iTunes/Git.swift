@@ -17,7 +17,6 @@ enum GitError: Error {
   case pushTags(Int32)
   case gc(Int32)
   case diff(Int32)
-  case contains(Int32)
   case tags(Int32)
   case show(Int32)
   case createBranch(Int32)
@@ -92,10 +91,6 @@ struct Git {
 
   func diff() async throws {
     try await git(["diff", "--staged", "--name-only", "--exit-code"]) { GitError.diff($0) }
-  }
-
-  func tagContains(_ message: String) async throws -> [String] {
-    try await git(["tag", "--contains", message]) { GitError.contains($0) }
   }
 
   func tags() async throws -> [String] {
