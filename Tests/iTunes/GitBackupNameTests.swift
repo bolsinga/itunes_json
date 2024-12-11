@@ -84,4 +84,12 @@ struct GitBackupNameTests {
         == GitBackup.changes.backupName(
           baseName: BasicName, existingNames: [PreviousName, BasicName, SubsequentName]))
   }
+
+  @Test func newstuff() {
+    #expect(
+      "iTunes.artists-2024-12-11.02"
+        == GitBackup.changes.backupName(
+          baseName: "iTunes.artists-2024-12-11",
+          existingNames: ["iTunes.artists-2024-12-11", "iTunes.artists-2024-12-11.01"]))
+  }
 }

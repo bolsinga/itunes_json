@@ -14,11 +14,15 @@ extension String {
     return self + Self.emptySuffix
   }
 
-  fileprivate func appendValue(_ value: Int) -> String {
+  fileprivate static func twoDigits(_ value: Int) -> String {
     let formatter = NumberFormatter()
     formatter.minimumIntegerDigits = 2
-    guard let r = formatter.string(from: value as NSNumber) else { return self }
-    return self + "." + r
+    guard let r = formatter.string(from: value as NSNumber) else { return "" }
+    return r
+  }
+
+  fileprivate func appendValue(_ value: Int) -> String {
+    return self + ".\(Self.twoDigits(value))"
   }
 
   var nextTag: String {
@@ -27,9 +31,14 @@ extension String {
     switch parts.count {
     case 1:
       return self.appendValue(1)
-    case 2:
-      guard let index = Int(parts[1]) else { return self }
-      return parts[0].appendValue(index + 1)
+    case 2...Int.max:
+      guard let lastPart = parts.last else {
+        return self
+      }
+      guard let value = Int(lastPart) else {
+        return self.appendValue(1)
+      }
+      return self.replacingOccurrences(of: lastPart, with: Self.twoDigits(value + 1))
     default:
       return self
     }
