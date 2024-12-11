@@ -14,8 +14,8 @@ extension Logger {
 }
 
 extension Track {
-  fileprivate func apply(patch: ArtistPatchLookup.Value) -> Track {
-    Logger.patch.info("Patching: \(patch)")
+  fileprivate func apply(patch: ArtistPatchLookup.Value, tag: String) -> Track {
+    Logger.patch.info("Patching: \(patch) - \(tag)")
 
     return Track(
       album: album,
@@ -80,8 +80,8 @@ extension Track {
       isrc: isrc)
   }
 
-  fileprivate func apply(patch: AlbumPatchLookup.Value) -> Track {
-    Logger.patch.info("Patching: \(patch)")
+  fileprivate func apply(patch: AlbumPatchLookup.Value, tag: String) -> Track {
+    Logger.patch.info("Patching: \(patch) - \(tag)")
 
     return Track(
       album: patch.name.name,
@@ -148,30 +148,30 @@ extension Track {
 }
 
 extension Array where Element == Track {
-  fileprivate func patchArtists(_ lookup: ArtistPatchLookup) throws -> [Track] {
+  fileprivate func patchArtists(_ lookup: ArtistPatchLookup, tag: String) throws -> [Track] {
     self.map { track in
       guard let name = track.artistName, let patch = lookup[name] else { return track }
-      return track.apply(patch: patch)
+      return track.apply(patch: patch, tag: tag)
     }
   }
 
-  fileprivate func patchAlbums(_ lookup: AlbumPatchLookup) throws -> [Track] {
+  fileprivate func patchAlbums(_ lookup: AlbumPatchLookup, tag: String) throws -> [Track] {
     self.map { track in
       guard let name = track.albumArtistName, let patch = lookup[name] else { return track }
-      return track.apply(patch: patch)
+      return track.apply(patch: patch, tag: tag)
     }
   }
 
-  fileprivate func patchTracks(_ patch: Patch) throws -> [Track] {
+  fileprivate func patchTracks(_ patch: Patch, tag: String) throws -> [Track] {
     switch patch {
     case .artists(let lookup):
-      try patchArtists(lookup)
+      try patchArtists(lookup, tag: tag)
     case .albums(let lookup):
-      try patchAlbums(lookup)
+      try patchAlbums(lookup, tag: tag)
     }
   }
 
-  public func patch(_ patch: Patch) throws -> Data {
-    try patchTracks(patch).jsonData()
+  public func patch(_ patch: Patch, tag: String) throws -> Data {
+    try patchTracks(patch, tag: tag).jsonData()
   }
 }
