@@ -44,7 +44,7 @@ struct TracksDBEncoder {
 
   func encode(schemaConstrainsts: SchemaConstraints) async throws {
     try await db.execute("PRAGMA foreign_keys = ON;")
-    let artistLookup = try await emitArtists(schemaConstrainsts: schemaConstrainsts)
+    let artistLookup = try await emitArtists(schemaConstrainsts: .strict)
     let albumLookup = try await emitAlbums(schemaConstrainsts: schemaConstrainsts)
     let songLookup = try await emitSongs(
       artistLookup: artistLookup, albumLookup: albumLookup, schemaConstrainsts: schemaConstrainsts)
