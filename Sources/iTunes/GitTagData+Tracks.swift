@@ -42,7 +42,9 @@ extension GitTagData {
     }
   }
 
-  public func transformTaggedTracks(transform: @escaping @Sendable ([Track]) async throws -> Data)
+  public func transformTaggedTracks(
+    transform: @escaping @Sendable (String, [Track]) async throws -> Data
+  )
     async throws -> [TagData]
   {
     var tagDatum = try await self.tagDatum()
@@ -52,7 +54,8 @@ extension GitTagData {
         tagDatum.removeLast()
         group.addTask {
           Logger.transform.info("Transform Tag: \(tagData.tag)")
-          return TagData(tag: tagData.tag, data: try await transform(try tagData.tracks()))
+          return TagData(
+            tag: tagData.tag, data: try await transform(tagData.tag, try tagData.tracks()))
         }
       }
 
