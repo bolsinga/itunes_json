@@ -37,6 +37,7 @@ extension Track {
     guard !kind.contains("itunes extras") else { return false }
     guard !kind.contains("internet audio stream") else { return false }
     guard kind != "quicktime movie file" else { return false }
+    guard artistName != nil else { return false }
 
     return true
   }
