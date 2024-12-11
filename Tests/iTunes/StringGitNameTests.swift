@@ -12,6 +12,7 @@ import Testing
 struct StringGitNameTests {
   @Test func empty() {
     #expect("name-empty" == "name".emptyTag)
+    #expect("name.it-empty" == "name.it".emptyTag)
   }
 
   @Test func next_none() {
@@ -26,15 +27,20 @@ struct StringGitNameTests {
     #expect("name.02" == "name.01".nextTag)
   }
 
-  @Test func next_notCannonical() {
-    #expect("name.it.now" == "name.it.now".nextTag)
+  @Test func next_withDots_incremental() {
+    #expect("name.it.02" == "name.it.1".nextTag)
   }
 
-  @Test func next_notCannonicalIntegral() {
-    #expect("name.it.1" == "name.it.1".nextTag)
+  @Test func next_withDots_incrementalWithLeadingZero() {
+    #expect("name.it.02" == "name.it.01".nextTag)
   }
 
   @Test func next_notIntegral() {
-    #expect("name.it" == "name.it".nextTag)
+    #expect("name.it.01" == "name.it".nextTag)
+  }
+
+  @Test func next_wacky() {
+    #expect("name.02.02" == "name.01.01".nextTag)  // Bug
+    #expect("name.01.02" != "name.01.01".nextTag)  // Desired
   }
 }
