@@ -42,6 +42,15 @@ public struct AlbumArtistName: Codable, Comparable, Hashable, Sendable {
         nil
       }
     }
+
+    var isCompilation: Bool {
+      switch self {
+      case .compilation(_):
+        true
+      case .artist(_), .unknown:
+        false
+      }
+    }
   }
 
   let name: SortableName
