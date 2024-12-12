@@ -14,7 +14,7 @@ extension Logger {
 }
 
 extension AlbumArtistName.AlbumType {
-  var compilation: Bool? {
+  fileprivate var compilation: Bool? {
     isCompilation ? true : nil
   }
 }
