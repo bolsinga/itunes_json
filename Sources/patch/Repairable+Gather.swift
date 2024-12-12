@@ -39,7 +39,9 @@ extension Repairable {
   }
 
   private func correctionLookup(from string: String) throws -> [String: String] {
-    try JSONDecoder().decode(Dictionary<String, String>.self, from: data(from: string))
+    let data = try data(from: string)
+    guard !data.isEmpty else { return [:] }
+    return try JSONDecoder().decode(Dictionary<String, String>.self, from: data)
   }
 
   fileprivate func artistCorrections(from string: String) throws -> [String: String] {
