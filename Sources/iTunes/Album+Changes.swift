@@ -15,7 +15,7 @@ extension Track {
 
   private var albumType: AlbumArtistName.AlbumType {
     if isCompilation {
-      .compilation
+      .compilation(artist)
     } else if let artistName = artistName {
       .artist(artistName.name)
     } else {
