@@ -13,6 +13,12 @@ extension Logger {
     subsystem: Bundle.main.bundleIdentifier ?? "unknown", category: "patch")
 }
 
+extension AlbumArtistName.AlbumType {
+  var compilation: Bool? {
+    isCompilation ? true : nil
+  }
+}
+
 extension Track {
   fileprivate func apply(patch: ArtistPatchLookup.Value, tag: String) -> Track {
     Logger.patch.info("Patching: \(patch) - \(tag)")
@@ -92,7 +98,7 @@ extension Track {
       bitRate: bitRate,
       bPM: bPM,
       comments: comments,
-      compilation: compilation,
+      compilation: patch.type.compilation,
       composer: composer,
       contentRating: contentRating,
       dateAdded: dateAdded,
