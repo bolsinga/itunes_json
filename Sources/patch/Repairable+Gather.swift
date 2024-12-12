@@ -56,7 +56,7 @@ extension Repairable {
         } createGuide: {
           $0.albumNames
         } createChange: {
-          guard let valid = $1.similarName(to: $0) else {
+          guard let valid = $1.correctedSimilarName(to: $0, corrections: corrections) else {
             return nil
           }
           return ($0, valid)

@@ -9,24 +9,37 @@ import Foundation
 
 public struct AlbumArtistName: Codable, Comparable, Hashable, Sendable {
   enum AlbumType: Codable, Hashable {
-    case compilation
+    case compilation(String?)
     case artist(String)
     case unknown
 
     func isSimilar(to other: AlbumType) -> Bool {
       // self is current here
       switch (self, other) {
-      case (.compilation, .compilation):
-        return true
+      case (.compilation(let sa), .compilation(let oa)):
+        guard let sa, let oa else { return false }
+        return sa.isSimilar(to: oa)
       case (.artist(let sa), .artist(let oa)):
         return sa.isSimilar(to: oa)
       case (.unknown, .unknown):
         return true
-      case (.compilation, .artist(_)):
-        // self says it is a compilation, but the old code says it is not. trust the current version.
-        return true
+      case (.artist(let sa), .compilation(let oa)):
+        /// No equivalent in reverse, as that will remove fixes.
+        guard let oa else { return false }
+        return sa.isSimilar(to: oa)
       default:
         return false
+      }
+    }
+
+    var artist: String? {
+      switch self {
+      case .compilation(let artist):
+        artist
+      case .artist(let artist):
+        artist
+      case .unknown:
+        nil
       }
     }
   }
@@ -36,6 +49,14 @@ public struct AlbumArtistName: Codable, Comparable, Hashable, Sendable {
 
   public static func < (lhs: AlbumArtistName, rhs: AlbumArtistName) -> Bool {
     lhs.name < rhs.name
+  }
+
+  func update(name: String) -> AlbumArtistName {
+    AlbumArtistName(name: SortableName(name: name), type: self.type)
+  }
+
+  func updateToCompilation() -> AlbumArtistName {
+    AlbumArtistName(name: name, type: .compilation(type.artist))
   }
 }
 
