@@ -27,12 +27,36 @@ private func changes<Guide: Hashable & Similar, Change: Sendable>(
 }
 
 extension Repairable {
-  func gather(_ configuration: GitTagData.Configuration, corrections: [String: String])
-    async throws -> Patch
-  {
+  enum CorrectionError: Error {
+    case noData
+  }
+
+  private func data(from string: String) throws -> Data {
+    guard let data = string.data(using: .utf8) else {
+      throw CorrectionError.noData
+    }
+    return data
+  }
+
+  private func correctionLookup(from string: String) throws -> [String: String] {
+    try JSONDecoder().decode(Dictionary<String, String>.self, from: data(from: string))
+  }
+
+  fileprivate func artistCorrections(from string: String) throws -> [String: String] {
+    try correctionLookup(from: string)
+  }
+
+  fileprivate func albumCorrections(from string: String) throws -> [String: String] {
+    try correctionLookup(from: string)
+  }
+}
+
+extension Repairable {
+  func gather(_ configuration: GitTagData.Configuration, correction: String) async throws -> Patch {
     switch self {
     case .artists:
-      .artists(
+      let corrections = try artistCorrections(from: correction)
+      return .artists(
         try await changes(configuration: configuration) {
           try await currentArtists()
         } createGuide: {
@@ -50,7 +74,8 @@ extension Repairable {
           partialResult[pair.key] = pair.value
         })
     case .albums:
-      .albums(
+      let corrections = try albumCorrections(from: correction)
+      return .albums(
         try await changes(configuration: configuration) {
           try await currentAlbums()
         } createGuide: {
