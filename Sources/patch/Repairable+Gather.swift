@@ -48,8 +48,10 @@ extension Repairable {
     try correctionLookup(from: string)
   }
 
-  fileprivate func albumCorrections(from string: String) throws -> [String: String] {
-    try correctionLookup(from: string)
+  fileprivate func albumCorrection(from string: String) throws -> AlbumCorrection {
+    let data = try data(from: string)
+    guard !data.isEmpty else { return AlbumCorrection() }
+    return try JSONDecoder().decode(AlbumCorrection.self, from: data)
   }
 }
 
@@ -76,14 +78,14 @@ extension Repairable {
           partialResult[pair.key] = pair.value
         })
     case .albums:
-      let corrections = try albumCorrections(from: correction)
+      let correction = try albumCorrection(from: correction)
       return .albums(
         try await changes(configuration: configuration) {
           try await currentAlbums()
         } createGuide: {
           $0.albumNames
         } createChange: {
-          guard let valid = $1.correctedSimilarName(to: $0, corrections: corrections) else {
+          guard let valid = $1.correctedSimilarName(to: $0, correction: correction) else {
             return nil
           }
           return ($0, valid)
