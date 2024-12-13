@@ -7,4 +7,4 @@
 
 import iTunes
 
-Backup.main(CommandLine.arguments)
+BackupCommand.main(CommandLine.arguments)
