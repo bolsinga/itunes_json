@@ -10,7 +10,7 @@ import Foundation
 struct Repair: Repairing {
   let issues: [Issue]
 
-  public func repair(_ tracks: [Track]) -> [Track] {
+  func repair(_ tracks: [Track]) -> [Track] {
     fix(tracks)
   }
 

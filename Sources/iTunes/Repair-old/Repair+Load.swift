@@ -13,7 +13,7 @@ private enum RepairError: Error {
   case invalidString
 }
 
-public func createRepair(url: URL?, source: String?) async throws
+func createRepair(url: URL?, source: String?) async throws
   -> Repairing
 {
   var items: [Item]?

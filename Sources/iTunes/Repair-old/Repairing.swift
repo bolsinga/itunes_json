@@ -7,6 +7,6 @@
 
 import Foundation
 
-public protocol Repairing {
+protocol Repairing {
   func repair(_ tracks: [Track]) -> [Track]
 }
