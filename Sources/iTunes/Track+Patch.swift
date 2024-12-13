@@ -177,7 +177,7 @@ extension Array where Element == Track {
     }
   }
 
-  public func patch(_ patch: Patch, tag: String) throws -> Data {
+  func patch(_ patch: Patch, tag: String) throws -> Data {
     try patchTracks(patch, tag: tag).jsonData()
   }
 }
