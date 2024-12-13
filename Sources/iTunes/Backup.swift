@@ -1,3 +1,9 @@
+//
+//  BackupCommand.swift
+//  itunes_json
+//
+//  Created by Greg Bolsinga on 12/13/24.
+//
 import ArgumentParser
 import Foundation
 
@@ -59,7 +65,9 @@ enum DestinationContext: EnumerableFlag {
 extension SchemaConstraints: EnumerableFlag {}
 extension Source: EnumerableFlag {}
 
-public struct Program: AsyncParsableCommand {
+public struct Backup: AsyncParsableCommand {
+  public static let configuration = CommandConfiguration(abstract: "Backs up music data.")
+
   /// Input source type.
   @Flag(help: "Input Source type. Where Track data is being read from.") var source: Source =
     .itunes
@@ -110,7 +118,7 @@ public struct Program: AsyncParsableCommand {
   }
 
   /// Validates the input matrix.
-  public mutating func validate() throws {
+  public func validate() throws {
     if destination == .db && outputFile == nil {
       throw ValidationError("--db requires outputDirectory to be set")
     }
@@ -125,17 +133,6 @@ public struct Program: AsyncParsableCommand {
 
     try await destination.context(outputFile: outputFile).emit(
       tracks, branch: "main", tagPrefix: tagPrefix, schemaConstraints: schemaConstraints)
-  }
-
-  static public func run(arguments: [String]) async {
-    var arguments = arguments
-    arguments.removeFirst()
-    let command = Self.parseOrExit(arguments)
-    do {
-      try await command.run()
-    } catch {
-      Self.exit(withError: error)
-    }
   }
 
   public init() {}  // This is public and empty to help the compiler.
