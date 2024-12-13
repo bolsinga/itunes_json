@@ -20,8 +20,6 @@ extension Source {
       return try Track.gatherAllTracks()
     case .musickit:
       return try await Track.gatherWithMusicKit()
-    case .jsonString(let source):
-      return try Track.array(from: source)
     }
   }
 }
