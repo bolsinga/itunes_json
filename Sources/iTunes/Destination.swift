@@ -8,7 +8,7 @@
 import Foundation
 
 /// The destination type for the Track data.
-public enum Destination {
+enum Destination {
   /// Emit a JSON string representing the Tracks.
   case json(Output)
   /// Emit JSON representing the Tracks and add to a git repository

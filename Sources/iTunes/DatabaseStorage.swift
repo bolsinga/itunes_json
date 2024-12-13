@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum DatabaseStorage: Sendable {
+enum DatabaseStorage: Sendable {
   case file(URL)
   case memory
 

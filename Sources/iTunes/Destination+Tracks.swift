@@ -34,7 +34,7 @@ extension Destination {
     }
   }
 
-  public func emit(
+  func emit(
     _ tracks: [Track], branch: String, tagPrefix: String, schemaConstraints: SchemaConstraints
   ) async throws {
     enum DataExportError: Error {
