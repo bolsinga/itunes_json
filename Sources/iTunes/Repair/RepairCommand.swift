@@ -31,7 +31,8 @@ public struct RepairCommand: AsyncParsableCommand {
 
   public static let configuration = CommandConfiguration(
     commandName: "repair",
-    abstract: "Repairs git repositories with itunes.json using a patch file."
+    abstract: "Repairs git repositories with itunes.json using a patch file.",
+    version: iTunesVersion
   )
 
   /// Input source type.

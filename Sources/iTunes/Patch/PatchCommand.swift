@@ -8,7 +8,8 @@ public struct PatchCommand: AsyncParsableCommand {
 
   public static let configuration = CommandConfiguration(
     commandName: "patch",
-    abstract: "Creates patches for itunes.json data."
+    abstract: "Creates patches for itunes.json data.",
+    version: iTunesVersion
   )
 
   /// Input source type.
