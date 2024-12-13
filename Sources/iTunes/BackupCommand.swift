@@ -65,8 +65,10 @@ enum DestinationContext: EnumerableFlag {
 extension SchemaConstraints: EnumerableFlag {}
 extension Source: EnumerableFlag {}
 
-public struct Backup: AsyncParsableCommand {
-  public static let configuration = CommandConfiguration(abstract: "Backs up music data.")
+public struct BackupCommand: AsyncParsableCommand {
+  public static let configuration = CommandConfiguration(
+    commandName: "backup", abstract: "Backs up music data."
+  )
 
   /// Input source type.
   @Flag(help: "Input Source type. Where Track data is being read from.") var source: Source =
