@@ -8,7 +8,7 @@
 import Foundation
 
 extension PackageBuild {
-  public var version : String {
+  var name: String {
     guard let name = tag else {
       guard let name = branch else {
         return commit
@@ -16,6 +16,14 @@ extension PackageBuild {
       return name
     }
     return name
+  }
+
+  var modifiedName: String {
+    isDirty ? "\(name)-\(countSinceTag)-local" : "\(name)-\(countSinceTag)"
+  }
+
+  var version: String {
+    (countSinceTag > 0) ? modifiedName : name
   }
 }
 
