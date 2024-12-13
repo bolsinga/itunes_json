@@ -6,8 +6,8 @@ import iTunes
 public struct Program: AsyncParsableCommand {
   public static let configuration = CommandConfiguration(
     abstract: "A tool for working with iTunes data.",
-    subcommands: [Backup.self, PatchCommand.self, RepairCommand.self, BatchCommand.self],
-    defaultSubcommand: Backup.self
+    subcommands: [BackupCommand.self, PatchCommand.self, RepairCommand.self, BatchCommand.self],
+    defaultSubcommand: BackupCommand.self
   )
 
   public init() {}  // This is public and empty to help the compiler.
