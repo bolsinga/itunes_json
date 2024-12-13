@@ -15,7 +15,8 @@ public struct BatchCommand: AsyncParsableCommand {
 
   public static let configuration = CommandConfiguration(
     commandName: "batch",
-    abstract: "Create many sql source or databases from a git repository."
+    abstract: "Create many sql source or databases from a git repository.",
+    version: iTunesVersion
   )
 
   /// Batch type.
