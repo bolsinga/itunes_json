@@ -117,17 +117,6 @@ public struct Program: AsyncParsableCommand {
   )
   var outputDirectory: URL? = nil
 
-  /// Optional repair file path.
-  @Option(
-    help: "Repair JSON file path. Repairs well-defined and specific Tracks.",
-    transform: ({ URL(filePath: $0) })
-  )
-  var repairFile: URL? = nil
-
-  /// Optional repair json source string.
-  @Option(help: "Optional json string to parse for repairs.")
-  var repairSource: String?
-
   /// JSON Source to parse when using Source.jsonString.
   @Argument(
     help:
@@ -161,10 +150,6 @@ public struct Program: AsyncParsableCommand {
       throw ValidationError("Using --json-string requires JSON String to be passed as an argument.")
     }
 
-    if (repairFile != nil) && (repairSource != nil) {
-      throw ValidationError("repairSource is already defined, but repairFile is being passed.")
-    }
-
     if destination == .db && outputFile == nil {
       throw ValidationError("--db requires outputDirectory to be set")
     }
@@ -174,23 +159,8 @@ public struct Program: AsyncParsableCommand {
     }
   }
 
-  /// Indicates if the Track data is going to be repaired.
-  private var isRepairing: Bool {
-    repairFile != nil || (repairSource != nil && !repairSource!.isEmpty)
-  }
-
-  private func repairing() async throws -> Repairing? {
-    guard isRepairing else { return nil }
-    return try await createRepair(url: repairFile, source: repairSource)
-  }
-
-  private var isReducing: Bool {
-    isRepairing || reduce
-  }
-
   public func run() async throws {
-    let tracks = try await source.context(source: jsonSource).gather(
-      repair: try await repairing(), reduce: isReducing)
+    let tracks = try await source.context(source: jsonSource).gather(reduce: reduce)
 
     try await destination.context(outputFile: outputFile).emit(
       tracks, branch: "main", tagPrefix: tagPrefix, schemaConstraints: schemaConstraints)
