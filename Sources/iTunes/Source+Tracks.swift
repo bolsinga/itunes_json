@@ -8,15 +8,10 @@
 import Foundation
 
 extension Source {
-  public func gather(repair: Repairing?, reduce: Bool) async throws -> [Track] {
-    _repair(tracks: try await gather(), repair: repair).compactMap {
-      reduce ? $0.reducedTrack : $0
-    }.map { $0.duplicateAndEmptyFieldsRemoved }
-  }
-
-  private func _repair(tracks: [Track], repair: Repairing?) -> [Track] {
-    guard let repair else { return tracks }
-    return repair.repair(tracks)
+  public func gather(reduce: Bool) async throws -> [Track] {
+    try await gather().compactMap { reduce ? $0.reducedTrack : $0 }.map {
+      $0.duplicateAndEmptyFieldsRemoved
+    }
   }
 
   private func gather() async throws -> [Track] {
