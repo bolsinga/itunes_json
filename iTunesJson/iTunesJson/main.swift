@@ -7,4 +7,4 @@
 
 import iTunes
 
-await Program.parseStandardInAndArgumentsOrExit(arguments: CommandLine.arguments)
+Backup.main(CommandLine.arguments)
