@@ -175,8 +175,9 @@ actor Database {
       }
 
       guard result == SQLITE_ROW || result == SQLITE_DONE else {
-        logging.step.error("\(result, privacy: .public)")
-        throw DatabaseError.cannotStep(errorStringBuilder())
+        let message = errorStringBuilder()
+        logging.step.error("\(message, privacy: .public)")
+        throw DatabaseError.cannotStep(message)
       }
 
       let columnCount = sqlite3_column_count(handle)
