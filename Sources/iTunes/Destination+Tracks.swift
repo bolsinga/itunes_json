@@ -35,11 +35,8 @@ extension Destination {
   }
 
   public func emit(
-    _ tracks: [Track], loggingToken: String?, branch: String, tagPrefix: String,
-    schemaConstraints: SchemaConstraints
-  )
-    async throws
-  {
+    _ tracks: [Track], branch: String, tagPrefix: String, schemaConstraints: SchemaConstraints
+  ) async throws {
     enum DataExportError: Error {
       case noTracks
     }
@@ -51,7 +48,7 @@ extension Destination {
     let tracks = tracks.sorted()
 
     let data = try await self.data(
-      for: tracks, loggingToken: loggingToken, schemaConstraints: schemaConstraints)
+      for: tracks, loggingToken: nil, schemaConstraints: schemaConstraints)
 
     if let outputFile = self.url {
       try await self.fileWriter(for: outputFile, branch: branch, tagPrefix: tagPrefix).write(

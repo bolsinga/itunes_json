@@ -142,9 +142,6 @@ public struct Program: AsyncParsableCommand {
   )
   var fileName: String?
 
-  @Option(help: "Optional string to add to debug logs for debugging.")
-  var loggingToken: String?
-
   @Option(help: "The prefix to use for the git tags.") var tagPrefix: String = "iTunes"
 
   /// Outputfile where data will be writen, if outputDirectory is not specified.
@@ -184,7 +181,7 @@ public struct Program: AsyncParsableCommand {
 
   private func repairing() async throws -> Repairing? {
     guard isRepairing else { return nil }
-    return try await createRepair(url: repairFile, source: repairSource, loggingToken: loggingToken)
+    return try await createRepair(url: repairFile, source: repairSource)
   }
 
   private var isReducing: Bool {
@@ -196,8 +193,7 @@ public struct Program: AsyncParsableCommand {
       repair: try await repairing(), reduce: isReducing)
 
     try await destination.context(outputFile: outputFile).emit(
-      tracks, loggingToken: loggingToken, branch: "main",
-      tagPrefix: tagPrefix, schemaConstraints: schemaConstraints)
+      tracks, branch: "main", tagPrefix: tagPrefix, schemaConstraints: schemaConstraints)
   }
 
   private static func readSTDIN() -> String? {
