@@ -7,10 +7,10 @@
 
 import Foundation
 
-public typealias ArtistPatchLookup = [SortableName: SortableName]
-public typealias AlbumPatchLookup = [AlbumArtistName: AlbumArtistName]
+typealias ArtistPatchLookup = [SortableName: SortableName]
+typealias AlbumPatchLookup = [AlbumArtistName: AlbumArtistName]
 
-public enum Patch: Sendable {
+enum Patch: Sendable {
   case artists(ArtistPatchLookup)
   case albums(AlbumPatchLookup)
 }
@@ -30,7 +30,7 @@ extension Dictionary where Key: Codable & Comparable, Value: Codable & Comparabl
 }
 
 extension Patch: CustomStringConvertible {
-  public var description: String {
+  var description: String {
     switch self {
     case .artists(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct AlbumArtistName: Codable, Comparable, Hashable, Sendable {
+struct AlbumArtistName: Codable, Comparable, Hashable, Sendable {
   enum AlbumType: Codable, Hashable {
     case compilation(String?)
     case artist(String)
@@ -56,7 +56,7 @@ public struct AlbumArtistName: Codable, Comparable, Hashable, Sendable {
   let name: SortableName
   let type: AlbumType
 
-  public static func < (lhs: AlbumArtistName, rhs: AlbumArtistName) -> Bool {
+  static func < (lhs: AlbumArtistName, rhs: AlbumArtistName) -> Bool {
     lhs.name < rhs.name
   }
 
@@ -70,7 +70,7 @@ public struct AlbumArtistName: Codable, Comparable, Hashable, Sendable {
 }
 
 extension AlbumArtistName: CustomStringConvertible {
-  public var description: String {
+  var description: String {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys]
     encoder.dateEncodingStrategy = .iso8601
