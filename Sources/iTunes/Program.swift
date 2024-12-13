@@ -1,32 +1,6 @@
 import ArgumentParser
 import Foundation
 
-/// The source of the data to be converted into a Track.
-enum SourceContext: CaseIterable, EnumerableFlag {
-  /// Retreive Track data using the iTunesLibrary.
-  case itunes
-  /// Retreive Track data using MusicKit.
-  case musickit
-  /// Retreive Track data using existing Track JSON strings.
-  case jsonString
-
-  func context(source: String?) throws -> Source {
-    enum SourceError: Error {
-      case noSource
-    }
-
-    switch self {
-    case .itunes:
-      return .itunes
-    case .musickit:
-      return .musickit
-    case .jsonString:
-      guard let source else { throw SourceError.noSource }
-      return .jsonString(source)
-    }
-  }
-}
-
 /// The destination type for the Track data.
 enum DestinationContext: EnumerableFlag {
   /// Emit a JSON string representing the Tracks.
@@ -83,11 +57,13 @@ enum DestinationContext: EnumerableFlag {
 }
 
 extension SchemaConstraints: EnumerableFlag {}
+extension Source: EnumerableFlag {}
 
 public struct Program: AsyncParsableCommand {
   /// Input source type.
-  @Flag(help: "Input Source type. Where Track data is being read from.") var source: SourceContext =
+  @Flag(help: "Input Source type. Where Track data is being read from.") var source: Source =
     .itunes
+
   /// Output destination type.
   @Flag(help: "Output Destination type. Format Track data will be written out as.") var destination:
     DestinationContext = .json
@@ -117,13 +93,6 @@ public struct Program: AsyncParsableCommand {
   )
   var outputDirectory: URL? = nil
 
-  /// JSON Source to parse when using Source.jsonString.
-  @Argument(
-    help:
-      "Optional json string to parse when --json-string is passed as input. Use '-' as last argument to read from stdin."
-  )
-  var jsonSource: String?
-
   /// Optional file name to use. Default is 'iTunes-yyyy-MM-dd". Its extension is always based upon the --destination.
   @Option(
     help:
@@ -142,14 +111,6 @@ public struct Program: AsyncParsableCommand {
 
   /// Validates the input matrix.
   public mutating func validate() throws {
-    if jsonSource != nil && source != .jsonString {
-      throw ValidationError("Passing JSON Source requires --json-string to be passed. \(source)")
-    }
-
-    if jsonSource == nil, source == .jsonString {
-      throw ValidationError("Using --json-string requires JSON String to be passed as an argument.")
-    }
-
     if destination == .db && outputFile == nil {
       throw ValidationError("--db requires outputDirectory to be set")
     }
@@ -160,41 +121,13 @@ public struct Program: AsyncParsableCommand {
   }
 
   public func run() async throws {
-    let tracks = try await source.context(source: jsonSource).gather(reduce: reduce)
+    let tracks = try await source.gather(reduce: reduce)
 
     try await destination.context(outputFile: outputFile).emit(
       tracks, branch: "main", tagPrefix: tagPrefix, schemaConstraints: schemaConstraints)
   }
 
-  private static func readSTDIN() -> String? {
-    var input: String = ""
-
-    while let line = readLine() {
-      if input.isEmpty {
-        input = line
-      } else {
-        input += "\n" + line
-      }
-    }
-
-    return input
-  }
-
-  static public func parseStandardInAndArgumentsOrExit(arguments: [String]) async {
-    var text: String?
-    var arguments = arguments
-
-    if arguments.last == "-" {
-      arguments.removeLast()
-
-      text = Self.readSTDIN()
-    }
-
-    arguments.removeFirst()
-    if let text = text {
-      arguments.insert(text, at: 0)
-    }
-
+  static public func run(arguments: [String]) async {
     let command = Self.parseOrExit(arguments)
     do {
       try await command.run()
