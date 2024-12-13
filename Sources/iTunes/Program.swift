@@ -128,6 +128,8 @@ public struct Program: AsyncParsableCommand {
   }
 
   static public func run(arguments: [String]) async {
+    var arguments = arguments
+    arguments.removeFirst()
     let command = Self.parseOrExit(arguments)
     do {
       try await command.run()
