@@ -145,9 +145,6 @@ public struct Program: AsyncParsableCommand {
   @Option(help: "Optional string to add to debug logs for debugging.")
   var loggingToken: String?
 
-  @Option(help: "Optional filter for an Artist Name.")
-  var artistNameFilter: String?
-
   @Option(help: "The prefix to use for the git tags.") var tagPrefix: String = "iTunes"
 
   /// Outputfile where data will be writen, if outputDirectory is not specified.
@@ -195,16 +192,8 @@ public struct Program: AsyncParsableCommand {
   }
 
   public func run() async throws {
-    let tracks = try await {
-      let artistIncluded: ((String) -> Bool)? = {
-        if let artistNameFilter, !artistNameFilter.isEmpty {
-          return { $0 == artistNameFilter }
-        }
-        return nil
-      }()
-      return try await source.context(source: jsonSource).gather(
-        repair: try await repairing(), artistIncluded: artistIncluded, reduce: isReducing)
-    }()
+    let tracks = try await source.context(source: jsonSource).gather(
+      repair: try await repairing(), reduce: isReducing)
 
     try await destination.context(outputFile: outputFile).emit(
       tracks, loggingToken: loggingToken, branch: "main",
