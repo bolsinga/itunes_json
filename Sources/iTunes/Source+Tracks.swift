@@ -8,7 +8,7 @@
 import Foundation
 
 extension Source {
-  public func gather(reduce: Bool) async throws -> [Track] {
+  func gather(reduce: Bool) async throws -> [Track] {
     try await gather().compactMap { reduce ? $0.reducedTrack : $0 }.map {
       $0.duplicateAndEmptyFieldsRemoved
     }

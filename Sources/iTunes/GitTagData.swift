@@ -13,7 +13,7 @@ extension Logger {
     subsystem: Bundle.main.bundleIdentifier ?? "unknown", category: "gitTagData")
 }
 
-public struct TagData: Sendable {
+struct TagData: Sendable {
   let tag: String
   let data: Data
 }
@@ -43,7 +43,7 @@ extension TagData {
     }
   }
 
-  public func write(to directory: URL, pathExtension: String) throws {
+  func write(to directory: URL, pathExtension: String) throws {
     Logger.gitTagData.info("Write: \(tag)")
 
     let url = directory.appending(path: tag).appendingPathExtension(pathExtension)
@@ -58,17 +58,17 @@ extension String {
 }
 
 extension Array where Element == TagData {
-  public func replaceTagPrefix(tagPrefix: String) -> [Element] {
+  func replaceTagPrefix(tagPrefix: String) -> [Element] {
     self.map { TagData(tag: $0.tag.replaceTagPrefix(tagPrefix: tagPrefix), data: $0.data) }
   }
 
-  public var initialCommit: String? {
+  var initialCommit: String? {
     self.sorted(by: { $0.tag < $1.tag }).first?.tag
   }
 }
 
-public struct GitTagData {
-  public struct Configuration {
+struct GitTagData {
+  struct Configuration {
     let directory: URL
     let tagPrefix: String
     let branch: String?
@@ -91,7 +91,7 @@ public struct GitTagData {
   private let configuration: Configuration
   private let git: Git
 
-  public init(configuration: Configuration) throws {
+  init(configuration: Configuration) throws {
     self.configuration = configuration
     self.git = Git(directory: configuration.directory, suppressStandardErr: true)
   }
@@ -151,7 +151,7 @@ public struct GitTagData {
     return tagDatum
   }
 
-  public func write(tagDatum: [TagData], initialCommit: String) async throws {
+  func write(tagDatum: [TagData], initialCommit: String) async throws {
     enum WriteError: Error {
       case noBranch
     }

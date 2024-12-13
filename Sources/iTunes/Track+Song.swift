@@ -111,7 +111,7 @@ extension Track {
     print("\(musicAuthorizationStatus)")
   }
 
-  static public func gatherWithMusicKit() async throws -> [Track] {
+  static func gatherWithMusicKit() async throws -> [Track] {
     await requestAccess()
 
     let request = MusicLibrarySectionedRequest<Album, Song>()

@@ -7,14 +7,17 @@
 
 import ArgumentParser
 import Foundation
-import iTunes
-
-let fileName = "itunes.json"
 
 extension Batch: EnumerableFlag {}
 
-@main
-struct BatchMusic: AsyncParsableCommand {
+public struct BatchCommand: AsyncParsableCommand {
+  private static let fileName = "itunes.json"
+
+  public static let configuration = CommandConfiguration(
+    commandName: "batch",
+    abstract: "Create many sql source or databases from a git repository."
+  )
+
   /// Batch type.
   @Flag(help: "Batch type to build.") var batch: Batch = .sql
 
@@ -57,8 +60,10 @@ struct BatchMusic: AsyncParsableCommand {
 
   public func run() async throws {
     let configuration = GitTagData.Configuration(
-      directory: gitDirectory, tagPrefix: tagPrefix, fileName: fileName)
+      directory: gitDirectory, tagPrefix: tagPrefix, fileName: Self.fileName)
     try await batch.build(
       configuration, outputDirectory: outputDirectory, schemaConstraints: schemaConstraints)
   }
+
+  public init() {}  // This is public and empty to help the compiler.
 }

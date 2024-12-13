@@ -20,7 +20,7 @@ extension TagData {
 }
 
 extension GitTagData {
-  public func transformTracks<Transform: Hashable & Sendable>(
+  func transformTracks<Transform: Hashable & Sendable>(
     _ transform: @escaping @Sendable ([Track]) -> Set<Transform>
   ) async throws -> Set<Transform> {
     var tagDatum = try await self.tagDatum()
@@ -42,9 +42,7 @@ extension GitTagData {
     }
   }
 
-  public func transformTaggedTracks(
-    transform: @escaping @Sendable (String, [Track]) async throws -> Data
-  )
+  func transformTaggedTracks(transform: @escaping @Sendable (String, [Track]) async throws -> Data)
     async throws -> [TagData]
   {
     var tagDatum = try await self.tagDatum()

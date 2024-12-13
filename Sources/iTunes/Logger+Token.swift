@@ -8,7 +8,7 @@
 import os
 
 extension Logger {
-  public init(type: String, category: String, token: String?) {
+  init(type: String, category: String, token: String?) {
     let prefix = token != nil ? "\(token!): " : ""
     self.init(subsystem: "\(prefix)\(type)", category: category)
   }

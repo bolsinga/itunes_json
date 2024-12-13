@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum Output {
+enum Output {
   case file(URL)
   case standardOut
 

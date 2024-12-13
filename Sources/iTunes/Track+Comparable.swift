@@ -16,7 +16,7 @@ extension Track: Comparable {
 
   fileprivate var compareTrackNumber: Int { trackNumber ?? 1 }
 
-  public static func < (lhs: Track, rhs: Track) -> Bool {
+  static func < (lhs: Track, rhs: Track) -> Bool {
     let lhEncodable = lhs.isSQLEncodable
     let rhEncodable = rhs.isSQLEncodable
 
