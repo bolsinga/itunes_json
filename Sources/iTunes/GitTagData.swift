@@ -52,14 +52,14 @@ extension TagData {
 }
 
 extension String {
-  fileprivate func appendTag(appendix: String) -> String {
-    appendToPrefix(appendix: appendix) ?? "\(self)-Could-Not-Properly-Append-\(appendix)"
+  fileprivate func replaceTagPrefix(tagPrefix: String) -> String {
+    replacePrefix(newPrefix: tagPrefix) ?? "\(self)-Could-Not-Properly-Replace-\(tagPrefix)"
   }
 }
 
 extension Array where Element == TagData {
-  public func addTagAppendix(tagAppendix: String) -> [Element] {
-    self.map { TagData(tag: $0.tag.appendTag(appendix: tagAppendix), data: $0.data) }
+  public func replaceTagPrefix(tagPrefix: String) -> [Element] {
+    self.map { TagData(tag: $0.tag.replaceTagPrefix(tagPrefix: tagPrefix), data: $0.data) }
   }
 
   public var initialCommit: String? {

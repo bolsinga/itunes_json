@@ -60,9 +60,9 @@ struct RepairMusic: AsyncParsableCommand {
 
   @Option(
     help:
-      "The string to append to the sourceTagPrefix for the destination git branch. Defaults to the patchable type name."
+      "The string to append to the sourceTagPrefix for the destination git branch."
   )
-  var destinationTagAppendix: String?
+  var destinationTagPrefix: String
 
   @Option(help: "The destination git branch. Defaults to the patchable type name.")
   var destinationBranch: String?
@@ -73,7 +73,6 @@ struct RepairMusic: AsyncParsableCommand {
     let sourceConfiguration = GitTagData.Configuration(
       directory: gitDirectory, tagPrefix: sourceTagPrefix, fileName: fileName)
 
-    let tagAppendix = destinationTagAppendix ?? patchable.rawValue
     let destinationBranch = destinationBranch ?? patchable.rawValue
 
     let destinationConfiguration = GitTagData.Configuration(
@@ -82,7 +81,7 @@ struct RepairMusic: AsyncParsableCommand {
     try await patch.patch(
       sourceConfiguration: sourceConfiguration,
       patch: patch,
-      tagAppendix: tagAppendix,
+      destinationTagPrefix: destinationTagPrefix,
       destinationConfiguration: destinationConfiguration)
   }
 }
