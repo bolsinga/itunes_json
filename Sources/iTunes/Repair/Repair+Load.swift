@@ -13,7 +13,7 @@ private enum RepairError: Error {
   case invalidString
 }
 
-public func createRepair(url: URL?, source: String?, loggingToken: String?) async throws
+public func createRepair(url: URL?, source: String?) async throws
   -> Repairing
 {
   var items: [Item]?
@@ -26,7 +26,7 @@ public func createRepair(url: URL?, source: String?, loggingToken: String?) asyn
     .keys
     if !duplicateProblems.isEmpty {
       let duplicateProblemLogger = Logger(
-        type: "repair", category: "duplicateProblem", token: loggingToken)
+        type: "repair", category: "duplicateProblem", token: nil)
 
       duplicateProblems.forEach {
         duplicateProblemLogger.error("\(String(describing: $0), privacy: .public)")
@@ -37,7 +37,7 @@ public func createRepair(url: URL?, source: String?, loggingToken: String?) asyn
     //        try printRepairJson(items: items)
     //      } catch {}
 
-    let issues = items.compactMap { $0.issue(loggingToken) }
+    let issues = items.compactMap { $0.issue() }
     return Repair(issues: issues)
   }
   throw RepairError.invalidInput
