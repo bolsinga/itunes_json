@@ -14,17 +14,15 @@ extension Logger {
 }
 
 extension Collection where Element == AlbumArtistName {
-  public func correctedSimilarName(to other: Element, corrections: [String: String]) -> Element? {
+  public func correctedSimilarName(to other: Element, correction: AlbumCorrection) -> Element? {
     var similarValid = self.similarName(to: other)
-    if similarValid == nil, let correction = corrections[other.name.name] {
-      Logger.albumCorrection.log("Corrected \(other.name.name) to \(correction)")
-      switch correction {
-      case "--COMPILATION--":
-        // Change named album to a compilation.
+    if similarValid == nil {
+      if let rename = correction.rename[other.name.name] {
+        Logger.albumCorrection.log("Rename \(other.name.name) to \(rename)")
+        similarValid = self.similarName(to: other.update(name: rename))
+      } else if correction.compilation.contains(other.name.name) {
+        Logger.albumCorrection.log("compilation \(other.name.name)")
         similarValid = self.similarName(to: other.updateToCompilation())
-      default:
-        // Change the name of the album.
-        similarValid = self.similarName(to: other.update(name: correction))
       }
     }
     return similarValid
