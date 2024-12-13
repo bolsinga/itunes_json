@@ -14,7 +14,7 @@ extension Logger {
 }
 
 extension Collection where Element == AlbumArtistName {
-  public func correctedSimilarName(to other: Element, correction: AlbumCorrection) -> Element? {
+  func correctedSimilarName(to other: Element, correction: AlbumCorrection) -> Element? {
     var similarValid = self.similarName(to: other)
     if similarValid == nil {
       if let rename = correction.rename[other.name.name] {

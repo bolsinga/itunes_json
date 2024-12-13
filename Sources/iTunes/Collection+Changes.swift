@@ -6,7 +6,7 @@
 //
 
 extension Collection where Element: Similar {
-  public func changes<T: Sendable>(createChange: @escaping @Sendable (Element) -> T?) async -> [T] {
+  func changes<T: Sendable>(createChange: @escaping @Sendable (Element) -> T?) async -> [T] {
     await withTaskGroup(of: Optional<T>.self) { group in
       self.forEach { element in
         group.addTask { createChange(element) }

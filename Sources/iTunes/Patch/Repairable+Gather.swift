@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import iTunes
 
 private func changes<Guide: Hashable & Similar, Change: Sendable>(
   configuration: GitTagData.Configuration,

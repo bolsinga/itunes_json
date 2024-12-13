@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum Repairable: CaseIterable {
+enum Repairable: CaseIterable {
   case artists
   case albums
 }

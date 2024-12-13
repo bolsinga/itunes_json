@@ -14,7 +14,7 @@ extension Logger {
 }
 
 extension Collection where Element == SortableName {
-  public func correctedSimilarName(to other: Element, corrections: [String: String]) -> Element? {
+  func correctedSimilarName(to other: Element, corrections: [String: String]) -> Element? {
     var similarValid = self.similarName(to: other)
     if similarValid == nil, let correction = corrections[other.name] {
       Logger.correction.log("Corrected \(other.name) to \(correction)")
