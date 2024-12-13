@@ -1,13 +1,16 @@
 import ArgumentParser
 import Foundation
-import iTunes
-
-let fileName = "itunes.json"
 
 extension Repairable: EnumerableFlag {}
 
-@main
-struct PatchMusic: AsyncParsableCommand {
+public struct PatchCommand: AsyncParsableCommand {
+  private static let fileName = "itunes.json"
+
+  public static let configuration = CommandConfiguration(
+    commandName: "patch",
+    abstract: "Creates patches for itunes.json data."
+  )
+
   /// Input source type.
   @Flag(help: "Repairable type to build.") var repairable: Repairable = .artists
 
@@ -34,7 +37,9 @@ struct PatchMusic: AsyncParsableCommand {
 
   public func run() async throws {
     let configuration = GitTagData.Configuration(
-      directory: gitDirectory, tagPrefix: sourceTagPrefix, fileName: fileName)
+      directory: gitDirectory, tagPrefix: sourceTagPrefix, fileName: PatchCommand.fileName)
     print(try await repairable.gather(configuration, correction: correction))
   }
+
+  public init() {}  // This is public and empty to help the compiler.
 }

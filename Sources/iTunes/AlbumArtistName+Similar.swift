@@ -6,11 +6,11 @@
 //
 
 extension AlbumArtistName: Similar {
-  public var cullable: Bool {
+  var cullable: Bool {
     true  // FIXME
   }
 
-  public func isSimilar(to other: AlbumArtistName) -> Bool {
+  func isSimilar(to other: AlbumArtistName) -> Bool {
     // self is the current here.
     self.name.isSimilar(to: other.name) && self.type.isSimilar(to: other.type)
   }

@@ -18,7 +18,7 @@ extension Collection where Element: Similar {
     self.filter { $0.isSimilar(to: other) }
   }
 
-  public func similarName(to other: Element) -> Element? {
+  func similarName(to other: Element) -> Element? {
     // 'self' contains the current names here.
     var similarNames = self.similarNames(to: other)
     let originalCount = similarNames.count

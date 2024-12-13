@@ -8,11 +8,11 @@
 import Foundation
 
 extension Array where Element == Track {
-  public var artistNames: Set<SortableName> {
+  var artistNames: Set<SortableName> {
     Set(self.filter { $0.isSQLEncodable }.compactMap { $0.artistName })
   }
 }
 
-public func currentArtists() async throws -> Set<SortableName> {
+func currentArtists() async throws -> Set<SortableName> {
   try await Source.itunes.gather(reduce: false).artistNames
 }
