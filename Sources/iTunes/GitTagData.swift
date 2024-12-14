@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Git
 import os
 
 extension Logger {

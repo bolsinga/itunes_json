@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Git
 
 extension URL {
   fileprivate var filename: String {
