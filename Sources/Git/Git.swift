@@ -22,11 +22,11 @@ enum GitError: Error {
   case createBranch(Int32)
 }
 
-struct Git {
+public struct Git {
   private let path: String
   private let suppressStandardErr: Bool
 
-  init(directory: URL, suppressStandardErr: Bool = false) {
+  public init(directory: URL, suppressStandardErr: Bool = false) {
     self.path = directory.path(percentEncoded: false)
     self.suppressStandardErr = suppressStandardErr
   }
@@ -57,51 +57,51 @@ struct Git {
     return standardOutput.components(separatedBy: "\n").filter { !$0.isEmpty }
   }
 
-  func status() async throws {
+  public func status() async throws {
     try await git(["status"]) { GitError.status($0) }
   }
 
-  func checkout(commit: String) async throws {
+  public func checkout(commit: String) async throws {
     try await git(["checkout", commit]) { GitError.main($0) }
   }
 
-  func add(_ filename: String) async throws {
+  public func add(_ filename: String) async throws {
     try await git(["add", filename]) { GitError.add($0) }
   }
 
-  func commit(_ message: String) async throws {
+  public func commit(_ message: String) async throws {
     try await git(["commit", "-m", message]) { GitError.commit($0) }
   }
 
-  func tag(_ name: String) async throws {
+  public func tag(_ name: String) async throws {
     try await git(["tag", name]) { GitError.tag($0) }
   }
 
-  func push() async throws {
+  public func push() async throws {
     try await git(["push"]) { GitError.push($0) }
   }
 
-  func pushTags() async throws {
+  public func pushTags() async throws {
     try await git(["push", "--tags"]) { GitError.pushTags($0) }
   }
 
-  func gc() async throws {
+  public func gc() async throws {
     try await git(["gc", "--prune=now"]) { GitError.gc($0) }
   }
 
-  func diff() async throws {
+  public func diff() async throws {
     try await git(["diff", "--staged", "--name-only", "--exit-code"]) { GitError.diff($0) }
   }
 
-  func tags() async throws -> [String] {
+  public func tags() async throws -> [String] {
     try await git(["tag"]) { GitError.tags(($0)) }
   }
 
-  func show(commit: String, path: String) async throws -> Data {
+  public func show(commit: String, path: String) async throws -> Data {
     try await gitData(["show", "\(commit):\(path)"]) { GitError.show($0) }
   }
 
-  func createBranch(named name: String, initialCommit: String) async throws {
+  public func createBranch(named name: String, initialCommit: String) async throws {
     try await git(["checkout", "-b", name, initialCommit]) { GitError.createBranch($0) }
   }
 }
