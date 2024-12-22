@@ -136,7 +136,8 @@ public struct BackupCommand: AsyncParsableCommand {
     let tracks = try await source.gather(reduce: reduce)
 
     try await destination.context(outputFile: outputFile).emit(
-      tracks, branch: "main", tagPrefix: tagPrefix, schemaConstraints: schemaConstraints)
+      tracks, branch: "main", tagPrefix: tagPrefix, version: Self.configuration.version,
+      schemaConstraints: schemaConstraints)
   }
 
   public init() {}  // This is public and empty to help the compiler.

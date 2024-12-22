@@ -86,7 +86,7 @@ public struct RepairCommand: AsyncParsableCommand {
       sourceConfiguration: sourceConfiguration,
       patch: patch,
       destinationTagPrefix: destinationTagPrefix,
-      destinationConfiguration: destinationConfiguration)
+      destinationConfiguration: destinationConfiguration, version: Self.configuration.version)
   }
 
   public init() {}  // This is public and empty to help the compiler.
