@@ -20,7 +20,7 @@ struct TagData: Sendable {
 }
 
 extension TagData {
-  fileprivate func add(to git: Git, file: URL) async throws {
+  fileprivate func add(to git: Git, file: URL, version: String) async throws {
     Logger.gitTagData.info("Add: \(tag)")
 
     // this makes memory shoot up, unexpectedly.
@@ -39,7 +39,7 @@ extension TagData {
     }()
 
     if hasChanges {
-      try await git.commit(tag)
+      try await git.commit("\(tag)\n\(version)")
       try await git.tag(tag)
     }
   }
@@ -152,7 +152,7 @@ struct GitTagData {
     return tagDatum
   }
 
-  func write(tagDatum: [TagData], initialCommit: String) async throws {
+  func write(tagDatum: [TagData], initialCommit: String, version: String) async throws {
     enum WriteError: Error {
       case noBranch
     }
@@ -168,7 +168,7 @@ struct GitTagData {
     for tagData in tagDatum.reversed() {
       tagDatum.removeLast()
 
-      try await tagData.add(to: git, file: configuration.file)
+      try await tagData.add(to: git, file: configuration.file, version: version)
     }
 
     //    try await git.push()

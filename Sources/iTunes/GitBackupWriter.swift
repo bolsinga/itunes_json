@@ -32,7 +32,9 @@ extension Git {
     return latest
   }
 
-  fileprivate func addCommitTagPush(filename: String, tagPrefix: String) async throws {
+  fileprivate func addCommitTagPush(filename: String, tagPrefix: String, version: String)
+    async throws
+  {
     let message = tagPrefix.defaultDestinationName
 
     try await add(filename)
@@ -53,7 +55,7 @@ extension Git {
     case .noChanges:
       break
     case .changes:
-      try await commit(backupName)
+      try await commit("\(backupName)\n\(version)")
     }
 
     try await tag(backupName)
@@ -69,6 +71,7 @@ struct GitBackupWriter: DestinationFileWriting {
   let fileWriter: DestinationFileWriting
   let branch: String
   let tagPrefix: String
+  let version: String
 
   var outputFile: URL { fileWriter.outputFile }
 
@@ -78,6 +81,7 @@ struct GitBackupWriter: DestinationFileWriting {
     try await git.validateAndCheckout(branch: branch)
     try await fileWriter.write(data: data)
 
-    try await git.addCommitTagPush(filename: outputFile.filename, tagPrefix: tagPrefix)
+    try await git.addCommitTagPush(
+      filename: outputFile.filename, tagPrefix: tagPrefix, version: version)
   }
 }

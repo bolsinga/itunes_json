@@ -10,7 +10,7 @@ import Foundation
 extension Patch {
   func patch(
     sourceConfiguration: GitTagData.Configuration, patch: Patch, destinationTagPrefix: String,
-    destinationConfiguration: GitTagData.Configuration
+    destinationConfiguration: GitTagData.Configuration, version: String
   ) async throws {
     let patchedTracksData = try await GitTagData(configuration: sourceConfiguration)
       .transformTaggedTracks { try $1.patch(patch, tag: $0) }
@@ -19,6 +19,6 @@ extension Patch {
 
     try await GitTagData(configuration: destinationConfiguration).write(
       tagDatum: patchedTracksData.replaceTagPrefix(tagPrefix: destinationTagPrefix),
-      initialCommit: initialCommit)
+      initialCommit: initialCommit, version: version)
   }
 }
