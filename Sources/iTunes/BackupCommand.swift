@@ -67,7 +67,9 @@ extension Source: EnumerableFlag {}
 
 public struct BackupCommand: AsyncParsableCommand {
   public static let configuration = CommandConfiguration(
-    commandName: "backup", abstract: "Backs up music data."
+    commandName: "backup",
+    abstract: "Backs up music data.",
+    version: iTunesVersion
   )
 
   /// Input source type.
