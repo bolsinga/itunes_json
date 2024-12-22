@@ -19,4 +19,4 @@ jobs:
     - name: Show SDKs
       run: xcodebuild -showsdks
     - name: Build
-      run: xcodebuild -verbose -scheme iTunesJson
+      run: xcodebuild -verbose -skipPackagePluginValidation -scheme iTunesJson
