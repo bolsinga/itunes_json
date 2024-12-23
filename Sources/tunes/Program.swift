@@ -1,7 +1,9 @@
 import ArgumentParser
 import Foundation
+import iTunes
 
-public struct TunesCommand: AsyncParsableCommand {
+@main
+public struct Program: AsyncParsableCommand {
   public static let configuration = CommandConfiguration(
     commandName: "tunes",
     abstract: "A tool for working with iTunes data.",
@@ -11,8 +13,4 @@ public struct TunesCommand: AsyncParsableCommand {
   )
 
   public init() {}  // This is public and empty to help the compiler.
-
-  public static func go(_ arguments: [String]?) async {
-    await Self.main(arguments)
-  }
 }
