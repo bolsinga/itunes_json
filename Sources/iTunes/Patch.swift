@@ -10,11 +10,13 @@ import Foundation
 typealias ArtistPatchLookup = [SortableName: SortableName]
 typealias AlbumPatchLookup = [AlbumArtistName: AlbumArtistName]
 typealias AlbumMissingTitlePatchLookup = [SongArtist: SortableName]
+typealias AlbumTrackCountLookup = [AlbumArtistName: Int]
 
 enum Patch: Sendable {
   case artists(ArtistPatchLookup)
   case albums(AlbumPatchLookup)
   case missingTitleAlbums(AlbumMissingTitlePatchLookup)
+  case trackCounts(AlbumTrackCountLookup)
 }
 
 // This will make a Dictionary<Key, Value> into Array<Key> where each Array
@@ -42,6 +44,17 @@ extension AlbumMissingTitlePatchLookup {
   }
 }
 
+extension AlbumTrackCountLookup {
+  fileprivate func jsonData() throws -> Data {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+    encoder.dateEncodingStrategy = .iso8601
+    // FIXME: It would be nice to have the dictionary self-sort, like the extension above.
+    // The problem is that the key/values are different types.
+    return try encoder.encode(self)
+  }
+}
+
 extension Patch: CustomStringConvertible {
   var description: String {
     switch self {
@@ -50,6 +63,8 @@ extension Patch: CustomStringConvertible {
     case .albums(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     case .missingTitleAlbums(let items):
+      return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
+    case .trackCounts(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     }
   }

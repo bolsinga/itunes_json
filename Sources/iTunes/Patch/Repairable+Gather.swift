@@ -74,6 +74,12 @@ extension Repairable {
     guard !data.isEmpty else { return [] }
     return try JSONDecoder().decode(Array<SongArtistAlbum>.self, from: data)
   }
+
+  fileprivate func albumTrackCounts(from string: String) throws -> [AlbumTrackCount] {
+    let data = try data(from: string)
+    guard !data.isEmpty else { return [] }
+    return try JSONDecoder().decode(Array<AlbumTrackCount>.self, from: data)
+  }
 }
 
 extension Repairable {
@@ -135,6 +141,25 @@ extension Repairable {
           { (partialResult: inout AlbumMissingTitlePatchLookup, item: SongArtistAlbum) in
             guard let album = item.album else { return }
             partialResult[item.songArtist] = album
+          }))
+    case .trackCounts:
+      let correction = try albumTrackCounts(from: correction)
+      return .trackCounts(
+        try await corrections(configuration: configuration) {
+          try await currentAlbumTrackCounts()
+        } brokenGuides: {
+          $0.filter { $0.isSQLEncodable }.albumTrackCounts.filter { $0.trackCount == nil }
+        } createChange: {
+          let similar = $1.needsChangeAndSimilar(to: $0)
+          if similar == nil {
+            return correction.similarName(to: $0)
+          }
+          return similar
+        }.reduce(
+          into: AlbumTrackCountLookup(),
+          { (partialResult: inout AlbumTrackCountLookup, item: AlbumTrackCount) in
+            guard let trackCount = item.trackCount else { return }
+            partialResult[item.album] = trackCount
           })
       )
     }
