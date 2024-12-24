@@ -5,7 +5,7 @@
 //  Created by Greg Bolsinga on 11/30/24.
 //
 
-extension Collection where Element: Similar {
+extension Collection where Element: Sendable {
   func changes<T: Sendable>(createChange: @escaping @Sendable (Element) -> T?) async -> [T] {
     await withTaskGroup(of: Optional<T>.self) { group in
       self.forEach { element in
