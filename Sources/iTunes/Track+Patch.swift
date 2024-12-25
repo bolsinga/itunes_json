@@ -234,7 +234,8 @@ extension Array where Element == Track {
     }
   }
 
-  fileprivate func patchAlbumTrackCounts(_ lookup: AlbumMissingTitlePatchLookup, tag: String) throws
+  fileprivate func patchMissingAlbumTitles(_ lookup: AlbumMissingTitlePatchLookup, tag: String)
+    throws
     -> [Track]
   {
     self.map { track in
@@ -252,7 +253,7 @@ extension Array where Element == Track {
     case .albums(let lookup):
       try patchAlbums(lookup, tag: tag)
     case .missingTitleAlbums(let lookup):
-      try patchAlbumTrackCounts(lookup, tag: tag)
+      try patchMissingAlbumTitles(lookup, tag: tag)
     }
   }
 
