@@ -25,6 +25,22 @@ private func changes<Guide: Hashable & Similar, Change: Sendable>(
   return await unknownGuides.changes { createChange($0, currentGuides) }
 }
 
+private func corrections<Guide: Hashable & Sendable, Change: Sendable>(
+  configuration: GitTagData.Configuration,
+  currentGuides: @Sendable () async throws -> Set<Guide>,
+  brokenGuides: @escaping @Sendable ([Track]) -> Set<Guide>,
+  createChange: @escaping @Sendable (Guide, Set<Guide>) -> Change?
+) async throws -> [Change] {
+  async let asyncCurrentGuides = try await currentGuides()
+
+  let allBrokenGuides = try await GitTagData(configuration: configuration).transformTracks(
+    brokenGuides)
+
+  let currentGuides = try await asyncCurrentGuides
+
+  return await allBrokenGuides.changes { createChange($0, currentGuides) }
+}
+
 extension Repairable {
   enum CorrectionError: Error {
     case noData
@@ -51,6 +67,12 @@ extension Repairable {
     let data = try data(from: string)
     guard !data.isEmpty else { return AlbumCorrection() }
     return try JSONDecoder().decode(AlbumCorrection.self, from: data)
+  }
+
+  fileprivate func songArtistAlbums(from string: String) throws -> [SongArtistAlbum] {
+    let data = try data(from: string)
+    guard !data.isEmpty else { return [] }
+    return try JSONDecoder().decode(Array<SongArtistAlbum>.self, from: data)
   }
 }
 
@@ -95,6 +117,26 @@ extension Repairable {
           }
           partialResult[pair.key] = pair.value
         })
+    case .missingTitleAlbums:
+      let correction = try songArtistAlbums(from: correction)
+      return .missingTitleAlbums(
+        try await corrections(configuration: configuration) {
+          try await currentSongArtistAlbums()
+        } brokenGuides: {
+          $0.filter { $0.isSQLEncodable }.songArtistAlbums.filter { $0.album == nil }
+        } createChange: {
+          let similar = $1.similarName(to: $0)
+          if similar == nil {
+            return correction.similarName(to: $0)
+          }
+          return similar
+        }.reduce(
+          into: AlbumMissingTitlePatchLookup(),
+          { (partialResult: inout AlbumMissingTitlePatchLookup, item: SongArtistAlbum) in
+            guard let album = item.album else { return }
+            partialResult[item.songArtist] = album
+          })
+      )
     }
   }
 }
