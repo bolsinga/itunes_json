@@ -27,14 +27,27 @@ extension Track {
     guard let albumName else { return nil }
     return AlbumArtistName(name: albumName, type: albumType)
   }
+
+  var albumTrackCount: AlbumTrackCount? {
+    guard let albumArtistName = albumArtistName else { return nil }
+    return AlbumTrackCount(album: albumArtistName, trackCount: trackCount)
+  }
 }
 
 extension Array where Element == Track {
   var albumNames: Set<AlbumArtistName> {
     Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumArtistName })
   }
+
+  var albumTrackCounts: Set<AlbumTrackCount> {
+    Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumTrackCount })
+  }
 }
 
 func currentAlbums() async throws -> Set<AlbumArtistName> {
   try await Source.itunes.gather(reduce: false).albumNames
+}
+
+func currentAlbumTrackCounts() async throws -> Set<AlbumTrackCount> {
+  try await Source.itunes.gather(reduce: false).albumTrackCounts
 }
