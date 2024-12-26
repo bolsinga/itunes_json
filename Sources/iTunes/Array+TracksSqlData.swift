@@ -8,9 +8,9 @@
 import Foundation
 
 extension Array where Element == Track {
-  func sqlData(loggingToken: String?, schemaConstraints: SchemaConstraints) throws -> Data {
+  func sqlData(loggingToken: String?, schemaOptions: SchemaOptions) throws -> Data {
     let encoder = TracksSQLSourceEncoder()
     return try encoder.encode(
-      self, loggingToken: loggingToken, schemaConstraints: schemaConstraints)
+      self, loggingToken: loggingToken, schemaOptions: schemaOptions)
   }
 }

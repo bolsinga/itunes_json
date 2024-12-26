@@ -15,7 +15,7 @@ enum Batch: CaseIterable {
 extension Batch {
   func build(
     _ configuration: GitTagData.Configuration, outputDirectory: URL,
-    schemaConstraints: SchemaConstraints
+    schemaOptions: SchemaOptions
   ) async throws {
     var patchedTracksData = try await GitTagData(configuration: configuration)
       .transformTaggedTracks {
@@ -29,7 +29,7 @@ extension Batch {
         }()
 
         return try await destination.data(
-          for: $1, loggingToken: "batch-\($0)", schemaConstraints: schemaConstraints)
+          for: $1, loggingToken: "batch-\($0)", schemaOptions: schemaOptions)
       }
 
     let pathExtension = {

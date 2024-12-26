@@ -15,17 +15,21 @@ struct TracksSQLSourceEncoder {
       self.rowEncoder = rowEncoder
     }
 
-    private var tableBuilders: [any TableBuilder] {
+    private func tableBuilders(schemaOptions: SchemaOptions) -> [(
+      any TableBuilder, SchemaConstraints
+    )] {
       [
-        rowEncoder.artistTableBuilder, rowEncoder.albumTableBuilder, rowEncoder.songTableBuilder(),
-        rowEncoder.playTableBuilder(),
+        (rowEncoder.artistTableBuilder, schemaOptions.artistConstraints),
+        (rowEncoder.albumTableBuilder, schemaOptions.albumConstraints),
+        (rowEncoder.songTableBuilder(), schemaOptions.songConstraints),
+        (rowEncoder.playTableBuilder(), schemaOptions.playsConstraints),
       ]
     }
 
-    fileprivate func sqlStatements(schemaConstraints: SchemaConstraints) -> String {
+    fileprivate func sqlStatements(schemaOptions: SchemaOptions) -> String {
       (["PRAGMA foreign_keys = ON;"]
-        + tableBuilders.flatMap {
-          var statements = [$0.schema(constraints: schemaConstraints)]
+        + tableBuilders(schemaOptions: schemaOptions).flatMap {
+          var statements = [$0.schema(constraints: $1)]
           statements.append(contentsOf: $0.statements.map { "\($0)" }.sorted())
           return statements
         } + [rowEncoder.views].compactMap { $0 }).joined(separator: "\n")
@@ -33,20 +37,20 @@ struct TracksSQLSourceEncoder {
   }
 
   private func encode(
-    _ tracks: [Track], loggingToken: String?, schemaConstraints: SchemaConstraints
+    _ tracks: [Track], loggingToken: String?, schemaOptions: SchemaOptions
   ) -> String {
     let encoder = Encoder(rowEncoder: tracks.rowEncoder(loggingToken))
-    return encoder.sqlStatements(schemaConstraints: schemaConstraints)
+    return encoder.sqlStatements(schemaOptions: schemaOptions)
   }
 
-  func encode(_ tracks: [Track], loggingToken: String?, schemaConstraints: SchemaConstraints) throws
+  func encode(_ tracks: [Track], loggingToken: String?, schemaOptions: SchemaOptions) throws
     -> Data
   {
     enum TracksSQLSourceEncoderError: Error {
       case cannotMakeData
     }
     guard
-      let data = encode(tracks, loggingToken: loggingToken, schemaConstraints: schemaConstraints)
+      let data = encode(tracks, loggingToken: loggingToken, schemaOptions: schemaOptions)
         .data(using: .utf8)
     else {
       throw TracksSQLSourceEncoderError.cannotMakeData

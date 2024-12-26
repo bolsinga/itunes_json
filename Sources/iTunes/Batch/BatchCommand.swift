@@ -63,7 +63,8 @@ public struct BatchCommand: AsyncParsableCommand {
     let configuration = GitTagData.Configuration(
       directory: gitDirectory, tagPrefix: tagPrefix, fileName: Self.fileName)
     try await batch.build(
-      configuration, outputDirectory: outputDirectory, schemaConstraints: schemaConstraints)
+      configuration, outputDirectory: outputDirectory,
+      schemaOptions: schemaConstraints.schemaOptions)
   }
 
   public init() {}  // This is public and empty to help the compiler.
