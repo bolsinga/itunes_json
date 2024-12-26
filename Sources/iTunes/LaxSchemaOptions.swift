@@ -10,16 +10,16 @@ import Foundation
 struct LaxSchemaOptions: OptionSet {
   let rawValue: UInt
 
-  static let artist = LaxSchemaOptions(rawValue: 1 << 0)
-  static let album = LaxSchemaOptions(rawValue: 1 << 1)
-  static let song = LaxSchemaOptions(rawValue: 1 << 2)
-  static let plays = LaxSchemaOptions(rawValue: 1 << 3)
+  private static let laxArtist = LaxSchemaOptions(rawValue: 1 << 0)
+  private static let laxAlbum = LaxSchemaOptions(rawValue: 1 << 1)
+  private static let laxSong = LaxSchemaOptions(rawValue: 1 << 2)
+  private static let laxPlays = LaxSchemaOptions(rawValue: 1 << 3)
 
   static let strictSchema = LaxSchemaOptions()
-  static let laxSchema: LaxSchemaOptions = [Self.artist, Self.album, Self.song, Self.plays]
+  static let laxSchema: LaxSchemaOptions = [Self.laxArtist, Self.laxAlbum, Self.laxSong, Self.laxPlays]
 
-  var artistConstraints: SchemaConstraints { self.contains(.artist) ? .lax : .strict }
-  var albumConstraints: SchemaConstraints { self.contains(.album) ? .lax : .strict }
-  var songConstraints: SchemaConstraints { self.contains(.song) ? .lax : .strict }
-  var playsConstraints: SchemaConstraints { self.contains(.plays) ? .lax : .strict }
+  var artistConstraints: SchemaConstraints { self.contains(.laxArtist) ? .lax : .strict }
+  var albumConstraints: SchemaConstraints { self.contains(.laxAlbum) ? .lax : .strict }
+  var songConstraints: SchemaConstraints { self.contains(.laxSong) ? .lax : .strict }
+  var playsConstraints: SchemaConstraints { self.contains(.laxPlays) ? .lax : .strict }
 }
