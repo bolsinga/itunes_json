@@ -6,7 +6,7 @@
 //
 
 extension SchemaConstraints {
-  var laxSchemaOptionSet: LaxSchemaOptions {
+  var laxSchemaOptionSet: SchemaOptions {
     switch self {
     case .strict:
       .strictSchema

@@ -15,7 +15,7 @@ struct TracksSQLSourceEncoder {
       self.rowEncoder = rowEncoder
     }
 
-    private func tableBuilders(schemaOptions: LaxSchemaOptions) -> [(
+    private func tableBuilders(schemaOptions: SchemaOptions) -> [(
       any TableBuilder, SchemaConstraints
     )] {
       [
@@ -26,7 +26,7 @@ struct TracksSQLSourceEncoder {
       ]
     }
 
-    fileprivate func sqlStatements(schemaOptions: LaxSchemaOptions) -> String {
+    fileprivate func sqlStatements(schemaOptions: SchemaOptions) -> String {
       (["PRAGMA foreign_keys = ON;"]
         + tableBuilders(schemaOptions: schemaOptions).flatMap {
           var statements = [$0.schema(constraints: $1)]
@@ -37,13 +37,13 @@ struct TracksSQLSourceEncoder {
   }
 
   private func encode(
-    _ tracks: [Track], loggingToken: String?, schemaOptions: LaxSchemaOptions
+    _ tracks: [Track], loggingToken: String?, schemaOptions: SchemaOptions
   ) -> String {
     let encoder = Encoder(rowEncoder: tracks.rowEncoder(loggingToken))
     return encoder.sqlStatements(schemaOptions: schemaOptions)
   }
 
-  func encode(_ tracks: [Track], loggingToken: String?, schemaOptions: LaxSchemaOptions) throws
+  func encode(_ tracks: [Track], loggingToken: String?, schemaOptions: SchemaOptions) throws
     -> Data
   {
     enum TracksSQLSourceEncoderError: Error {

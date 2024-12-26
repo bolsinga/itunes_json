@@ -9,7 +9,7 @@ import Foundation
 
 extension Array where Element == Track {
   func database(
-    storage: DatabaseStorage, loggingToken: String?, schemaOptions: LaxSchemaOptions
+    storage: DatabaseStorage, loggingToken: String?, schemaOptions: SchemaOptions
   ) async throws -> Data {
     let dbEncoder = try TracksDBEncoder(
       storage: storage, rowEncoder: self.rowEncoder(loggingToken), loggingToken: loggingToken)

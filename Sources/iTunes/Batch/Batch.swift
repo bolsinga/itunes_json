@@ -15,7 +15,7 @@ enum Batch: CaseIterable {
 extension Batch {
   func build(
     _ configuration: GitTagData.Configuration, outputDirectory: URL,
-    schemaOptions: LaxSchemaOptions
+    schemaOptions: SchemaOptions
   ) async throws {
     var patchedTracksData = try await GitTagData(configuration: configuration)
       .transformTaggedTracks {

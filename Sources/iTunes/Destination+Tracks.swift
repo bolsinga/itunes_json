@@ -39,7 +39,7 @@ extension Destination {
 
   func emit(
     _ tracks: [Track], branch: String, tagPrefix: String, version: String,
-    schemaOptions: LaxSchemaOptions
+    schemaOptions: SchemaOptions
   ) async throws {
     enum DataExportError: Error {
       case noTracks

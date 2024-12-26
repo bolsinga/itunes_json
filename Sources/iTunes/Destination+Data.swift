@@ -8,7 +8,7 @@
 import Foundation
 
 extension Destination {
-  func data(for tracks: [Track], loggingToken: String?, schemaOptions: LaxSchemaOptions)
+  func data(for tracks: [Track], loggingToken: String?, schemaOptions: SchemaOptions)
     async throws -> Data
   {
     switch self {
