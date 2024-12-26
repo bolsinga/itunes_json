@@ -16,7 +16,9 @@ struct SchemaOptions: OptionSet {
   private static let laxPlays = SchemaOptions(rawValue: 1 << 3)
 
   static let strictSchema = SchemaOptions()
-  static let laxSchema: SchemaOptions = [Self.laxArtist, Self.laxAlbum, Self.laxSong, Self.laxPlays]
+  static let laxSchema: SchemaOptions = [
+    Self.laxArtist, Self.laxAlbum, Self.laxSong, Self.laxPlays,
+  ]
 
   var artistConstraints: SchemaConstraints { self.contains(.laxArtist) ? .lax : .strict }
   var albumConstraints: SchemaConstraints { self.contains(.laxAlbum) ? .lax : .strict }

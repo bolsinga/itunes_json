@@ -1,12 +1,12 @@
 //
-//  SchemaConstraints+LaxSchemaOptions.swift
+//  SchemaConstraints+SchemaOptions.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 12/25/24.
 //
 
 extension SchemaConstraints {
-  var laxSchemaOptionSet: SchemaOptions {
+  var schemaOptions: SchemaOptions {
     switch self {
     case .strict:
       .strictSchema
