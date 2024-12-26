@@ -15,17 +15,21 @@ struct TracksSQLSourceEncoder {
       self.rowEncoder = rowEncoder
     }
 
-    private var tableBuilders: [any TableBuilder] {
+    private func tableBuilders(laxSchemaOptions: LaxSchemaOptions) -> [(
+      any TableBuilder, SchemaConstraints
+    )] {
       [
-        rowEncoder.artistTableBuilder, rowEncoder.albumTableBuilder, rowEncoder.songTableBuilder(),
-        rowEncoder.playTableBuilder(),
+        (rowEncoder.artistTableBuilder, laxSchemaOptions.artistConstraints),
+        (rowEncoder.albumTableBuilder, laxSchemaOptions.albumConstraints),
+        (rowEncoder.songTableBuilder(), laxSchemaOptions.songConstraints),
+        (rowEncoder.playTableBuilder(), laxSchemaOptions.playsConstraints),
       ]
     }
 
-    fileprivate func sqlStatements(schemaConstraints: SchemaConstraints) -> String {
+    fileprivate func sqlStatements(laxSchemaOptions: LaxSchemaOptions) -> String {
       (["PRAGMA foreign_keys = ON;"]
-        + tableBuilders.flatMap {
-          var statements = [$0.schema(constraints: schemaConstraints)]
+        + tableBuilders(laxSchemaOptions: laxSchemaOptions).flatMap {
+          var statements = [$0.schema(constraints: $1)]
           statements.append(contentsOf: $0.statements.map { "\($0)" }.sorted())
           return statements
         } + [rowEncoder.views].compactMap { $0 }).joined(separator: "\n")
@@ -33,20 +37,20 @@ struct TracksSQLSourceEncoder {
   }
 
   private func encode(
-    _ tracks: [Track], loggingToken: String?, schemaConstraints: SchemaConstraints
+    _ tracks: [Track], loggingToken: String?, laxSchemaOptions: LaxSchemaOptions
   ) -> String {
     let encoder = Encoder(rowEncoder: tracks.rowEncoder(loggingToken))
-    return encoder.sqlStatements(schemaConstraints: schemaConstraints)
+    return encoder.sqlStatements(laxSchemaOptions: laxSchemaOptions)
   }
 
-  func encode(_ tracks: [Track], loggingToken: String?, schemaConstraints: SchemaConstraints) throws
+  func encode(_ tracks: [Track], loggingToken: String?, laxSchemaOptions: LaxSchemaOptions) throws
     -> Data
   {
     enum TracksSQLSourceEncoderError: Error {
       case cannotMakeData
     }
     guard
-      let data = encode(tracks, loggingToken: loggingToken, schemaConstraints: schemaConstraints)
+      let data = encode(tracks, loggingToken: loggingToken, laxSchemaOptions: laxSchemaOptions)
         .data(using: .utf8)
     else {
       throw TracksSQLSourceEncoderError.cannotMakeData
