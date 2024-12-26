@@ -42,15 +42,15 @@ struct TracksDBEncoder {
       rowEncoder.playTableBuilder(songLookup), schemaConstraints: schemaConstrainsts)
   }
 
-  func encode(laxSchemaOptions: LaxSchemaOptions) async throws {
+  func encode(schemaOptions: LaxSchemaOptions) async throws {
     try await db.execute("PRAGMA foreign_keys = ON;")
-    let artistLookup = try await emitArtists(schemaConstrainsts: laxSchemaOptions.artistConstraints)
-    let albumLookup = try await emitAlbums(schemaConstrainsts: laxSchemaOptions.albumConstraints)
+    let artistLookup = try await emitArtists(schemaConstrainsts: schemaOptions.artistConstraints)
+    let albumLookup = try await emitAlbums(schemaConstrainsts: schemaOptions.albumConstraints)
     let songLookup = try await emitSongs(
       artistLookup: artistLookup, albumLookup: albumLookup,
-      schemaConstrainsts: laxSchemaOptions.songConstraints)
+      schemaConstrainsts: schemaOptions.songConstraints)
     try await emitPlays(
-      songLookup: songLookup, schemaConstrainsts: laxSchemaOptions.playsConstraints)
+      songLookup: songLookup, schemaConstrainsts: schemaOptions.playsConstraints)
     try await db.execute(rowEncoder.views)
   }
 

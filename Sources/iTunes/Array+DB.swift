@@ -9,12 +9,12 @@ import Foundation
 
 extension Array where Element == Track {
   func database(
-    storage: DatabaseStorage, loggingToken: String?, laxSchemaOptions: LaxSchemaOptions
+    storage: DatabaseStorage, loggingToken: String?, schemaOptions: LaxSchemaOptions
   ) async throws -> Data {
     let dbEncoder = try TracksDBEncoder(
       storage: storage, rowEncoder: self.rowEncoder(loggingToken), loggingToken: loggingToken)
     do {
-      try await dbEncoder.encode(laxSchemaOptions: laxSchemaOptions)
+      try await dbEncoder.encode(schemaOptions: schemaOptions)
       let data = try await dbEncoder.data()
       await dbEncoder.close()
       return data

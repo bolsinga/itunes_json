@@ -64,7 +64,7 @@ public struct BatchCommand: AsyncParsableCommand {
       directory: gitDirectory, tagPrefix: tagPrefix, fileName: Self.fileName)
     try await batch.build(
       configuration, outputDirectory: outputDirectory,
-      laxSchemaOptions: schemaConstraints.laxSchemaOptionSet)
+      schemaOptions: schemaConstraints.laxSchemaOptionSet)
   }
 
   public init() {}  // This is public and empty to help the compiler.

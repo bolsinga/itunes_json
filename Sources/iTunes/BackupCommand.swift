@@ -137,7 +137,7 @@ public struct BackupCommand: AsyncParsableCommand {
 
     try await destination.context(outputFile: outputFile).emit(
       tracks, branch: "main", tagPrefix: tagPrefix, version: Self.configuration.version,
-      laxSchemaOptions: schemaConstraints.laxSchemaOptionSet)
+      schemaOptions: schemaConstraints.laxSchemaOptionSet)
   }
 
   public init() {}  // This is public and empty to help the compiler.

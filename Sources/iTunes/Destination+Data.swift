@@ -8,17 +8,17 @@
 import Foundation
 
 extension Destination {
-  func data(for tracks: [Track], loggingToken: String?, laxSchemaOptions: LaxSchemaOptions)
+  func data(for tracks: [Track], loggingToken: String?, schemaOptions: LaxSchemaOptions)
     async throws -> Data
   {
     switch self {
     case .json, .jsonGit:
       try tracks.jsonData()
     case .sqlCode:
-      try tracks.sqlData(loggingToken: loggingToken, laxSchemaOptions: laxSchemaOptions)
+      try tracks.sqlData(loggingToken: loggingToken, schemaOptions: schemaOptions)
     case .db:
       try await tracks.database(
-        storage: .memory, loggingToken: loggingToken, laxSchemaOptions: laxSchemaOptions)
+        storage: .memory, loggingToken: loggingToken, schemaOptions: schemaOptions)
     }
   }
 }

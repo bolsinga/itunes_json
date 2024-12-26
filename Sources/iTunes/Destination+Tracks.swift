@@ -39,7 +39,7 @@ extension Destination {
 
   func emit(
     _ tracks: [Track], branch: String, tagPrefix: String, version: String,
-    laxSchemaOptions: LaxSchemaOptions
+    schemaOptions: LaxSchemaOptions
   ) async throws {
     enum DataExportError: Error {
       case noTracks
@@ -52,7 +52,7 @@ extension Destination {
     let tracks = tracks.sorted()
 
     let data = try await self.data(
-      for: tracks, loggingToken: nil, laxSchemaOptions: laxSchemaOptions)
+      for: tracks, loggingToken: nil, schemaOptions: schemaOptions)
 
     if let outputFile = self.url {
       try await self.fileWriter(
