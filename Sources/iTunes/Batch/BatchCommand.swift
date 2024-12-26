@@ -22,9 +22,9 @@ public struct BatchCommand: AsyncParsableCommand {
   /// Batch type.
   @Flag(help: "Batch type to build.") var batch: Batch = .sql
 
-  /// Database schema constraints.
-  @Flag(help: "Database schema constraints.")
-  var schemaConstraints: SchemaConstraints = .strict
+  /// Lax database schema table constraints.
+  @Flag(help: "Lax database schema table constraints")
+  var laxSchema: [SchemaFlag] = []
 
   /// Git Directory to read and write data from.
   @Option(
@@ -64,7 +64,7 @@ public struct BatchCommand: AsyncParsableCommand {
       directory: gitDirectory, tagPrefix: tagPrefix, fileName: Self.fileName)
     try await batch.build(
       configuration, outputDirectory: outputDirectory,
-      schemaOptions: schemaConstraints.schemaOptions)
+      schemaOptions: laxSchema.schemaOptions)
   }
 
   public init() {}  // This is public and empty to help the compiler.

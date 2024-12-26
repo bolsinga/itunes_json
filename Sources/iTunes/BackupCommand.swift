@@ -85,9 +85,9 @@ public struct BackupCommand: AsyncParsableCommand {
       "Reduce Tracks to minimum required fields and music related only. Defaults to false, unless repairing."
   ) var reduce: Bool = false
 
-  /// Database schema constraints. Only applicable with --sql-code or --db.
-  @Flag(help: "Database schema constraints. Only applicable with --sql-code or --db.")
-  var schemaConstraints: SchemaConstraints = .strict
+  /// Lax database schema table constraints. Only applicable with --sql-code or --db.
+  @Flag(help: "Lax database schema table constraints. Only applicable with --sql-code or --db.")
+  var laxSchema: [SchemaFlag] = []
 
   /// Optional Output Directory for output file.
   @Option(
@@ -137,7 +137,7 @@ public struct BackupCommand: AsyncParsableCommand {
 
     try await destination.context(outputFile: outputFile).emit(
       tracks, branch: "main", tagPrefix: tagPrefix, version: Self.configuration.version,
-      schemaOptions: schemaConstraints.schemaOptions)
+      schemaOptions: laxSchema.schemaOptions)
   }
 
   public init() {}  // This is public and empty to help the compiler.
