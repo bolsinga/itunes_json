@@ -8,7 +8,7 @@
 import Foundation
 
 extension Array where Element: Codable {
-  public func jsonData() throws -> Data {
+  func jsonData() throws -> Data {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     encoder.dateEncodingStrategy = .iso8601

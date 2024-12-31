@@ -75,7 +75,7 @@ struct GitTagData {
     let branch: String?
     let fileName: String
 
-    public init(
+    init(
       directory: URL, tagPrefix: String = "", branch: String? = nil, fileName: String
     ) {
       self.directory = directory
@@ -118,7 +118,7 @@ struct GitTagData {
 
       var index = 0
 
-      mutating public func next() async throws -> TagData? {
+      mutating func next() async throws -> TagData? {
         guard !Task.isCancelled else { return nil }
 
         guard index < tags.count else { return nil }
