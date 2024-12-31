@@ -8,7 +8,7 @@
 import Foundation
 
 extension Data {
-  public func asUTF8String() throws -> String {
+  func asUTF8String() throws -> String {
     enum DataUTF8Error: Error {
       case cannotConvertToUTF8String
     }

@@ -3,10 +3,10 @@ import Foundation
 
 extension Repairable: EnumerableFlag {}
 
-public struct PatchCommand: AsyncParsableCommand {
+struct PatchCommand: AsyncParsableCommand {
   private static let fileName = "itunes.json"
 
-  public static let configuration = CommandConfiguration(
+  static let configuration = CommandConfiguration(
     commandName: "patch",
     abstract: "Creates patches for itunes.json data.",
     version: iTunesVersion
@@ -36,11 +36,9 @@ public struct PatchCommand: AsyncParsableCommand {
   @Option(help: "The corrections to apply when creating this patch (as a JSON string).")
   var correction: String = ""
 
-  public func run() async throws {
+  func run() async throws {
     let configuration = GitTagData.Configuration(
       directory: gitDirectory, tagPrefix: sourceTagPrefix, fileName: PatchCommand.fileName)
     print(try await repairable.gather(configuration, correction: correction))
   }
-
-  public init() {}  // This is public and empty to help the compiler.
 }

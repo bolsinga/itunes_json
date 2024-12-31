@@ -27,4 +27,4 @@ extension PackageBuild {
   }
 }
 
-public let iTunesVersion = PackageBuild.info.version
+let iTunesVersion = PackageBuild.info.version

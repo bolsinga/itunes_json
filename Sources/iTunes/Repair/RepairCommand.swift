@@ -54,10 +54,10 @@ extension Patchable {
   }
 }
 
-public struct RepairCommand: AsyncParsableCommand {
+struct RepairCommand: AsyncParsableCommand {
   private static let fileName = "itunes.json"
 
-  public static let configuration = CommandConfiguration(
+  static let configuration = CommandConfiguration(
     commandName: "repair",
     abstract: "Repairs git repositories with itunes.json using a patch file.",
     version: iTunesVersion
@@ -99,7 +99,7 @@ public struct RepairCommand: AsyncParsableCommand {
   @Option(help: "The destination git branch. Defaults to the patchable type name.")
   var destinationBranch: String?
 
-  public func run() async throws {
+  func run() async throws {
     let patch = try patchable.createPatch(patchURL)
 
     let sourceConfiguration = GitTagData.Configuration(
@@ -116,6 +116,4 @@ public struct RepairCommand: AsyncParsableCommand {
       destinationTagPrefix: destinationTagPrefix,
       destinationConfiguration: destinationConfiguration, version: Self.configuration.version)
   }
-
-  public init() {}  // This is public and empty to help the compiler.
 }

@@ -65,8 +65,8 @@ enum DestinationContext: EnumerableFlag {
 extension SchemaConstraints: EnumerableFlag {}
 extension Source: EnumerableFlag {}
 
-public struct BackupCommand: AsyncParsableCommand {
-  public static let configuration = CommandConfiguration(
+struct BackupCommand: AsyncParsableCommand {
+  static let configuration = CommandConfiguration(
     commandName: "backup",
     abstract: "Backs up music data.",
     version: iTunesVersion
@@ -122,7 +122,7 @@ public struct BackupCommand: AsyncParsableCommand {
   }
 
   /// Validates the input matrix.
-  public func validate() throws {
+  func validate() throws {
     if destination == .db && outputFile == nil {
       throw ValidationError("--db requires outputDirectory to be set")
     }
@@ -132,13 +132,11 @@ public struct BackupCommand: AsyncParsableCommand {
     }
   }
 
-  public func run() async throws {
+  func run() async throws {
     let tracks = try await source.gather(reduce: reduce)
 
     try await destination.context(outputFile: outputFile).emit(
       tracks, branch: "main", tagPrefix: tagPrefix, version: Self.configuration.version,
       schemaOptions: laxSchema.schemaOptions)
   }
-
-  public init() {}  // This is public and empty to help the compiler.
 }
