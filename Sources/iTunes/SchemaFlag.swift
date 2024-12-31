@@ -9,19 +9,19 @@ import ArgumentParser
 import Foundation
 
 enum SchemaFlag: String, EnumerableFlag {
-  case artists, albums, songs, plays
+  case laxArtists, laxAlbums, laxSongs, laxPlays
 }
 
 extension SchemaFlag {
   var schemaOption: SchemaOptions {
     switch self {
-    case .artists:
+    case .laxArtists:
       .laxArtist
-    case .albums:
+    case .laxAlbums:
       .laxAlbum
-    case .songs:
+    case .laxSongs:
       .laxSong
-    case .plays:
+    case .laxPlays:
       .laxPlays
     }
   }
