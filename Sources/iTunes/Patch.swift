@@ -17,6 +17,7 @@ enum Patch: Sendable {
   case albums(AlbumPatchLookup)
   case missingTitleAlbums(AlbumMissingTitlePatchLookup)
   case trackCounts(AlbumTrackCountLookup)
+  case trackCorrections([TrackCorrection])
 }
 
 // This will make a Dictionary<Key, Value> into Array<Key> where each Array
@@ -65,6 +66,8 @@ extension Patch: CustomStringConvertible {
     case .missingTitleAlbums(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     case .trackCounts(let items):
+      return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
+    case .trackCorrections(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     }
   }

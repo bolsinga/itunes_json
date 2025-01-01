@@ -15,6 +15,18 @@ extension Dictionary where Key: Codable & Comparable, Value: Codable & Comparabl
   }
 }
 
+extension Array where Element: Codable {
+  static fileprivate func load(from url: URL) throws -> Self {
+    try load(from: try Data(contentsOf: url, options: .mappedIfSafe))
+  }
+
+  static fileprivate func load(from data: Data) throws -> Self {
+    let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .iso8601
+    return try decoder.decode(Self.self, from: data)
+  }
+}
+
 extension AlbumMissingTitlePatchLookup {
   static fileprivate func load(from url: URL) throws -> Self {
     try load(from: try Data(contentsOf: url, options: .mappedIfSafe))
@@ -50,6 +62,8 @@ extension Patchable {
       Patch.missingTitleAlbums(try AlbumMissingTitlePatchLookup.load(from: fileURL))
     case .trackCounts:
       Patch.trackCounts(try AlbumTrackCountLookup.load(from: fileURL))
+    case .trackCorrections:
+      Patch.trackCorrections(try Array<TrackCorrection>.load(from: fileURL))
     }
   }
 }
