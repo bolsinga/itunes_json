@@ -112,13 +112,18 @@ struct BackupCommand: AsyncParsableCommand {
   )
   var fileName: String?
 
-  @Option(help: "The prefix to use for the git tags.") var tagPrefix: String = "iTunes"
+  @Option(help: "The prefix to use for the git tags.") var tagPrefix: String = BackupContext
+    .defaultTag
 
   /// Outputfile where data will be writen, if outputDirectory is not specified.
   private var outputFile: URL? {
     guard let outputDirectory else { return nil }
 
     return destination.outputFile(using: outputDirectory, name: fileName)
+  }
+
+  private var context: BackupContext {
+    BackupContext(branch: "main", tagPrefix: tagPrefix, version: Self.configuration.version)
   }
 
   /// Validates the input matrix.
@@ -136,7 +141,6 @@ struct BackupCommand: AsyncParsableCommand {
     let tracks = try await source.gather(reduce: reduce)
 
     try await destination.context(outputFile: outputFile).emit(
-      tracks, branch: "main", tagPrefix: tagPrefix, version: Self.configuration.version,
-      schemaOptions: laxSchema.schemaOptions)
+      tracks, context: context, schemaOptions: laxSchema.schemaOptions)
   }
 }

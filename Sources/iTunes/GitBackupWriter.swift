@@ -69,19 +69,17 @@ extension Git {
 
 struct GitBackupWriter: DestinationFileWriting {
   let fileWriter: DestinationFileWriting
-  let branch: String
-  let tagPrefix: String
-  let version: String
+  let context: BackupContext
 
   var outputFile: URL { fileWriter.outputFile }
 
   func write(data: Data) async throws {
     let git = outputFile.parentDirectoryGit
 
-    try await git.validateAndCheckout(branch: branch)
+    try await git.validateAndCheckout(branch: context.branch)
     try await fileWriter.write(data: data)
 
     try await git.addCommitTagPush(
-      filename: outputFile.filename, tagPrefix: tagPrefix, version: version)
+      filename: outputFile.filename, tagPrefix: context.tagPrefix, version: context.version)
   }
 }
