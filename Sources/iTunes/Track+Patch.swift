@@ -283,6 +283,18 @@ extension Track {
       year: year,
       isrc: isrc)
   }
+
+  fileprivate func apply(trackCorrection: TrackCorrection, tag: String) -> Track {
+    Logger.patch.info("Patching TrackCorrection: \(trackCorrection) - \(tag)")
+    switch trackCorrection.correction {
+    case .albumTitle(let newTitle):
+      guard albumName != newTitle else { return self }
+      return apply(albumTitle: newTitle, tag: tag)
+    case .trackCount(let newTrackCount):
+      guard let trackCount, trackCount != newTrackCount else { return self }
+      return apply(trackCount: newTrackCount, tag: tag)
+    }
+  }
 }
 
 extension Array where Element == Track {
@@ -325,6 +337,21 @@ extension Array where Element == Track {
     }
   }
 
+  fileprivate func patchTrackCorrections(_ corrections: [TrackCorrection], tag: String) throws
+    -> [Track]
+  {
+    self.map { track in
+      guard let songArtistAlbum = track.songArtistAlbum else { return track }
+      let applicableCorrections = corrections.matches(songArtistAlbum)
+      guard !applicableCorrections.isEmpty else { return track }
+      guard applicableCorrections.count == 1 else {
+        Logger.patch.info("Too Many Applicable Corrections: \(applicableCorrections) - \(tag)")
+        return track
+      }
+      return track.apply(trackCorrection: applicableCorrections[0], tag: tag)
+    }
+  }
+
   fileprivate func patchTracks(_ patch: Patch, tag: String) throws -> [Track] {
     switch patch {
     case .artists(let lookup):
@@ -335,6 +362,8 @@ extension Array where Element == Track {
       try patchMissingAlbumTitles(lookup, tag: tag)
     case .trackCounts(let lookup):
       try patchAlbumTrackCounts(lookup, tag: tag)
+    case .trackCorrections(let lookup):
+      try patchTrackCorrections(lookup, tag: tag)
     }
   }
 
