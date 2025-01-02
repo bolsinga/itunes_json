@@ -32,6 +32,11 @@ extension Track {
     guard let albumArtistName = albumArtistName else { return nil }
     return AlbumTrackCount(album: albumArtistName, trackCount: trackCount)
   }
+
+  var songTrackNumber: SongTrackNumber? {
+    guard let songArtistAlbum else { return nil }
+    return SongTrackNumber(song: songArtistAlbum, trackNumber: trackNumber)
+  }
 }
 
 extension Array where Element == Track {
@@ -42,6 +47,10 @@ extension Array where Element == Track {
   var albumTrackCounts: Set<AlbumTrackCount> {
     Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumTrackCount })
   }
+
+  var songTrackNumbers: Set<SongTrackNumber> {
+    Set(self.filter { $0.isSQLEncodable }.compactMap { $0.songTrackNumber })
+  }
 }
 
 func currentAlbums() async throws -> Set<AlbumArtistName> {
@@ -50,4 +59,8 @@ func currentAlbums() async throws -> Set<AlbumArtistName> {
 
 func currentAlbumTrackCounts() async throws -> Set<AlbumTrackCount> {
   try await Source.itunes.gather(reduce: false).albumTrackCounts
+}
+
+func currentSongTrackNumbers() async throws -> Set<SongTrackNumber> {
+  try await Source.itunes.gather(reduce: false).songTrackNumbers
 }

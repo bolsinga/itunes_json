@@ -295,6 +295,72 @@ extension Track {
       return apply(trackCount: newTrackCount, tag: tag)
     }
   }
+
+  fileprivate func apply(trackNumber newTrackNumber: Int, tag: String) -> Track {
+    Logger.patch.info("Patching TrackNumber: \(newTrackNumber) - \(tag)")
+
+    return Track(
+      album: album,
+      albumArtist: albumArtist,
+      albumRating: albumRating,
+      albumRatingComputed: albumRatingComputed,
+      artist: artist,
+      bitRate: bitRate,
+      bPM: bPM,
+      comments: comments,
+      compilation: compilation,
+      composer: composer,
+      contentRating: contentRating,
+      dateAdded: dateAdded,
+      dateModified: dateModified,
+      disabled: disabled,
+      discCount: discCount,
+      discNumber: discNumber,
+      episode: episode,
+      episodeOrder: episodeOrder,
+      explicit: explicit,
+      genre: genre,
+      grouping: grouping,
+      hasVideo: hasVideo,
+      hD: hD,
+      kind: kind,
+      location: location,
+      movie: movie,
+      musicVideo: musicVideo,
+      name: name,
+      partOfGaplessAlbum: partOfGaplessAlbum,
+      persistentID: persistentID,
+      playCount: playCount,
+      playDateUTC: playDateUTC,
+      podcast: podcast,
+      protected: protected,
+      purchased: purchased,
+      rating: rating,
+      ratingComputed: ratingComputed,
+      releaseDate: releaseDate,
+      sampleRate: sampleRate,
+      season: season,
+      series: series,
+      size: size,
+      skipCount: skipCount,
+      skipDate: skipDate,
+      sortAlbum: sortAlbum,
+      sortAlbumArtist: sortAlbumArtist,
+      sortArtist: sortArtist,
+      sortComposer: sortComposer,
+      sortName: sortName,
+      sortSeries: sortSeries,
+      totalTime: totalTime,
+      trackCount: trackCount,
+      trackNumber: newTrackNumber,
+      trackType: trackType,
+      tVShow: tVShow,
+      unplayed: unplayed,
+      videoHeight: videoHeight,
+      videoWidth: videoWidth,
+      year: year,
+      isrc: isrc)
+  }
 }
 
 extension Array where Element == Track {
@@ -352,6 +418,19 @@ extension Array where Element == Track {
     }
   }
 
+  fileprivate func patchSongTrackNumbers(_ lookup: SongTrackNumberLookup, tag: String) throws
+    -> [Track]
+  {
+    self.map { track in
+      guard track.isSQLEncodable, let name = track.songArtistAlbum,
+        let correctedTrackNumber = lookup[name]
+      else {
+        return track
+      }
+      return track.apply(trackNumber: correctedTrackNumber, tag: tag)
+    }
+  }
+
   fileprivate func patchTracks(_ patch: Patch, tag: String) throws -> [Track] {
     switch patch {
     case .artists(let lookup):
@@ -364,6 +443,8 @@ extension Array where Element == Track {
       try patchAlbumTrackCounts(lookup, tag: tag)
     case .trackCorrections(let lookup):
       try patchTrackCorrections(lookup, tag: tag)
+    case .trackNumbers(let lookup):
+      try patchSongTrackNumbers(lookup, tag: tag)
     }
   }
 

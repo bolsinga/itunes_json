@@ -162,6 +162,23 @@ extension Repairable {
             partialResult[item.album] = trackCount
           })
       )
+    case .trackNumbers:
+      return .trackNumbers(
+        try await corrections(configuration: configuration) {
+          try await currentSongTrackNumbers()
+        } brokenGuides: {
+          $0.filter { $0.isSQLEncodable }.songTrackNumbers.filter { $0.trackNumber == nil }
+        } createChange: { item, currentItems in
+          if item.trackNumber == nil {
+            return currentItems.filter { $0.song == item.song }.first
+          }
+          return nil
+        }.reduce(
+          into: SongTrackNumberLookup(),
+          { (partialResult: inout SongTrackNumberLookup, item: SongTrackNumber) in
+            guard let trackNumber = item.trackNumber else { return }
+            partialResult[item.song] = trackNumber
+          }))
     }
   }
 }
