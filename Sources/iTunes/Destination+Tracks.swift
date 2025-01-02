@@ -13,16 +13,12 @@ protocol DestinationFileWriting {
 }
 
 extension Destination {
-  fileprivate func fileWriter(
-    for outputFile: URL, branch: String, tagPrefix: String, version: String
-  )
-    -> DestinationFileWriting
+  fileprivate func fileWriter(for outputFile: URL, context: BackupContext) -> DestinationFileWriting
   {
     let fileWriter: DestinationFileWriting = FileWriter(outputFile: outputFile)
     switch self {
     case .jsonGit:
-      return GitBackupWriter(
-        fileWriter: fileWriter, branch: branch, tagPrefix: tagPrefix, version: version)
+      return GitBackupWriter(fileWriter: fileWriter, context: context)
     default:
       return fileWriter
     }
@@ -37,10 +33,7 @@ extension Destination {
     }
   }
 
-  func emit(
-    _ tracks: [Track], branch: String, tagPrefix: String, version: String,
-    schemaOptions: SchemaOptions
-  ) async throws {
+  func emit(_ tracks: [Track], context: BackupContext, schemaOptions: SchemaOptions) async throws {
     enum DataExportError: Error {
       case noTracks
     }
@@ -55,10 +48,7 @@ extension Destination {
       for: tracks, loggingToken: nil, schemaOptions: schemaOptions)
 
     if let outputFile = self.url {
-      try await self.fileWriter(
-        for: outputFile, branch: branch, tagPrefix: tagPrefix, version: version
-      ).write(
-        data: data)
+      try await self.fileWriter(for: outputFile, context: context).write(data: data)
     } else {
       print("\(try data.asUTF8String())")
     }
