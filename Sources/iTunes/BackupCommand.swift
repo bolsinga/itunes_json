@@ -112,8 +112,9 @@ struct BackupCommand: AsyncParsableCommand {
   )
   var fileName: String?
 
-  @Option(help: "The prefix to use for the git tags.") var tagPrefix: String = BackupContext
-    .defaultTag
+  @Option(
+    help: "The prefix to use for the git tags. If not set, will try to find most recent tag prefix."
+  ) var tagPrefix: String?
 
   /// Outputfile where data will be writen, if outputDirectory is not specified.
   private var outputFile: URL? {

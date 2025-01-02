@@ -77,9 +77,10 @@ struct GitBackupWriter: DestinationFileWriting {
     let git = outputFile.parentDirectoryGit
 
     try await git.validateAndCheckout(branch: context.branch)
+    let tagPrefix = try await context.tag(git)
     try await fileWriter.write(data: data)
 
     try await git.addCommitTagPush(
-      filename: outputFile.filename, tagPrefix: context.tagPrefix, version: context.version)
+      filename: outputFile.filename, tagPrefix: tagPrefix, version: context.version)
   }
 }
