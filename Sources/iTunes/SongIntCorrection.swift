@@ -1,5 +1,5 @@
 //
-//  SongTrackNumber.swift
+//  SongIntCorrection.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 1/2/25.
@@ -7,25 +7,25 @@
 
 import Foundation
 
-struct SongTrackNumber: Codable, Comparable, Hashable, Sendable {
+struct SongIntCorrection: Codable, Comparable, Hashable, Sendable {
   let song: SongArtistAlbum
-  let trackNumber: Int?
+  let value: Int?
 
   static func < (lhs: Self, rhs: Self) -> Bool {
     if lhs.song == rhs.song {
-      if let lhNumber = lhs.trackNumber {
-        if let rhNumber = rhs.trackNumber {
-          return lhNumber < rhNumber
+      if let lhValue = lhs.value {
+        if let rhValue = rhs.value {
+          return lhValue < rhValue
         }
         return false
       }
-      return rhs.trackNumber == nil
+      return rhs.value == nil
     }
     return lhs.song < rhs.song
   }
 }
 
-extension SongTrackNumber: CustomStringConvertible {
+extension SongIntCorrection: CustomStringConvertible {
   var description: String {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys]
