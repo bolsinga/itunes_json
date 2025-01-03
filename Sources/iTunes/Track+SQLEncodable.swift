@@ -23,6 +23,13 @@ extension Track {
     return tVShow
   }
 
+  fileprivate var isRemoteNoKindNoTime: Bool {
+    guard kind == nil else { return false }
+    guard let totalTime, totalTime == 0 else { return false }
+    guard let trackType, trackType == "Remote" else { return false }
+    return true
+  }
+
   var isSQLEncodable: Bool {
     guard !isPodcast else { return false }
     guard !isVoiceMemo else { return false }
@@ -38,6 +45,7 @@ extension Track {
     guard !kind.contains("internet audio stream") else { return false }
     guard kind != "quicktime movie file" else { return false }
     guard artistName != nil else { return false }
+    guard !isRemoteNoKindNoTime else { return false }
 
     return true
   }
