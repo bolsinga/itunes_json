@@ -12,6 +12,7 @@ typealias AlbumPatchLookup = [AlbumArtistName: AlbumArtistName]
 typealias AlbumMissingTitlePatchLookup = [SongArtist: SortableName]
 typealias AlbumTrackCountLookup = [AlbumArtistName: Int]
 typealias SongTrackNumberLookup = [SongArtistAlbum: Int]
+typealias SongYearLookup = [SongArtistAlbum: Int]
 
 enum Patch: Sendable {
   case artists(ArtistPatchLookup)
@@ -20,6 +21,7 @@ enum Patch: Sendable {
   case trackCounts(AlbumTrackCountLookup)
   case trackCorrections([TrackCorrection])
   case trackNumbers(SongTrackNumberLookup)
+  case years(SongYearLookup)
 }
 
 // This will make a Dictionary<Key, Value> into Array<Key> where each Array
@@ -58,7 +60,7 @@ extension AlbumTrackCountLookup {
   }
 }
 
-extension SongTrackNumberLookup {
+extension Dictionary where Key == SongArtistAlbum, Value == Int {
   fileprivate func jsonData() throws -> Data {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -83,6 +85,8 @@ extension Patch: CustomStringConvertible {
     case .trackCorrections(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     case .trackNumbers(let items):
+      return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
+    case .years(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     }
   }

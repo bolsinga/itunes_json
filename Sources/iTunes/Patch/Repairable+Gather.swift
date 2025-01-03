@@ -81,10 +81,10 @@ extension Repairable {
     return try JSONDecoder().decode(Array<AlbumTrackCount>.self, from: data)
   }
 
-  fileprivate func songTrackNumbers(from string: String) throws -> [SongTrackNumber] {
+  fileprivate func songIntCorrections(from string: String) throws -> [SongIntCorrection] {
     let data = try data(from: string)
     guard !data.isEmpty else { return [] }
-    return try JSONDecoder().decode(Array<SongTrackNumber>.self, from: data)
+    return try JSONDecoder().decode(Array<SongIntCorrection>.self, from: data)
   }
 }
 
@@ -169,7 +169,7 @@ extension Repairable {
           })
       )
     case .trackNumbers:
-      let correction = try songTrackNumbers(from: correction)
+      let correction = try songIntCorrections(from: correction)
       return .trackNumbers(
         try await corrections(configuration: configuration) {
           try await currentSongTrackNumbers()
@@ -185,6 +185,24 @@ extension Repairable {
           { (partialResult: inout SongTrackNumberLookup, item: SongTrackNumber) in
             guard let trackNumber = item.trackNumber else { return }
             partialResult[item.song] = trackNumber
+          }))
+    case .years:
+      let correction = try songIntCorrections(from: correction)
+      return .years(
+        try await corrections(configuration: configuration) {
+          try await currentSongYears()
+        } brokenGuides: {
+          $0.filter { $0.isSQLEncodable }.songYears.filter { $0.year == nil }
+        } createChange: { item, currentItems in
+          if item.year == nil {
+            return currentItems.union(correction).filter { $0.song == item.song }.first
+          }
+          return nil
+        }.reduce(
+          into: SongYearLookup(),
+          { partialResult, item in
+            guard let year = item.year else { return }
+            partialResult[item.song] = year
           }))
     }
   }

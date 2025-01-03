@@ -78,6 +78,8 @@ extension Patchable {
       Patch.trackCorrections(try Array<TrackCorrection>.load(from: fileURL))
     case .trackNumbers:
       Patch.trackNumbers(try SongTrackNumberLookup.load(from: fileURL))
+    case .years:
+      Patch.years(try SongYearLookup.load(from: fileURL))
     }
   }
 }
