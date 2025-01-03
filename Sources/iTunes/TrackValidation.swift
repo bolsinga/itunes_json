@@ -14,8 +14,7 @@ struct TrackValidation {
   let noArtist: Logger
   let noPlayDate: Logger
   let noPlayCount: Logger
-  let noTrackNumber: Logger
-  let badTrackNumber: Logger
+  let invalidTrackNumber: Logger
   let noYear: Logger
   let duplicateArtist: Logger
   let duplicatePlayDate: Logger
@@ -26,9 +25,8 @@ struct TrackValidation {
     self.noArtist = Logger(type: "validation", category: "noArtist", token: loggingToken)
     self.noPlayDate = Logger(type: "validation", category: "noPlayDate", token: loggingToken)
     self.noPlayCount = Logger(type: "validation", category: "noPlayCount", token: loggingToken)
-    self.noTrackNumber = Logger(type: "validation", category: "noTrackNumber", token: loggingToken)
-    self.badTrackNumber = Logger(
-      type: "validation", category: "badTrackNumber", token: loggingToken)
+    self.invalidTrackNumber = Logger(
+      type: "validation", category: "invalidTrackNumber", token: loggingToken)
     self.noYear = Logger(type: "validation", category: "noYear", token: loggingToken)
     self.duplicateArtist = Logger(
       type: "validation", category: "duplicateArtist", token: loggingToken)

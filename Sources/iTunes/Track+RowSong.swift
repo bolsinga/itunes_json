@@ -31,12 +31,8 @@ extension Track: RowSongInterface {
   }
 
   func songTrackNumber(validation: TrackValidation) -> Int {
-    guard let trackNumber else {
-      validation.noTrackNumber.error("\(debugLogInformation, privacy: .public)")
-      return -1
-    }
-    guard trackNumber > 0 else {
-      validation.badTrackNumber.error("\(debugLogInformation, privacy: .public)")
+    guard let trackNumber, trackNumber > 0 else {
+      validation.invalidTrackNumber.error("\(debugLogInformation, privacy: .public)")
       return -1
     }
     return trackNumber
