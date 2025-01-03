@@ -14,7 +14,7 @@ protocol RowSongInterface {
   var songComments: String { get }
   var dateReleasedISO8601: String { get }
   var songName: SortableName { get }
-  func songTrackNumber(validation: TrackValidation) -> Int
+  func normalizedTrackNumber(validation: TrackValidation) -> Int
   func songYear(logger: Logger) -> Int
   var songDuration: Int { get }
   var dateAddedISO8601: String { get }
@@ -24,7 +24,7 @@ struct RowSong: Hashable, Sendable {
   init(_ song: RowSongInterface, validation: TrackValidation) {
     self.init(
       name: song.songName, itunesid: song.songPersistentID, composer: song.songComposer,
-      trackNumber: song.songTrackNumber(validation: validation),
+      trackNumber: song.normalizedTrackNumber(validation: validation),
       year: song.songYear(logger: validation.noYear), duration: song.songDuration,
       dateAdded: song.dateAddedISO8601, dateReleased: song.dateReleasedISO8601,
       comments: song.songComments)

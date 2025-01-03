@@ -35,7 +35,7 @@ extension Track {
 
   var songTrackNumber: SongTrackNumber? {
     guard let songArtistAlbum else { return nil }
-    return SongTrackNumber(song: songArtistAlbum, trackNumber: trackNumber)
+    return SongTrackNumber(song: songArtistAlbum, trackNumber: normalizedTrackNumber)
   }
 }
 
