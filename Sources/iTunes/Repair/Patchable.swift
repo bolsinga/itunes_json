@@ -14,4 +14,5 @@ enum Patchable: String, CaseIterable {
   case trackCounts
   case trackCorrections
   case trackNumbers
+  case years
 }

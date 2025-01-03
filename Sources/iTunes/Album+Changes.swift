@@ -17,6 +17,16 @@ extension SongTrackNumber {
   var trackNumber: Int? { value }
 }
 
+typealias SongYear = SongIntCorrection
+
+extension SongYear {
+  init(song: SongArtistAlbum, year: Int?) {
+    self.init(song: song, value: year)
+  }
+
+  var year: Int? { value }
+}
+
 extension Track {
   private var isCompilation: Bool {
     guard let compilation else { return false }
@@ -47,6 +57,11 @@ extension Track {
     guard let songArtistAlbum else { return nil }
     return SongTrackNumber(song: songArtistAlbum, trackNumber: normalizedTrackNumber)
   }
+
+  var songYear: SongYear? {
+    guard let songArtistAlbum else { return nil }
+    return SongYear(song: songArtistAlbum, year: year)
+  }
 }
 
 extension Array where Element == Track {
@@ -61,6 +76,10 @@ extension Array where Element == Track {
   var songTrackNumbers: Set<SongTrackNumber> {
     Set(self.filter { $0.isSQLEncodable }.compactMap { $0.songTrackNumber })
   }
+
+  var songYears: Set<SongYear> {
+    Set(self.filter { $0.isSQLEncodable }.compactMap { $0.songYear })
+  }
 }
 
 func currentAlbums() async throws -> Set<AlbumArtistName> {
@@ -73,4 +92,8 @@ func currentAlbumTrackCounts() async throws -> Set<AlbumTrackCount> {
 
 func currentSongTrackNumbers() async throws -> Set<SongTrackNumber> {
   try await Source.itunes.gather(reduce: false).songTrackNumbers
+}
+
+func currentSongYears() async throws -> Set<SongYear> {
+  try await Source.itunes.gather(reduce: false).songYears
 }
