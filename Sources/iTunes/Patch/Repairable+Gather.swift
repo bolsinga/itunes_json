@@ -80,6 +80,12 @@ extension Repairable {
     guard !data.isEmpty else { return [] }
     return try JSONDecoder().decode(Array<AlbumTrackCount>.self, from: data)
   }
+
+  fileprivate func songTrackNumbers(from string: String) throws -> [SongTrackNumber] {
+    let data = try data(from: string)
+    guard !data.isEmpty else { return [] }
+    return try JSONDecoder().decode(Array<SongTrackNumber>.self, from: data)
+  }
 }
 
 extension Repairable {
@@ -163,6 +169,7 @@ extension Repairable {
           })
       )
     case .trackNumbers:
+      let correction = try songTrackNumbers(from: correction)
       return .trackNumbers(
         try await corrections(configuration: configuration) {
           try await currentSongTrackNumbers()
@@ -170,7 +177,7 @@ extension Repairable {
           $0.filter { $0.isSQLEncodable }.songTrackNumbers.filter { $0.trackNumber == nil }
         } createChange: { item, currentItems in
           if item.trackNumber == nil {
-            return currentItems.filter { $0.song == item.song }.first
+            return currentItems.union(correction).filter { $0.song == item.song }.first
           }
           return nil
         }.reduce(
