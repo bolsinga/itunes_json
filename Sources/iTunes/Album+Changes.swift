@@ -7,6 +7,16 @@
 
 import Foundation
 
+typealias SongTrackNumber = SongIntCorrection
+
+extension SongTrackNumber {
+  init(song: SongArtistAlbum, trackNumber: Int?) {
+    self.init(song: song, value: trackNumber)
+  }
+
+  var trackNumber: Int? { value }
+}
+
 extension Track {
   private var isCompilation: Bool {
     guard let compilation else { return false }
