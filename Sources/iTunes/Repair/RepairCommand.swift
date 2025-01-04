@@ -129,6 +129,12 @@ struct RepairCommand: AsyncParsableCommand {
   @Option(help: "The destination git branch. Defaults to the patchable type name.")
   var destinationBranch: String?
 
+  func validate() throws {
+    if sourceTagPrefix == destinationTagPrefix {
+      throw ValidationError("Source and Destination Tags must be different.")
+    }
+  }
+
   func run() async throws {
     let patch = try patchable.createPatch(patchURL)
 
