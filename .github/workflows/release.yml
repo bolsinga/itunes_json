@@ -16,5 +16,7 @@ jobs:
       run: sw_vers
     - name: Switch to Xcode 16.0
       run: sudo xcode-select -s "/Applications/Xcode_16.0.app"
-    - name: Build
+    - name: Build / Test
       run: swift test -v
+    - name: Build iOS / macOS
+      run: xcodebuild -verbose -scheme Site -destination "generic/platform=iOS Simulator" -destination "generic/platform=macOS"
