@@ -11,6 +11,7 @@ struct TrackCorrection: Codable, Comparable, Hashable, Sendable {
   enum Property: Codable, Comparable, Hashable, Sendable {
     case albumTitle(SortableName)
     case trackCount(Int)
+    case artistName(SortableName)
   }
 
   let songArtistAlbum: SongArtistAlbum
@@ -42,7 +43,7 @@ extension TrackCorrection {
     switch correction {
     case .albumTitle(_):
       songArtistAlbum.matchesExcludingAlbumTitle(other)
-    case .trackCount(_):
+    case .trackCount(_), .artistName(_):
       songArtistAlbum == other
     }
   }

@@ -293,6 +293,9 @@ extension Track {
     case .trackCount(let newTrackCount):
       guard let trackCount, trackCount != newTrackCount else { return self }
       return apply(trackCount: newTrackCount, tag: tag)
+    case .artistName(let newArtistName):
+      guard newArtistName != artistName else { return self }
+      return apply(patch: newArtistName, tag: tag)
     }
   }
 
