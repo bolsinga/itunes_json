@@ -17,7 +17,14 @@ extension Source {
   private func gather() async throws -> [Track] {
     switch self {
     case .itunes:
-      return try Track.gatherAllTracks()
+      #if canImport(iTunesLibrary)
+        return try Track.gatherAllTracks()
+      #else
+        enum iTunesError: Error {
+          case notAvailable
+        }
+        throw iTunesError.notAvailable
+      #endif
     case .musickit:
       return try await Track.gatherWithMusicKit()
     }
