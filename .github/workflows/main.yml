@@ -19,4 +19,4 @@ jobs:
     - name: Build / Test
       run: swift test -v
     - name: Build iOS / macOS
-      run: xcodebuild -verbose -scheme Site -destination "generic/platform=iOS Simulator" -destination "generic/platform=macOS"
+      run: xcodebuild -verbose -scheme iTunes -destination "generic/platform=iOS Simulator" -destination "generic/platform=macOS"
