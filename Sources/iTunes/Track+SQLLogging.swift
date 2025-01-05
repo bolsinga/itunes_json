@@ -8,7 +8,47 @@
 import Foundation
 
 extension Track {
+  fileprivate var albumInformation: String {
+    if let album {
+      return "album: \"\(album)\""
+    }
+    return ""
+  }
+
+  fileprivate var artistInformation: String {
+    if let artist {
+      return "artist: \"\(artist)\""
+    }
+    return ""
+  }
+
+  fileprivate var nPlayCount: Int {
+    if let playCount { return playCount }
+    return 0
+  }
+
+  fileprivate var playCountInformation: String {
+    "playCount: \(nPlayCount)"
+  }
+
+  fileprivate var nPlayDate: String {
+    if let playDateUTC { return "\(playDateUTC)" }
+    return "<none>"
+  }
+
+  fileprivate var playDateInformation: String {
+    "playDate: \"\(nPlayDate)\""
+  }
+
+  fileprivate var playInformation: String {
+    let info = [
+      albumInformation, artistInformation, "name: \"\(name)\"", playCountInformation,
+      playDateInformation,
+    ]
+    return info.filter { !$0.isEmpty }.joined(separator: ", ")
+  }
+
   var debugLogInformation: String {
-    "album: \(String(describing: album)), artist: \(String(describing: artist)), name: \(name), trackCount: \(String(describing: trackCount)), trackNumber: \(String(describing: trackNumber)), year: \(String(describing: year)), playCount: \(String(describing: playCount)), playDate: \(String(describing: playDateUTC))"
+    "[\(playInformation)]"
   }
 }
