@@ -24,6 +24,8 @@ struct TrackCorrection: Codable, Comparable, Hashable, Sendable {
         return lht < rht
       case (.trackCount(let lhc), .trackCount(let rhc)):
         return lhc < rhc
+      case (.artistName(let lhn), .artistName(let rhn)):
+        return lhn < rhn
       default:
         return false
       }
