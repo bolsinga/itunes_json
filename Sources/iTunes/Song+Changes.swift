@@ -8,9 +8,13 @@
 import Foundation
 
 extension Track {
+  fileprivate var sortableSongName: SortableName {
+    SortableName(name: name, sorted: sortName ?? "")
+  }
+
   var songArtist: SongArtist? {
     guard let artistName else { return nil }
-    return SongArtist(song: name, artist: artistName.name)
+    return SongArtist(song: sortableSongName, artist: artistName)
   }
 
   var songArtistAlbum: SongArtistAlbum? {
