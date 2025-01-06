@@ -14,4 +14,5 @@ enum Repairable: CaseIterable {
   case trackCounts
   case trackNumbers
   case years
+  case songs
 }
