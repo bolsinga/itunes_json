@@ -105,8 +105,7 @@ struct GitTagData {
 
     init(git: Git, tagPrefix: String, fileName: String) async throws {
       self.git = git
-      self.tags = try await self.git.tags().filter { $0.matchingFormattedTag(prefix: tagPrefix) }
-        .sorted()
+      self.tags = try await self.git.tags().orderedMatching(tagPrefix: tagPrefix)
       self.fileName = fileName
     }
 
