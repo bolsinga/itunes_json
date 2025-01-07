@@ -40,8 +40,8 @@ extension TagData {
 
     if hasChanges {
       try await git.commit("\(tag)\n\(version)")
-      try await git.tag(tag)
     }
+    try await git.tag(tag)
   }
 
   func write(to directory: URL, pathExtension: String) throws {
