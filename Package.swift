@@ -4,6 +4,7 @@ import PackageDescription
 
 let package = Package(
   name: "itunes_json",
+  defaultLocalization: "en",
   platforms: [
     .macOS(.v15),
     .iOS(.v18),
@@ -24,6 +25,7 @@ let package = Package(
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "GitLibrary", package: "GitLibrary"),
       ],
+      resources: [.process("Resources/Localizable.xcstrings")],
       plugins: [.plugin(name: "PackageBuildInfoPlugin", package: "PackageBuildInfo")]),
     .testTarget(name: "iTunesTests", dependencies: ["iTunes"]),
     .executableTarget(name: "tunes", dependencies: [.byName(name: "iTunes")]),
