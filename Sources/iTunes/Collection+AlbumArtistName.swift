@@ -9,8 +9,7 @@ import Foundation
 import os
 
 extension Logger {
-  fileprivate static let albumCorrection = Logger(
-    subsystem: Bundle.main.bundleIdentifier ?? "unknown", category: "albumCorrection")
+  fileprivate static let albumCorrection = Logger(category: "albumCorrection")
 }
 
 extension Collection where Element == AlbumArtistName {

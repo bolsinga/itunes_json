@@ -9,8 +9,7 @@ import Foundation
 import os
 
 extension Logger {
-  fileprivate static let correction = Logger(
-    subsystem: Bundle.main.bundleIdentifier ?? "unknown", category: "correction")
+  fileprivate static let correction = Logger(category: "correction")
 }
 
 extension Collection where Element == SortableName {
