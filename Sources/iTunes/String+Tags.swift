@@ -9,7 +9,7 @@ import Foundation
 import RegexBuilder
 
 extension String {
-  func tagPrefix() -> String? {
+  func tagPrefixAndStamp() -> (String, String)? {
     let regex = Regex {
       Capture {
         OneOrMore {
@@ -21,28 +21,34 @@ extension String {
         }
       }
       "-"
-      One(.digit)
-      One(.digit)
-      One(.digit)
-      One(.digit)
-      "-"
-      One(.digit)
-      One(.digit)
-      "-"
-      One(.digit)
-      One(.digit)
-      Optionally {
-        "."
+      Capture {
+        One(.digit)
+        One(.digit)
+        One(.digit)
+        One(.digit)
+        "-"
+        One(.digit)
+        One(.digit)
+        "-"
+        One(.digit)
+        One(.digit)
+        Optionally {
+          "."
+        }
+        Optionally(.digit)
+        Optionally(.digit)
       }
-      Optionally(.digit)
-      Optionally(.digit)
     }
     .repetitionBehavior(.reluctant)
 
     if let match = try? regex.wholeMatch(in: self) {
-      return String(match.output.1)
+      return (String(match.output.1), String(match.output.2))
     }
     return nil
+  }
+
+  func tagPrefix() -> String? {
+    tagPrefixAndStamp()?.0
   }
 
   func matchingFormattedTag(prefix: String) -> Bool {
