@@ -9,8 +9,7 @@ import Foundation
 import os
 
 extension Logger {
-  fileprivate static let transform = Logger(
-    subsystem: Bundle.main.bundleIdentifier ?? "unknown", category: "transform")
+  fileprivate static let transform = Logger(category: "transform")
 }
 
 extension TagData {

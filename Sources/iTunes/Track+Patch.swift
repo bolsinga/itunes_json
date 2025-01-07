@@ -9,8 +9,7 @@ import Foundation
 import os
 
 extension Logger {
-  fileprivate static let patch = Logger(
-    subsystem: Bundle.main.bundleIdentifier ?? "unknown", category: "patch")
+  fileprivate static let patch = Logger(category: "patch")
 }
 
 extension AlbumArtistName.AlbumType {

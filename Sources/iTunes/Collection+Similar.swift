@@ -9,8 +9,7 @@ import Foundation
 import os
 
 extension Logger {
-  fileprivate static let similar = Logger(
-    subsystem: Bundle.main.bundleIdentifier ?? "unknown", category: "similar")
+  fileprivate static let similar = Logger(category: "similar")
 }
 
 extension Collection where Element: Similar {

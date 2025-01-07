@@ -10,8 +10,7 @@ import GitLibrary
 import os
 
 extension Logger {
-  fileprivate static let gitTagData = Logger(
-    subsystem: Bundle.main.bundleIdentifier ?? "unknown", category: "gitTagData")
+  fileprivate static let gitTagData = Logger(category: "gitTagData")
 }
 
 struct TagData: Sendable {
