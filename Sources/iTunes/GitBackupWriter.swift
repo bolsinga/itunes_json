@@ -24,7 +24,7 @@ extension Git {
     guard let allTags = try? await tags() else { return [] }
 
     let latest = allTags.filter {
-      guard let prefix = $0.tagPrefix() else {
+      guard let prefix = $0.tagPrefix else {
         return false
       }
       return prefix.starts(with: tagPrefix)

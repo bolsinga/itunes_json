@@ -9,7 +9,7 @@ import Foundation
 import RegexBuilder
 
 extension String {
-  func tagPrefixAndStamp() -> (String, String)? {
+  var tagPrefixAndStamp: (String, String)? {
     let regex = Regex {
       Capture {
         OneOrMore {
@@ -47,26 +47,26 @@ extension String {
     return nil
   }
 
-  func tagPrefix() -> String? {
-    tagPrefixAndStamp()?.0
+  var tagPrefix: String? {
+    tagPrefixAndStamp?.0
   }
 
   func matchingFormattedTag(prefix: String) -> Bool {
     guard !prefix.isEmpty else { return false }
 
-    guard let existingPrefix = tagPrefix() else { return false }
+    guard let existingPrefix = tagPrefix else { return false }
 
     return existingPrefix == prefix
   }
 
   func replacePrefix(newPrefix: String) -> String? {
-    guard let prefix = tagPrefix() else { return nil }
+    guard let prefix = tagPrefix else { return nil }
 
     return self.replacing(prefix, with: newPrefix)
   }
 
   func appendToPrefix(appendix: String) -> String? {
-    guard let prefix = tagPrefix() else { return nil }
+    guard let prefix = tagPrefix else { return nil }
 
     return self.replacing(prefix, with: "\(prefix).\(appendix)")
   }
