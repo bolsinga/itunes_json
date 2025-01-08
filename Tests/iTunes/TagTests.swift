@@ -150,4 +150,39 @@ struct TagTests {
   @Test func bad() throws {
     #expect("iTunes-2024-05-12-empty.01-empty".tagPrefixAndStamp == nil)
   }
+
+  @Test func standardTagVersion() async throws {
+    #expect(try #require("iTunes-V1".tagVersion) == ("iTunes", 1))
+    #expect(try #require("iTunes.V1".tagVersion) == ("iTunes", 1))
+    #expect(try #require("iTunes-V10".tagVersion) == ("iTunes", 10))
+    #expect(try #require("iTunes.V10".tagVersion) == ("iTunes", 10))
+    #expect(try #require("iTunes-A10".tagVersion) == ("iTunes", 10))
+    #expect(try #require("iTunes.A10".tagVersion) == ("iTunes", 10))
+    #expect(try #require("iTunes.artists1".tagVersion) == ("iTunes", 1))
+  }
+
+  @Test func invalidTagVersion() async throws {
+    #expect("iTunes".tagVersion == nil)
+    #expect("iTunes1".tagVersion == nil)
+    #expect("iTunes.1".tagVersion == nil)
+    #expect("iTunes-1".tagVersion == nil)
+    #expect("iTunesV1".tagVersion == nil)
+    #expect("iTunes.A".tagVersion == nil)
+    #expect("iTunes-A".tagVersion == nil)
+    #expect("iTunes.1A".tagVersion == nil)
+    #expect("iTunes-1A".tagVersion == nil)
+    #expect("iTunes.1artists".tagVersion == nil)
+  }
+
+  @Test func fullVersion() async throws {
+    #expect(
+      try #require("iTunes-V10-2025-01-07".structuredTag)
+        == StructuredTag(root: "iTunes", version: 10, stamp: "2025-01-07"))
+    #expect(
+      try #require("iTunes-V10-2025-01-07.01".structuredTag)
+        == StructuredTag(root: "iTunes", version: 10, stamp: "2025-01-07.01"))
+    #expect("iTunes-V10-2025-01-07.empty".structuredTag == nil)
+    #expect("iTunes.artists-2025-01-07".structuredTag == nil)
+    #expect("iTunes-2006-01-01".structuredTag == nil)
+  }
 }
