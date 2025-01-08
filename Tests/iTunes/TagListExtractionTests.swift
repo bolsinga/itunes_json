@@ -31,6 +31,11 @@ struct TagListExtractionTests {
     #expect(result[1] == tags[1])
     #expect(result[2] == tags[2])
     #expect(result[3] == tags[4])
+
+    let stampedResult = tags.shuffled().stampOrderedMatching
+
+    #expect(result.count == 4)
+    #expect(result == stampedResult)
   }
 
   @Test func assortedPrefixes_ordered() async throws {
@@ -84,15 +89,15 @@ struct TagListExtractionTests {
     #expect(!tags.isEmpty)
     #expect(tags.count == 14)
 
-    let result = tags.shuffled().orderedMatching(tagPrefix: "iTunes-V12")
+    let result = tags.shuffled().stampOrderedMatching
 
-    #expect(result.count != 6)
+    #expect(result.count == 6)
 
-    #expect(result[0] != tags[5])
-    #expect(result[1] != tags[6])
-    //    #expect(result[2] == tags[7])
-    //    #expect(result[3] == tags[8])
-    //    #expect(result[4] == tags[12])
-    //    #expect(result[5] == tags[13])
+    #expect(result[0] == tags[5])
+    #expect(result[1] == tags[6])
+    #expect(result[2] == tags[7])
+    #expect(result[3] == tags[8])
+    #expect(result[4] == tags[12])
+    #expect(result[5] == tags[13])
   }
 }
