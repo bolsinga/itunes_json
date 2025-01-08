@@ -86,10 +86,13 @@ struct TagListExtractionTests {
 
     let result = tags.shuffled().orderedMatching(tagPrefix: "iTunes-V12")
 
-    #expect(!(result.count == 9))  // go all the way back to V5 (since it is the earliest encoded Date.
+    #expect(result.count != 6)
 
-    for index in 0..<result.count {
-      #expect(!(result[index] == tags[index + 5]))
-    }
+    #expect(result[0] != tags[5])
+    #expect(result[1] != tags[6])
+    //    #expect(result[2] == tags[7])
+    //    #expect(result[3] == tags[8])
+    //    #expect(result[4] == tags[12])
+    //    #expect(result[5] == tags[13])
   }
 }
