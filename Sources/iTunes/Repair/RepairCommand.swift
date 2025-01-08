@@ -96,6 +96,9 @@ struct RepairCommand: AsyncParsableCommand {
   /// Input source type.
   @Flag(help: "Patchable type to build.") var patchable: Patchable = .artists
 
+  @Flag(help: "How to filter git tags. Default is .ordered")
+  var tagFilter: TagFilter = .ordered
+
   /// Git Directory to read and write data from.
   @Option(
     help: "The path for the git directory to work with.",
@@ -139,12 +142,14 @@ struct RepairCommand: AsyncParsableCommand {
     let patch = try patchable.createPatch(patchURL)
 
     let sourceConfiguration = GitTagData.Configuration(
-      directory: gitDirectory, tagPrefix: sourceTagPrefix, fileName: Self.fileName)
+      directory: gitDirectory, tagPrefix: sourceTagPrefix, fileName: Self.fileName,
+      tagFilter: tagFilter)
 
     let destinationBranch = destinationBranch ?? patchable.rawValue
 
     let destinationConfiguration = GitTagData.Configuration(
-      directory: gitDirectory, branch: destinationBranch, fileName: Self.fileName)
+      directory: gitDirectory, branch: destinationBranch, fileName: Self.fileName,
+      tagFilter: tagFilter)
 
     try await patch.patch(
       sourceConfiguration: sourceConfiguration,

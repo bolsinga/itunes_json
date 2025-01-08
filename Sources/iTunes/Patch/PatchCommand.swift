@@ -15,6 +15,9 @@ struct PatchCommand: AsyncParsableCommand {
   /// Input source type.
   @Flag(help: "Repairable type to build.") var repairable: Repairable = .artists
 
+  @Flag(help: "How to filter git tags. Default is .ordered")
+  var tagFilter: TagFilter = .ordered
+
   /// Git Directory to read and write data from.
   @Option(
     help: "The path for the git directory to work with.",
@@ -38,7 +41,8 @@ struct PatchCommand: AsyncParsableCommand {
 
   func run() async throws {
     let configuration = GitTagData.Configuration(
-      directory: gitDirectory, tagPrefix: sourceTagPrefix, fileName: PatchCommand.fileName)
+      directory: gitDirectory, tagPrefix: sourceTagPrefix, fileName: PatchCommand.fileName,
+      tagFilter: tagFilter)
     print(try await repairable.gather(configuration, correction: correction))
   }
 }
