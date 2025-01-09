@@ -132,22 +132,20 @@ extension Repairable {
     case .missingTitleAlbums:
       let correction = try songArtistAlbums(from: correction)
       return .missingTitleAlbums(
-        try await corrections(configuration: configuration) {
-          try await currentSongArtistAlbums()
-        } brokenGuides: {
-          $0.filter { $0.isSQLEncodable }.songArtistAlbums.filter { $0.album == nil }
-        } createChange: {
-          let similar = $1.similarName(to: $0)
-          if similar == nil {
-            return correction.similarName(to: $0)
+        Set(
+          try await corrections(configuration: configuration) {
+            try await currentSongArtistAlbums()
+          } brokenGuides: {
+            $0.filter { $0.isSQLEncodable }.songArtistAlbums.filter { $0.album == nil }
+          } createChange: {
+            let similar = $1.similarName(to: $0)
+            if similar == nil {
+              return correction.similarName(to: $0)
+            }
+            return similar
           }
-          return similar
-        }.reduce(
-          into: AlbumMissingTitlePatchLookup(),
-          { (partialResult: inout AlbumMissingTitlePatchLookup, item: SongArtistAlbum) in
-            guard let album = item.album else { return }
-            partialResult[item.songArtist] = album
-          }))
+        ).sorted()
+      )
     case .trackCounts:
       let correction = try albumTrackCounts(from: correction)
       return .trackCounts(
