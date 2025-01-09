@@ -67,24 +67,42 @@ extension Array where Element == TagData {
   }
 }
 
+extension TagFilter {
+  fileprivate func filter(tags: [String], prefix: String) -> [String] {
+    switch self {
+    case .ordered:
+      tags.orderedMatching(tagPrefix: prefix)
+    case .stamped:
+      tags.stampOrderedMatching
+    }
+  }
+}
+
 struct GitTagData {
   struct Configuration {
     let directory: URL
     let tagPrefix: String
     let branch: String?
     let fileName: String
+    let tagFilter: TagFilter
 
     init(
-      directory: URL, tagPrefix: String = "", branch: String? = nil, fileName: String
+      directory: URL, tagPrefix: String = "", branch: String? = nil, fileName: String,
+      tagFilter: TagFilter
     ) {
       self.directory = directory
       self.tagPrefix = tagPrefix
       self.branch = branch
       self.fileName = fileName
+      self.tagFilter = tagFilter
     }
 
     var file: URL {
       directory.appending(path: fileName)
+    }
+
+    func filter(tags: [String]) -> [String] {
+      tagFilter.filter(tags: tags, prefix: tagPrefix)
     }
   }
 
@@ -102,12 +120,6 @@ struct GitTagData {
     let git: Git
     let tags: [String]
     let fileName: String
-
-    init(git: Git, tagPrefix: String, fileName: String) async throws {
-      self.git = git
-      self.tags = try await self.git.tags().orderedMatching(tagPrefix: tagPrefix)
-      self.fileName = fileName
-    }
 
     struct AsyncIterator: AsyncIteratorProtocol {
       let git: Git
@@ -142,8 +154,9 @@ struct GitTagData {
     try await self.git.status()
 
     var tagDatum: [TagData] = []
-    for try await tagData in try await ReadSequence(
-      git: git, tagPrefix: configuration.tagPrefix, fileName: configuration.fileName)
+    for try await tagData in ReadSequence(
+      git: git, tags: configuration.filter(tags: try await git.tags()),
+      fileName: configuration.fileName)
     {
       tagDatum.append(tagData)
     }
