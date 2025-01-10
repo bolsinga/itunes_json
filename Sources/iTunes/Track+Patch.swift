@@ -446,11 +446,18 @@ extension Array where Element == Track {
     }
   }
 
-  fileprivate func patchMissingAlbumTitles(_ lookup: AlbumMissingTitlePatchLookup, tag: String)
+  fileprivate func patchMissingAlbumTitles(_ items: [SongArtistAlbum], tag: String)
     throws
     -> [Track]
   {
-    self.map { track in
+    let lookup = items.reduce(
+      into: [SongArtist: SortableName](),
+      { partialResult, item in
+        guard let album = item.album else { return }
+        partialResult[item.songArtist] = album
+      })
+
+    return self.map { track in
       guard track.albumName == nil, let songArtist = track.songArtist,
         let title = lookup[songArtist]
       else { return track }
