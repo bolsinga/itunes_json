@@ -27,18 +27,6 @@ extension Array where Element: Codable {
   }
 }
 
-extension AlbumTrackCountLookup {
-  static fileprivate func load(from url: URL) throws -> Self {
-    try load(from: try Data(contentsOf: url, options: .mappedIfSafe))
-  }
-
-  static fileprivate func load(from data: Data) throws -> Self {
-    let decoder = JSONDecoder()
-    decoder.dateDecodingStrategy = .iso8601
-    return try decoder.decode(Self.self, from: data)
-  }
-}
-
 extension SongTrackNumberLookup {
   static fileprivate func load(from url: URL) throws -> Self {
     try load(from: try Data(contentsOf: url, options: .mappedIfSafe))
@@ -61,7 +49,7 @@ extension Patchable {
     case .missingTitleAlbums:
       Patch.missingTitleAlbums(try Array<SongArtistAlbum>.load(from: fileURL))
     case .trackCounts:
-      Patch.trackCounts(try AlbumTrackCountLookup.load(from: fileURL))
+      Patch.trackCounts(try Array<AlbumTrackCount>.load(from: fileURL))
     case .trackCorrections:
       Patch.trackCorrections(try Array<TrackCorrection>.load(from: fileURL))
     case .trackNumbers:
