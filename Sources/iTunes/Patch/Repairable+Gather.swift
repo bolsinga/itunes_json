@@ -149,22 +149,19 @@ extension Repairable {
     case .trackCounts:
       let correction = try albumTrackCounts(from: correction)
       return .trackCounts(
-        try await corrections(configuration: configuration) {
-          try await currentAlbumTrackCounts()
-        } brokenGuides: {
-          $0.filter { $0.isSQLEncodable }.albumTrackCounts.filter { $0.trackCount == nil }
-        } createChange: {
-          let similar = $1.needsChangeAndSimilar(to: $0)
-          if similar == nil {
-            return correction.similarName(to: $0)
+        Set(
+          try await corrections(configuration: configuration) {
+            try await currentAlbumTrackCounts()
+          } brokenGuides: {
+            $0.filter { $0.isSQLEncodable }.albumTrackCounts.filter { $0.trackCount == nil }
+          } createChange: {
+            let similar = $1.needsChangeAndSimilar(to: $0)
+            if similar == nil {
+              return correction.similarName(to: $0)
+            }
+            return similar
           }
-          return similar
-        }.reduce(
-          into: AlbumTrackCountLookup(),
-          { (partialResult: inout AlbumTrackCountLookup, item: AlbumTrackCount) in
-            guard let trackCount = item.trackCount else { return }
-            partialResult[item.album] = trackCount
-          })
+        ).sorted()
       )
     case .trackNumbers:
       let correction = try songIntCorrections(from: correction)

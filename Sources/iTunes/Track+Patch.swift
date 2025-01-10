@@ -465,10 +465,16 @@ extension Array where Element == Track {
     }
   }
 
-  fileprivate func patchAlbumTrackCounts(_ lookup: AlbumTrackCountLookup, tag: String) throws
+  fileprivate func patchAlbumTrackCounts(_ items: [AlbumTrackCount], tag: String) throws
     -> [Track]
   {
-    self.map { track in
+    let lookup = items.reduce(
+      into: [AlbumArtistName: Int](),
+      { partialResult, item in
+        guard let trackCount = item.trackCount else { return }
+        partialResult[item.album] = trackCount
+      })
+    return self.map { track in
       guard track.isSQLEncodable, let name = track.albumArtistName,
         let correctedTrackCount = lookup[name]
       else {
