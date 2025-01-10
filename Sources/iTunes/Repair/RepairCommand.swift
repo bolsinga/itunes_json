@@ -27,18 +27,6 @@ extension Array where Element: Codable {
   }
 }
 
-extension SongYearLookup {
-  static fileprivate func load(from url: URL) throws -> Self {
-    try load(from: try Data(contentsOf: url, options: .mappedIfSafe))
-  }
-
-  static fileprivate func load(from data: Data) throws -> Self {
-    let decoder = JSONDecoder()
-    decoder.dateDecodingStrategy = .iso8601
-    return try decoder.decode(Self.self, from: data)
-  }
-}
-
 extension Patchable {
   fileprivate func createPatch(_ fileURL: URL) throws -> Patch {
     switch self {
@@ -55,7 +43,7 @@ extension Patchable {
     case .trackNumbers:
       Patch.trackNumbers(try Array<SongTrackNumber>.load(from: fileURL))
     case .years:
-      Patch.years(try SongYearLookup.load(from: fileURL))
+      Patch.years(try Array<SongYear>.load(from: fileURL))
     }
   }
 }

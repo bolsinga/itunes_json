@@ -9,7 +9,6 @@ import Foundation
 
 typealias ArtistPatchLookup = [SortableName: SortableName]
 typealias AlbumPatchLookup = [AlbumArtistName: AlbumArtistName]
-typealias SongYearLookup = [SongArtistAlbum: Int]
 
 enum Patch: Sendable {
   case artists(ArtistPatchLookup)
@@ -18,7 +17,7 @@ enum Patch: Sendable {
   case trackCounts([AlbumTrackCount])
   case trackCorrections([TrackCorrection])
   case trackNumbers([SongTrackNumber])
-  case years(SongYearLookup)
+  case years([SongYear])
 }
 
 // This will make a Dictionary<Key, Value> into Array<Key> where each Array
@@ -32,17 +31,6 @@ extension Dictionary where Key: Codable & Comparable, Value: Codable & Comparabl
     encoder.dateEncodingStrategy = .iso8601
     let items = self.map { $0 }.sorted(by: { $0 < $1 }).flatMap { [$0.0, $0.1] }
     return try encoder.encode(items)
-  }
-}
-
-extension Dictionary where Key == SongArtistAlbum, Value == Int {
-  fileprivate func jsonData() throws -> Data {
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-    encoder.dateEncodingStrategy = .iso8601
-    // FIXME: It would be nice to have the dictionary self-sort, like the extension above.
-    // The problem is that the key/values are different types.
-    return try encoder.encode(self)
   }
 }
 
