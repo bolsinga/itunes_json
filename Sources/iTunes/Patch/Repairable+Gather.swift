@@ -182,21 +182,19 @@ extension Repairable {
     case .years:
       let correction = try songIntCorrections(from: correction)
       return .years(
-        try await corrections(configuration: configuration) {
-          try await currentSongYears()
-        } brokenGuides: {
-          $0.filter { $0.isSQLEncodable }.songYears.filter { $0.year == nil }
-        } createChange: { item, currentItems in
-          if item.year == nil {
-            return currentItems.union(correction).filter { $0.song == item.song }.first
+        Set(
+          try await corrections(configuration: configuration) {
+            try await currentSongYears()
+          } brokenGuides: {
+            $0.filter { $0.isSQLEncodable }.songYears.filter { $0.year == nil }
+          } createChange: { item, currentItems in
+            if item.year == nil {
+              return currentItems.union(correction).filter { $0.song == item.song }.first
+            }
+            return nil
           }
-          return nil
-        }.reduce(
-          into: SongYearLookup(),
-          { partialResult, item in
-            guard let year = item.year else { return }
-            partialResult[item.song] = year
-          }))
+        ).sorted()
+      )
     }
   }
 }
