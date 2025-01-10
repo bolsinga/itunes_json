@@ -499,10 +499,16 @@ extension Array where Element == Track {
     }
   }
 
-  fileprivate func patchSongTrackNumbers(_ lookup: SongTrackNumberLookup, tag: String) throws
+  fileprivate func patchSongTrackNumbers(_ items: [SongTrackNumber], tag: String) throws
     -> [Track]
   {
-    self.map { track in
+    let lookup = items.reduce(
+      into: [SongArtistAlbum: Int](),
+      { partialResult, item in
+        guard let trackNumber = item.trackNumber else { return }
+        partialResult[item.song] = trackNumber
+      })
+    return self.map { track in
       guard track.isSQLEncodable, let name = track.songArtistAlbum,
         let correctedTrackNumber = lookup[name]
       else {

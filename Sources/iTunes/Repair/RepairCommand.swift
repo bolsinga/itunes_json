@@ -27,7 +27,7 @@ extension Array where Element: Codable {
   }
 }
 
-extension SongTrackNumberLookup {
+extension SongYearLookup {
   static fileprivate func load(from url: URL) throws -> Self {
     try load(from: try Data(contentsOf: url, options: .mappedIfSafe))
   }
@@ -53,7 +53,7 @@ extension Patchable {
     case .trackCorrections:
       Patch.trackCorrections(try Array<TrackCorrection>.load(from: fileURL))
     case .trackNumbers:
-      Patch.trackNumbers(try SongTrackNumberLookup.load(from: fileURL))
+      Patch.trackNumbers(try Array<SongTrackNumber>.load(from: fileURL))
     case .years:
       Patch.years(try SongYearLookup.load(from: fileURL))
     }
