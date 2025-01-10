@@ -9,7 +9,6 @@ import Foundation
 
 typealias ArtistPatchLookup = [SortableName: SortableName]
 typealias AlbumPatchLookup = [AlbumArtistName: AlbumArtistName]
-typealias SongTrackNumberLookup = [SongArtistAlbum: Int]
 typealias SongYearLookup = [SongArtistAlbum: Int]
 
 enum Patch: Sendable {
@@ -18,7 +17,7 @@ enum Patch: Sendable {
   case missingTitleAlbums([SongArtistAlbum])
   case trackCounts([AlbumTrackCount])
   case trackCorrections([TrackCorrection])
-  case trackNumbers(SongTrackNumberLookup)
+  case trackNumbers([SongTrackNumber])
   case years(SongYearLookup)
 }
 
