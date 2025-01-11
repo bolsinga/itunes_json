@@ -24,22 +24,32 @@ extension Destination {
     }
   }
 
-  fileprivate var url: URL? {
+  fileprivate var output: Output? {
     switch self {
     case .json(let output), .jsonGit(let output), .sqlCode(let output):
-      output.url
+      return output
     case .db(let storage):
-      storage.url
+      switch storage {
+      case .file(let url):
+        return .file(url)
+      case .memory:
+        return nil
+      }
     }
   }
 
   func emit(_ tracks: [Track], context: BackupContext, schemaOptions: SchemaOptions) async throws {
     enum DataExportError: Error {
       case noTracks
+      case noOutput
     }
 
     guard !tracks.isEmpty else {
       throw DataExportError.noTracks
+    }
+
+    guard let output else {
+      throw DataExportError.noOutput
     }
 
     let tracks = tracks.sorted()
@@ -47,9 +57,10 @@ extension Destination {
     let data = try await self.data(
       for: tracks, loggingToken: nil, schemaOptions: schemaOptions)
 
-    if let outputFile = self.url {
-      try await self.fileWriter(for: outputFile, context: context).write(data: data)
-    } else {
+    switch output {
+    case .file(let url):
+      try await self.fileWriter(for: url, context: context).write(data: data)
+    case .standardOut:
       print("\(try data.asUTF8String())")
     }
   }
