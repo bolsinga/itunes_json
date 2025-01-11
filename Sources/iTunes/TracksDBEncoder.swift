@@ -8,7 +8,7 @@
 import Foundation
 
 struct TracksDBEncoder {
-  private let db: Database
+  let db: Database
   private let rowEncoder: TrackRowEncoder
 
   init(storage: DatabaseStorage, rowEncoder: TrackRowEncoder, loggingToken: String?) throws {
