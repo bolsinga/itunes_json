@@ -39,7 +39,7 @@ enum DestinationContext: EnumerableFlag {
       switch output {
       case .file(let outputFile):
         return .db(.file(outputFile))
-      default:
+      case .standardOut, .update:
         throw DestinationError.noDBOutputFile
       }
     }
