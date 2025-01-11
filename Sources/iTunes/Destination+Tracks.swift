@@ -35,6 +35,13 @@ extension Destination {
       case .memory:
         return nil
       }
+    case .updateDB(let storage):
+      switch storage {
+      case .file(let url):
+        return .update(url)
+      case .memory:
+        return nil
+      }
     }
   }
 
@@ -64,7 +71,8 @@ extension Destination {
     case .standardOut:
       print("\(try await dataProvider().asUTF8String())")
     case .update(let url):
-      print("Updated \(url.absoluteString)")
+      try await self.updateDB(
+        at: url, tracks: tracks, loggingToken: nil, schemaOptions: schemaOptions)
     }
   }
 }

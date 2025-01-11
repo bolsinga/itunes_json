@@ -17,10 +17,13 @@ enum DestinationContext: EnumerableFlag {
   case sqlCode
   /// Emit a sqlite3 database that represents the Tracks.
   case db
+  /// Update a sqlite3 database that represents the Tracks.
+  case updateDB
 
   func context(outputFile: URL?) throws -> Destination {
     enum DestinationError: Error {
       case noDBOutputFile
+      case invalidUpdateDB
     }
 
     let output: Output = {
@@ -42,6 +45,17 @@ enum DestinationContext: EnumerableFlag {
       case .standardOut, .update:
         throw DestinationError.noDBOutputFile
       }
+    case .updateDB:
+      let updateOutput: Output = {
+        guard let outputFile else { return .standardOut }
+        return .update(outputFile)
+      }()
+      switch updateOutput {
+      case .update(let outputFile):
+        return .updateDB(.file(outputFile))
+      case .standardOut, .file:
+        throw DestinationError.invalidUpdateDB
+      }
     }
   }
 
@@ -56,7 +70,7 @@ enum DestinationContext: EnumerableFlag {
       "json"
     case .sqlCode:
       "sql"
-    case .db:
+    case .db, .updateDB:
       "db"
     }
   }
@@ -86,7 +100,10 @@ struct BackupCommand: AsyncParsableCommand {
   ) var reduce: Bool = false
 
   /// Lax database schema table constraints. Only applicable with --sql-code or --db.
-  @Flag(help: "Lax database schema table constraints. Only applicable with --sql-code or --db.")
+  @Flag(
+    help:
+      "Lax database schema table constraints. Only applicable with --sql-code, --db or --update-db."
+  )
   var laxSchema: [SchemaFlag] = []
 
   /// Optional Output Directory for output file.
@@ -135,6 +152,10 @@ struct BackupCommand: AsyncParsableCommand {
 
     if destination == .jsonGit && outputFile == nil {
       throw ValidationError("--json-git requires outputDirectory to be set")
+    }
+
+    if destination == .updateDB && (fileName == nil || outputDirectory == nil) {
+      throw ValidationError("--update-db requires outputDirectory and fileName to be set")
     }
   }
 
