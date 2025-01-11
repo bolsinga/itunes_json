@@ -62,7 +62,7 @@ struct RepairCommand: AsyncParsableCommand {
   /// Input source type.
   @Flag(help: "Patchable type to build.") var patchable: Patchable = .artists
 
-  @Flag(help: "How to filter git tags. Default is .ordered")
+  @Flag(help: "How to filter git tags.")
   var tagFilter: TagFilter = .ordered
 
   /// Git Directory to read and write data from.

@@ -26,7 +26,7 @@ struct BatchCommand: AsyncParsableCommand {
   @Flag(help: "Lax database schema table constraints")
   var laxSchema: [SchemaFlag] = []
 
-  @Flag(help: "How to filter git tags. Default is .ordered")
+  @Flag(help: "How to filter git tags.")
   var tagFilter: TagFilter = .ordered
 
   /// Git Directory to read and write data from.
