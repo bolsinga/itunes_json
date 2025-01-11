@@ -62,6 +62,8 @@ extension Destination {
       try await self.fileWriter(for: url, context: context).write(data: data)
     case .standardOut:
       print("\(try data.asUTF8String())")
+    case .update(let url):
+      print("Updated \(url.absoluteString)")
     }
   }
 }
