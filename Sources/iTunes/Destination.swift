@@ -17,4 +17,6 @@ enum Destination {
   case sqlCode(Output)
   /// Emit a sqlite3 database that represents the Tracks.
   case db(DatabaseStorage)
+  /// Update a sqlite3 database that represents the Tracks.
+  case updateDB(DatabaseStorage)
 }
