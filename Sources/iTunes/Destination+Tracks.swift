@@ -54,14 +54,15 @@ extension Destination {
 
     let tracks = tracks.sorted()
 
-    let data = try await self.data(
-      for: tracks, loggingToken: nil, schemaOptions: schemaOptions)
+    let dataProvider = {
+      try await self.data(for: tracks, loggingToken: nil, schemaOptions: schemaOptions)
+    }
 
     switch output {
     case .file(let url):
-      try await self.fileWriter(for: url, context: context).write(data: data)
+      try await self.fileWriter(for: url, context: context).write(data: try await dataProvider())
     case .standardOut:
-      print("\(try data.asUTF8String())")
+      print("\(try await dataProvider().asUTF8String())")
     case .update(let url):
       print("Updated \(url.absoluteString)")
     }
