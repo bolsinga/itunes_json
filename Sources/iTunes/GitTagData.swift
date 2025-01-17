@@ -42,13 +42,6 @@ extension GitTaggedData {
     }
     try await git.tag(tag)
   }
-
-  func write(to directory: URL, pathExtension: String) throws {
-    Logger.gitTagData.info("Write: \(tag)")
-
-    let url = directory.appending(path: tag).appendingPathExtension(pathExtension)
-    try data.write(to: url)
-  }
 }
 
 extension String {
