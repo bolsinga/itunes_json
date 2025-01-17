@@ -6,10 +6,24 @@
 //
 
 import Foundation
+import os
+
+extension Logger {
+  fileprivate static let batch = Logger(category: "batch")
+}
 
 enum Batch: CaseIterable {
   case sql
   case db
+}
+
+extension GitTaggedData {
+  fileprivate func write(to directory: URL, pathExtension: String) throws {
+    Logger.batch.info("Write: \(tag)")
+
+    let url = directory.appending(path: tag).appendingPathExtension(pathExtension)
+    try data.write(to: url)
+  }
 }
 
 extension Batch {
