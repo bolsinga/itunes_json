@@ -7,6 +7,18 @@
 
 import Foundation
 
+extension String {
+  fileprivate func replaceTagPrefix(tagPrefix: String) -> String {
+    replacePrefix(newPrefix: tagPrefix) ?? "\(self)-Could-Not-Properly-Replace-\(tagPrefix)"
+  }
+}
+
+extension Tag {
+  fileprivate func replace(newTagPrefix: String) -> Tag {
+    Tag(tag: tag.replaceTagPrefix(tagPrefix: newTagPrefix), item: item)
+  }
+}
+
 extension Patch {
   func patch(
     sourceConfiguration: GitTagData.Configuration, patch: Patch, destinationTagPrefix: String,
@@ -18,7 +30,7 @@ extension Patch {
     guard let initialCommit = patchedTracksData.initialTag else { return }
 
     try await GitTagData(configuration: destinationConfiguration).write(
-      tagDatum: patchedTracksData.replaceTagPrefix(tagPrefix: destinationTagPrefix),
+      tagDatum: patchedTracksData.map { $0.replace(newTagPrefix: destinationTagPrefix) },
       initialCommit: initialCommit, version: version)
   }
 }

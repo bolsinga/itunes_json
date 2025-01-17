@@ -13,17 +13,12 @@ extension Logger {
   fileprivate static let gitTagData = Logger(category: "gitTagData")
 }
 
-struct GitTaggedData: Tagged, Sendable {
-  let tag: String
-  let data: Data
-}
-
-extension GitTaggedData {
+extension Tag where Item == Data {
   fileprivate func add(to git: Git, file: URL, version: String) async throws {
     Logger.gitTagData.info("Add: \(tag)")
 
     // this makes memory shoot up, unexpectedly.
-    try data.write(to: file)
+    try item.write(to: file)
 
     try await git.add(file.lastPathComponent)
 
@@ -41,18 +36,6 @@ extension GitTaggedData {
       try await git.commit("\(tag)\n\(version)")
     }
     try await git.tag(tag)
-  }
-}
-
-extension String {
-  fileprivate func replaceTagPrefix(tagPrefix: String) -> String {
-    replacePrefix(newPrefix: tagPrefix) ?? "\(self)-Could-Not-Properly-Replace-\(tagPrefix)"
-  }
-}
-
-extension Array where Element == GitTaggedData {
-  func replaceTagPrefix(tagPrefix: String) -> [Element] {
-    self.map { GitTaggedData(tag: $0.tag.replaceTagPrefix(tagPrefix: tagPrefix), data: $0.data) }
   }
 }
 
@@ -104,7 +87,7 @@ struct GitTagData {
   }
 
   private struct ReadSequence: AsyncSequence {
-    typealias Element = GitTaggedData
+    typealias Element = Tag<Data>
 
     let git: Git
     let tags: [String]
@@ -117,7 +100,7 @@ struct GitTagData {
 
       var index = 0
 
-      mutating func next() async throws -> GitTaggedData? {
+      mutating func next() async throws -> Element? {
         guard !Task.isCancelled else { return nil }
 
         guard index < tags.count else { return nil }
@@ -130,7 +113,7 @@ struct GitTagData {
 
         index += 1
 
-        return GitTaggedData(tag: tag, data: data)
+        return Element(tag: tag, item: data)
       }
     }
 
@@ -139,10 +122,10 @@ struct GitTagData {
     }
   }
 
-  func tagDatum() async throws -> [GitTaggedData] {
+  func tagDatum() async throws -> [Tag<Data>] {
     try await self.git.status()
 
-    var tagDatum: [GitTaggedData] = []
+    var tagDatum: [Tag<Data>] = []
     for try await tagData in ReadSequence(
       git: git, tags: configuration.filter(tags: try await git.tags()),
       fileName: configuration.fileName)
@@ -152,7 +135,7 @@ struct GitTagData {
     return tagDatum
   }
 
-  func write(tagDatum: [GitTaggedData], initialCommit: String, version: String) async throws {
+  func write(tagDatum: [Tag<Data>], initialCommit: String, version: String) async throws {
     enum WriteError: Error {
       case noBranch
     }
