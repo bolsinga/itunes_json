@@ -13,12 +13,12 @@ extension Logger {
   fileprivate static let gitTagData = Logger(category: "gitTagData")
 }
 
-struct TagData: Sendable {
+struct GitTaggedData: Sendable {
   let tag: String
   let data: Data
 }
 
-extension TagData {
+extension GitTaggedData {
   fileprivate func add(to git: Git, file: URL, version: String) async throws {
     Logger.gitTagData.info("Add: \(tag)")
 
@@ -57,9 +57,9 @@ extension String {
   }
 }
 
-extension Array where Element == TagData {
+extension Array where Element == GitTaggedData {
   func replaceTagPrefix(tagPrefix: String) -> [Element] {
-    self.map { TagData(tag: $0.tag.replaceTagPrefix(tagPrefix: tagPrefix), data: $0.data) }
+    self.map { GitTaggedData(tag: $0.tag.replaceTagPrefix(tagPrefix: tagPrefix), data: $0.data) }
   }
 
   var initialCommit: String? {
@@ -115,7 +115,7 @@ struct GitTagData {
   }
 
   private struct ReadSequence: AsyncSequence {
-    typealias Element = TagData
+    typealias Element = GitTaggedData
 
     let git: Git
     let tags: [String]
@@ -128,7 +128,7 @@ struct GitTagData {
 
       var index = 0
 
-      mutating func next() async throws -> TagData? {
+      mutating func next() async throws -> GitTaggedData? {
         guard !Task.isCancelled else { return nil }
 
         guard index < tags.count else { return nil }
@@ -141,7 +141,7 @@ struct GitTagData {
 
         index += 1
 
-        return TagData(tag: tag, data: data)
+        return GitTaggedData(tag: tag, data: data)
       }
     }
 
@@ -150,10 +150,10 @@ struct GitTagData {
     }
   }
 
-  func tagDatum() async throws -> [TagData] {
+  func tagDatum() async throws -> [GitTaggedData] {
     try await self.git.status()
 
-    var tagDatum: [TagData] = []
+    var tagDatum: [GitTaggedData] = []
     for try await tagData in ReadSequence(
       git: git, tags: configuration.filter(tags: try await git.tags()),
       fileName: configuration.fileName)
@@ -163,7 +163,7 @@ struct GitTagData {
     return tagDatum
   }
 
-  func write(tagDatum: [TagData], initialCommit: String, version: String) async throws {
+  func write(tagDatum: [GitTaggedData], initialCommit: String, version: String) async throws {
     enum WriteError: Error {
       case noBranch
     }
