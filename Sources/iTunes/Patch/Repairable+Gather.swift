@@ -15,8 +15,10 @@ private func changes<Guide: Hashable & Similar, Change: Sendable>(
 ) async throws -> [Change] {
   async let asyncCurrentGuides = try await currentGuides()
 
-  let allKnownGuides = try await GitTagData(configuration: configuration).transformTracks(
-    createGuide)
+  let allKnownGuides = try await GitTagData(configuration: configuration).transformTracks {
+    _, tracks in
+    createGuide(tracks)
+  }
 
   let currentGuides = try await asyncCurrentGuides
 
@@ -33,8 +35,10 @@ private func corrections<Guide: Hashable & Sendable, Change: Sendable>(
 ) async throws -> [Change] {
   async let asyncCurrentGuides = try await currentGuides()
 
-  let allBrokenGuides = try await GitTagData(configuration: configuration).transformTracks(
-    brokenGuides)
+  let allBrokenGuides = try await GitTagData(configuration: configuration).transformTracks {
+    _, tracks in
+    brokenGuides(tracks)
+  }
 
   let currentGuides = try await asyncCurrentGuides
 
