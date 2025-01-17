@@ -13,7 +13,7 @@ extension Logger {
   fileprivate static let gitTagData = Logger(category: "gitTagData")
 }
 
-struct GitTaggedData: Sendable {
+struct GitTaggedData: Tagged, Sendable {
   let tag: String
   let data: Data
 }
@@ -53,10 +53,6 @@ extension String {
 extension Array where Element == GitTaggedData {
   func replaceTagPrefix(tagPrefix: String) -> [Element] {
     self.map { GitTaggedData(tag: $0.tag.replaceTagPrefix(tagPrefix: tagPrefix), data: $0.data) }
-  }
-
-  var initialCommit: String? {
-    self.sorted(by: { $0.tag < $1.tag }).first?.tag
   }
 }
 

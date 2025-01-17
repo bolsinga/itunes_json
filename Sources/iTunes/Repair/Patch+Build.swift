@@ -15,7 +15,7 @@ extension Patch {
     let patchedTracksData = try await GitTagData(configuration: sourceConfiguration)
       .transformTaggedTracks { try $1.patch(patch, tag: $0) }
 
-    guard let initialCommit = patchedTracksData.initialCommit else { return }
+    guard let initialCommit = patchedTracksData.initialTag else { return }
 
     try await GitTagData(configuration: destinationConfiguration).write(
       tagDatum: patchedTracksData.replaceTagPrefix(tagPrefix: destinationTagPrefix),
