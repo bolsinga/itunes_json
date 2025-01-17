@@ -12,7 +12,7 @@ extension Logger {
   fileprivate static let transform = Logger(category: "transform")
 }
 
-extension TagData {
+extension GitTaggedData {
   fileprivate func tracks() throws -> [Track] {
     try Track.array(from: self.data)
   }
@@ -42,21 +42,21 @@ extension GitTagData {
   }
 
   func transformTaggedTracks(transform: @escaping @Sendable (String, [Track]) async throws -> Data)
-    async throws -> [TagData]
+    async throws -> [GitTaggedData]
   {
     var tagDatum = try await self.tagDatum()
 
-    return try await withThrowingTaskGroup(of: TagData.self) { group in
+    return try await withThrowingTaskGroup(of: GitTaggedData.self) { group in
       for tagData in tagDatum.reversed() {
         tagDatum.removeLast()
         group.addTask {
           Logger.transform.info("Transform Tag: \(tagData.tag)")
-          return TagData(
+          return GitTaggedData(
             tag: tagData.tag, data: try await transform(tagData.tag, try tagData.tracks()))
         }
       }
 
-      var tagDatum: [TagData] = []
+      var tagDatum: [GitTaggedData] = []
       for try await tagData in group {
         tagDatum.append(tagData)
       }
