@@ -6,7 +6,10 @@ public struct Program: AsyncParsableCommand {
     commandName: String(localized: "tunes", bundle: .module),
     abstract: String(localized: "A tool for working with iTunes data.", bundle: .module),
     version: iTunesVersion,
-    subcommands: [BackupCommand.self, PatchCommand.self, RepairCommand.self, BatchCommand.self],
+    subcommands: [
+      BackupCommand.self, PatchCommand.self, RepairCommand.self, BatchCommand.self,
+      QueryCommand.self,
+    ],
     defaultSubcommand: BackupCommand.self
   )
 
