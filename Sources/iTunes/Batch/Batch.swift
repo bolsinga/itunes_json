@@ -17,12 +17,12 @@ enum Batch: CaseIterable {
   case db
 }
 
-extension GitTaggedData {
+extension Tag where Item == Data {
   fileprivate func write(to directory: URL, pathExtension: String) throws {
     Logger.batch.info("Write: \(tag)")
 
     let url = directory.appending(path: tag).appendingPathExtension(pathExtension)
-    try data.write(to: url)
+    try item.write(to: url)
   }
 }
 
