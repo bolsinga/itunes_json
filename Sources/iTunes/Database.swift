@@ -134,8 +134,10 @@ actor Database {
     }
 
     init(sql: Statement, db: isolated Database) throws {
-      let string = sql.sql
+      try self.init(string: sql.sql, db: db)
+    }
 
+    init(string: String, db: isolated Database) throws {
       var statementHandle: StatementHandle?
       let result = sqlite3_prepare_v3(
         db.handle, string, -1, UInt32(SQLITE_PREPARE_PERSISTENT), &statementHandle, nil)
