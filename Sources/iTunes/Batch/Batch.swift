@@ -32,7 +32,7 @@ extension Batch {
     schemaOptions: SchemaOptions
   ) async throws {
     var patchedTracksData = try await GitTagData(configuration: configuration)
-      .transformTaggedTracks {
+      .transformTracks {
         let destination = {
           switch self {
           case .sql:

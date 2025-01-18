@@ -25,7 +25,7 @@ extension Patch {
     destinationConfiguration: GitTagData.Configuration, version: String
   ) async throws {
     let patchedTracksData = try await GitTagData(configuration: sourceConfiguration)
-      .transformTaggedTracks { try $1.patch(patch, tag: $0) }
+      .transformTracks { try $1.patch(patch, tag: $0) }
 
     guard let initialCommit = patchedTracksData.initialTag else { return }
 

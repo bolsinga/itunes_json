@@ -19,29 +19,7 @@ extension Tag where Item == Data {
 }
 
 extension GitTagData {
-  func transformTracks<Transform: Sendable>(
-    _ transform: @escaping @Sendable (String, [Track]) -> [Transform]
-  ) async throws -> [Transform] {
-    var tagDatum = try await self.tagDatum()
-
-    return try await withThrowingTaskGroup(of: Array<Transform>.self) { group in
-      for tagData in tagDatum.reversed() {
-        tagDatum.removeLast()
-        group.addTask {
-          Logger.transform.info("transform: \(tagData.tag)")
-          return transform(tagData.tag, try tagData.tracks())
-        }
-      }
-
-      var allTransforms = [Transform]()
-      for try await transforms in group {
-        allTransforms.append(contentsOf: transforms)
-      }
-      return allTransforms
-    }
-  }
-
-  func transformTaggedTracks<T: Sendable>(
+  func transformTracks<T: Sendable>(
     transform: @escaping @Sendable (String, [Track]) async throws -> T
   ) async throws -> [Tag<T>] {
     var tagDatum = try await self.tagDatum()
