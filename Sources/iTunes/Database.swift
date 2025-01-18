@@ -17,8 +17,10 @@ enum DatabaseError: Error {
   case cannotPrepare(String)
   case cannotBind(String)
   case cannotStep(String)
-  case unexpectedColumns(Int32)
   case cannotSerialize
+  case noColumnName(Int)
+  case unimplementedColumnType(Int)
+  case noColumnText(Int)
 }
 
 extension DatabaseHandle {
@@ -32,6 +34,8 @@ typealias StatementHandle = OpaquePointer
 
 actor Database {
   typealias Value = Statement.Value
+
+  typealias Row = [String: Value]
 
   fileprivate struct Logging {
     let open: Logger
@@ -167,7 +171,60 @@ actor Database {
       }
     }
 
-    func execute(_ errorStringBuilder: () -> String) throws {
+    private func columnName(for index: Int32) throws -> String {
+      guard let ptr = sqlite3_column_name(handle, index) else {
+        throw DatabaseError.noColumnName(Int(index))
+      }
+      return String(cString: ptr)
+    }
+
+    private func columnValue(for index: Int32) throws -> Value {
+      switch sqlite3_column_type(handle, index) {
+      case SQLITE_NULL:
+        return .null
+      case SQLITE_INTEGER:
+        return .integer(sqlite3_column_int64(handle, index))
+      case SQLITE_TEXT:
+        guard let ptr = sqlite3_column_text(handle, index) else {
+          throw DatabaseError.noColumnText(Int(index))
+        }
+        return .string(String(cString: ptr))
+      default:
+        throw DatabaseError.unimplementedColumnType(Int(index))
+      }
+    }
+
+    private func row(columnCount: Int32, columnNames: inout [String]) throws -> Row {
+      var row = Row()
+
+      for index in 0..<columnCount {
+        if columnNames.count <= index {
+          columnNames.append(try columnName(for: index))
+        }
+        row[columnNames[Int(index)]] = try columnValue(for: index)
+      }
+
+      return row
+    }
+
+    private func rows() throws -> [Row] {
+      let columnCount = sqlite3_column_count(handle)
+      guard columnCount != 0 else { return [] }
+
+      var columnNames = [String]()
+      var rows = [Row]()
+
+      var result = SQLITE_ROW
+      while result == SQLITE_ROW {
+        rows.append(try row(columnCount: columnCount, columnNames: &columnNames))
+
+        result = sqlite3_step(handle)
+      }
+      return rows
+    }
+
+    @discardableResult
+    func execute(_ errorStringBuilder: () -> String) throws -> [Row] {
       let result = sqlite3_step(handle)
       defer {
         var result = sqlite3_reset(handle)
@@ -182,10 +239,9 @@ actor Database {
         throw DatabaseError.cannotStep(message)
       }
 
-      let columnCount = sqlite3_column_count(handle)
-      guard columnCount == 0 else {
-        throw DatabaseError.unexpectedColumns(columnCount)
-      }
+      guard result == SQLITE_ROW else { return [] }
+
+      return try rows()
     }
 
     @discardableResult
