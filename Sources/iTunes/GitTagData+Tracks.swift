@@ -19,12 +19,12 @@ extension Tag where Item == Data {
 }
 
 extension GitTagData {
-  func transformTracks<Transform: Hashable & Sendable>(
-    _ transform: @escaping @Sendable (String, [Track]) -> Set<Transform>
-  ) async throws -> Set<Transform> {
+  func transformTracks<Transform: Sendable>(
+    _ transform: @escaping @Sendable (String, [Track]) -> [Transform]
+  ) async throws -> [Transform] {
     var tagDatum = try await self.tagDatum()
 
-    return try await withThrowingTaskGroup(of: Set<Transform>.self) { group in
+    return try await withThrowingTaskGroup(of: Array<Transform>.self) { group in
       for tagData in tagDatum.reversed() {
         tagDatum.removeLast()
         group.addTask {
@@ -33,11 +33,11 @@ extension GitTagData {
         }
       }
 
-      var allNames: Set<Transform> = []
-      for try await tracksNames in group {
-        allNames = allNames.union(tracksNames)
+      var allTransforms = [Transform]()
+      for try await transforms in group {
+        allTransforms.append(contentsOf: transforms)
       }
-      return allNames
+      return allTransforms
     }
   }
 

@@ -70,43 +70,43 @@ extension Track {
 }
 
 extension Array where Element == Track {
-  var albumNames: Set<AlbumArtistName> {
-    Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumArtistName })
+  var albumNames: [AlbumArtistName] {
+    [AlbumArtistName](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumArtistName }))
   }
 
-  var albumTrackCounts: Set<AlbumTrackCount> {
-    Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumTrackCount })
+  var albumTrackCounts: [AlbumTrackCount] {
+    [AlbumTrackCount](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumTrackCount }))
   }
 
-  var songTrackNumbers: Set<SongTrackNumber> {
-    Set(self.filter { $0.isSQLEncodable }.compactMap { $0.songTrackNumber })
+  var songTrackNumbers: [SongTrackNumber] {
+    [SongTrackNumber](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.songTrackNumber }))
   }
 
-  var songYears: Set<SongYear> {
-    Set(self.filter { $0.isSQLEncodable }.compactMap { $0.songYear })
+  var songYears: [SongYear] {
+    [SongYear](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.songYear }))
   }
 
-  var songIdentifiers: Set<SongIdentifier> {
-    Set(self.filter { $0.isSQLEncodable }.compactMap { $0.songIdentifier })
+  var songIdentifiers: [SongIdentifier] {
+    [SongIdentifier](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.songIdentifier }))
   }
 }
 
-func currentAlbums() async throws -> Set<AlbumArtistName> {
+func currentAlbums() async throws -> [AlbumArtistName] {
   try await Source.itunes.gather(reduce: false).albumNames
 }
 
-func currentAlbumTrackCounts() async throws -> Set<AlbumTrackCount> {
+func currentAlbumTrackCounts() async throws -> [AlbumTrackCount] {
   try await Source.itunes.gather(reduce: false).albumTrackCounts
 }
 
-func currentSongTrackNumbers() async throws -> Set<SongTrackNumber> {
+func currentSongTrackNumbers() async throws -> [SongTrackNumber] {
   try await Source.itunes.gather(reduce: false).songTrackNumbers
 }
 
-func currentSongYears() async throws -> Set<SongYear> {
+func currentSongYears() async throws -> [SongYear] {
   try await Source.itunes.gather(reduce: false).songYears
 }
 
-func currentSongIdentifiers() async throws -> Set<SongIdentifier> {
+func currentSongIdentifiers() async throws -> [SongIdentifier] {
   try await Source.itunes.gather(reduce: false).songIdentifiers
 }

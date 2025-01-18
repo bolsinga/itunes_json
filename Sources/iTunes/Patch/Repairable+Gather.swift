@@ -9,9 +9,9 @@ import Foundation
 
 private func changes<Guide: Hashable & Similar, Change: Sendable>(
   configuration: GitTagData.Configuration,
-  currentGuides: @Sendable () async throws -> Set<Guide>,
-  createGuide: @escaping @Sendable ([Track]) -> Set<Guide>,
-  createChange: @escaping @Sendable (Guide, Set<Guide>) -> Change?
+  currentGuides: @Sendable () async throws -> [Guide],
+  createGuide: @escaping @Sendable ([Track]) -> [Guide],
+  createChange: @escaping @Sendable (Guide, [Guide]) -> Change?
 ) async throws -> [Change] {
   async let asyncCurrentGuides = try await currentGuides()
 
@@ -22,16 +22,16 @@ private func changes<Guide: Hashable & Similar, Change: Sendable>(
 
   let currentGuides = try await asyncCurrentGuides
 
-  let unknownGuides = Array(allKnownGuides.subtracting(currentGuides))
+  let unknownGuides = Array(Set(allKnownGuides).subtracting(Set(currentGuides)))
 
   return await unknownGuides.changes { createChange($0, currentGuides) }
 }
 
-private func corrections<Guide: Hashable & Sendable, Change: Sendable>(
+private func corrections<Guide: Sendable, Change: Sendable>(
   configuration: GitTagData.Configuration,
-  currentGuides: @Sendable () async throws -> Set<Guide>,
-  brokenGuides: @escaping @Sendable ([Track]) -> Set<Guide>,
-  createChange: @escaping @Sendable (Guide, Set<Guide>) -> Change?
+  currentGuides: @Sendable () async throws -> [Guide],
+  brokenGuides: @escaping @Sendable ([Track]) -> [Guide],
+  createChange: @escaping @Sendable (Guide, [Guide]) -> Change?
 ) async throws -> [Change] {
   async let asyncCurrentGuides = try await currentGuides()
 
@@ -177,7 +177,7 @@ extension Repairable {
             $0.filter { $0.isSQLEncodable }.songTrackNumbers.filter { $0.trackNumber == nil }
           } createChange: { item, currentItems in
             if item.trackNumber == nil {
-              return currentItems.union(correction).filter { $0.song == item.song }.first
+              return Set(currentItems).union(correction).filter { $0.song == item.song }.first
             }
             return nil
           }
@@ -193,7 +193,7 @@ extension Repairable {
             $0.filter { $0.isSQLEncodable }.songYears.filter { $0.year == nil }
           } createChange: { item, currentItems in
             if item.year == nil {
-              return currentItems.union(correction).filter { $0.song == item.song }.first
+              return Set(currentItems).union(correction).filter { $0.song == item.song }.first
             }
             return nil
           }
@@ -206,7 +206,7 @@ extension Repairable {
             try await currentSongIdentifiers()
           } brokenGuides: {
             $0.filter { $0.isSQLEncodable }.songIdentifiers
-          } createChange: { (item: SongIdentifier, currentItems: Set<SongIdentifier>) in
+          } createChange: { (item: SongIdentifier, currentItems: [SongIdentifier]) in
             if let songIdentifier = currentItems.filter({ $0.matchesExcludingSongName(item) })
               .first,
               songIdentifier.song.songArtist.song != item.song.songArtist.song
