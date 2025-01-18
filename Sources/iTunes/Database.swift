@@ -31,7 +31,7 @@ typealias DatabaseHandle = OpaquePointer
 typealias StatementHandle = OpaquePointer
 
 actor Database {
-  typealias Value = Statement.Parameter
+  typealias Value = Statement.Value
 
   fileprivate struct Logging {
     let open: Logger
@@ -61,14 +61,14 @@ actor Database {
     static let empty: Statement = "\(Int(0))"
 
     var sql: String
-    var parameters: [Parameter]
+    var parameters: [Value]
 
-    init(sql: String = "", parameters: [Parameter] = []) {
+    init(sql: String = "", parameters: [Value] = []) {
       self.sql = sql
       self.parameters = parameters
     }
 
-    enum Parameter: CustomStringConvertible {
+    enum Value: CustomStringConvertible {
       case integer(Int64)
       case string(String)
       case null
@@ -114,7 +114,7 @@ actor Database {
       static private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
     }
 
-    func description(_ parameterDescriptor: (Parameter) -> String) -> String {
+    func description(_ parameterDescriptor: (Value) -> String) -> String {
       let chunks = sql.split(separator: "?")
       let parameterizedChunks = zip(chunks, parameters.map { parameterDescriptor($0) }).flatMap {
         [String($0), String($1)]
@@ -277,7 +277,7 @@ protocol SQLiteStatementConvertible {
 }
 
 protocol SQLiteParameterConvertible: SQLiteStatementConvertible {
-  var parameter: Database.Statement.Parameter { get }
+  var parameter: Database.Statement.Value { get }
 }
 
 extension SQLiteParameterConvertible {
@@ -287,15 +287,15 @@ extension SQLiteParameterConvertible {
 }
 
 extension Int64: SQLiteParameterConvertible {
-  var parameter: Database.Statement.Parameter { .integer(self) }
+  var parameter: Database.Statement.Value { .integer(self) }
 }
 
 extension Int: SQLiteParameterConvertible {
-  var parameter: Database.Statement.Parameter { .integer(Int64(self)) }
+  var parameter: Database.Statement.Value { .integer(Int64(self)) }
 }
 
 extension String: SQLiteParameterConvertible {
-  var parameter: Database.Statement.Parameter { .string(self) }
+  var parameter: Database.Statement.Value { .string(self) }
 }
 
 extension Database.Statement: SQLiteStatementConvertible {
