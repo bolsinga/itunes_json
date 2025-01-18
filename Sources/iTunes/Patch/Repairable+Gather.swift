@@ -18,7 +18,7 @@ private func changes<Guide: Hashable & Similar, Change: Sendable>(
   let allKnownGuides = try await GitTagData(configuration: configuration).transformTracks {
     _, tracks in
     createGuide(tracks)
-  }
+  }.flatMap { $0.item }
 
   let currentGuides = try await asyncCurrentGuides
 
@@ -38,7 +38,7 @@ private func corrections<Guide: Sendable, Change: Sendable>(
   let allBrokenGuides = try await GitTagData(configuration: configuration).transformTracks {
     _, tracks in
     brokenGuides(tracks)
-  }
+  }.flatMap { $0.item }
 
   let currentGuides = try await asyncCurrentGuides
 
