@@ -8,18 +8,39 @@
 import ArgumentParser
 import Foundation
 
+extension Database {
+  func executeAndClose(_ query: String) throws -> [Row] {
+    let result = try execute(query: query)
+    close()
+    return result
+  }
+}
+
 extension GitTagData {
   func execute(query: String, schemaOptions: SchemaOptions) async throws {
     let databases = try await transformTracks {
       let database: Database = try await $1.database(
         storage: .memory, loggingToken: "batch-\($0)", schemaOptions: schemaOptions)
       return database
-    }
+    }.sorted(by: { $0.tag < $1.tag })
+
+    var columns = [String]()
 
     for database in databases {
-      print(database.tag)
-      try await database.item.execute(query)
-      await database.item.close()
+      let rows = try await database.item.executeAndClose(query)
+      guard !rows.isEmpty else { continue }
+
+      if columns.isEmpty {
+        columns = rows[0].keys.sorted()
+        print((["tag"] + columns).joined(separator: "|"))
+      }
+
+      for row in rows {
+        let rowDescription = columns.reduce(into: [database.tag]) {
+          $0.append("\(row[$1] ?? .null)")
+        }.joined(separator: "|")
+        print(rowDescription)
+      }
     }
   }
 }
