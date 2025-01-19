@@ -9,7 +9,7 @@ import ArgumentParser
 import Foundation
 
 extension Database {
-  func executeAndClose(_ query: String) throws -> [Row] {
+  func executeAndClose(_ query: String) throws -> [[Row]] {
     let result = try execute(query: query)
     close()
     return result
@@ -27,19 +27,23 @@ extension GitTagData {
     var columns = [String]()
 
     for database in databases {
-      let rows = try await database.item.executeAndClose(query)
-      guard !rows.isEmpty else { continue }
+      let queryRows = try await database.item.executeAndClose(query)
+      guard !queryRows.isEmpty else { continue }
 
-      if columns.isEmpty {
-        columns = rows[0].keys.sorted()
-        print((["tag"] + columns).joined(separator: "|"))
-      }
+      for rows in queryRows {
+        guard !rows.isEmpty else { continue }
 
-      for row in rows {
-        let rowDescription = columns.reduce(into: [database.tag]) {
-          $0.append("\(row[$1] ?? .null)")
-        }.joined(separator: "|")
-        print(rowDescription)
+        if columns.isEmpty {
+          columns = rows[0].keys.sorted()
+          print((["tag"] + columns).joined(separator: "|"))
+        }
+
+        for row in rows {
+          let rowDescription = columns.reduce(into: [database.tag]) {
+            $0.append("\(row[$1] ?? .null)")
+          }.joined(separator: "|")
+          print(rowDescription)
+        }
       }
     }
   }
