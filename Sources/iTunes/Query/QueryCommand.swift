@@ -31,6 +31,8 @@ extension GitTagData {
       guard !queryRows.isEmpty else { continue }
 
       for rows in queryRows {
+        guard !rows.isEmpty else { continue }
+
         if columns.isEmpty {
           columns = rows[0].keys.sorted()
           print((["tag"] + columns).joined(separator: "|"))
