@@ -132,11 +132,16 @@ actor Database {
     private let handle: StatementHandle
     private let logging: Logging
 
-    static func create(sql: Statement, db: isolated Database) throws -> [PreparedStatement] {
-      try create(string: sql.sql, db: db)
+    fileprivate init(handle: StatementHandle, logging: Logging) {
+      self.handle = handle
+      self.logging = logging
     }
 
-    static func create(string: String, db: isolated Database) throws -> [PreparedStatement] {
+    init(sql: Statement, db: isolated Database) throws {
+      try self.init(string: sql.sql, db: db)
+    }
+
+    init(string: String, db: isolated Database) throws {
       var statementHandle: StatementHandle?
       let result = sqlite3_prepare_v3(
         db.handle, string, -1, UInt32(SQLITE_PREPARE_PERSISTENT), &statementHandle, nil)
@@ -147,13 +152,7 @@ actor Database {
         throw DatabaseError.cannotPrepare(db.handle.sqlError)
       }
 
-      let statement = PreparedStatement(handle: statementHandle, logging: db.logging)
-      return [statement]
-    }
-
-    private init(handle: StatementHandle, logging: Logging) {
-      self.handle = handle
-      self.logging = logging
+      self.init(handle: statementHandle, logging: db.logging)
     }
 
     func close() {
@@ -311,13 +310,11 @@ actor Database {
     }
   }
 
-  func execute(query: String) throws -> [[Row]] {
+  func execute(query: String) throws -> [Row] {
     try transaction { db in
-      let statements = try Database.PreparedStatement.create(string: query, db: db)
-      return try statements.map {
-        try $0.executeAndClose(db) { statement, db in
-          try statement.execute { db.errorString }
-        }
+      let statement = try Database.PreparedStatement(string: query, db: db)
+      return try statement.executeAndClose(db) { statement, db in
+        try statement.execute { db.errorString }
       }
     }
   }
