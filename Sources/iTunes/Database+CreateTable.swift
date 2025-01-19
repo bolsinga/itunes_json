@@ -7,10 +7,6 @@
 
 import Foundation
 
-private enum CreateTableError: Error {
-  case tooManyStatements
-}
-
 protocol TableBuilder: Sendable {
   associatedtype Row: SQLBindableInsert & Hashable & Sendable
 
@@ -29,8 +25,8 @@ extension TableBuilder {
     return []
   }
 
-  func preparedStatements(using db: isolated Database) throws -> [Database.PreparedStatement] {
-    try Database.PreparedStatement.create(sql: Row.insertBinding, db: db)
+  func preparedStatement(using db: isolated Database) throws -> Database.PreparedStatement {
+    try Database.PreparedStatement(sql: Row.insertBinding, db: db)
   }
 }
 
@@ -52,11 +48,7 @@ extension Database {
     return try self.transaction { db in
       try db.execute(builder.schema(constraints: schemaConstraints))
 
-      let statements = try builder.preparedStatements(using: db)
-
-      guard statements.count == 1, let statement = statements.first else {
-        throw CreateTableError.tooManyStatements
-      }
+      let statement = try builder.preparedStatement(using: db)
 
       return try statement.executeAndClose(db) { statement, db in
         try builder.rows.reduce(into: [B.Row: Int64](minimumCapacity: builder.rows.count)) {
