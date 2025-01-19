@@ -21,6 +21,7 @@ enum DatabaseError: Error {
   case noColumnName(Int)
   case unimplementedColumnType(Int)
   case noColumnText(Int)
+  case memoryError
 }
 
 extension DatabaseHandle {
@@ -130,10 +131,16 @@ actor Database {
 
   struct PreparedStatement {
     private let handle: StatementHandle
+    private let cString: ContiguousArray<CChar>
+    private let offset: Int
     private let logging: Logging
 
-    fileprivate init(handle: StatementHandle, logging: Logging) {
+    fileprivate init(
+      handle: StatementHandle, cString: ContiguousArray<CChar>, offset: Int, logging: Logging
+    ) {
       self.handle = handle
+      self.cString = cString
+      self.offset = offset
       self.logging = logging
     }
 
@@ -142,17 +149,40 @@ actor Database {
     }
 
     init(string: String, db: isolated Database) throws {
-      var statementHandle: StatementHandle?
-      let result = sqlite3_prepare_v3(
-        db.handle, string, -1, UInt32(SQLITE_PREPARE_PERSISTENT), &statementHandle, nil)
+      try self.init(cString: string.utf8CString, offset: 0, db: db)
+    }
 
-      guard result == SQLITE_OK, let statementHandle else {
-        db.logging.prepare.error(
-          "\(string, privacy: .public) (result: \(result, privacy: .public))")
-        throw DatabaseError.cannotPrepare(db.handle.sqlError)
+    fileprivate init(cString: ContiguousArray<CChar>, offset: Int, db: isolated Database) throws {
+      let (handle, newOffset) = try cString.withUnsafeBufferPointer { buffer in
+        guard let baseAddress = buffer.baseAddress else {
+          throw DatabaseError.memoryError
+        }
+
+        var statementHandle: StatementHandle?
+        var remainderPtr: UnsafePointer<CChar>?
+
+        let offsetCopy = offset
+
+        let result = sqlite3_prepare_v3(
+          db.handle, baseAddress + offset, -1, UInt32(SQLITE_PREPARE_PERSISTENT),
+          &statementHandle, &remainderPtr)
+
+        guard result == SQLITE_OK, let statementHandle else {
+          db.logging.prepare.error(
+            "\(String(cString: baseAddress + offsetCopy), privacy: .public) (result: \(result, privacy: .public))"
+          )
+          throw DatabaseError.cannotPrepare(db.handle.sqlError)
+        }
+
+        let newOffset = remainderPtr! - baseAddress
+        return (statementHandle, newOffset)
       }
+      self.init(handle: handle, cString: cString, offset: newOffset, logging: db.logging)
+    }
 
-      self.init(handle: statementHandle, logging: db.logging)
+    func next(db: isolated Database) throws -> PreparedStatement? {
+      guard offset < cString.count - 1 else { return nil }
+      return try PreparedStatement(cString: cString, offset: offset, db: db)
     }
 
     func close() {
@@ -310,12 +340,20 @@ actor Database {
     }
   }
 
-  func execute(query: String) throws -> [Row] {
+  func execute(query: String) throws -> [[Row]] {
     try transaction { db in
-      let statement = try Database.PreparedStatement(string: query, db: db)
-      return try statement.executeAndClose(db) { statement, db in
-        try statement.execute { db.errorString }
+      var queryResult = [[Row]]()
+
+      var statement: PreparedStatement? = try Database.PreparedStatement(string: query, db: db)
+      while statement != nil {
+        let result = try statement!.executeAndClose(db) { statement, db in
+          try statement.execute { db.errorString }
+        }
+        queryResult.append(result)
+        statement = try statement?.next(db: db)
       }
+
+      return queryResult
     }
   }
 
