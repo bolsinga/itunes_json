@@ -132,16 +132,11 @@ actor Database {
     private let handle: StatementHandle
     private let logging: Logging
 
-    fileprivate init(handle: StatementHandle, logging: Logging) {
-      self.handle = handle
-      self.logging = logging
+    static func create(sql: Statement, db: isolated Database) throws -> [PreparedStatement] {
+      try create(string: sql.sql, db: db)
     }
 
-    init(sql: Statement, db: isolated Database) throws {
-      try self.init(string: sql.sql, db: db)
-    }
-
-    init(string: String, db: isolated Database) throws {
+    static func create(string: String, db: isolated Database) throws -> [PreparedStatement] {
       var statementHandle: StatementHandle?
       let result = sqlite3_prepare_v3(
         db.handle, string, -1, UInt32(SQLITE_PREPARE_PERSISTENT), &statementHandle, nil)
@@ -150,7 +145,13 @@ actor Database {
       guard result == SQLITE_OK else { throw DatabaseError.cannotPrepare(db.handle.sqlError) }
       guard let statementHandle else { throw DatabaseError.cannotPrepare(string) }
 
-      self.init(handle: statementHandle, logging: db.logging)
+      let statement = PreparedStatement(handle: statementHandle, logging: db.logging)
+      return [statement]
+    }
+
+    private init(handle: StatementHandle, logging: Logging) {
+      self.handle = handle
+      self.logging = logging
     }
 
     func close() {
@@ -290,11 +291,13 @@ actor Database {
     guard result == SQLITE_OK else { throw DatabaseError.cannotExecute(handle.sqlError) }
   }
 
-  func execute(query: String) throws -> [Row] {
+  func execute(query: String) throws -> [[Row]] {
     try transaction { db in
-      let statement = try Database.PreparedStatement(string: query, db: db)
-      return try statement.executeAndClose(db) { statement, db in
-        try statement.execute { db.errorString }
+      let statements = try Database.PreparedStatement.create(string: query, db: db)
+      return try statements.map {
+        try $0.executeAndClose(db) { statement, db in
+          try statement.execute { db.errorString }
+        }
       }
     }
   }
