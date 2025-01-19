@@ -147,8 +147,8 @@ actor Database {
         db.handle, string, -1, UInt32(SQLITE_PREPARE_PERSISTENT), &statementHandle, nil)
 
       db.logging.prepare.log("\(string, privacy: .public) (result: \(result, privacy: .public))")
-      guard let statementHandle else { throw DatabaseError.cannotPrepare(string) }
       guard result == SQLITE_OK else { throw DatabaseError.cannotPrepare(db.handle.sqlError) }
+      guard let statementHandle else { throw DatabaseError.cannotPrepare(string) }
 
       self.init(handle: statementHandle, logging: db.logging)
     }
