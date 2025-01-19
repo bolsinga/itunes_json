@@ -141,9 +141,11 @@ actor Database {
       let result = sqlite3_prepare_v3(
         db.handle, string, -1, UInt32(SQLITE_PREPARE_PERSISTENT), &statementHandle, nil)
 
-      db.logging.prepare.log("\(string, privacy: .public) (result: \(result, privacy: .public))")
-      guard result == SQLITE_OK else { throw DatabaseError.cannotPrepare(db.handle.sqlError) }
-      guard let statementHandle else { throw DatabaseError.cannotPrepare(string) }
+      guard result == SQLITE_OK, let statementHandle else {
+        db.logging.prepare.error(
+          "\(string, privacy: .public) (result: \(result, privacy: .public))")
+        throw DatabaseError.cannotPrepare(db.handle.sqlError)
+      }
 
       let statement = PreparedStatement(handle: statementHandle, logging: db.logging)
       return [statement]
@@ -156,7 +158,9 @@ actor Database {
 
     func close() {
       let result = sqlite3_finalize(handle)
-      logging.finalize.log("\(result, privacy: .public)")
+      if result != SQLITE_OK {
+        logging.finalize.error("\(result, privacy: .public)")
+      }
     }
 
     func bind(arguments: [Value], errorStringBuilder: () -> String) throws {
@@ -266,9 +270,21 @@ actor Database {
       storage.name, &handle, SQLITE_OPEN_URI | SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
       nil)
 
-    logging.open.log("\(result, privacy: .public)")
-    guard let handle else { throw DatabaseError.cannotOpen("No handle") }
-    guard result == SQLITE_OK else { throw DatabaseError.cannotOpen(handle.sqlError) }
+    guard result == SQLITE_OK else {
+      var errorString: String?
+      if let handle {
+        errorString = handle.sqlError
+      } else {
+        errorString = String(cString: sqlite3_errstr(result))
+      }
+      logging.open.error("\(result, privacy: .public)")
+      guard let errorString else { throw DatabaseError.cannotOpen("Unknown") }
+      throw DatabaseError.cannotOpen(errorString)
+    }
+    guard let handle else {
+      logging.open.error("No handle")
+      throw DatabaseError.cannotOpen("No handle")
+    }
 
     self.handle = handle
 
@@ -282,13 +298,17 @@ actor Database {
 
   func close() {
     let result = sqlite3_close(handle)
-    logging.close.log("\(result, privacy: .public)")
+    if result != SQLITE_OK {
+      logging.close.error("\(result, privacy: .public)")
+    }
   }
 
   func execute(_ string: String) throws {
     let result = sqlite3_exec(handle, string, nil, nil, nil)
-    logging.exec.log("\(string, privacy: .public) (result: \(result, privacy: .public))")
-    guard result == SQLITE_OK else { throw DatabaseError.cannotExecute(handle.sqlError) }
+    guard result == SQLITE_OK else {
+      logging.exec.error("\(string, privacy: .public) (result: \(result, privacy: .public))")
+      throw DatabaseError.cannotExecute(handle.sqlError)
+    }
   }
 
   func execute(query: String) throws -> [[Row]] {
