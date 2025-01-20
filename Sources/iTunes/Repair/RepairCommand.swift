@@ -84,12 +84,6 @@ struct RepairCommand: AsyncParsableCommand {
   )
   var patchURL: URL
 
-  @Option(
-    help:
-      "The string to append to the sourceTagPrefix for the destination git branch."
-  )
-  var destinationTagPrefix: String
-
   @Option(help: "The destination git branch. Defaults to the patchable type name.")
   var destinationBranch: String?
 
@@ -105,9 +99,7 @@ struct RepairCommand: AsyncParsableCommand {
       directory: gitDirectory, branch: destinationBranch, fileName: Self.fileName)
 
     try await patch.patch(
-      sourceConfiguration: sourceConfiguration,
-      patch: patch,
-      destinationTagPrefix: destinationTagPrefix,
+      sourceConfiguration: sourceConfiguration, patch: patch,
       destinationConfiguration: destinationConfiguration, version: Self.configuration.version)
   }
 }

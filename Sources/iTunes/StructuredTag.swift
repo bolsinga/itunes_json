@@ -25,4 +25,8 @@ struct StructuredTag: Comparable, CustomStringConvertible {
   var description: String {
     "\(root)-V\(version)-\(stamp)"
   }
+
+  var next: StructuredTag {
+    StructuredTag(root: root, version: version + 1, stamp: stamp)
+  }
 }

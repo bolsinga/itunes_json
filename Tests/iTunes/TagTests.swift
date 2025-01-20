@@ -103,18 +103,6 @@ struct TagTests {
     #expect("2024-10-25".tagPrefixAndStamp == nil)
   }
 
-  @Test func replaceInvalid() throws {
-    #expect("-2024-12-05".replacePrefix(newPrefix: "X") == nil)
-  }
-
-  @Test func replaceNonConforming() throws {
-    #expect("xxxxx".replacePrefix(newPrefix: "X") == nil)
-  }
-
-  @Test func replace() throws {
-    #expect("tag-2024-12-05".replacePrefix(newPrefix: "X") == "X-2024-12-05")
-  }
-
   @Test func appendInvalid() throws {
     #expect("-2024-12-05".appendToPrefix(appendix: "x") == nil)
   }
@@ -178,5 +166,17 @@ struct TagTests {
     #expect("iTunes-V10-2025-01-07.empty".structuredTag == nil)
     #expect("iTunes.artists-2025-01-07".structuredTag == nil)
     #expect("iTunes-2006-01-01".structuredTag == nil)
+  }
+
+  @Test func nextVersion() async throws {
+    #expect(
+      StructuredTag(root: "R", version: 3, stamp: "2025-01-20").next
+        == StructuredTag(root: "R", version: 4, stamp: "2025-01-20"))
+    #expect(
+      StructuredTag(root: "R", version: 10, stamp: "2025-01-20").next
+        == StructuredTag(root: "R", version: 11, stamp: "2025-01-20"))
+    #expect(
+      StructuredTag(root: "R", version: 100, stamp: "2025-01-20").next
+        == StructuredTag(root: "R", version: 101, stamp: "2025-01-20"))
   }
 }
