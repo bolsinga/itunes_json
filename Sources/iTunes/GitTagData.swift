@@ -39,34 +39,16 @@ extension Tag where Item == Data {
   }
 }
 
-extension TagFilter {
-  fileprivate func filter(tags: [String], prefix: String) -> [String] {
-    switch self {
-    case .ordered:
-      tags.orderedMatching(tagPrefix: prefix)
-    case .stamped:
-      tags.stampOrderedMatching
-    }
-  }
-}
-
 struct GitTagData {
   struct Configuration {
     let directory: URL
-    let tagPrefix: String
     let branch: String?
     let fileName: String
-    let tagFilter: TagFilter
 
-    init(
-      directory: URL, tagPrefix: String = "", branch: String? = nil, fileName: String,
-      tagFilter: TagFilter
-    ) {
+    init(directory: URL, branch: String? = nil, fileName: String) {
       self.directory = directory
-      self.tagPrefix = tagPrefix
       self.branch = branch
       self.fileName = fileName
-      self.tagFilter = tagFilter
     }
 
     var file: URL {
@@ -74,7 +56,7 @@ struct GitTagData {
     }
 
     func filter(tags: [String]) -> [String] {
-      tagFilter.filter(tags: tags, prefix: tagPrefix)
+      tags.stampOrderedMatching
     }
   }
 

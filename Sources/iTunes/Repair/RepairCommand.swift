@@ -62,9 +62,6 @@ struct RepairCommand: AsyncParsableCommand {
   /// Input source type.
   @Flag(help: "Patchable type to build.") var patchable: Patchable = .artists
 
-  @Flag(help: "How to filter git tags.")
-  var tagFilter: TagFilter = .ordered
-
   /// Git Directory to read and write data from.
   @Option(
     help: "The path for the git directory to work with.",
@@ -87,8 +84,6 @@ struct RepairCommand: AsyncParsableCommand {
   )
   var patchURL: URL
 
-  @Option(help: "The prefix to use for the source git tags.") var sourceTagPrefix: String = "iTunes"
-
   @Option(
     help:
       "The string to append to the sourceTagPrefix for the destination git branch."
@@ -98,24 +93,16 @@ struct RepairCommand: AsyncParsableCommand {
   @Option(help: "The destination git branch. Defaults to the patchable type name.")
   var destinationBranch: String?
 
-  func validate() throws {
-    if sourceTagPrefix == destinationTagPrefix {
-      throw ValidationError("Source and Destination Tags must be different.")
-    }
-  }
-
   func run() async throws {
     let patch = try patchable.createPatch(patchURL)
 
     let sourceConfiguration = GitTagData.Configuration(
-      directory: gitDirectory, tagPrefix: sourceTagPrefix, fileName: Self.fileName,
-      tagFilter: tagFilter)
+      directory: gitDirectory, fileName: Self.fileName)
 
     let destinationBranch = destinationBranch ?? patchable.rawValue
 
     let destinationConfiguration = GitTagData.Configuration(
-      directory: gitDirectory, branch: destinationBranch, fileName: Self.fileName,
-      tagFilter: tagFilter)
+      directory: gitDirectory, branch: destinationBranch, fileName: Self.fileName)
 
     try await patch.patch(
       sourceConfiguration: sourceConfiguration,

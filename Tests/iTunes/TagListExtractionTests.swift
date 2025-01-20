@@ -23,7 +23,7 @@ struct TagListExtractionTests {
     #expect(!tags.isEmpty)
     #expect(tags.count == 6)
 
-    let result = tags.shuffled().orderedMatching(tagPrefix: "iTunes-V12")
+    let result = tags.shuffled().stampOrderedMatching
 
     #expect(result.count == 4)
 
@@ -31,41 +31,6 @@ struct TagListExtractionTests {
     #expect(result[1] == tags[1])
     #expect(result[2] == tags[2])
     #expect(result[3] == tags[4])
-
-    let stampedResult = tags.shuffled().stampOrderedMatching
-
-    #expect(result.count == 4)
-    #expect(result == stampedResult)
-  }
-
-  @Test func assortedPrefixes_ordered() async throws {
-    let tags = """
-      iTunes-2006-01-01
-      iTunes.artists-2006-01-01
-      iTunes-V2-2006-01-01
-      iTunes-V3-2006-01-01
-      iTunes-V4-2006-01-01
-      iTunes-V5-2006-01-01
-      iTunes-V6-2006-02-01
-      iTunes-V7-2006-03-01
-      iTunes-V8-2006-04-01
-      iTunes-V9-2006-05-01
-      iTunes-V10-2006-05-01
-      iTunes-V11-2006-05-01
-      iTunes-V12-2006-05-01
-      iTunes-V12-2006-06-01
-      """.split(separator: "\n").map { String($0) }
-
-    #expect(!tags.isEmpty)
-    #expect(tags.count == 14)
-
-    let result = tags.shuffled().orderedMatching(tagPrefix: "iTunes-V12")
-
-    #expect(result.count == 2)
-
-    for index in 0..<result.count {
-      #expect(result[index] == tags[index + 12])
-    }
   }
 
   @Test func assortedPrefixes_date() async throws {
