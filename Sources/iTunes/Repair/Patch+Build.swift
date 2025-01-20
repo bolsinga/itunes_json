@@ -7,21 +7,20 @@
 
 import Foundation
 
-extension String {
-  fileprivate func replaceTagPrefix(tagPrefix: String) -> String {
-    replacePrefix(newPrefix: tagPrefix) ?? "\(self)-Could-Not-Properly-Replace-\(tagPrefix)"
-  }
+private enum TagError: Error {
+  case unstructuredTag
 }
 
 extension Tag {
-  fileprivate func replace(newTagPrefix: String) -> Tag {
-    Tag(tag: tag.replaceTagPrefix(tagPrefix: newTagPrefix), item: item)
+  fileprivate func nextVersion() throws -> Tag {
+    guard let structuredTag = tag.structuredTag else { throw TagError.unstructuredTag }
+    return Tag(tag: structuredTag.next.description, item: item)
   }
 }
 
 extension Patch {
   func patch(
-    sourceConfiguration: GitTagData.Configuration, patch: Patch, destinationTagPrefix: String,
+    sourceConfiguration: GitTagData.Configuration, patch: Patch,
     destinationConfiguration: GitTagData.Configuration, version: String
   ) async throws {
     let patchedTracksData = try await GitTagData(configuration: sourceConfiguration)
@@ -30,7 +29,7 @@ extension Patch {
     guard let initialCommit = patchedTracksData.initialTag else { return }
 
     try await GitTagData(configuration: destinationConfiguration).write(
-      tagDatum: patchedTracksData.map { $0.replace(newTagPrefix: destinationTagPrefix) },
+      tagDatum: patchedTracksData.map { try $0.nextVersion() },
       initialCommit: initialCommit, version: version)
   }
 }
