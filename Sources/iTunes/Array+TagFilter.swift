@@ -18,10 +18,6 @@ extension Array where Element == StructuredTag {
 }
 
 extension Array where Element == String {
-  func orderedMatching(tagPrefix: String) -> [String] {
-    self.filter { $0.matchingFormattedTag(prefix: tagPrefix) }.sorted()
-  }
-
   var stampOrderedMatching: [Element] {
     self.compactMap { $0.structuredTag }.stampOrderedMatching.map { $0.description }
   }

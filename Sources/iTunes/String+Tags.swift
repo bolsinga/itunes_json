@@ -79,14 +79,6 @@ extension String {
     tagPrefixAndStamp?.0
   }
 
-  func matchingFormattedTag(prefix: String) -> Bool {
-    guard !prefix.isEmpty else { return false }
-
-    guard let existingPrefix = tagPrefix else { return false }
-
-    return existingPrefix == prefix
-  }
-
   func replacePrefix(newPrefix: String) -> String? {
     guard let prefix = tagPrefix else { return nil }
 

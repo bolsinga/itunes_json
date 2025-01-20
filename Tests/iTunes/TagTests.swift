@@ -103,26 +103,6 @@ struct TagTests {
     #expect("2024-10-25".tagPrefixAndStamp == nil)
   }
 
-  @Test func matchingEmpty() throws {
-    #expect(!"tag-2024-12-05".matchingFormattedTag(prefix: ""))
-  }
-
-  @Test func matchingInvalidPrefix() throws {
-    #expect(!"-2024-12-05".matchingFormattedTag(prefix: "tag"))
-  }
-
-  @Test func matchingNonConforming() throws {
-    #expect(!"xxxxx".matchingFormattedTag(prefix: "tag"))
-  }
-
-  @Test func matchingWrongPrefix() throws {
-    #expect(!"tag-2024-12-05".matchingFormattedTag(prefix: "x"))
-  }
-
-  @Test func matchingPrefix() throws {
-    #expect("tag-2024-12-05".matchingFormattedTag(prefix: "tag"))
-  }
-
   @Test func replaceInvalid() throws {
     #expect("-2024-12-05".replacePrefix(newPrefix: "X") == nil)
   }

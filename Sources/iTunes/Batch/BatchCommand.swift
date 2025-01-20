@@ -26,9 +26,6 @@ struct BatchCommand: AsyncParsableCommand {
   @Flag(help: "Lax database schema table constraints")
   var laxSchema: [SchemaFlag] = []
 
-  @Flag(help: "How to filter git tags.")
-  var tagFilter: TagFilter = .ordered
-
   /// Git Directory to read and write data from.
   @Option(
     help: "The path for the git directory to work with.",
@@ -43,8 +40,6 @@ struct BatchCommand: AsyncParsableCommand {
     })
   )
   var gitDirectory: URL
-
-  @Option(help: "The prefix to use for the git tags.") var tagPrefix: String = "iTunes"
 
   /// Output Directory for batch results.
   @Option(
@@ -63,8 +58,7 @@ struct BatchCommand: AsyncParsableCommand {
   var outputDirectory: URL
 
   func run() async throws {
-    let configuration = GitTagData.Configuration(
-      directory: gitDirectory, tagPrefix: tagPrefix, fileName: Self.fileName, tagFilter: tagFilter)
+    let configuration = GitTagData.Configuration(directory: gitDirectory, fileName: Self.fileName)
     try await batch.build(
       configuration, outputDirectory: outputDirectory,
       schemaOptions: laxSchema.schemaOptions)
