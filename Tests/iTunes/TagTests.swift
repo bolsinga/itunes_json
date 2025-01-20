@@ -136,8 +136,16 @@ struct TagTests {
     #expect(try #require("iTunes.V1".tagVersion) == ("iTunes", 1))
     #expect(try #require("iTunes-V10".tagVersion) == ("iTunes", 10))
     #expect(try #require("iTunes.V10".tagVersion) == ("iTunes", 10))
+    #expect(try #require("iTunes-V100".tagVersion) == ("iTunes", 100))
+    #expect(try #require("iTunes.V100".tagVersion) == ("iTunes", 100))
+    #expect(try #require("iTunes-V1000".tagVersion) == ("iTunes", 1000))
+    #expect(try #require("iTunes.V1000".tagVersion) == ("iTunes", 1000))
     #expect(try #require("iTunes-A10".tagVersion) == ("iTunes", 10))
     #expect(try #require("iTunes.A10".tagVersion) == ("iTunes", 10))
+    #expect(try #require("iTunes-A100".tagVersion) == ("iTunes", 100))
+    #expect(try #require("iTunes.A100".tagVersion) == ("iTunes", 100))
+    #expect(try #require("iTunes-A1000".tagVersion) == ("iTunes", 1000))
+    #expect(try #require("iTunes.A1000".tagVersion) == ("iTunes", 1000))
     #expect(try #require("iTunes.artists1".tagVersion) == ("iTunes", 1))
   }
 
@@ -161,6 +169,12 @@ struct TagTests {
     #expect(
       try #require("iTunes-V10-2025-01-07.01".structuredTag)
         == StructuredTag(root: "iTunes", version: 10, stamp: "2025-01-07.01"))
+    #expect(
+      try #require("iTunes-V100-2025-01-07.01".structuredTag)
+        == StructuredTag(root: "iTunes", version: 100, stamp: "2025-01-07.01"))
+    #expect(
+      try #require("iTunes-V1000-2025-01-07.01".structuredTag)
+        == StructuredTag(root: "iTunes", version: 1000, stamp: "2025-01-07.01"))
     #expect("iTunes-V10-2025-01-07.empty".structuredTag == nil)
     #expect("iTunes.artists-2025-01-07".structuredTag == nil)
     #expect("iTunes-2006-01-01".structuredTag == nil)
