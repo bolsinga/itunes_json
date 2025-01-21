@@ -1,7 +1,7 @@
 # itunes_json
-This uses [iTunesLibrary framework](https://developer.apple.com/documentation/ituneslibrary) or [MusicKit](https://developer.apple.com/musickit/) to create JSON representing your music library.
+This uses the [iTunesLibrary framework](https://developer.apple.com/documentation/ituneslibrary) or [MusicKit](https://developer.apple.com/musickit/) to create JSON representing your music library. This JSON contains every field possible, with compatibility with the iTunes.plist file that used to be created before macOS Catalina.
 
-It can backup to a file or commit to a git repository for listening history. The files will be committed to git with tag indicating the date snapshot (as well as a version). It will not write over existing tags.
+It can backup to a file or commit to a git repository for listening history. The files will be committed to git with a tag indicating the snapshot date (as well as a version). It will not write over existing tags.
 
 It can also emit SQL or a SQLite3 database. `tunes backup --sql-code | sqlite3 > /tmp/itunes.db` Right now the schema is documented only in code. Then you can get information such as last playdates in order: `SELECT s.name, a.name, p.date, p.delta FROM songs s, artists a, plays p WHERE s.artistid=a.id AND p.songid=s.id ORDER by p.date;` 
 The schema is strict by default. In order to allow work to be done while the data may be incomplete, there are options to create the tables with lax schema constraints.
@@ -12,7 +12,7 @@ The output of this program is also used as input to [web generator](https://gith
 
 ## Other Modes
 
-These modes are useful when there is listening history in a git repository. It allows the data to be mined, in order to make patches, and then apply the patches for repairs. Iterations over the data will allow it to populate the database tables with strict schema enabled.
+These modes are useful when there is listening history in a git repository created by this program. It allows the data to be mined, create patches, and repair the data. Iterations over the data will allow it to populate the database tables with strict schema enabled.
 
 ### patch
 This will create patch files for the repair tool to use. It makes the assumption that the current data found in the Music application is correct. It then will go through the backups in git history to find "patches" to tracks that are "similar".
@@ -34,7 +34,7 @@ This will repair a git repository with listening history, given a file created w
 This will iterate through a git repository with listening history and either create a directory full of sql code or a database file for each tag found in the repository. This is used to find bad data as the schema is made more strict.
 
 ### query
-This will iterate through a git repository with listening history and execute the given SQL code on each individual databases. This is useful to help determine next steps with this code.
+This will iterate through a git repository with listening history and execute the given SQL code on each individual databases. This is useful to help determine next steps with this code and data.
 
 ## Future
 Back up to a single already existing database file, instead of many snapshots of data. Music will only tell you the last time a song was played. This database will have all the times it was played.
