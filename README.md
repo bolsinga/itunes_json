@@ -34,7 +34,7 @@ This will repair a git repository with listening history, given a file created w
 This will iterate through a git repository with listening history and either create a directory full of sql code or a database file for each tag found in the repository. This is used to find bad data as the schema is made more strict.
 
 ### query
-This will iterate through a git repository with listening history and execute the given SQL code on each individual databases. This is useful to help determine next steps with this code and data.
+This will iterate through a git repository with listening history and execute the given SQL code on each individual database. This is useful to help determine next steps with this code and data.
 
 ## Future
 Back up to a single already existing database file, instead of many snapshots of data. Music will only tell you the last time a song was played. This database will have all the times it was played. I have backup data dating to 01/01/2006 to work with.
