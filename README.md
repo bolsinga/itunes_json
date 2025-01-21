@@ -17,18 +17,18 @@ These modes are useful when there is listening history in a git repository creat
 ### patch
 This will create patch files for the repair tool to use. It makes the assumption that the current data found in the Music application is correct. It then will go through the backups in git history to find "patches" to tracks that are "similar".
 
-- artists - Fixes similar artist names, including sort names.
-- albums - Fixes similar album names, including sort names.
-- missing-title-albums - Gets album names using songs and artists.
-- track-counts - Gets track counts for albums.
-- track-numbers - Gets track numbers for songs.
-- years - Gets years for songs.
-- songs - Fixes song names based upon artist, album, and Music "persistentID".
+- `artists` - Fixes similar artist names, including sort names.
+- `albums` - Fixes similar album names, including sort names.
+- `missing-title-albums` - Gets album names using songs and artists.
+- `track-counts` - Gets track counts for albums.
+- `track-numbers` - Gets track numbers for songs.
+- `years` - Gets years for songs.
+- `songs` - Fixes song names based upon artist, album, and Music "persistentID".
 
 ### repair
 This will repair a git repository with listening history, given a file created with the patch tool. It has all the same options as the patch tool, found above. It has one additional option, listed below.
 
-- track-corrections - This will fix items in a hand built patch file. Please see the code for the format. These were necessary for songs that are no longer in the library, or those that needed to be repaired, but have nothing "similar" enough to automate the creation of a patch file.
+- `track-corrections` - This will fix items in a hand built patch file. Please see the code for the format. These were necessary for songs that are no longer in the library, or those that needed to be repaired, but have nothing "similar" enough to automate the creation of a patch file.
 
 ### batch
 This will iterate through a git repository with listening history and either create a directory full of sql code or a database file for each tag found in the repository. This is used to find bad data as the schema is made more strict.
