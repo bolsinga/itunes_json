@@ -67,6 +67,13 @@ extension Track {
     guard let songArtistAlbum else { return nil }
     return SongIdentifier(song: songArtistAlbum, persistentID: persistentID)
   }
+
+  var trackIdentifier: TrackIdentifier? {
+    guard let songIdentifier else { return nil }
+    return TrackIdentifier(
+      songIdentifier: songIdentifier, trackNumber: trackNumber, trackCount: trackCount,
+      discNumber: discNumber, discCount: discCount)
+  }
 }
 
 extension Array where Element == Track {
@@ -89,6 +96,10 @@ extension Array where Element == Track {
   var songIdentifiers: [SongIdentifier] {
     [SongIdentifier](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.songIdentifier }))
   }
+
+  var trackIdentifiers: [TrackIdentifier] {
+    [TrackIdentifier](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.trackIdentifier }))
+  }
 }
 
 func currentAlbums() async throws -> [AlbumArtistName] {
@@ -109,4 +120,8 @@ func currentSongYears() async throws -> [SongYear] {
 
 func currentSongIdentifiers() async throws -> [SongIdentifier] {
   try await Source.itunes.gather(reduce: false).songIdentifiers
+}
+
+func currentTrackIdentifiers() async throws -> [TrackIdentifier] {
+  try await Source.itunes.gather(reduce: false).trackIdentifiers
 }

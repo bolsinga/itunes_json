@@ -218,6 +218,27 @@ extension Repairable {
           }
         ).sorted()
       )
+    case .replaceTrackCounts:
+      return .trackCorrections(
+        Set(
+          try await changes(configuration: configuration) {
+            try await currentTrackIdentifiers()
+          } createGuide: {
+            $0.filter { $0.isSQLEncodable }.trackIdentifiers
+          } createChange: { (item: TrackIdentifier, currentItems: [TrackIdentifier]) in
+            guard
+              let identifier = currentItems.filter({ $0.matchesExcludingTrackCount(item) }).first
+            else { return nil }
+            guard let trackCount = identifier.trackCount else { return nil }
+            if trackCount != item.trackCount {
+              return TrackCorrection(
+                songArtistAlbum: identifier.songIdentifier.song, correction: .trackCount(trackCount)
+              )
+            }
+            return nil
+          }
+        ).sorted()
+      )
     }
   }
 }
