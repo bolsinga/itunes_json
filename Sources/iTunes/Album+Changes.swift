@@ -71,8 +71,7 @@ extension Track {
   var trackIdentifier: TrackIdentifier? {
     guard let songIdentifier else { return nil }
     return TrackIdentifier(
-      songIdentifier: songIdentifier, trackNumber: normalizedTrackNumber,
-      trackCount: normalizedTrackCount,
+      songIdentifier: songIdentifier, trackNumber: normalizedTrackNumber, trackCount: trackCount,
       discNumber: albumDiscNumber, discCount: albumDiscCount)
   }
 }
