@@ -22,8 +22,13 @@ extension Track: RowAlbumInterface {
     return albumName
   }
 
+  var normalizedTrackCount: Int? {
+    guard let trackCount else { return nil }
+    return trackCount
+  }
+
   func albumTrackCount(logger: Logger) -> Int {
-    guard let trackCount else {
+    guard let trackCount = normalizedTrackCount else {
       logger.error("\(debugLogInformation, privacy: .public)")
       return -1
     }
