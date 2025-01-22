@@ -36,13 +36,13 @@ extension Patchable {
       Patch.albums(try AlbumPatchLookup.load(from: fileURL))
     case .missingTitleAlbums:
       Patch.missingTitleAlbums(try Array<SongArtistAlbum>.load(from: fileURL))
-    case .trackCounts:
+    case .missingTrackCounts:
       Patch.trackCounts(try Array<AlbumTrackCount>.load(from: fileURL))
     case .trackCorrections:
       Patch.trackCorrections(try Array<TrackCorrection>.load(from: fileURL))
-    case .trackNumbers:
+    case .missingTrackNumbers:
       Patch.trackNumbers(try Array<SongTrackNumber>.load(from: fileURL))
-    case .years:
+    case .missingYears:
       Patch.years(try Array<SongYear>.load(from: fileURL))
     case .songs:
       Patch.songs(try Array<SongTitleCorrection>.load(from: fileURL))
