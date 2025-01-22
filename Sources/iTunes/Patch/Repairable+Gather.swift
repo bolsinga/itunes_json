@@ -45,6 +45,20 @@ private func corrections<Guide: Sendable, Change: Sendable>(
   return await allBrokenGuides.changes { createChange($0, currentGuides) }
 }
 
+private func trackCorrections(
+  configuration: GitTagData.Configuration,
+  createChange: @escaping @Sendable (TrackIdentifier, [TrackIdentifier]) -> TrackCorrection?
+) async throws -> Patch {
+  .trackCorrections(
+    Set(
+      try await changes(
+        configuration: configuration,
+        currentGuides: { try await currentTrackIdentifiers() },
+        createGuide: { $0.filter { $0.isSQLEncodable }.trackIdentifiers },
+        createChange: createChange)
+    ).sorted())
+}
+
 extension Repairable {
   enum CorrectionError: Error {
     case noData
@@ -219,26 +233,16 @@ extension Repairable {
         ).sorted()
       )
     case .replaceTrackCounts:
-      return .trackCorrections(
-        Set(
-          try await changes(configuration: configuration) {
-            try await currentTrackIdentifiers()
-          } createGuide: {
-            $0.filter { $0.isSQLEncodable }.trackIdentifiers
-          } createChange: { (item: TrackIdentifier, currentItems: [TrackIdentifier]) in
-            guard
-              let identifier = currentItems.filter({ $0.matchesExcludingTrackCount(item) }).first
-            else { return nil }
-            guard let trackCount = identifier.trackCount else { return nil }
-            if trackCount != item.trackCount {
-              return TrackCorrection(
-                songArtistAlbum: identifier.songIdentifier.song, correction: .trackCount(trackCount)
-              )
-            }
-            return nil
-          }
-        ).sorted()
-      )
+      return try await trackCorrections(configuration: configuration) {
+        (item: TrackIdentifier, currentItems: [TrackIdentifier]) in
+        guard let identifier = currentItems.filter({ $0.matchesExcludingTrackCount(item) }).first
+        else { return nil }
+        guard let trackCount = identifier.trackCount else { return nil }
+        guard trackCount != item.trackCount else { return nil }
+
+        return TrackCorrection(
+          songArtistAlbum: identifier.songIdentifier.song, correction: .trackCount(trackCount))
+      }
     }
   }
 }
