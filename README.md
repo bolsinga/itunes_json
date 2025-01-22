@@ -19,10 +19,10 @@ This will create patch files for the repair tool to use. It makes the assumption
 
 - `artists` - Similar artist names, including sort names.
 - `albums` - Similar album names, including sort names.
-- `missing-title-albums` - Album names using songs and artists.
-- `track-counts` - Track counts for albums.
-- `track-numbers` - Track numbers for songs.
-- `years` - Years for songs.
+- `missing-title-albums` - **Missing** album names using songs and artists.
+- `missing-track-counts` - Track counts for albums that are **missing** track counts.
+- `missing-track-numbers` - Track numbers for songs that are **missing** track numbers.
+- `missing-years` - Years for songs that are **missing** years.
 - `songs` - Song names based upon artist, album, and Music "persistentID".
 
 ### repair

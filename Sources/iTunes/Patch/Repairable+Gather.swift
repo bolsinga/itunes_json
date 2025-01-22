@@ -150,7 +150,7 @@ extension Repairable {
           }
         ).sorted()
       )
-    case .trackCounts:
+    case .missingTrackCounts:
       let correction = try albumTrackCounts(from: correction)
       return .trackCounts(
         Set(
@@ -167,7 +167,7 @@ extension Repairable {
           }
         ).sorted()
       )
-    case .trackNumbers:
+    case .missingTrackNumbers:
       let correction = try songIntCorrections(from: correction)
       return .trackNumbers(
         Set(
@@ -183,7 +183,7 @@ extension Repairable {
           }
         ).sorted()
       )
-    case .years:
+    case .missingYears:
       let correction = try songIntCorrections(from: correction)
       return .years(
         Set(
