@@ -47,7 +47,8 @@ private func corrections<Guide: Sendable, Change: Sendable>(
 
 private func trackCorrections(
   configuration: GitTagData.Configuration,
-  createChange: @escaping @Sendable (TrackIdentifier, [TrackIdentifier]) -> TrackCorrection?
+  createCorrection: @escaping @Sendable (_ item: TrackIdentifier, _ identifier: TrackIdentifier) ->
+    TrackCorrection.Property?
 ) async throws -> Patch {
   .trackCorrections(
     Set(
@@ -55,7 +56,14 @@ private func trackCorrections(
         configuration: configuration,
         currentGuides: { try await currentTrackIdentifiers() },
         createGuide: { $0.filter { $0.isSQLEncodable }.trackIdentifiers },
-        createChange: createChange)
+        createChange: {
+          (item: TrackIdentifier, currentItems: [TrackIdentifier]) in
+          guard let identifier = currentItems.filter({ $0.matchesSongIdentifier(item) }).first
+          else { return nil }
+          guard let property = createCorrection(item, identifier) else { return nil }
+          return TrackCorrection(
+            songArtistAlbum: identifier.songIdentifier.song, correction: property)
+        })
     ).sorted())
 }
 
@@ -234,14 +242,11 @@ extension Repairable {
       )
     case .replaceTrackCounts:
       return try await trackCorrections(configuration: configuration) {
-        (item: TrackIdentifier, currentItems: [TrackIdentifier]) in
-        guard let identifier = currentItems.filter({ $0.matchesExcludingTrackCount(item) }).first
-        else { return nil }
+        (item: TrackIdentifier, identifier: TrackIdentifier) in
         guard let trackCount = identifier.trackCount else { return nil }
         guard trackCount != item.trackCount else { return nil }
 
-        return TrackCorrection(
-          songArtistAlbum: identifier.songIdentifier.song, correction: .trackCount(trackCount))
+        return .trackCount(trackCount)
       }
     }
   }
