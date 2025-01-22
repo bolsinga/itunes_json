@@ -52,8 +52,7 @@ extension TrackIdentifier: CustomStringConvertible {
 }
 
 extension TrackIdentifier {
-  func matchesExcludingTrackCount(_ other: Self) -> Bool {
-    songIdentifier == other.songIdentifier && self.trackNumber == other.trackNumber
-      && self.discNumber == other.discNumber && self.discCount == other.discCount
+  func matchesSongIdentifier(_ other: Self) -> Bool {
+    songIdentifier == other.songIdentifier
   }
 }
