@@ -7,7 +7,7 @@
 
 import Foundation
 
-private func changes<Guide: Hashable & Similar, Change: Sendable>(
+private func changes<Guide: Hashable & Sendable, Change: Sendable>(
   configuration: GitTagData.Configuration,
   currentGuides: @Sendable () async throws -> [Guide],
   createGuide: @escaping @Sendable ([Track]) -> [Guide],
