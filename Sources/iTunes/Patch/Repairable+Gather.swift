@@ -256,6 +256,14 @@ extension Repairable {
 
         return .discCount(discCount)
       }
+    case .replaceDiscNumbers:
+      return try await trackCorrections(configuration: configuration) {
+        (item: TrackIdentifier, identifier: TrackIdentifier) in
+        guard let discNumber = identifier.discNumber else { return nil }
+        guard discNumber != item.discNumber else { return nil }
+
+        return .discNumber(discNumber)
+      }
     }
   }
 }
