@@ -13,6 +13,7 @@ struct TrackCorrection: Codable, Comparable, Hashable, Sendable {
     case trackCount(Int)
     case artistName(SortableName)
     case discCount(Int)
+    case discNumber(Int)
   }
 
   let songArtistAlbum: SongArtistAlbum
@@ -28,6 +29,8 @@ struct TrackCorrection: Codable, Comparable, Hashable, Sendable {
       case (.artistName(let lhn), .artistName(let rhn)):
         return lhn < rhn
       case (.discCount(let lhc), .discCount(let rhc)):
+        return lhc < rhc
+      case (.discNumber(let lhc), .discNumber(let rhc)):
         return lhc < rhc
       default:
         return false
@@ -48,7 +51,7 @@ extension TrackCorrection {
     switch correction {
     case .albumTitle(_):
       songArtistAlbum.matchesExcludingAlbumTitle(other)
-    case .trackCount(_), .artistName(_), .discCount(_):
+    case .trackCount(_), .artistName(_), .discCount(_), .discNumber(_):
       songArtistAlbum == other
     }
   }
