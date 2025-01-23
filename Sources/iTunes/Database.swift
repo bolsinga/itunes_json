@@ -36,7 +36,8 @@ typealias StatementHandle = OpaquePointer
 actor Database {
   typealias Value = Statement.Value
 
-  typealias Row = [String: Value]
+  typealias Column = (column: String, value: Value)
+  typealias Row = [Column]
 
   fileprivate struct Logging {
     let open: Logger
@@ -235,7 +236,8 @@ actor Database {
         if columnNames.count <= index {
           columnNames.append(try columnName(for: index))
         }
-        row[columnNames[Int(index)]] = try columnValue(for: index)
+        let column = Column(column: columnNames[Int(index)], value: try columnValue(for: index))
+        row.append(column)
       }
 
       return row

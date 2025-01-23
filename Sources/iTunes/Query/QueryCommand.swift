@@ -33,14 +33,12 @@ extension GitTagData {
 
         var columns = [String]()
         if columns.isEmpty {
-          columns = rows[0].keys.sorted()
+          columns = rows[0].map { $0.column }
           print((["tag"] + columns).joined(separator: "|"))
         }
 
         for row in rows {
-          let rowDescription = columns.reduce(into: [database.tag]) {
-            $0.append("\(row[$1] ?? .null)")
-          }.joined(separator: "|")
+          let rowDescription = ([database.tag] + row.map { "\($0.value)" }).joined(separator: "|")
           print(rowDescription)
         }
       }
