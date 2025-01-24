@@ -79,16 +79,26 @@ struct TrackRowEncoder {
   var views = """
     CREATE VIEW tracks AS
     SELECT
-      s.id AS sid,
-      s.name AS song,
-      s.trackNumber AS track,
-      a.id AS aid,
+      s.itunesid AS itunesid,
+      s.name AS name,
+      s.sortname AS sortname,
       a.name AS artist,
-      al.id AS alid,
+      a.sortname AS sortartist,
       al.name AS album,
-      p.id AS pid,
-      p.date AS date,
-      p.delta as delta
+      al.sortname AS sortalbum,
+      s.tracknumber AS tracknumber,
+      al.trackcount AS trackcount,
+      al.disccount AS discount,
+      al.discnumber AS discnumber,
+      s.year AS year,
+      s.duration AS duration,
+      s.dateadded AS dateadded,
+      al.compilation AS compilation,
+      s.composer AS composer,
+      s.datereleased AS datereleased,
+      s.comments AS comments,
+      p.date AS playdate,
+      p.delta AS delta
     FROM songs s
     LEFT JOIN artists a ON s.artistid=a.id
     LEFT JOIN albums al ON s.albumid=al.id
