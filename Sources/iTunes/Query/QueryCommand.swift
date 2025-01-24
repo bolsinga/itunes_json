@@ -9,30 +9,37 @@ import ArgumentParser
 import Foundation
 
 extension GitTagData {
-  func execute(query: String, schemaOptions: SchemaOptions) async throws {
-    let taggedRows = try await rows(query: query, schemaOptions: schemaOptions).sorted(by: {
-      $0.tag < $1.tag
-    })
+  func sortedRows(query: String, schemaOptions: SchemaOptions) async throws
+    -> [Tag<[[Database.Row]]>]
+  {
+    try await rows(query: query, schemaOptions: schemaOptions).sorted(by: { $0.tag < $1.tag })
+  }
 
-    for taggedRow in taggedRows {
-      let queryRows = taggedRow.item
-      guard !queryRows.isEmpty else { continue }
+  func transformRows<T: Sendable>(
+    query: String, schemaOptions: SchemaOptions, transform: @escaping ([[Database.Row]]) throws -> T
+  ) async throws -> [Tag<T>] {
+    try await sortedRows(query: query, schemaOptions: schemaOptions).filter { !$0.item.isEmpty }.map
+    {
+      Tag(tag: $0.tag, item: try transform($0.item))
+    }
+  }
 
-      for rows in queryRows {
-        if rows.isEmpty { continue }
-
-        var columns = [String]()
-        if columns.isEmpty {
-          columns = rows[0].map { $0.column }
-          print((["tag"] + columns).joined(separator: "|"))
-        }
-
-        for row in rows {
-          let rowDescription = ([taggedRow.tag] + row.map { "\($0.value)" }).joined(separator: "|")
-          print(rowDescription)
-        }
+  func rowOutput(query: String, schemaOptions: SchemaOptions) async throws -> [Tag<[String]>] {
+    try await transformRows(query: query, schemaOptions: schemaOptions) { queryRows in
+      queryRows.flatMap { rows in
+        let columnNames = rows[0].map { $0.column }.joined(separator: "|")
+        let output = rows.map { $0.map { "\($0.value)" }.joined(separator: "|") }
+        return [columnNames] + output
       }
     }
+  }
+
+  func printOutput(query: String, schemaOptions: SchemaOptions) async throws {
+    let lines = try await rowOutput(query: query, schemaOptions: schemaOptions).flatMap {
+      let tag = $0.tag
+      return $0.item.map { "\(tag)|\($0)" }
+    }
+    lines.forEach { print($0) }
   }
 }
 
@@ -74,7 +81,7 @@ struct QueryCommand: AsyncParsableCommand {
 
   func run() async throws {
     let configuration = GitTagData.Configuration(directory: gitDirectory, fileName: Self.fileName)
-    try await GitTagData(configuration: configuration).execute(
+    try await GitTagData(configuration: configuration).printOutput(
       query: query, schemaOptions: laxSchema.schemaOptions)
   }
 }
