@@ -117,6 +117,24 @@ actor Database {
         }
       }
 
+      var integer: Int64? {
+        switch self {
+        case .integer(let int64):
+          int64
+        case .string(_), .null:
+          nil
+        }
+      }
+
+      var string: String? {
+        switch self {
+        case .integer(_), .null:
+          nil
+        case .string(let string):
+          string
+        }
+      }
+
       static private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
     }
 

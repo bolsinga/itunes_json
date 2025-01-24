@@ -8,6 +8,47 @@
 import ArgumentParser
 import Foundation
 
+/// Enum representing how the SQL query result should be transformed.
+enum Transform: CaseIterable {
+  /// Transform the query rows into [Track] and output as JSON
+  case tracks
+  /// print the raw result rows to stdout.
+  case raw
+}
+
+extension Transform: EnumerableFlag {}
+
+extension Transform {
+  fileprivate func query(
+    _ query: String, configuration: GitTagData.Configuration, schemaOptions: SchemaOptions
+  )
+    async throws
+  {
+    switch self {
+    case .tracks:
+      let t = try await GitTagData(configuration: configuration).tracks(
+        query: query, schemaOptions: schemaOptions)
+      try t.forEach {
+        print($0.tag)
+        print(try $0.item.jsonData().asUTF8String())
+      }
+    case .raw:
+      try await GitTagData(configuration: configuration).printOutput(
+        query: query, schemaOptions: schemaOptions)
+    }
+  }
+}
+
+extension GitTagData {
+  fileprivate func tracks(query: String, schemaOptions: SchemaOptions) async throws -> [Tag<
+    [Track]
+  >] {
+    try await transformRows(query: query, schemaOptions: schemaOptions) { queryRows in
+      queryRows.flatMap { $0.compactMap { Track(row: $0) } }
+    }
+  }
+}
+
 extension GitTagData {
   fileprivate func rowOutput(query: String, schemaOptions: SchemaOptions) async throws -> [Tag<
     [String]
@@ -41,6 +82,9 @@ struct QueryCommand: AsyncParsableCommand {
     version: iTunesVersion
   )
 
+  /// Transform type.
+  @Flag(help: "How to transform the query result.") var transform: Transform = .raw
+
   /// Lax database schema table constraints.
   @Flag(help: "Lax database schema table constraints")
   var laxSchema: [SchemaFlag] = []
@@ -70,7 +114,7 @@ struct QueryCommand: AsyncParsableCommand {
 
   func run() async throws {
     let configuration = GitTagData.Configuration(directory: gitDirectory, fileName: Self.fileName)
-    try await GitTagData(configuration: configuration).printOutput(
-      query: query, schemaOptions: laxSchema.schemaOptions)
+    try await transform.query(
+      query, configuration: configuration, schemaOptions: laxSchema.schemaOptions)
   }
 }
