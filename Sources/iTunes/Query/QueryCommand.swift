@@ -8,24 +8,14 @@
 import ArgumentParser
 import Foundation
 
-extension Database {
-  func executeAndClose(_ query: String) throws -> [[Row]] {
-    let result = try execute(query: query)
-    close()
-    return result
-  }
-}
-
 extension GitTagData {
   func execute(query: String, schemaOptions: SchemaOptions) async throws {
-    let databases = try await transformTracks {
-      let database: Database = try await $1.database(
-        storage: .memory, loggingToken: "batch-\($0)", schemaOptions: schemaOptions)
-      return database
-    }.sorted(by: { $0.tag < $1.tag })
+    let taggedRows = try await rows(query: query, schemaOptions: schemaOptions).sorted(by: {
+      $0.tag < $1.tag
+    })
 
-    for database in databases {
-      let queryRows = try await database.item.executeAndClose(query)
+    for taggedRow in taggedRows {
+      let queryRows = taggedRow.item
       guard !queryRows.isEmpty else { continue }
 
       for rows in queryRows {
@@ -38,7 +28,7 @@ extension GitTagData {
         }
 
         for row in rows {
-          let rowDescription = ([database.tag] + row.map { "\($0.value)" }).joined(separator: "|")
+          let rowDescription = ([taggedRow.tag] + row.map { "\($0.value)" }).joined(separator: "|")
           print(rowDescription)
         }
       }
