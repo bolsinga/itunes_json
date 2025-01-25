@@ -9,22 +9,9 @@ import ArgumentParser
 import Foundation
 
 extension GitTagData {
-  func sortedRows(query: String, schemaOptions: SchemaOptions) async throws
-    -> [Tag<[[Database.Row]]>]
-  {
-    try await rows(query: query, schemaOptions: schemaOptions).sorted(by: { $0.tag < $1.tag })
-  }
-
-  func transformRows<T: Sendable>(
-    query: String, schemaOptions: SchemaOptions, transform: @escaping ([[Database.Row]]) throws -> T
-  ) async throws -> [Tag<T>] {
-    try await sortedRows(query: query, schemaOptions: schemaOptions).filter { !$0.item.isEmpty }.map
-    {
-      Tag(tag: $0.tag, item: try transform($0.item))
-    }
-  }
-
-  func rowOutput(query: String, schemaOptions: SchemaOptions) async throws -> [Tag<[String]>] {
+  fileprivate func rowOutput(query: String, schemaOptions: SchemaOptions) async throws -> [Tag<
+    [String]
+  >] {
     try await transformRows(query: query, schemaOptions: schemaOptions) { queryRows in
       queryRows.flatMap { rows in
         let columnNames = rows[0].map { $0.column }.joined(separator: "|")
@@ -34,8 +21,10 @@ extension GitTagData {
     }
   }
 
-  func printOutput(query: String, schemaOptions: SchemaOptions) async throws {
-    let lines = try await rowOutput(query: query, schemaOptions: schemaOptions).flatMap {
+  fileprivate func printOutput(query: String, schemaOptions: SchemaOptions) async throws {
+    let lines = try await rowOutput(query: query, schemaOptions: schemaOptions).sorted(by: {
+      $0.tag < $1.tag
+    }).flatMap {
       let tag = $0.tag
       return $0.item.map { "\(tag)|\($0)" }
     }

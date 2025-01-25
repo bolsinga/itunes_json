@@ -48,4 +48,12 @@ extension GitTagData {
       return tags
     }
   }
+
+  func transformRows<T: Sendable>(
+    query: String, schemaOptions: SchemaOptions, transform: @escaping ([[Database.Row]]) throws -> T
+  ) async throws -> [Tag<T>] {
+    try await rows(query: query, schemaOptions: schemaOptions).filter { !$0.item.isEmpty }.map {
+      Tag(tag: $0.tag, item: try transform($0.item))
+    }
+  }
 }
