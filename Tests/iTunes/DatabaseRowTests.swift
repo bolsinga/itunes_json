@@ -27,7 +27,7 @@ struct DatabaseRowTests {
   }
 
   @Test func itunesid() async throws {
-    #expect(try #require(Track(row: basic)).persistentID == 3)
+    #expect(Track(row: basic)?.persistentID == 3)
     #expect(Track(row: [name]) == nil)
     #expect(Track(row: [name, ("itunesid", .string(""))]) == nil)
     #expect(Track(row: [name, ("itunesid", .integer(3))]) == nil)
@@ -35,7 +35,7 @@ struct DatabaseRowTests {
   }
 
   @Test func name() async throws {
-    #expect(try #require(Track(row: basic)).name == "song title")
+    #expect(Track(row: basic)?.name == "song title")
     #expect(Track(row: [itunesid]) == nil)
     #expect(Track(row: [itunesid, ("name", .string(""))]) == nil)
     #expect(Track(row: [itunesid, ("name", .integer(3))]) == nil)
