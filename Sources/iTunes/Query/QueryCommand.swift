@@ -26,9 +26,33 @@ extension Transform {
   {
     switch self {
     case .tracks:
-      let t = try await GitTagData(configuration: configuration).tracks(
+      let tags = try await GitTagData(configuration: configuration).tracks(
         query: query, schemaOptions: schemaOptions
       ).sorted(by: { $0.tag < $1.tag })
+
+      // each unique Track will refer to the tags it is in; the tags are in-order.
+      let trackToTags = tags.reduce(into: [Track: [String]]()) { partialResult, tag in
+        partialResult = tag.item.reduce(into: partialResult) { partialResult, track in
+          var tags = partialResult[track] ?? []
+          tags.append(tag.tag)
+          partialResult[track] = tags
+        }
+      }
+
+      // each tag will have a list of the tracks that first appear in the tag
+      let tagToTracks = trackToTags.reduce(into: [String: [Track]]()) { partialResult, value in
+        let (track, tags) = value
+
+        let firstTag = tags.first!
+
+        var tracks = partialResult[firstTag] ?? []
+        tracks.append(track)
+        partialResult[firstTag] = tracks
+      }
+
+      // make them back into Tags
+      let t = tagToTracks.map { Tag(tag: $0.key, item: $0.value) }.sorted(by: { $0.tag < $1.tag })
+
       try t.forEach {
         print($0.tag)
         print(try $0.item.jsonData().asUTF8String())
