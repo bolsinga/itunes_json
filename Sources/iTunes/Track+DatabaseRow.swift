@@ -7,7 +7,13 @@
 
 import Foundation
 
-extension Dictionary where Key == String, Value == Database.Value {
+typealias DatabaseRowLookup = [String: Database.Value]
+
+extension DatabaseRowLookup {
+  init(row: Database.Row) {
+    self.init(uniqueKeysWithValues: row)
+  }
+
   fileprivate func string(_ key: String) -> String? {
     guard let s = self[key]?.string, !s.isEmpty else { return nil }
     return s
@@ -16,6 +22,12 @@ extension Dictionary where Key == String, Value == Database.Value {
   fileprivate func integer(_ key: String) -> Int? {
     guard let i = self[key]?.integer else { return nil }
     return Int(i)
+  }
+
+  fileprivate func boolean(_ key: String) -> Bool? {
+    guard let v = integer(key) else { return nil }
+    guard v == 1 else { return nil }
+    return true
   }
 
   fileprivate func date(_ key: String) -> Date? {
@@ -32,12 +44,12 @@ extension Dictionary where Key == String, Value == Database.Value {
   fileprivate var sortalbum: String? { string("sortalbum") }
   fileprivate var tracknumber: Int? { integer("tracknumber") }
   fileprivate var trackcount: Int? { integer("trackcount") }
-  fileprivate var discount: Int? { integer("disccount") }
+  fileprivate var disccount: Int? { integer("disccount") }
   fileprivate var discnumber: Int? { integer("discnumber") }
   fileprivate var year: Int? { integer("year") }
   fileprivate var duration: Int? { integer("duration") }
   fileprivate var dateadded: Date? { date("dateadded") }
-  fileprivate var compilation: Bool? { integer("compilation") == 0 ? nil : true }
+  fileprivate var compilation: Bool? { boolean("compilation") }
   fileprivate var composer: String? { string("composer") }
   fileprivate var datereleased: Date? { date("datereleased") }
   fileprivate var comments: String? { string("comments") }
@@ -47,7 +59,7 @@ extension Dictionary where Key == String, Value == Database.Value {
 
 extension Track {
   init?(row: Database.Row) {
-    let rowLookup = [String: Database.Value](uniqueKeysWithValues: row)
+    let rowLookup = DatabaseRowLookup(row: row)
 
     guard let name = rowLookup.name else { return nil }
     guard let itunesid = rowLookup.itunesid else { return nil }
@@ -67,7 +79,7 @@ extension Track {
       dateAdded: rowLookup.dateadded,
       dateModified: nil,
       disabled: nil,
-      discCount: rowLookup.discount,
+      discCount: rowLookup.disccount,
       discNumber: rowLookup.discnumber,
       episode: nil,
       episodeOrder: nil,
