@@ -27,7 +27,8 @@ extension Transform {
     switch self {
     case .tracks:
       let t = try await GitTagData(configuration: configuration).tracks(
-        query: query, schemaOptions: schemaOptions)
+        query: query, schemaOptions: schemaOptions
+      ).sorted(by: { $0.tag < $1.tag })
       try t.forEach {
         print($0.tag)
         print(try $0.item.jsonData().asUTF8String())
