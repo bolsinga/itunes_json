@@ -80,6 +80,12 @@ struct QueryCommand: AsyncParsableCommand {
   @Flag(help: "Lax database schema table constraints")
   var laxSchema: [SchemaFlag] = []
 
+  /// Should query run serially.
+  @Flag(
+    help:
+      "Run the query on each database serially. Some SQL may ATTACH a single database, so this would be required."
+  ) var serializeDatabaseQueries: Bool = false
+
   /// Git Directory to read and write data from.
   @Option(
     help: "The path for the git directory to work with.",
@@ -104,7 +110,9 @@ struct QueryCommand: AsyncParsableCommand {
   }
 
   func run() async throws {
-    let configuration = GitTagData.Configuration(directory: gitDirectory, fileName: Self.fileName)
+    let configuration = GitTagData.Configuration(
+      directory: gitDirectory, fileName: Self.fileName,
+      serializeDatabaseQueries: serializeDatabaseQueries)
     try await transform.query(
       query, configuration: configuration, schemaOptions: laxSchema.schemaOptions)
   }

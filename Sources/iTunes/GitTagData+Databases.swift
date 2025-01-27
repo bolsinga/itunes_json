@@ -20,6 +20,13 @@ extension Database {
   }
 }
 
+extension Tag where Item == Database {
+  fileprivate func execute(query: String) async throws -> Tag<[[Database.Row]]> {
+    Logger.query.info("Query Tag: \(self.tag)")
+    return Tag<[[Database.Row]]>(tag: self.tag, item: try await self.item.executeAndClose(query))
+  }
+}
+
 extension GitTagData {
   func databases(schemaOptions: SchemaOptions) async throws -> [Tag<Database>] {
     try await transformTracks {
@@ -32,20 +39,27 @@ extension GitTagData {
   func rows(query: String, schemaOptions: SchemaOptions) async throws -> [Tag<[[Database.Row]]>] {
     var taggedDBs = try await databases(schemaOptions: schemaOptions)
 
-    return try await withThrowingTaskGroup(of: Tag<[[Database.Row]]>.self) { group in
-      for taggedDB in taggedDBs.reversed() {
-        taggedDBs.removeLast()
-        group.addTask {
-          Logger.query.info("Query Tag: \(taggedDB.tag)")
-          return Tag(tag: taggedDB.tag, item: try await taggedDB.item.executeAndClose(query))
-        }
-      }
-
+    if configuration.serializeDatabaseQueries {
       var tags: [Tag<[[Database.Row]]>] = []
-      for try await tag in group {
-        tags.append(tag)
+      for taggedDB in taggedDBs.sorted(by: { $0.tag < $1.tag }) {
+        tags.append(try await taggedDB.execute(query: query))
       }
       return tags
+    } else {
+      return try await withThrowingTaskGroup(of: Tag<[[Database.Row]]>.self) { group in
+        for taggedDB in taggedDBs.reversed() {
+          taggedDBs.removeLast()
+          group.addTask {
+            try await taggedDB.execute(query: query)
+          }
+        }
+
+        var tags: [Tag<[[Database.Row]]>] = []
+        for try await tag in group {
+          tags.append(tag)
+        }
+        return tags
+      }
     }
   }
 
