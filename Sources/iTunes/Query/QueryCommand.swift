@@ -45,6 +45,7 @@ extension GitTagData {
   >] {
     try await transformRows(query: query, schemaOptions: schemaOptions) { queryRows in
       queryRows.flatMap { rows in
+        guard !rows.isEmpty else { return [String]() }
         let columnNames = rows[0].map { $0.column }.joined(separator: "|")
         let output = rows.map { $0.map { "\($0.value)" }.joined(separator: "|") }
         return [columnNames] + output
