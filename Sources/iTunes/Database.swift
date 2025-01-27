@@ -204,6 +204,10 @@ actor Database {
       return try PreparedStatement(cString: cString, offset: offset, db: db)
     }
 
+    var parameterCount: Int {
+      Int(sqlite3_bind_parameter_count(handle))
+    }
+
     func close() {
       let result = sqlite3_finalize(handle)
       if result != SQLITE_OK {
@@ -360,14 +364,18 @@ actor Database {
     }
   }
 
-  func execute(query: String) throws -> [[Row]] {
+  func execute(query: String, arguments: [Database.Value]) throws -> [[Row]] {
     try transaction { db in
       var queryResult = [[Row]]()
 
       var statement: PreparedStatement? = try Database.PreparedStatement(string: query, db: db)
       while statement != nil {
         let result = try statement!.executeAndClose(db) { statement, db in
-          try statement.execute { db.errorString }
+          let parameterCount = statement.parameterCount
+          if parameterCount > 0 && parameterCount == arguments.count {
+            try statement.bind(arguments: arguments) { db.errorString }
+          }
+          return try statement.execute { db.errorString }
         }
         queryResult.append(result)
         statement = try statement?.next(db: db)

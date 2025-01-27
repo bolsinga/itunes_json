@@ -13,8 +13,8 @@ extension Logger {
 }
 
 extension Database {
-  fileprivate func executeAndClose(_ query: String) throws -> [[Row]] {
-    let result = try execute(query: query)
+  fileprivate func executeAndClose(_ query: String, arguments: [Database.Value]) throws -> [[Row]] {
+    let result = try execute(query: query, arguments: arguments)
     close()
     return result
   }
@@ -23,7 +23,9 @@ extension Database {
 extension Tag where Item == Database {
   fileprivate func execute(query: String) async throws -> Tag<[[Database.Row]]> {
     Logger.query.info("Query Tag: \(self.tag)")
-    return Tag<[[Database.Row]]>(tag: self.tag, item: try await self.item.executeAndClose(query))
+    return Tag<[[Database.Row]]>(
+      tag: self.tag,
+      item: try await self.item.executeAndClose(query, arguments: [.string(taggedDB.tag)]))
   }
 }
 
