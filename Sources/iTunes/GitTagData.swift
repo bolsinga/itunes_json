@@ -44,11 +44,16 @@ struct GitTagData {
     let directory: URL
     let branch: String?
     let fileName: String
+    let serializeDatabaseQueries: Bool
 
-    init(directory: URL, branch: String? = nil, fileName: String) {
+    init(
+      directory: URL, branch: String? = nil, fileName: String,
+      serializeDatabaseQueries: Bool = false
+    ) {
       self.directory = directory
       self.branch = branch
       self.fileName = fileName
+      self.serializeDatabaseQueries = serializeDatabaseQueries
     }
 
     var file: URL {
@@ -60,7 +65,7 @@ struct GitTagData {
     }
   }
 
-  private let configuration: Configuration
+  let configuration: Configuration
   private let git: Git
 
   init(configuration: Configuration) throws {
