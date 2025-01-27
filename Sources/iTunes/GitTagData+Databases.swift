@@ -22,10 +22,9 @@ extension Database {
 
 extension Tag where Item == Database {
   fileprivate func execute(query: String) async throws -> Tag<[[Database.Row]]> {
-    Logger.query.info("Query Tag: \(self.tag)")
+    Logger.query.info("Query Tag: \(tag)")
     return Tag<[[Database.Row]]>(
-      tag: self.tag,
-      item: try await self.item.executeAndClose(query, arguments: [.string(taggedDB.tag)]))
+      tag: tag, item: try await item.executeAndClose(query, arguments: [.string(tag)]))
   }
 }
 
