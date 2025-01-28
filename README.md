@@ -14,8 +14,9 @@ The output of this program is also used as input to [web generator](https://gith
 
 These modes are useful when there is listening history in a git repository created by this program. It allows the data to be mined, create patches, and repair the data. Iterations over the data will allow it to populate the database tables with strict schema enabled.
 
-There is one database format.
+There are two database formats.
 - Normalized: It has four tables: artists, albums, songs, plays. They each reference each other via IDs. The intent is that an artist only appears once, etc.
+- Flat: It has a single table, which is all the tracks that are SQL encodable (aka music tracks), with the columns non unique. This will be useful for more data mining.
 
 ### patch
 This will create patch files for the repair tool to use. It makes the assumption that the current data found in the Music application is correct. It then will go through the backups in git history to find "patches" to tracks that are "similar".
@@ -44,6 +45,7 @@ This will iterate through a git repository with listening history and execute th
 
 - `raw` - This is the default, where the normalized database rows are just written to standard out.
 - `tracks` - This will attempt to transform the query result from the normalized database `tracks` view into `[Track]`. It will just emit these tracks as JSON.
+- `flat` - This will query the flat databases, written to standard out.
 
 ## Future
 Back up to a single already existing database file, instead of many snapshots of data. Music will only tell you the last time a song was played. This database will have all the times it was played. I have backup data dating to 01/01/2006 to work with.

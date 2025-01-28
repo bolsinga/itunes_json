@@ -17,6 +17,8 @@ enum Batch: CaseIterable {
   case sql
   /// Normalized Database
   case db
+  /// Flat Database
+  case flat
 }
 
 extension Tag where Item == Data {
@@ -46,6 +48,9 @@ extension Batch {
               .normalized(
                 DatabaseContext(
                   storage: .memory, schemaOptions: schemaOptions, loggingToken: "batch-\(tag)")))
+          case .flat:
+            Destination.db(
+              .flat(FlatDatabaseContext(storage: .memory, loggingToken: "batch-\(tag)")))
           }
         }()
 
@@ -56,7 +61,7 @@ extension Batch {
       switch self {
       case .sql:
         "sql"
-      case .db:
+      case .db, .flat:
         "db"
       }
     }()

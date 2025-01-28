@@ -36,11 +36,20 @@ extension DatabaseContext {
   }
 }
 
+extension FlatDatabaseContext {
+  fileprivate func append(tag: String) -> FlatDatabaseContext {
+    guard let loggingToken else { return self }
+    return FlatDatabaseContext(storage: storage, loggingToken: "\(loggingToken)-\(tag)")
+  }
+}
+
 extension DatabaseFormat {
   fileprivate func append(tag: String) -> DatabaseFormat {
     switch self {
     case .normalized(let context):
       .normalized(context.append(tag: tag))
+    case .flat(let context):
+      .flat(context.append(tag: tag))
     }
   }
 }

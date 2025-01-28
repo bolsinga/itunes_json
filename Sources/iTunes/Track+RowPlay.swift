@@ -27,7 +27,7 @@ extension Track: RowPlayInterface {
     return (datePlayed, playCount)
   }
 
-  private var datePlayedISO8601: String {
+  var datePlayedISO8601: String {
     guard let playDateUTC else { return "" }
     return playDateUTC.formatted(.iso8601)
   }

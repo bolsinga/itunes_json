@@ -13,10 +13,12 @@ enum DestinationContext: EnumerableFlag {
   case json
   /// Emit JSON representing the Tracks and add to a git repository
   case jsonGit
-  /// Emit SQLite code that represents the Tracks.
+  /// Emit Normalized SQLite code that represents the Tracks.
   case sqlCode
-  /// Emit a sqlite3 database that represents the Tracks.
+  /// Emit a Normalized sqlite3 database that represents the Tracks.
   case db
+  /// Emit a Flat sqlite3 database that represents the Tracks.
+  case flat
 
   func context(outputFile: URL?, schemaOptions: SchemaOptions) throws -> Destination {
     enum DestinationError: Error {
@@ -47,6 +49,13 @@ enum DestinationContext: EnumerableFlag {
       case .standardOut, .update:
         throw DestinationError.noDBOutputFile
       }
+    case .flat:
+      switch output {
+      case .file(let outputFile):
+        return .db(.flat(FlatDatabaseContext(storage: .file(outputFile), loggingToken: nil)))
+      case .standardOut, .update:
+        throw DestinationError.noDBOutputFile
+      }
     }
   }
 
@@ -61,7 +70,7 @@ enum DestinationContext: EnumerableFlag {
       "json"
     case .sqlCode:
       "sql"
-    case .db:
+    case .db, .flat:
       "db"
     }
   }
