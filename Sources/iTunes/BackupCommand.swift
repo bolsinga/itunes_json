@@ -89,10 +89,10 @@ struct BackupCommand: AsyncParsableCommand {
       "Reduce Tracks to minimum required fields and music related only. Defaults to false."
   ) var reduce: Bool = false
 
-  /// Lax database schema table constraints. Only applicable with --sql-code or --db.
+  /// Lax normalized database schema table constraints. Only applicable with --sql-code or --db.
   @Flag(
     help:
-      "Lax database schema table constraints. Only applicable with --sql-code or --db."
+      "Lax normalized database schema table constraints. Only applicable with --sql-code or --db."
   )
   var laxSchema: [SchemaFlag] = []
 

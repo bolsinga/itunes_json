@@ -74,8 +74,8 @@ struct QueryCommand: AsyncParsableCommand {
   /// Transform type.
   @Flag(help: "How to transform the query result.") var transform: Transform = .raw
 
-  /// Lax database schema table constraints.
-  @Flag(help: "Lax database schema table constraints")
+  /// Lax normalized database schema table constraints.
+  @Flag(help: "Lax normalized database schema table constraints")
   var laxSchema: [SchemaFlag] = []
 
   /// Should query run serially.
