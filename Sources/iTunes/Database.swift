@@ -312,15 +312,20 @@ actor Database {
     }
   }
 
+  struct Context {
+    let storage: DatabaseStorage
+    let loggingToken: String?
+  }
+
   private let handle: DatabaseHandle
   private let logging: Logging
 
-  init(storage: DatabaseStorage, loggingToken: String?) throws {
-    self.logging = Logging(token: loggingToken)
+  init(context: Context) throws {
+    self.logging = Logging(token: context.loggingToken)
 
     var handle: DatabaseHandle?
     let result = sqlite3_open_v2(
-      storage.name, &handle, SQLITE_OPEN_URI | SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
+      context.storage.name, &handle, SQLITE_OPEN_URI | SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
       nil)
 
     guard result == SQLITE_OK else {

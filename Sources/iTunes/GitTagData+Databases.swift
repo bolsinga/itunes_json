@@ -32,7 +32,8 @@ extension GitTagData {
   func databases(schemaOptions: SchemaOptions) async throws -> [Tag<Database>] {
     try await transformTracks {
       let database: Database = try await $1.database(
-        storage: .memory, loggingToken: "batch-\($0)", schemaOptions: schemaOptions)
+        context: Database.Context(storage: .memory, loggingToken: "batch-\($0)"),
+        schemaOptions: schemaOptions)
       return database
     }
   }
