@@ -17,7 +17,7 @@ extension Destination {
   {
     let fileWriter: DestinationFileWriting = FileWriter(outputFile: outputFile)
     switch self {
-    case .jsonGit:
+    case .jsonGit(_):
       return GitBackupWriter(fileWriter: fileWriter, context: context)
     default:
       return fileWriter
