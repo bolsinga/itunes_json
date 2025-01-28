@@ -56,7 +56,7 @@ extension Track: RowSongInterface {
   }
 
   var dateAddedISO8601: String {
-    guard let dateAdded else { preconditionFailure() }
+    guard let dateAdded else { return "" }
     return dateAdded.formatted(.iso8601)
   }
 }
