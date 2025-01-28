@@ -36,17 +36,26 @@ extension DatabaseContext {
   }
 }
 
+extension DatabaseFormat {
+  fileprivate func append(tag: String) -> DatabaseFormat {
+    switch self {
+    case .normalized(let context):
+      .normalized(context.append(tag: tag))
+    }
+  }
+}
+
 extension GitTagData {
-  fileprivate func databases(_ context: DatabaseContext) async throws -> [Tag<Database>] {
+  fileprivate func databases(_ format: DatabaseFormat) async throws -> [Tag<Database>] {
     try await transformTracks {
-      try await $1.database(context.append(tag: $0))
+      try await format.append(tag: $0).database(tracks: $1)
     }
   }
 
-  fileprivate func rows(query: String, context: DatabaseContext) async throws -> [Tag<
+  fileprivate func rows(query: String, format: DatabaseFormat) async throws -> [Tag<
     [[Database.Row]]
   >] {
-    var taggedDBs = try await databases(context)
+    var taggedDBs = try await databases(format)
 
     if configuration.serializeDatabaseQueries {
       var tags: [Tag<[[Database.Row]]>] = []
@@ -73,9 +82,9 @@ extension GitTagData {
   }
 
   func transformRows<T: Sendable>(
-    query: String, context: DatabaseContext, transform: @escaping ([[Database.Row]]) throws -> T
+    query: String, format: DatabaseFormat, transform: @escaping ([[Database.Row]]) throws -> T
   ) async throws -> [Tag<T>] {
-    try await rows(query: query, context: context).filter { !$0.item.isEmpty }.map {
+    try await rows(query: query, format: format).filter { !$0.item.isEmpty }.map {
       Tag(tag: $0.tag, item: try transform($0.item))
     }
   }

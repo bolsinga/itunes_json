@@ -16,7 +16,7 @@ extension Destination {
     case .json(_), .jsonGit(_), .sqlCode(_), .db(_):
       throw UpdateDBError.invalidDestination
     case .updateDB(let context):
-      let sourceDB: Database = try await tracks.database(context)
+      let sourceDB: Database = try await DatabaseFormat.normalized(context).database(tracks: tracks)
       try await sourceDB.mergeIntoDB(at: url)
     }
   }

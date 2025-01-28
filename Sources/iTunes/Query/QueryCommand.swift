@@ -20,28 +20,25 @@ extension Transform: EnumerableFlag {}
 
 extension Transform {
   fileprivate func query(
-    _ query: String, configuration: GitTagData.Configuration, context: DatabaseContext
+    _ query: String, configuration: GitTagData.Configuration, format: DatabaseFormat
   ) async throws {
     switch self {
     case .tracks:
-      try await GitTagData(configuration: configuration).uniqueTracks(
-        query: query, context: context
-      )
-      .forEach {
-        print($0.tag)
-        print(try $0.item.jsonData().asUTF8String())
-      }
+      try await GitTagData(configuration: configuration).uniqueTracks(query: query, format: format)
+        .forEach {
+          print($0.tag)
+          print(try $0.item.jsonData().asUTF8String())
+        }
     case .raw:
-      try await GitTagData(configuration: configuration).printOutput(query: query, context: context)
+      try await GitTagData(configuration: configuration).printOutput(query: query, format: format)
     }
   }
 }
 
 extension GitTagData {
-  fileprivate func rowOutput(query: String, context: DatabaseContext) async throws -> [Tag<
-    [String]
-  >] {
-    try await transformRows(query: query, context: context) { queryRows in
+  fileprivate func rowOutput(query: String, format: DatabaseFormat) async throws -> [Tag<[String]>]
+  {
+    try await transformRows(query: query, format: format) { queryRows in
       queryRows.flatMap { rows in
         guard !rows.isEmpty else { return [String]() }
         let columnNames = rows[0].map { $0.column }.joined(separator: "|")
@@ -51,8 +48,8 @@ extension GitTagData {
     }
   }
 
-  fileprivate func printOutput(query: String, context: DatabaseContext) async throws {
-    let lines = try await rowOutput(query: query, context: context).sorted(by: {
+  fileprivate func printOutput(query: String, format: DatabaseFormat) async throws {
+    let lines = try await rowOutput(query: query, format: format).sorted(by: {
       $0.tag < $1.tag
     }).flatMap {
       let tag = $0.tag
@@ -111,8 +108,9 @@ struct QueryCommand: AsyncParsableCommand {
     let configuration = GitTagData.Configuration(
       directory: gitDirectory, fileName: Self.fileName,
       serializeDatabaseQueries: serializeDatabaseQueries)
-    let context = DatabaseContext(
-      storage: .memory, schemaOptions: laxSchema.schemaOptions, loggingToken: "query")
-    try await transform.query(query, configuration: configuration, context: context)
+    let format = DatabaseFormat.normalized(
+      DatabaseContext(
+        storage: .memory, schemaOptions: laxSchema.schemaOptions, loggingToken: "query"))
+    try await transform.query(query, configuration: configuration, format: format)
   }
 }

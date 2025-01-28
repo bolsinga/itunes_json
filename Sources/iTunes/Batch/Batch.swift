@@ -43,8 +43,9 @@ extension Batch {
                 output: .standardOut, schemaOptions: schemaOptions, loggingToken: "batch-\(tag)"))
           case .db:
             Destination.db(
-              DatabaseContext(
-                storage: .memory, schemaOptions: schemaOptions, loggingToken: "batch-\(tag)"))
+              .normalized(
+                DatabaseContext(
+                  storage: .memory, schemaOptions: schemaOptions, loggingToken: "batch-\(tag)")))
           }
         }()
 
