@@ -16,15 +16,15 @@ extension Destination {
     async throws -> Data
   {
     switch self {
-    case .json, .jsonGit:
+    case .json(_), .jsonGit(_):
       try tracks.jsonData()
-    case .sqlCode:
+    case .sqlCode(_):
       try tracks.sqlData(loggingToken: loggingToken, schemaOptions: schemaOptions)
     case .db(let storage):
       try await tracks.database(
         context: Database.Context(storage: storage, loggingToken: loggingToken),
         schemaOptions: schemaOptions)
-    case .updateDB:
+    case .updateDB(_):
       throw DestinationDataError.noDataForUpdateDB
     }
   }
