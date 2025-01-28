@@ -8,11 +8,9 @@
 import Foundation
 
 extension Array where Element == Track {
-  func database(
-    storage: DatabaseStorage, loggingToken: String?, schemaOptions: SchemaOptions
-  ) async throws -> Database {
+  func database(context: Database.Context, schemaOptions: SchemaOptions) async throws -> Database {
     let dbEncoder = try TracksDBEncoder(
-      storage: storage, rowEncoder: self.rowEncoder(loggingToken), loggingToken: loggingToken)
+      context: context, rowEncoder: self.rowEncoder(context.loggingToken))
     do {
       try await dbEncoder.encode(schemaOptions: schemaOptions)
       return dbEncoder.db
@@ -22,11 +20,8 @@ extension Array where Element == Track {
     }
   }
 
-  func database(
-    storage: DatabaseStorage, loggingToken: String?, schemaOptions: SchemaOptions
-  ) async throws -> Data {
-    let db: Database = try await database(
-      storage: storage, loggingToken: loggingToken, schemaOptions: schemaOptions)
+  func database(context: Database.Context, schemaOptions: SchemaOptions) async throws -> Data {
+    let db: Database = try await database(context: context, schemaOptions: schemaOptions)
     do {
       let data = try await db.data()
       await db.close()
