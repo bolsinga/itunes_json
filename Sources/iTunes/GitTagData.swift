@@ -45,15 +45,17 @@ struct GitTagData {
     let branch: String?
     let fileName: String
     let serializeDatabaseQueries: Bool
+    let limit: Int?
 
     init(
       directory: URL, branch: String? = nil, fileName: String,
-      serializeDatabaseQueries: Bool = false
+      serializeDatabaseQueries: Bool = false, limit: Int? = nil
     ) {
       self.directory = directory
       self.branch = branch
       self.fileName = fileName
       self.serializeDatabaseQueries = serializeDatabaseQueries
+      self.limit = limit
     }
 
     var file: URL {
@@ -118,6 +120,10 @@ struct GitTagData {
       fileName: configuration.fileName)
     {
       tagDatum.append(tagData)
+
+      if let limit = configuration.limit, tagDatum.count == limit {
+        break
+      }
     }
     return tagDatum
   }
