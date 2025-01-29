@@ -26,8 +26,10 @@ extension Destination {
 
   fileprivate var output: Output? {
     switch self {
-    case .json(let output), .jsonGit(let output), .sqlCode(let output):
+    case .json(let output), .jsonGit(let output):
       return output
+    case .sqlCode(let context):
+      return context.output
     case .db(let storage):
       switch storage {
       case .file(let url):
