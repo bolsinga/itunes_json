@@ -36,7 +36,7 @@ extension Batch {
         let destination = {
           switch self {
           case .sql:
-            Destination.sqlCode(SQLCodeContext(output: .standardOut))
+            Destination.sqlCode(SQLCodeContext(output: .standardOut, schemaOptions: schemaOptions))
           case .db:
             Destination.db(.memory)
           }

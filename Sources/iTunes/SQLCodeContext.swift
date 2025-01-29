@@ -9,4 +9,5 @@ import Foundation
 
 struct SQLCodeContext {
   let output: Output
+  let schemaOptions: SchemaOptions
 }

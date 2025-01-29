@@ -18,8 +18,8 @@ extension Destination {
     switch self {
     case .json(_), .jsonGit(_):
       try tracks.jsonData()
-    case .sqlCode(_):
-      try tracks.sqlData(loggingToken: loggingToken, schemaOptions: schemaOptions)
+    case .sqlCode(let context):
+      try tracks.sqlData(loggingToken: loggingToken, schemaOptions: context.schemaOptions)
     case .db(let storage):
       try await tracks.database(
         context: Database.Context(storage: storage, loggingToken: loggingToken),

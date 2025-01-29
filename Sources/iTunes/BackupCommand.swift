@@ -18,7 +18,7 @@ enum DestinationContext: EnumerableFlag {
   /// Emit a sqlite3 database that represents the Tracks.
   case db
 
-  func context(outputFile: URL?) throws -> Destination {
+  func context(outputFile: URL?, schemaOptions: SchemaOptions) throws -> Destination {
     enum DestinationError: Error {
       case noDBOutputFile
       case invalidUpdateDB
@@ -35,7 +35,7 @@ enum DestinationContext: EnumerableFlag {
     case .jsonGit:
       return .jsonGit(output)
     case .sqlCode:
-      return .sqlCode(SQLCodeContext(output: output))
+      return .sqlCode(SQLCodeContext(output: output, schemaOptions: schemaOptions))
     case .db:
       switch output {
       case .file(let outputFile):
@@ -144,8 +144,8 @@ struct BackupCommand: AsyncParsableCommand {
 
   func run() async throws {
     let tracks = try await source.gather(reduce: reduce)
-
-    try await destination.context(outputFile: outputFile).emit(
-      tracks, context: context, schemaOptions: laxSchema.schemaOptions)
+    let schemaOptions = laxSchema.schemaOptions
+    try await destination.context(outputFile: outputFile, schemaOptions: schemaOptions).emit(
+      tracks, context: context, schemaOptions: schemaOptions)
   }
 }
