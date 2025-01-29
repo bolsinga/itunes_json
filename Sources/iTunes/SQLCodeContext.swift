@@ -7,7 +7,8 @@
 
 import Foundation
 
-struct SQLCodeContext {
+struct SQLCodeContext: TracksSQLSourceEncoderContext {
   let output: Output
   let schemaOptions: SchemaOptions
+  let loggingToken: String?
 }

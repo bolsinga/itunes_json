@@ -19,7 +19,7 @@ extension Destination {
     case .json(_), .jsonGit(_):
       try tracks.jsonData()
     case .sqlCode(let context):
-      try tracks.sqlData(loggingToken: loggingToken, schemaOptions: context.schemaOptions)
+      try tracks.sqlData(context)
     case .db(let storage):
       try await tracks.database(
         context: Database.Context(storage: storage, loggingToken: loggingToken),
