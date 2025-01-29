@@ -16,9 +16,10 @@ extension DatabaseContext {
 extension Array where Element == Track {
   func database(_ context: DatabaseContext) async throws -> Database {
     let dbEncoder = try TracksDBEncoder(
-      context: context.context, rowEncoder: self.rowEncoder(context.loggingToken))
+      context: context.context, schemaOptions: context.schemaOptions,
+      rowEncoder: self.rowEncoder(context.loggingToken))
     do {
-      try await dbEncoder.encode(schemaOptions: context.schemaOptions)
+      try await dbEncoder.encode()
       return dbEncoder.db
     } catch {
       await dbEncoder.close()
