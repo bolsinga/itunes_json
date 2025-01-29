@@ -12,8 +12,7 @@ extension Destination {
     async throws
   {
     let sourceDB: Database = try await tracks.database(
-      context: Database.Context(storage: .memory, loggingToken: loggingToken),
-      schemaOptions: schemaOptions)
+      DatabaseContext(storage: .memory, schemaOptions: schemaOptions, loggingToken: loggingToken))
     try await sourceDB.mergeIntoDB(at: url)
   }
 }

@@ -7,12 +7,18 @@
 
 import Foundation
 
+extension DatabaseContext {
+  fileprivate var context: Database.Context {
+    Database.Context(storage: storage, loggingToken: loggingToken)
+  }
+}
+
 extension Array where Element == Track {
-  func database(context: Database.Context, schemaOptions: SchemaOptions) async throws -> Database {
+  func database(_ context: DatabaseContext) async throws -> Database {
     let dbEncoder = try TracksDBEncoder(
-      context: context, rowEncoder: self.rowEncoder(context.loggingToken))
+      context: context.context, rowEncoder: self.rowEncoder(context.loggingToken))
     do {
-      try await dbEncoder.encode(schemaOptions: schemaOptions)
+      try await dbEncoder.encode(schemaOptions: context.schemaOptions)
       return dbEncoder.db
     } catch {
       await dbEncoder.close()
@@ -20,8 +26,8 @@ extension Array where Element == Track {
     }
   }
 
-  func database(context: Database.Context, schemaOptions: SchemaOptions) async throws -> Data {
-    let db: Database = try await database(context: context, schemaOptions: schemaOptions)
+  func database(_ context: DatabaseContext) async throws -> Data {
+    let db: Database = try await database(context)
     do {
       let data = try await db.data()
       await db.close()
