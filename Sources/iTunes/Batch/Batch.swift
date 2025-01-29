@@ -40,12 +40,11 @@ extension Batch {
               SQLCodeContext(
                 output: .standardOut, schemaOptions: schemaOptions, loggingToken: "batch-\(tag)"))
           case .db:
-            Destination.db(DatabaseContext(storage: .memory))
+            Destination.db(DatabaseContext(storage: .memory, schemaOptions: schemaOptions))
           }
         }()
 
-        return try await destination.data(
-          for: tracks, loggingToken: "batch-\(tag)", schemaOptions: schemaOptions)
+        return try await destination.data(for: tracks, loggingToken: "batch-\(tag)")
       }
 
     let pathExtension = {

@@ -9,4 +9,5 @@ import Foundation
 
 struct DatabaseContext {
   let storage: DatabaseStorage
+  let schemaOptions: SchemaOptions
 }
