@@ -9,10 +9,13 @@ import Foundation
 
 struct TracksDBEncoder {
   let db: Database
+  let schemaOptions: SchemaOptions
   private let rowEncoder: TrackRowEncoder
 
-  init(context: Database.Context, rowEncoder: TrackRowEncoder) throws {
+  init(context: Database.Context, schemaOptions: SchemaOptions, rowEncoder: TrackRowEncoder) throws
+  {
     self.db = try Database(context: context)
+    self.schemaOptions = schemaOptions
     self.rowEncoder = rowEncoder
   }
 
@@ -42,7 +45,7 @@ struct TracksDBEncoder {
       rowEncoder.playTableBuilder(songLookup), schemaConstraints: schemaConstrainsts)
   }
 
-  func encode(schemaOptions: SchemaOptions) async throws {
+  func encode() async throws {
     try await db.execute("PRAGMA foreign_keys = ON;")
     let artistLookup = try await emitArtists(schemaConstrainsts: schemaOptions.artistConstraints)
     let albumLookup = try await emitAlbums(schemaConstrainsts: schemaOptions.albumConstraints)
