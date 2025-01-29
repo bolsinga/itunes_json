@@ -40,7 +40,7 @@ extension Batch {
               SQLCodeContext(
                 output: .standardOut, schemaOptions: schemaOptions, loggingToken: "batch-\(tag)"))
           case .db:
-            Destination.db(.memory)
+            Destination.db(DatabaseContext(storage: .memory))
           }
         }()
 
