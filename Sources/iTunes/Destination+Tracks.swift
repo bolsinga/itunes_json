@@ -64,7 +64,7 @@ extension Destination {
     let tracks = tracks.sorted()
 
     let dataProvider = {
-      try await self.data(for: tracks, loggingToken: nil, schemaOptions: schemaOptions)
+      try await self.data(for: tracks, loggingToken: nil)
     }
 
     switch output {
