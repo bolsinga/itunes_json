@@ -29,7 +29,7 @@ extension Tag where Item == Database {
 }
 
 extension GitTagData {
-  func databases(schemaOptions: SchemaOptions) async throws -> [Tag<Database>] {
+  fileprivate func databases(schemaOptions: SchemaOptions) async throws -> [Tag<Database>] {
     try await transformTracks {
       let database: Database = try await $1.database(
         DatabaseContext(storage: .memory, schemaOptions: schemaOptions, loggingToken: "batch-\($0)")
@@ -38,7 +38,9 @@ extension GitTagData {
     }
   }
 
-  func rows(query: String, schemaOptions: SchemaOptions) async throws -> [Tag<[[Database.Row]]>] {
+  fileprivate func rows(query: String, schemaOptions: SchemaOptions) async throws -> [Tag<
+    [[Database.Row]]
+  >] {
     var taggedDBs = try await databases(schemaOptions: schemaOptions)
 
     if configuration.serializeDatabaseQueries {
