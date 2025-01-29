@@ -12,7 +12,7 @@ private enum DestinationDataError: Error {
 }
 
 extension Destination {
-  func data(for tracks: [Track], loggingToken: String?) async throws -> Data {
+  func data(for tracks: [Track]) async throws -> Data {
     switch self {
     case .json(_), .jsonGit(_):
       try tracks.jsonData()
@@ -20,7 +20,7 @@ extension Destination {
       try tracks.sqlData(context)
     case .db(let context):
       try await tracks.database(
-        context: Database.Context(storage: context.storage, loggingToken: loggingToken),
+        context: Database.Context(storage: context.storage, loggingToken: context.loggingToken),
         schemaOptions: context.schemaOptions)
     case .updateDB(_):
       throw DestinationDataError.noDataForUpdateDB
