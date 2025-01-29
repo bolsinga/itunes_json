@@ -20,30 +20,28 @@ extension Transform: EnumerableFlag {}
 
 extension Transform {
   fileprivate func query(
-    _ query: String, configuration: GitTagData.Configuration, schemaOptions: SchemaOptions
-  )
-    async throws
-  {
+    _ query: String, configuration: GitTagData.Configuration, context: DatabaseContext
+  ) async throws {
     switch self {
     case .tracks:
       try await GitTagData(configuration: configuration).uniqueTracks(
-        query: query, schemaOptions: schemaOptions
-      ).forEach {
+        query: query, context: context
+      )
+      .forEach {
         print($0.tag)
         print(try $0.item.jsonData().asUTF8String())
       }
     case .raw:
-      try await GitTagData(configuration: configuration).printOutput(
-        query: query, schemaOptions: schemaOptions)
+      try await GitTagData(configuration: configuration).printOutput(query: query, context: context)
     }
   }
 }
 
 extension GitTagData {
-  fileprivate func rowOutput(query: String, schemaOptions: SchemaOptions) async throws -> [Tag<
+  fileprivate func rowOutput(query: String, context: DatabaseContext) async throws -> [Tag<
     [String]
   >] {
-    try await transformRows(query: query, schemaOptions: schemaOptions) { queryRows in
+    try await transformRows(query: query, context: context) { queryRows in
       queryRows.flatMap { rows in
         guard !rows.isEmpty else { return [String]() }
         let columnNames = rows[0].map { $0.column }.joined(separator: "|")
@@ -53,8 +51,8 @@ extension GitTagData {
     }
   }
 
-  fileprivate func printOutput(query: String, schemaOptions: SchemaOptions) async throws {
-    let lines = try await rowOutput(query: query, schemaOptions: schemaOptions).sorted(by: {
+  fileprivate func printOutput(query: String, context: DatabaseContext) async throws {
+    let lines = try await rowOutput(query: query, context: context).sorted(by: {
       $0.tag < $1.tag
     }).flatMap {
       let tag = $0.tag
@@ -113,7 +111,8 @@ struct QueryCommand: AsyncParsableCommand {
     let configuration = GitTagData.Configuration(
       directory: gitDirectory, fileName: Self.fileName,
       serializeDatabaseQueries: serializeDatabaseQueries)
-    try await transform.query(
-      query, configuration: configuration, schemaOptions: laxSchema.schemaOptions)
+    let context = DatabaseContext(
+      storage: .memory, schemaOptions: laxSchema.schemaOptions, loggingToken: "query")
+    try await transform.query(query, configuration: configuration, context: context)
   }
 }

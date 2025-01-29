@@ -28,20 +28,25 @@ extension Tag where Item == Database {
   }
 }
 
+extension DatabaseContext {
+  fileprivate func append(tag: String) -> DatabaseContext {
+    guard let loggingToken else { return self }
+    return DatabaseContext(
+      storage: storage, schemaOptions: schemaOptions, loggingToken: "\(loggingToken)-\(tag)")
+  }
+}
+
 extension GitTagData {
-  fileprivate func databases(schemaOptions: SchemaOptions) async throws -> [Tag<Database>] {
+  fileprivate func databases(_ context: DatabaseContext) async throws -> [Tag<Database>] {
     try await transformTracks {
-      let database: Database = try await $1.database(
-        DatabaseContext(storage: .memory, schemaOptions: schemaOptions, loggingToken: "batch-\($0)")
-      )
-      return database
+      try await $1.database(context.append(tag: $0))
     }
   }
 
-  fileprivate func rows(query: String, schemaOptions: SchemaOptions) async throws -> [Tag<
+  fileprivate func rows(query: String, context: DatabaseContext) async throws -> [Tag<
     [[Database.Row]]
   >] {
-    var taggedDBs = try await databases(schemaOptions: schemaOptions)
+    var taggedDBs = try await databases(context)
 
     if configuration.serializeDatabaseQueries {
       var tags: [Tag<[[Database.Row]]>] = []
@@ -68,9 +73,9 @@ extension GitTagData {
   }
 
   func transformRows<T: Sendable>(
-    query: String, schemaOptions: SchemaOptions, transform: @escaping ([[Database.Row]]) throws -> T
+    query: String, context: DatabaseContext, transform: @escaping ([[Database.Row]]) throws -> T
   ) async throws -> [Tag<T>] {
-    try await rows(query: query, schemaOptions: schemaOptions).filter { !$0.item.isEmpty }.map {
+    try await rows(query: query, context: context).filter { !$0.item.isEmpty }.map {
       Tag(tag: $0.tag, item: try transform($0.item))
     }
   }

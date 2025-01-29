@@ -8,16 +8,16 @@
 typealias TaggedTracks = Tag<[Track]>
 
 extension GitTagData {
-  fileprivate func tracks(query: String, schemaOptions: SchemaOptions) async throws
+  fileprivate func tracks(query: String, context: DatabaseContext) async throws
     -> [TaggedTracks]
   {
-    try await transformRows(query: query, schemaOptions: schemaOptions) { queryRows in
+    try await transformRows(query: query, context: context) { queryRows in
       queryRows.flatMap { $0.compactMap { Track(row: $0) } }
     }
   }
 
-  func uniqueTracks(query: String, schemaOptions: SchemaOptions) async throws -> [TaggedTracks] {
-    let tags = try await tracks(query: query, schemaOptions: schemaOptions).sorted(by: {
+  func uniqueTracks(query: String, context: DatabaseContext) async throws -> [TaggedTracks] {
+    let tags = try await tracks(query: query, context: context).sorted(by: {
       $0.tag < $1.tag
     })
 
