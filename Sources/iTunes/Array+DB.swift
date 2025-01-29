@@ -7,8 +7,8 @@
 
 import Foundation
 
-extension DatabaseContext {
-  fileprivate var context: Database.Context {
+extension DatabaseContext: TracksDBEncoderContext {
+  var context: Database.Context {
     Database.Context(storage: storage, loggingToken: loggingToken)
   }
 }
@@ -16,8 +16,7 @@ extension DatabaseContext {
 extension Array where Element == Track {
   func database(_ context: DatabaseContext) async throws -> Database {
     let dbEncoder = try TracksDBEncoder(
-      context: context.context, schemaOptions: context.schemaOptions,
-      rowEncoder: self.rowEncoder(context.loggingToken))
+      context: context, rowEncoder: self.rowEncoder(context.loggingToken))
     do {
       try await dbEncoder.encode()
       return dbEncoder.db
