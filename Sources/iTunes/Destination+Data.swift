@@ -19,9 +19,7 @@ extension Destination {
     case .sqlCode(let context):
       try tracks.sqlData(context)
     case .db(let context):
-      try await tracks.database(
-        context: Database.Context(storage: context.storage, loggingToken: context.loggingToken),
-        schemaOptions: context.schemaOptions)
+      try await tracks.database(context)
     case .updateDB(_):
       throw DestinationDataError.noDataForUpdateDB
     }
