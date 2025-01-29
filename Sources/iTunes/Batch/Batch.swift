@@ -32,18 +32,20 @@ extension Batch {
     schemaOptions: SchemaOptions
   ) async throws {
     var patchedTracksData = try await GitTagData(configuration: configuration)
-      .transformTracks {
+      .transformTracks { tag, tracks in
         let destination = {
           switch self {
           case .sql:
-            Destination.sqlCode(SQLCodeContext(output: .standardOut, schemaOptions: schemaOptions))
+            Destination.sqlCode(
+              SQLCodeContext(
+                output: .standardOut, schemaOptions: schemaOptions, loggingToken: "batch-\(tag)"))
           case .db:
             Destination.db(.memory)
           }
         }()
 
         return try await destination.data(
-          for: $1, loggingToken: "batch-\($0)", schemaOptions: schemaOptions)
+          for: tracks, loggingToken: "batch-\(tag)", schemaOptions: schemaOptions)
       }
 
     let pathExtension = {

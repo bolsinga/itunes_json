@@ -10,4 +10,5 @@ import Foundation
 struct SQLCodeContext {
   let output: Output
   let schemaOptions: SchemaOptions
+  let loggingToken: String?
 }

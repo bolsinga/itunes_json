@@ -35,7 +35,8 @@ enum DestinationContext: EnumerableFlag {
     case .jsonGit:
       return .jsonGit(output)
     case .sqlCode:
-      return .sqlCode(SQLCodeContext(output: output, schemaOptions: schemaOptions))
+      return .sqlCode(
+        SQLCodeContext(output: output, schemaOptions: schemaOptions, loggingToken: nil))
     case .db:
       switch output {
       case .file(let outputFile):
