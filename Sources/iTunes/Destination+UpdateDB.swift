@@ -8,11 +8,16 @@
 import Foundation
 
 extension Destination {
-  func updateDB(at url: URL, tracks: [Track], loggingToken: String?, schemaOptions: SchemaOptions)
-    async throws
-  {
-    let sourceDB: Database = try await tracks.database(
-      DatabaseContext(storage: .memory, schemaOptions: schemaOptions, loggingToken: loggingToken))
-    try await sourceDB.mergeIntoDB(at: url)
+  func updateDB(at url: URL, tracks: [Track]) async throws {
+    enum UpdateDBError: Error {
+      case invalidDestination
+    }
+    switch self {
+    case .json(_), .jsonGit(_), .sqlCode(_), .db(_):
+      throw UpdateDBError.invalidDestination
+    case .updateDB(let context):
+      let sourceDB: Database = try await tracks.database(context)
+      try await sourceDB.mergeIntoDB(at: url)
+    }
   }
 }
