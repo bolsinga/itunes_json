@@ -18,5 +18,5 @@ enum Destination {
   /// Emit a sqlite3 database that represents the Tracks.
   case db(DatabaseContext)
   /// Update a sqlite3 database that represents the Tracks.
-  case updateDB(DatabaseStorage)
+  case updateDB(DatabaseContext)
 }

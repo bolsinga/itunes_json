@@ -37,8 +37,8 @@ extension Destination {
       case .memory:
         return nil
       }
-    case .updateDB(let storage):
-      switch storage {
+    case .updateDB(let context):
+      switch context.storage {
       case .file(let url):
         return .update(url)
       case .memory:
@@ -47,7 +47,7 @@ extension Destination {
     }
   }
 
-  func emit(_ tracks: [Track], context: BackupContext, schemaOptions: SchemaOptions) async throws {
+  func emit(_ tracks: [Track], context: BackupContext) async throws {
     enum DataExportError: Error {
       case noTracks
       case noOutput
@@ -73,8 +73,7 @@ extension Destination {
     case .standardOut:
       print("\(try await dataProvider().asUTF8String())")
     case .update(let url):
-      try await self.updateDB(
-        at: url, tracks: tracks, loggingToken: nil, schemaOptions: schemaOptions)
+      try await self.updateDB(at: url, tracks: tracks)
     }
   }
 }

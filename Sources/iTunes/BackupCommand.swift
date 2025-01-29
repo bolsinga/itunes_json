@@ -147,8 +147,7 @@ struct BackupCommand: AsyncParsableCommand {
 
   func run() async throws {
     let tracks = try await source.gather(reduce: reduce)
-    let schemaOptions = laxSchema.schemaOptions
-    try await destination.context(outputFile: outputFile, schemaOptions: schemaOptions).emit(
-      tracks, context: context, schemaOptions: schemaOptions)
+    try await destination.context(outputFile: outputFile, schemaOptions: laxSchema.schemaOptions)
+      .emit(tracks, context: context)
   }
 }
