@@ -20,9 +20,9 @@ extension Destination {
       try tracks.jsonData()
     case .sqlCode(let context):
       try tracks.sqlData(context)
-    case .db(let storage):
+    case .db(let context):
       try await tracks.database(
-        context: Database.Context(storage: storage, loggingToken: loggingToken),
+        context: Database.Context(storage: context.storage, loggingToken: loggingToken),
         schemaOptions: schemaOptions)
     case .updateDB(_):
       throw DestinationDataError.noDataForUpdateDB

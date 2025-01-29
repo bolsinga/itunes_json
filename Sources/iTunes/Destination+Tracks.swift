@@ -30,8 +30,8 @@ extension Destination {
       return output
     case .sqlCode(let context):
       return context.output
-    case .db(let storage):
-      switch storage {
+    case .db(let context):
+      switch context.storage {
       case .file(let url):
         return .file(url)
       case .memory:
