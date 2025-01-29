@@ -10,26 +10,33 @@ import Foundation
 
 /// Enum representing how the SQL query result should be transformed.
 enum Transform: CaseIterable {
-  /// Transform the query rows into [Track] and output as JSON
+  /// Transform the query rows from a normalized database into [Track] and output as JSON
   case tracks
-  /// print the raw result rows to stdout.
+  /// print the raw result rows from a normalized database to stdout.
   case raw
+  /// print the raw result from a flat database to stdout.
+  case flat
 }
 
 extension Transform: EnumerableFlag {}
 
-extension Transform {
-  fileprivate func query(
-    _ query: String, configuration: GitTagData.Configuration, format: DatabaseFormat
-  ) async throws {
+private enum TransformContext {
+  case tracks(DatabaseContext)
+  case raw(DatabaseFormat)
+}
+
+extension TransformContext {
+  fileprivate func query(_ query: String, configuration: GitTagData.Configuration) async throws {
     switch self {
-    case .tracks:
-      try await GitTagData(configuration: configuration).uniqueTracks(query: query, format: format)
-        .forEach {
-          print($0.tag)
-          print(try $0.item.jsonData().asUTF8String())
-        }
-    case .raw:
+    case .tracks(let context):
+      try await GitTagData(configuration: configuration).uniqueTracks(
+        query: query, format: DatabaseFormat.normalized(context)
+      )
+      .forEach {
+        print($0.tag)
+        print(try $0.item.jsonData().asUTF8String())
+      }
+    case .raw(let format):
       try await GitTagData(configuration: configuration).printOutput(query: query, format: format)
     }
   }
@@ -104,13 +111,23 @@ struct QueryCommand: AsyncParsableCommand {
     }
   }
 
+  fileprivate var context: TransformContext {
+    let context = DatabaseContext(
+      storage: .memory, schemaOptions: laxSchema.schemaOptions, loggingToken: "query")
+    switch transform {
+    case .tracks:
+      return .tracks(context)
+    case .raw:
+      return .raw(.normalized(context))
+    case .flat:
+      return .raw(.flat(FlatDatabaseContext(storage: .memory, loggingToken: "query")))
+    }
+  }
+
   func run() async throws {
     let configuration = GitTagData.Configuration(
       directory: gitDirectory, fileName: Self.fileName,
       serializeDatabaseQueries: serializeDatabaseQueries)
-    let format = DatabaseFormat.normalized(
-      DatabaseContext(
-        storage: .memory, schemaOptions: laxSchema.schemaOptions, loggingToken: "query"))
-    try await transform.query(query, configuration: configuration, format: format)
+    try await context.query(query, configuration: configuration)
   }
 }
