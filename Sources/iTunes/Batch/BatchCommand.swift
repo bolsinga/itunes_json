@@ -22,8 +22,8 @@ struct BatchCommand: AsyncParsableCommand {
   /// Batch type.
   @Flag(help: "Batch type to build.") var batch: Batch = .sql
 
-  /// Lax database schema table constraints.
-  @Flag(help: "Lax database schema table constraints")
+  /// Lax normalized database schema table constraints.
+  @Flag(help: "Lax normalized database schema table constraints")
   var laxSchema: [SchemaFlag] = []
 
   /// Git Directory to read and write data from.

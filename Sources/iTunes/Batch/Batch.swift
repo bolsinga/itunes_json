@@ -13,7 +13,9 @@ extension Logger {
 }
 
 enum Batch: CaseIterable {
+  /// Normalized SQL
   case sql
+  /// Normalized Database
   case db
 }
 
