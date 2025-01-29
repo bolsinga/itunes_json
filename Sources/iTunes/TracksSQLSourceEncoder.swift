@@ -7,8 +7,17 @@
 
 import Foundation
 
-struct TracksSQLSourceEncoder {
-  let context: SQLCodeContext
+private enum TracksSQLSourceEncoderError: Error {
+  case cannotMakeData
+}
+
+protocol TracksSQLSourceEncoderContext {
+  var loggingToken: String? { get }
+  var schemaOptions: SchemaOptions { get }
+}
+
+struct TracksSQLSourceEncoder<Context: TracksSQLSourceEncoderContext> {
+  let context: Context
 
   fileprivate struct Encoder {
     private let rowEncoder: TrackRowEncoder
@@ -44,9 +53,6 @@ struct TracksSQLSourceEncoder {
   }
 
   func encode(_ tracks: [Track]) throws -> Data {
-    enum TracksSQLSourceEncoderError: Error {
-      case cannotMakeData
-    }
     guard let data = encode(tracks).data(using: .utf8) else {
       throw TracksSQLSourceEncoderError.cannotMakeData
     }
