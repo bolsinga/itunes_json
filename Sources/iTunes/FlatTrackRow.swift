@@ -11,12 +11,12 @@ struct FlatTrackRow {
   let track: Track
 
   fileprivate var itunesid: String { String(track.persistentID) }
-  fileprivate var name: String { track.name }
-  fileprivate var sortname: String { track.sortName ?? "" }
-  fileprivate var artist: String { track.artist ?? "" }
-  fileprivate var sortartist: String { track.sortArtist ?? "" }
-  fileprivate var album: String { track.album ?? "" }
-  fileprivate var sortalbum: String { track.sortAlbum ?? "" }
+  fileprivate var name: String { track.songName.name }
+  fileprivate var sortname: String { track.songName.sorted }
+  fileprivate var artist: String { track.artistName?.name ?? "" }
+  fileprivate var sortartist: String { track.artistName?.sorted ?? "" }
+  fileprivate var album: String { track.albumName?.name ?? "" }
+  fileprivate var sortalbum: String { track.albumName?.sorted ?? "" }
   fileprivate var tracknumber: Int { track.trackNumber ?? 0 }
   fileprivate var trackcount: Int { track.trackCount ?? 0 }
   fileprivate var disccount: Int { track.discCount ?? 0 }
