@@ -19,6 +19,7 @@ enum Patch: Sendable {
   case trackNumbers([SongTrackNumber])
   case years([SongYear])
   case songs([SongTitleCorrection])
+  case identifierCorrections([IdentifierCorrection])
 }
 
 // This will make a Dictionary<Key, Value> into Array<Key> where each Array
@@ -53,6 +54,8 @@ extension Patch: CustomStringConvertible {
     case .years(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     case .songs(let items):
+      return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
+    case .identifierCorrections(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     }
   }
