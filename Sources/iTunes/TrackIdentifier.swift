@@ -7,15 +7,6 @@
 
 import Foundation
 
-extension Optional where Wrapped == Int {
-  fileprivate static func < (lhs: Self, rhs: Self) -> Bool {
-    if let lhs, let rhs {
-      return lhs < rhs
-    }
-    return lhs == nil && rhs == nil
-  }
-}
-
 struct TrackIdentifier: Codable, Comparable, Hashable, Sendable {
   let songIdentifier: SongIdentifier
   let trackNumber: Int?
