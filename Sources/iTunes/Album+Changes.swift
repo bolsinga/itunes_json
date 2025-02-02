@@ -102,26 +102,30 @@ extension Array where Element == Track {
   }
 }
 
+func currentTracks() async throws -> [Track] {
+  try await Source.itunes.gather(reduce: false)
+}
+
 func currentAlbums() async throws -> [AlbumArtistName] {
-  try await Source.itunes.gather(reduce: false).albumNames
+  try await currentTracks().albumNames
 }
 
 func currentAlbumTrackCounts() async throws -> [AlbumTrackCount] {
-  try await Source.itunes.gather(reduce: false).albumTrackCounts
+  try await currentTracks().albumTrackCounts
 }
 
 func currentSongTrackNumbers() async throws -> [SongTrackNumber] {
-  try await Source.itunes.gather(reduce: false).songTrackNumbers
+  try await currentTracks().songTrackNumbers
 }
 
 func currentSongYears() async throws -> [SongYear] {
-  try await Source.itunes.gather(reduce: false).songYears
+  try await currentTracks().songYears
 }
 
 func currentSongIdentifiers() async throws -> [SongIdentifier] {
-  try await Source.itunes.gather(reduce: false).songIdentifiers
+  try await currentTracks().songIdentifiers
 }
 
 func currentTrackIdentifiers() async throws -> [TrackIdentifier] {
-  try await Source.itunes.gather(reduce: false).trackIdentifiers
+  try await currentTracks().trackIdentifiers
 }
