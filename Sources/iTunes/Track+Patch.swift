@@ -481,6 +481,72 @@ extension Track {
       isrc: isrc)
   }
 
+  fileprivate func apply(persistentID newPersistentID: UInt, tag: String) -> Track {
+    Logger.patch.info("Patching PersistentID: \(newPersistentID) - \(tag)")
+
+    return Track(
+      album: album,
+      albumArtist: albumArtist,
+      albumRating: albumRating,
+      albumRatingComputed: albumRatingComputed,
+      artist: artist,
+      bitRate: bitRate,
+      bPM: bPM,
+      comments: comments,
+      compilation: compilation,
+      composer: composer,
+      contentRating: contentRating,
+      dateAdded: dateAdded,
+      dateModified: dateModified,
+      disabled: disabled,
+      discCount: discCount,
+      discNumber: discNumber,
+      episode: episode,
+      episodeOrder: episodeOrder,
+      explicit: explicit,
+      genre: genre,
+      grouping: grouping,
+      hasVideo: hasVideo,
+      hD: hD,
+      kind: kind,
+      location: location,
+      movie: movie,
+      musicVideo: musicVideo,
+      name: name,
+      partOfGaplessAlbum: partOfGaplessAlbum,
+      persistentID: newPersistentID,
+      playCount: playCount,
+      playDateUTC: playDateUTC,
+      podcast: podcast,
+      protected: protected,
+      purchased: purchased,
+      rating: rating,
+      ratingComputed: ratingComputed,
+      releaseDate: releaseDate,
+      sampleRate: sampleRate,
+      season: season,
+      series: series,
+      size: size,
+      skipCount: skipCount,
+      skipDate: skipDate,
+      sortAlbum: sortAlbum,
+      sortAlbumArtist: sortAlbumArtist,
+      sortArtist: sortArtist,
+      sortComposer: sortComposer,
+      sortName: sortName,
+      sortSeries: sortSeries,
+      totalTime: totalTime,
+      trackCount: trackCount,
+      trackNumber: trackNumber,
+      trackType: trackType,
+      tVShow: tVShow,
+      unplayed: unplayed,
+      videoHeight: videoHeight,
+      videoWidth: videoWidth,
+      year: year,
+      isrc: isrc)
+  }
+
   fileprivate func apply(trackCorrection: TrackCorrection, tag: String) -> Track {
     Logger.patch.info("Patching TrackCorrection: \(trackCorrection) - \(tag)")
     switch trackCorrection.correction {
@@ -707,6 +773,9 @@ extension Track {
       guard let newValue else { return self }
       if let totalTime, totalTime == newValue { return self }
       return self.apply(duration: newValue, tag: tag)
+    case .persistentID(let newValue):
+      if persistentID == newValue { return self }
+      return self.apply(persistentID: newValue, tag: tag)
     }
   }
 }
