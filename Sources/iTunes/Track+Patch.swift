@@ -415,6 +415,72 @@ extension Track {
       isrc: isrc)
   }
 
+  fileprivate func apply(duration newDuration: Int, tag: String) -> Track {
+    Logger.patch.info("Patching Duration: \(newDuration) - \(tag)")
+
+    return Track(
+      album: album,
+      albumArtist: albumArtist,
+      albumRating: albumRating,
+      albumRatingComputed: albumRatingComputed,
+      artist: artist,
+      bitRate: bitRate,
+      bPM: bPM,
+      comments: comments,
+      compilation: compilation,
+      composer: composer,
+      contentRating: contentRating,
+      dateAdded: dateAdded,
+      dateModified: dateModified,
+      disabled: disabled,
+      discCount: discCount,
+      discNumber: discNumber,
+      episode: episode,
+      episodeOrder: episodeOrder,
+      explicit: explicit,
+      genre: genre,
+      grouping: grouping,
+      hasVideo: hasVideo,
+      hD: hD,
+      kind: kind,
+      location: location,
+      movie: movie,
+      musicVideo: musicVideo,
+      name: name,
+      partOfGaplessAlbum: partOfGaplessAlbum,
+      persistentID: persistentID,
+      playCount: playCount,
+      playDateUTC: playDateUTC,
+      podcast: podcast,
+      protected: protected,
+      purchased: purchased,
+      rating: rating,
+      ratingComputed: ratingComputed,
+      releaseDate: releaseDate,
+      sampleRate: sampleRate,
+      season: season,
+      series: series,
+      size: size,
+      skipCount: skipCount,
+      skipDate: skipDate,
+      sortAlbum: sortAlbum,
+      sortAlbumArtist: sortAlbumArtist,
+      sortArtist: sortArtist,
+      sortComposer: sortComposer,
+      sortName: sortName,
+      sortSeries: sortSeries,
+      totalTime: newDuration,
+      trackCount: trackCount,
+      trackNumber: trackNumber,
+      trackType: trackType,
+      tVShow: tVShow,
+      unplayed: unplayed,
+      videoHeight: videoHeight,
+      videoWidth: videoWidth,
+      year: year,
+      isrc: isrc)
+  }
+
   fileprivate func apply(trackCorrection: TrackCorrection, tag: String) -> Track {
     Logger.patch.info("Patching TrackCorrection: \(trackCorrection) - \(tag)")
     switch trackCorrection.correction {
@@ -633,6 +699,16 @@ extension Track {
       year: year,
       isrc: isrc)
   }
+
+  fileprivate func apply(identifierCorrection: IdentifierCorrection, tag: String) -> Track {
+    Logger.patch.info("Patching IdentifierCorrection: \(identifierCorrection) - \(tag)")
+    switch identifierCorrection.correction {
+    case .duration(let newValue):
+      guard let newValue else { return self }
+      if let totalTime, totalTime == newValue { return self }
+      return self.apply(duration: newValue, tag: tag)
+    }
+  }
 }
 
 extension Array where Element == Track {
@@ -749,6 +825,19 @@ extension Array where Element == Track {
     }
   }
 
+  fileprivate func patchIdentifierCorrections(_ corrections: [IdentifierCorrection], tag: String)
+    throws
+    -> [Track]
+  {
+    let lookup = corrections.reduce(into: [UInt: IdentifierCorrection]()) {
+      $0[$1.persistentID] = $1
+    }
+    return self.map {
+      guard let correction = lookup[$0.persistentID] else { return $0 }
+      return $0.apply(identifierCorrection: correction, tag: tag)
+    }
+  }
+
   fileprivate func patchTracks(_ patch: Patch, tag: String) throws -> [Track] {
     switch patch {
     case .artists(let lookup):
@@ -767,6 +856,8 @@ extension Array where Element == Track {
       try patchSongYears(lookup, tag: tag)
     case .songs(let lookup):
       try patchSongNames(lookup, tag: tag)
+    case .identifierCorrections(let items):
+      try patchIdentifierCorrections(items, tag: tag)
     }
   }
 

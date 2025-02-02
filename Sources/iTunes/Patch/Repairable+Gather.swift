@@ -67,6 +67,34 @@ private func trackCorrections(
     ).sorted())
 }
 
+private func identifierCorrections(
+  configuration: GitTagData.Configuration,
+  createIdentifier: @escaping @Sendable (_ track: Track) -> IdentifierCorrection,
+  qualifies: @escaping @Sendable (_ item: IdentifierCorrection, _ current: IdentifierCorrection) ->
+    Bool
+) async throws -> Patch {
+  .identifierCorrections(
+    Set(
+      try await changes(
+        configuration: configuration,
+        currentGuides: {
+          try await currentTracks().map { createIdentifier($0) }
+        },
+        createGuide: {
+          $0.filter { $0.isSQLEncodable }.map { createIdentifier($0) }
+        },
+        createChange: {
+          (item: IdentifierCorrection, currentItems: [IdentifierCorrection]) in
+          guard
+            let identifierMatch = currentItems.filter({ $0.persistentID == item.persistentID })
+              .first
+          else { return nil }
+          guard qualifies(item, identifierMatch) else { return nil }
+          return identifierMatch
+        })
+    ).sorted())
+}
+
 extension Repairable {
   enum CorrectionError: Error {
     case noData
@@ -263,6 +291,16 @@ extension Repairable {
         guard discNumber != item.discNumber else { return nil }
 
         return .discNumber(discNumber)
+      }
+
+    case .replaceDurations:
+      return try await identifierCorrections(configuration: configuration) { track in
+        track.identifierCorrection(.duration(track.totalTime))
+      } qualifies: { item, current in
+        switch (item.correction, current.correction) {
+        case (.duration(let itemValue), .duration(let currentValue)):
+          return itemValue != currentValue
+        }
       }
     }
   }
