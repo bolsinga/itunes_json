@@ -31,6 +31,8 @@ This will create patch files for the repair tool to use. It makes the assumption
 - `replace-track-counts` - Replace track counts for albums.
 - `replace-disc-counts` - Replace disc counts for albums.
 - `replace-disc-numbers` - Replace disc numbers for albums.
+- `replace-durations` - Replace track durations.
+- `replace-persistent-ids` - Replace track persistent IDs. This should be used with caution.
 - `replaced-date-addeds` - Replace date added for a track.
 
 ### repair

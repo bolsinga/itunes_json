@@ -322,7 +322,7 @@ extension Repairable {
         }
       }
 
-    case .replacePersistentIDs:
+    case .replacePersistentIds:
       let lookup = try identifierLookupCorrections(from: correction)
       return try await identifierCorrections(configuration: configuration) {
         lookup.map {
