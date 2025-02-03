@@ -374,6 +374,18 @@ extension Repairable {
           return false
         }
       }
+
+    case .replaceDateReleased:
+      return try await identifierCorrections(configuration: configuration) { track in
+        track.identifierCorrection(.dateReleased(track.releaseDate))
+      } qualifies: { item, current in
+        switch (item.correction, current.correction) {
+        case (.dateReleased(let itemValue), .dateReleased(let currentValue)):
+          return itemValue != currentValue
+        default:
+          return false
+        }
+      }
     }
   }
 }
