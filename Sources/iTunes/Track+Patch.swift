@@ -1178,12 +1178,19 @@ extension Array where Element == Track {
     throws
     -> [Track]
   {
-    let lookup = corrections.reduce(into: [UInt: IdentifierCorrection]()) {
-      $0[$1.persistentID] = $1
+    let lookup = corrections.reduce(into: [UInt: [IdentifierCorrection]]()) {
+      var corrections = $0[$1.persistentID] ?? []
+      corrections.append($1)
+      $0[$1.persistentID] = corrections
     }
     return self.map {
-      guard let correction = lookup[$0.persistentID] else { return $0 }
-      return $0.apply(identifierCorrection: correction, tag: tag)
+      guard let corrections = lookup[$0.persistentID] else { return $0 }
+
+      var result = $0
+      corrections.forEach { correction in
+        result = result.apply(identifierCorrection: correction, tag: tag)
+      }
+      return result
     }
   }
 
