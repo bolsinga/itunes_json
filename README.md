@@ -37,6 +37,8 @@ This will create patch files for the repair tool to use. It makes the assumption
 - `replace-composers` - Replace composer for a track.
 - `replace-comments` - Replace comments for a track.
 - `replace-date-released` - Replace date released for a track.
+- `replace-album-title` - Replace album title for a track.
+- `replace-song-title` - Replace song title for a track.
 
 ### repair
 This will repair a git repository with listening history, given a file created with the patch tool. It has all the same options as the patch tool, found above. It has one additional option, listed below.

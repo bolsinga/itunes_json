@@ -1056,6 +1056,13 @@ extension Track {
       guard let newValue else { return self }
       if let releaseDate, releaseDate == newValue { return self }
       return self.apply(dateReleased: newValue, tag: tag)
+    case .albumTitle(let newValue):
+      guard let newValue else { return self }
+      if let albumName, albumName == newValue { return self }
+      return self.apply(albumTitle: newValue, tag: tag)
+    case .songTitle(let newValue):
+      if songName == newValue { return self }
+      return self.apply(song: newValue, tag: tag)
     }
   }
 }
