@@ -33,7 +33,7 @@ This will create patch files for the repair tool to use. It makes the assumption
 - `replace-disc-numbers` - Replace disc numbers for albums.
 - `replace-durations` - Replace track durations.
 - `replace-persistent-ids` - Replace track persistent IDs. This should be used with caution.
-- `replaced-date-addeds` - Replace date added for a track.
+- `replace-date-addeds` - Replace date added for a track.
 
 ### repair
 This will repair a git repository with listening history, given a file created with the patch tool. It has all the same options as the patch tool, found above. It has one additional option, listed below.
