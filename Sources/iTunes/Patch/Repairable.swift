@@ -20,4 +20,5 @@ enum Repairable: CaseIterable {
   case replaceDiscNumbers
   case replaceDurations
   case replacePersistentIDs
+  case replaceDateAddeds
 }

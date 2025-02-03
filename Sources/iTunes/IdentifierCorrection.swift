@@ -11,12 +11,15 @@ struct IdentifierCorrection: Codable, Comparable, Hashable, Sendable {
   enum Property: Codable, Comparable, Hashable, Sendable {
     case duration(Int?)
     case persistentID(UInt)
+    case dateAdded(Date?)
 
     static func < (lhs: IdentifierCorrection.Property, rhs: IdentifierCorrection.Property) -> Bool {
       switch (lhs, rhs) {
       case (.duration(let lhv), .duration(let rhv)):
         return lhv < rhv
       case (.persistentID(let lhv), .persistentID(let rhv)):
+        return lhv < rhv
+      case (.dateAdded(let lhv), .dateAdded(let rhv)):
         return lhv < rhv
       default:
         return false
