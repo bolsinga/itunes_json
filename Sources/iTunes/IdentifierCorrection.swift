@@ -14,6 +14,7 @@ struct IdentifierCorrection: Codable, Comparable, Hashable, Sendable {
     case dateAdded(Date?)
     case composer(String?)
     case comments(String?)
+    case dateReleased(Date?)
 
     static func < (lhs: IdentifierCorrection.Property, rhs: IdentifierCorrection.Property) -> Bool {
       switch (lhs, rhs) {
@@ -26,6 +27,8 @@ struct IdentifierCorrection: Codable, Comparable, Hashable, Sendable {
       case (.composer(let lhv), .composer(let rhv)):
         return lhv < rhv
       case (.comments(let lhv), .comments(let rhv)):
+        return lhv < rhv
+      case (.dateReleased(let lhv), .dateReleased(let rhv)):
         return lhv < rhv
       default:
         return false

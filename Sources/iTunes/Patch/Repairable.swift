@@ -23,4 +23,5 @@ enum Repairable: CaseIterable {
   case replaceDateAddeds
   case replaceComposers
   case replaceComments
+  case replaceDateReleased
 }
