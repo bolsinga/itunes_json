@@ -69,6 +69,7 @@ private func trackCorrections(
 
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
+  current: @escaping @Sendable () async throws -> [IdentifierCorrection],
   createIdentifier: @escaping @Sendable (_ track: Track) -> IdentifierCorrection,
   qualifies: @escaping @Sendable (_ item: IdentifierCorrection, _ current: IdentifierCorrection) ->
     Bool
@@ -77,9 +78,7 @@ private func identifierCorrections(
     Set(
       try await changes(
         configuration: configuration,
-        currentGuides: {
-          try await currentTracks().map { createIdentifier($0) }
-        },
+        currentGuides: { try await current() },
         createGuide: {
           $0.filter { $0.isSQLEncodable }.map { createIdentifier($0) }
         },
@@ -93,6 +92,18 @@ private func identifierCorrections(
           return identifierMatch
         })
     ).sorted())
+}
+
+private func identifierCorrections(
+  configuration: GitTagData.Configuration,
+  createIdentifier: @escaping @Sendable (_ track: Track) -> IdentifierCorrection,
+  qualifies: @escaping @Sendable (_ item: IdentifierCorrection, _ current: IdentifierCorrection) ->
+    Bool
+) async throws -> Patch {
+  try await identifierCorrections(
+    configuration: configuration,
+    current: { try await currentTracks().map { createIdentifier($0) } },
+    createIdentifier: createIdentifier, qualifies: qualifies)
 }
 
 extension Repairable {
@@ -139,6 +150,12 @@ extension Repairable {
     let data = try data(from: string)
     guard !data.isEmpty else { return [] }
     return try JSONDecoder().decode(Array<SongIntCorrection>.self, from: data)
+  }
+
+  fileprivate func identifierLookupCorrections(from string: String) throws -> [UInt: UInt] {
+    let data = try data(from: string)
+    guard !data.isEmpty else { return [:] }
+    return try JSONDecoder().decode(Dictionary<UInt, UInt>.self, from: data)
   }
 }
 
@@ -300,6 +317,25 @@ extension Repairable {
         switch (item.correction, current.correction) {
         case (.duration(let itemValue), .duration(let currentValue)):
           return itemValue != currentValue
+        default:
+          return false
+        }
+      }
+
+    case .replacePersistentIDs:
+      let lookup = try identifierLookupCorrections(from: correction)
+      return try await identifierCorrections(configuration: configuration) {
+        lookup.map {
+          IdentifierCorrection(persistentID: $0.key, correction: .persistentID($0.value))
+        }
+      } createIdentifier: { track in
+        track.identifierCorrection(.duration(track.totalTime))
+      } qualifies: { item, current in
+        switch (item.correction, current.correction) {
+        case (.persistentID(let itemValue), .persistentID(let currentValue)):
+          return itemValue != currentValue
+        default:
+          return false
         }
       }
     }
