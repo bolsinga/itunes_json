@@ -329,7 +329,7 @@ extension Repairable {
           IdentifierCorrection(persistentID: $0.key, correction: .persistentID($0.value))
         }
       } createIdentifier: { track in
-        track.identifierCorrection(.duration(track.totalTime))
+        track.identifierCorrection(.persistentID(track.persistentID))
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.persistentID(let itemValue), .persistentID(let currentValue)):
