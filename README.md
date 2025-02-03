@@ -35,6 +35,7 @@ This will create patch files for the repair tool to use. It makes the assumption
 - `replace-persistent-ids` - Replace track persistent IDs. This should be used with caution.
 - `replace-date-addeds` - Replace date added for a track.
 - `replace-composers` - Replace composer for a track.
+- `replace-comments` - Replace comments for a track.
 
 ### repair
 This will repair a git repository with listening history, given a file created with the patch tool. It has all the same options as the patch tool, found above. It has one additional option, listed below.

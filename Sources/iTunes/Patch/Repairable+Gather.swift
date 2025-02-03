@@ -362,6 +362,18 @@ extension Repairable {
           return false
         }
       }
+
+    case .replaceComments:
+      return try await identifierCorrections(configuration: configuration) { track in
+        track.identifierCorrection(.comments(track.comments))
+      } qualifies: { item, current in
+        switch (item.correction, current.correction) {
+        case (.comments(let itemValue), .comments(let currentValue)):
+          return itemValue != currentValue
+        default:
+          return false
+        }
+      }
     }
   }
 }
