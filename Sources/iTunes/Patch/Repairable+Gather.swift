@@ -386,6 +386,30 @@ extension Repairable {
           return false
         }
       }
+
+    case .replaceAlbumTitle:
+      return try await identifierCorrections(configuration: configuration) { track in
+        track.identifierCorrection(.albumTitle(track.albumName))
+      } qualifies: { item, current in
+        switch (item.correction, current.correction) {
+        case (.albumTitle(let itemValue), .albumTitle(let currentValue)):
+          return itemValue != currentValue
+        default:
+          return false
+        }
+      }
+
+    case .replaceSongTitle:
+      return try await identifierCorrections(configuration: configuration) { track in
+        track.identifierCorrection(.songTitle(track.songName))
+      } qualifies: { item, current in
+        switch (item.correction, current.correction) {
+        case (.songTitle(let itemValue), .songTitle(let currentValue)):
+          return itemValue != currentValue
+        default:
+          return false
+        }
+      }
     }
   }
 }
