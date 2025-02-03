@@ -351,6 +351,17 @@ extension Repairable {
         }
       }
 
+    case .replaceComposers:
+      return try await identifierCorrections(configuration: configuration) { track in
+        track.identifierCorrection(.composer(track.composer))
+      } qualifies: { item, current in
+        switch (item.correction, current.correction) {
+        case (.composer(let itemValue), .composer(let currentValue)):
+          return itemValue != currentValue
+        default:
+          return false
+        }
+      }
     }
   }
 }

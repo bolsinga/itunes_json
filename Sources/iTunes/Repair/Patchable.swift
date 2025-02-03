@@ -22,4 +22,5 @@ enum Patchable: String, CaseIterable {
   case replaceDurations
   case replacePersistentIds
   case replaceDateAddeds
+  case replaceComposers
 }
