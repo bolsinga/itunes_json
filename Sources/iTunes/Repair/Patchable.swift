@@ -20,6 +20,6 @@ enum Patchable: String, CaseIterable {
   case replaceDiscCounts
   case replaceDiscNumbers
   case replaceDurations
-  case replacePersistentIDs
+  case replacePersistentIds
   case replaceDateAddeds
 }
