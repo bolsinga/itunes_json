@@ -365,7 +365,7 @@ extension Repairable {
 
     case .replaceComments:
       return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.comments(track.comments))
+        track.identifierCorrection(.comments(track.comments ?? ""))
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.comments(let itemValue), .comments(let currentValue)):

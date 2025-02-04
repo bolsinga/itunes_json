@@ -690,7 +690,7 @@ extension Track {
       artist: artist,
       bitRate: bitRate,
       bPM: bPM,
-      comments: newComments,
+      comments: !newComments.isEmpty ? newComments : nil,
       compilation: compilation,
       composer: composer,
       contentRating: contentRating,
@@ -1049,7 +1049,6 @@ extension Track {
       if let composer, composer == newValue { return self }
       return self.apply(composer: newValue, tag: tag)
     case .comments(let newValue):
-      guard let newValue else { return self }
       if let comments, comments == newValue { return self }
       return self.apply(comments: newValue, tag: tag)
     case .dateReleased(let newValue):
