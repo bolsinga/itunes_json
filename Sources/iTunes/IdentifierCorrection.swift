@@ -12,7 +12,7 @@ struct IdentifierCorrection: Codable, Comparable, Hashable, Sendable {
     case duration(Int?)
     case persistentID(UInt)
     case dateAdded(Date?)
-    case composer(String?)
+    case composer(String)
     case comments(String)
     case dateReleased(Date?)
     case albumTitle(SortableName?)
