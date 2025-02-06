@@ -626,7 +626,7 @@ extension Track {
       bPM: bPM,
       comments: comments,
       compilation: compilation,
-      composer: newComposer,
+      composer: !newComposer.isEmpty ? newComposer : nil,
       contentRating: contentRating,
       dateAdded: dateAdded,
       dateModified: dateModified,
@@ -1045,7 +1045,6 @@ extension Track {
       if let dateAdded, dateAdded == newValue { return self }
       return self.apply(dateAdded: newValue, tag: tag)
     case .composer(let newValue):
-      guard let newValue else { return self }
       if let composer, composer == newValue { return self }
       return self.apply(composer: newValue, tag: tag)
     case .comments(let newValue):
