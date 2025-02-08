@@ -410,6 +410,18 @@ extension Repairable {
           return false
         }
       }
+
+    case .replaceYear:
+      return try await identifierCorrections(configuration: configuration) { track in
+        track.identifierCorrection(.year(track.year ?? 0))
+      } qualifies: { item, current in
+        switch (item.correction, current.correction) {
+        case (.year(let itemValue), .year(let currentValue)):
+          return itemValue != currentValue
+        default:
+          return false
+        }
+      }
     }
   }
 }
