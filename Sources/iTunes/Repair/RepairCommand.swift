@@ -47,7 +47,7 @@ extension Patchable {
     case .songs:
       Patch.songs(try Array<SongTitleCorrection>.load(from: fileURL))
     case .replaceDurations, .replacePersistentIds, .replaceDateAddeds, .replaceComposers,
-      .replaceComments, .replaceDateReleased, .replaceAlbumTitle, .replaceSongTitle:
+      .replaceComments, .replaceDateReleased, .replaceAlbumTitle, .replaceSongTitle, .replaceYear:
       Patch.identifierCorrections(try Array<IdentifierCorrection>.load(from: fileURL))
     }
   }
