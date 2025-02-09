@@ -27,4 +27,5 @@ enum Repairable: CaseIterable {
   case replaceAlbumTitle
   case replaceSongTitle
   case replaceYear
+  case replaceTrackNumber
 }

@@ -1064,6 +1064,9 @@ extension Track {
     case .year(let newValue):
       if year == newValue { return self }
       return self.apply(year: newValue, tag: tag)
+    case .trackNumber(let newValue):
+      if trackNumber == newValue { return self }
+      return self.apply(trackNumber: newValue, tag: tag)
     }
   }
 }
