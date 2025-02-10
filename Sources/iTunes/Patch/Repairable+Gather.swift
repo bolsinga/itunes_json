@@ -106,6 +106,20 @@ private func identifierCorrections(
     createIdentifier: createIdentifier, qualifies: qualifies)
 }
 
+private func identifierCorrections(
+  configuration: GitTagData.Configuration,
+  additionalIdentifiers: [IdentifierCorrection] = [],
+  createIdentifier: @escaping @Sendable (_ track: Track) -> IdentifierCorrection,
+  qualifies: @escaping @Sendable (_ item: IdentifierCorrection, _ current: IdentifierCorrection) ->
+    Bool
+) async throws -> Patch {
+  try await identifierCorrections(
+    configuration: configuration,
+    current: { try await currentTracks().map { createIdentifier($0) } + additionalIdentifiers },
+    createIdentifier: createIdentifier, qualifies: qualifies
+  ).addIdentifierCorrections(additionalIdentifiers)
+}
+
 extension Repairable {
   enum CorrectionError: Error {
     case noData
@@ -156,6 +170,12 @@ extension Repairable {
     let data = try data(from: string)
     guard !data.isEmpty else { return [:] }
     return try JSONDecoder().decode(Dictionary<UInt, UInt>.self, from: data)
+  }
+
+  fileprivate func identifierStringLookupCorrections(from string: String) throws -> [UInt: String] {
+    let data = try data(from: string)
+    guard !data.isEmpty else { return [:] }
+    return try JSONDecoder().decode(Dictionary<UInt, String>.self, from: data)
   }
 }
 
@@ -400,7 +420,13 @@ extension Repairable {
       }
 
     case .replaceSongTitle:
-      return try await identifierCorrections(configuration: configuration) { track in
+      let additionalIdentifiers = try identifierStringLookupCorrections(from: correction).map {
+        IdentifierCorrection(
+          persistentID: $0.key, correction: .songTitle(SortableName(name: $0.value)))
+      }
+      return try await identifierCorrections(
+        configuration: configuration, additionalIdentifiers: additionalIdentifiers
+      ) { track in
         track.identifierCorrection(.songTitle(track.songName))
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
