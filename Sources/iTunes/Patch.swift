@@ -22,6 +22,17 @@ enum Patch: Sendable {
   case identifierCorrections([IdentifierCorrection])
 }
 
+extension Patch {
+  func addIdentifierCorrections(_ corrections: [IdentifierCorrection]) -> Patch {
+    switch self {
+    case .identifierCorrections(let array):
+      return .identifierCorrections(array + corrections)
+    default:
+      return self
+    }
+  }
+}
+
 // This will make a Dictionary<Key, Value> into Array<Key> where each Array
 //   element is a Key followed by a Value
 // This array of pairs is how JSON encodes a dictionary, but this code ensures
