@@ -29,4 +29,5 @@ enum Patchable: String, CaseIterable {
   case replaceSongTitle
   case replaceYear
   case replaceTrackNumber
+  case replaceIdSongTitle
 }
