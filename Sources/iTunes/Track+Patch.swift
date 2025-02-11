@@ -1067,6 +1067,8 @@ extension Track {
     case .trackNumber(let newValue):
       if trackNumber == newValue { return self }
       return self.apply(trackNumber: newValue, tag: tag)
+    case .replaceSongTitle(let newValue):
+      return self.apply(song: newValue, tag: tag)
     }
   }
 }

@@ -420,13 +420,7 @@ extension Repairable {
       }
 
     case .replaceSongTitle:
-      let additionalIdentifiers = try identifierStringLookupCorrections(from: correction).map {
-        IdentifierCorrection(
-          persistentID: $0.key, correction: .songTitle(SortableName(name: $0.value)))
-      }
-      return try await identifierCorrections(
-        configuration: configuration, additionalIdentifiers: additionalIdentifiers
-      ) { track in
+      return try await identifierCorrections(configuration: configuration) { track in
         track.identifierCorrection(.songTitle(track.songName))
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
@@ -456,6 +450,24 @@ extension Repairable {
         switch (item.correction, current.correction) {
         case (.trackNumber(let itemValue), .trackNumber(let currentValue)):
           return itemValue != currentValue
+        default:
+          return false
+        }
+      }
+
+    case .replaceIdSongTitle:
+      let additionalIdentifiers = try identifierStringLookupCorrections(from: correction).map {
+        IdentifierCorrection(
+          persistentID: $0.key, correction: .replaceSongTitle(SortableName(name: $0.value)))
+      }
+      return try await identifierCorrections(
+        configuration: configuration, additionalIdentifiers: additionalIdentifiers
+      ) { track in
+        track.identifierCorrection(.songTitle(track.songName))
+      } qualifies: { item, current in
+        switch (item.correction, current.correction) {
+        case (.replaceSongTitle(_), .replaceSongTitle(_)):
+          return true
         default:
           return false
         }
