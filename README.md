@@ -42,6 +42,7 @@ This will create patch files for the repair tool to use. It makes the assumption
 - `replace-year` - Replace year for a track.
 - `replace-track-number` - Replace track number for a track.
 - `replace-id-song-title` - Replace a song title. It does no string comparison and always sets it (different behavior than `replace-song-title`).
+- `replace-id-disc-count` - Replace a disc count, using persistent ID, no other criteria.
 
 ### repair
 This will repair a git repository with listening history, given a file created with the patch tool. It has all the same options as the patch tool, found above. It has one additional option, listed below.
