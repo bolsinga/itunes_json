@@ -484,6 +484,18 @@ extension Repairable {
           return false
         }
       }
+
+    case .replaceIdDiscNumber:
+      return try await identifierCorrections(configuration: configuration) { track in
+        track.identifierCorrection(.discNumber(track.discNumber ?? 0))
+      } qualifies: { item, current in
+        switch (item.correction, current.correction) {
+        case (.discNumber(let itemValue), .discNumber(let currentValue)):
+          return itemValue != currentValue
+        default:
+          return false
+        }
+      }
     }
   }
 }

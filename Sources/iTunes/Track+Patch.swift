@@ -1071,6 +1071,9 @@ extension Track {
       return self.apply(song: newValue, tag: tag)
     case .discCount(let newValue):
       return self.apply(discCount: newValue, tag: tag)
+    case .discNumber(let newValue):
+      if discNumber == newValue { return self }
+      return self.apply(discNumber: newValue, tag: tag)
     }
   }
 }
