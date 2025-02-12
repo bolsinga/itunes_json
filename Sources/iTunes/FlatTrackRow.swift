@@ -19,8 +19,8 @@ struct FlatTrackRow {
   fileprivate var sortalbum: String { track.albumName?.sorted ?? "" }
   fileprivate var tracknumber: Int { track.trackNumber ?? 0 }
   fileprivate var trackcount: Int { track.trackCount ?? 0 }
-  fileprivate var disccount: Int { track.discCount ?? 0 }
-  fileprivate var discnumber: Int { track.discNumber ?? 0 }
+  fileprivate var disccount: Int { track.discCount ?? 1 }
+  fileprivate var discnumber: Int { track.discNumber ?? 1 }
   fileprivate var year: Int { track.year ?? 0 }
   fileprivate var duration: Int { track.totalTime ?? 0 }
   fileprivate var dateadded: String { track.dateAddedISO8601 }

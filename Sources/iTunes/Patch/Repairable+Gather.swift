@@ -475,7 +475,7 @@ extension Repairable {
 
     case .replaceIdDiscCount:
       return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.discCount(track.discCount ?? 0))
+        track.identifierCorrection(.discCount(track.discCount ?? 1))
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.discCount(let itemValue), .discCount(let currentValue)):
@@ -487,7 +487,7 @@ extension Repairable {
 
     case .replaceIdDiscNumber:
       return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.discNumber(track.discNumber ?? 0))
+        track.identifierCorrection(.discNumber(track.discNumber ?? 1))
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.discNumber(let itemValue), .discNumber(let currentValue)):
