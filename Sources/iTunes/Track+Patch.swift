@@ -1070,6 +1070,7 @@ extension Track {
     case .replaceSongTitle(let newValue):
       return self.apply(song: newValue, tag: tag)
     case .discCount(let newValue):
+      if discCount == newValue { return self }
       return self.apply(discCount: newValue, tag: tag)
     }
   }
