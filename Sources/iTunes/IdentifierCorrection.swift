@@ -21,6 +21,7 @@ struct IdentifierCorrection: Codable, Comparable, Hashable, Sendable {
     case trackNumber(Int)
     case replaceSongTitle(SortableName)
     case discCount(Int)
+    case discNumber(Int)
 
     static func < (lhs: IdentifierCorrection.Property, rhs: IdentifierCorrection.Property) -> Bool {
       switch (lhs, rhs) {
@@ -47,6 +48,8 @@ struct IdentifierCorrection: Codable, Comparable, Hashable, Sendable {
       case (.replaceSongTitle(let lhv), .replaceSongTitle(let rhv)):
         return lhv < rhv
       case (.discCount(let lhv), .discCount(let rhv)):
+        return lhv < rhv
+      case (.discNumber(let lhv), .discNumber(let rhv)):
         return lhv < rhv
       default:
         return false
