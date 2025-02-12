@@ -1068,6 +1068,7 @@ extension Track {
       if trackNumber == newValue { return self }
       return self.apply(trackNumber: newValue, tag: tag)
     case .replaceSongTitle(let newValue):
+      // Note: This will always set the title w/o checking if it is different.
       return self.apply(song: newValue, tag: tag)
     case .discCount(let newValue):
       if discCount == newValue { return self }
