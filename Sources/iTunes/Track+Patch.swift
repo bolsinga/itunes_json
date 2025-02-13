@@ -1076,6 +1076,10 @@ extension Track {
     case .discNumber(let newValue):
       if discNumber == newValue { return self }
       return self.apply(discNumber: newValue, tag: tag)
+    case .artist(let newValue):
+      guard let newValue else { return self }
+      if artistName == newValue { return self }
+      return self.apply(patch: newValue, tag: tag)
     }
   }
 }

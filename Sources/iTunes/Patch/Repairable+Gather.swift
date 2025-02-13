@@ -496,6 +496,18 @@ extension Repairable {
           return false
         }
       }
+
+    case .replaceArtist:
+      return try await identifierCorrections(configuration: configuration) { track in
+        track.identifierCorrection(.artist(track.artistName))
+      } qualifies: { item, current in
+        switch (item.correction, current.correction) {
+        case (.artist(let itemValue), .artist(let currentValue)):
+          return itemValue != currentValue
+        default:
+          return false
+        }
+      }
     }
   }
 }
