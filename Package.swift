@@ -17,12 +17,14 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
     .package(url: "https://github.com/bolsinga/GitLibrary", from: "1.1.2"),
     .package(url: "https://github.com/DimaRU/PackageBuildInfo", from: "1.0.4"),
+    .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.4"),
   ],
   targets: [
     .target(
       name: "iTunes",
       dependencies: [
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
+        .product(name: "Collections", package: "swift-collections"),
         .product(name: "GitLibrary", package: "GitLibrary"),
       ],
       resources: [.process("Resources/Localizable.xcstrings")],
