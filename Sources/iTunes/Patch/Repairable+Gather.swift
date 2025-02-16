@@ -172,6 +172,17 @@ private func historicalIdentifierCorrections(
     ).sorted())
 }
 
+extension IdentifierCorrection.Property {
+  fileprivate var hasReleaseDate: Bool {
+    switch self {
+    case .dateReleased(let date):
+      return date != nil
+    default:
+      return false
+    }
+  }
+}
+
 extension Repairable {
   enum CorrectionError: Error {
     case noData
@@ -444,14 +455,12 @@ extension Repairable {
       }
 
     case .replaceDateReleased:
-      return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.dateReleased(track.releaseDate))
-      } qualifies: { item, current in
-        switch (item.correction, current.correction) {
-        case (.dateReleased(let itemValue), .dateReleased(let currentValue)):
-          return itemValue != currentValue
-        default:
-          return false
+      return try await historicalIdentifierCorrections(configuration: configuration) {
+        $0.identifierCorrection(.dateReleased($0.releaseDate))
+      } relevantChanges: {
+        // For ids with more than 1 dateReleased, use the earliest (sorted) correction.
+        $0.filter { $0.value.count > 1 }.compactMap {
+          $0.value.filter { $0.correction.hasReleaseDate }.sorted().first
         }
       }
 
