@@ -1244,4 +1244,8 @@ extension Array where Element == Track {
   func patch(_ patch: Patch, tag: String) throws -> Data {
     try patchTracks(patch, tag: tag).jsonData()
   }
+
+  func backupPatch(_ patchURL: URL) throws -> [Track] {
+    try patchTracks(Patchable.identifierCorrections(patchURL), tag: "")
+  }
 }

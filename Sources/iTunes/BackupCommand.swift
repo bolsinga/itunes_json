@@ -133,6 +133,13 @@ struct BackupCommand: AsyncParsableCommand {
     help: "The prefix to use for the git tags. If not set, will try to find most recent tag prefix."
   ) var tagPrefix: String?
 
+  /// Patch File URL.
+  @Option(
+    help: "Patch JSON file path.",
+    transform: ({ URL(filePath: $0) })
+  )
+  var patchURL: URL?
+
   /// Outputfile where data will be writen, if outputDirectory is not specified.
   private var outputFile: URL? {
     guard let outputDirectory else { return nil }
@@ -155,9 +162,16 @@ struct BackupCommand: AsyncParsableCommand {
     }
   }
 
+  func tracks() async throws -> [Track] {
+    var tracks = try await source.gather(reduce: reduce)
+    if let patchURL {
+      tracks = try tracks.backupPatch(patchURL)
+    }
+    return tracks
+  }
+
   func run() async throws {
-    let tracks = try await source.gather(reduce: reduce)
     try await destination.context(outputFile: outputFile, schemaOptions: laxSchema.schemaOptions)
-      .emit(tracks, context: context)
+      .emit(tracks(), context: context)
   }
 }
