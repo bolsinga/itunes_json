@@ -32,4 +32,5 @@ enum Repairable: CaseIterable {
   case replaceIdDiscCount
   case replaceIdDiscNumber
   case replaceArtist
+  case replacePlay
 }

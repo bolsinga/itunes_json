@@ -566,6 +566,38 @@ extension Repairable {
           return false
         }
       }
+
+    case .replacePlay:
+      return try await historicalIdentifierCorrections(configuration: configuration) {
+        $0.playIdentity
+      } relevantChanges: { (items: [UInt: [PlayIdentity]]) in
+        let oldPlays = items.mapValues { $0.map { $0.play } }
+        let newPlays = oldPlays.mapValues { $0.normalize() }
+
+        guard oldPlays.count == newPlays.count else { return [] }
+
+        return zip(oldPlays, newPlays).reduce(into: [IdentifierCorrection]()) {
+          (
+            partialResult: inout [IdentifierCorrection],
+            item: (Dictionary<UInt, [Play]>.Element, Dictionary<UInt, [Play]>.Element)
+          ) in
+          let persistentID = item.0.key
+          let oldPlays = item.0.value
+          let newPlays = item.1.value
+
+          guard oldPlays != newPlays else { return }
+          guard oldPlays.count == newPlays.count else { return }
+
+          partialResult = zip(oldPlays, newPlays).reduce(into: partialResult) {
+            (partialResult: inout [IdentifierCorrection], item: (Play, Play)) in
+            let (old, new) = item
+            guard old != new else { return }
+            partialResult.append(
+              IdentifierCorrection(
+                persistentID: persistentID, correction: .play(old: old, new: new)))
+          }
+        }
+      }
     }
   }
 }

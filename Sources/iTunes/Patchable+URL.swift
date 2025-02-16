@@ -53,7 +53,7 @@ extension Patchable {
     case .replaceDurations, .replacePersistentIds, .replaceDateAddeds, .replaceComposers,
       .replaceComments, .replaceDateReleased, .replaceAlbumTitle, .replaceSongTitle, .replaceYear,
       .replaceTrackNumber, .replaceIdSongTitle, .replaceIdDiscCount, .replaceIdDiscNumber,
-      .replaceArtist:
+      .replaceArtist, .replacePlay:
       try Self.identifierCorrections(fileURL)
     }
   }

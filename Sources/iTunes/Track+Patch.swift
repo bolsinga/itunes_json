@@ -964,6 +964,73 @@ extension Track {
       isrc: isrc)
   }
 
+  fileprivate func apply(playDate newPlayDate: Date, count newPlayCount: Int, tag: String) -> Track
+  {
+    Logger.patch.info("Patching Play: \(newPlayDate) (\(newPlayCount)) - \(tag)")
+
+    return Track(
+      album: album,
+      albumArtist: albumArtist,
+      albumRating: albumRating,
+      albumRatingComputed: albumRatingComputed,
+      artist: artist,
+      bitRate: bitRate,
+      bPM: bPM,
+      comments: comments,
+      compilation: compilation,
+      composer: composer,
+      contentRating: contentRating,
+      dateAdded: dateAdded,
+      dateModified: dateModified,
+      disabled: disabled,
+      discCount: discCount,
+      discNumber: discNumber,
+      episode: episode,
+      episodeOrder: episodeOrder,
+      explicit: explicit,
+      genre: genre,
+      grouping: grouping,
+      hasVideo: hasVideo,
+      hD: hD,
+      kind: kind,
+      location: location,
+      movie: movie,
+      musicVideo: musicVideo,
+      name: name,
+      partOfGaplessAlbum: partOfGaplessAlbum,
+      persistentID: persistentID,
+      playCount: newPlayCount,
+      playDateUTC: newPlayDate,
+      podcast: podcast,
+      protected: protected,
+      purchased: purchased,
+      rating: rating,
+      ratingComputed: ratingComputed,
+      releaseDate: releaseDate,
+      sampleRate: sampleRate,
+      season: season,
+      series: series,
+      size: size,
+      skipCount: skipCount,
+      skipDate: skipDate,
+      sortAlbum: sortAlbum,
+      sortAlbumArtist: sortAlbumArtist,
+      sortArtist: sortArtist,
+      sortComposer: sortComposer,
+      sortName: sortName,
+      sortSeries: sortSeries,
+      totalTime: totalTime,
+      trackCount: trackCount,
+      trackNumber: trackNumber,
+      trackType: trackType,
+      tVShow: tVShow,
+      unplayed: unplayed,
+      videoHeight: videoHeight,
+      videoWidth: videoWidth,
+      year: year,
+      isrc: isrc)
+  }
+
   fileprivate func apply(song newSong: SortableName, tag: String) -> Track {
     Logger.patch.info("Patching Song: \(newSong) - \(tag)")
 
@@ -1080,6 +1147,10 @@ extension Track {
       guard let newValue else { return self }
       if artistName == newValue { return self }
       return self.apply(patch: newValue, tag: tag)
+    case .play(let badPlay, let goodPlay):
+      guard badPlay == self.play else { return self }
+      guard let date = goodPlay.date, let count = goodPlay.count else { return self }
+      return self.apply(playDate: date, count: count, tag: tag)
     }
   }
 }
