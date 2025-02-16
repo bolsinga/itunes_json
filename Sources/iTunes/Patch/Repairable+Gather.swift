@@ -5,7 +5,44 @@
 //  Created by Greg Bolsinga on 11/18/24.
 //
 
+import Collections
 import Foundation
+
+private func historicalChanges<
+  Guide: Hashable & Sendable, Change: Hashable & Sendable, HistoricalID: Hashable
+>(
+  configuration: GitTagData.Configuration,
+  createGuide: @escaping @Sendable ([Track]) -> [Guide],
+  historicalID: @escaping @Sendable (Guide) -> HistoricalID,
+  relevantChanges: @escaping @Sendable ([HistoricalID: [Guide]]) -> [Change]
+) async throws -> [Change] {
+  // Get all git historical data.
+  let allHistoricalGuides = try await GitTagData(configuration: configuration).transformTracks {
+    _, tracks in
+    createGuide(tracks)
+  }
+
+  // sort data by tag ascending (oldest to newest).
+  let allHistoricalGuidesSorted = allHistoricalGuides.sorted(by: { $0.tag < $1.tag }).map {
+    $0.item
+  }
+
+  // Create a [HistoricalID: OrderedSet<Guide>]. This will get all unique Guides in tag order. Then covert it into [HistoricalID: [Guide]].
+  let historicalLookup = allHistoricalGuidesSorted.reduce(into: [HistoricalID: OrderedSet<Guide>]())
+  {
+    (partialResult: inout [HistoricalID: OrderedSet<Guide>], item: [Guide]) in
+    partialResult = item.reduce(into: partialResult) {
+      (partialResult: inout [HistoricalID: OrderedSet<Guide>], item: Guide) in
+      let id = historicalID(item)
+      var results = partialResult[id] ?? []
+      results.append(item)
+      partialResult[id] = results
+    }
+  }.mapValues { Array($0) }
+
+  // Get the relevant changes, according to the caller.
+  return Array(Set(relevantChanges(historicalLookup)))
+}
 
 private func changes<Guide: Hashable & Sendable, Change: Sendable>(
   configuration: GitTagData.Configuration,
@@ -118,6 +155,21 @@ private func identifierCorrections(
     current: { try await currentTracks().map { createIdentifier($0) } + additionalIdentifiers },
     createIdentifier: createIdentifier, qualifies: qualifies
   ).addIdentifierCorrections(additionalIdentifiers)
+}
+
+private func historicalIdentifierCorrections(
+  configuration: GitTagData.Configuration,
+  createIdentifier: @escaping @Sendable (_ track: Track) -> IdentifierCorrection,
+  relevantChanges: @escaping @Sendable ([UInt: [IdentifierCorrection]]) -> [IdentifierCorrection]
+) async throws -> Patch {
+  .identifierCorrections(
+    Set(
+      try await historicalChanges(
+        configuration: configuration,
+        createGuide: { $0.filter { $0.isSQLEncodable }.map { createIdentifier($0) } },
+        historicalID: { $0.persistentID },
+        relevantChanges: relevantChanges)
+    ).sorted())
 }
 
 extension Repairable {
@@ -360,15 +412,11 @@ extension Repairable {
       }
 
     case .replaceDateAddeds:
-      return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.dateAdded(track.dateAdded))
-      } qualifies: { item, current in
-        switch (item.correction, current.correction) {
-        case (.dateAdded(let itemValue), .dateAdded(let currentValue)):
-          return itemValue != currentValue
-        default:
-          return false
-        }
+      return try await historicalIdentifierCorrections(configuration: configuration) {
+        $0.identifierCorrection(.dateAdded($0.dateAdded))
+      } relevantChanges: {
+        // For ids with more than 1 dateAdded correction, use the first correction, since it is sorted by tag.
+        $0.filter { $0.value.count > 1 }.compactMap { $0.value.first }
       }
 
     case .replaceComposers:
