@@ -8,13 +8,16 @@
 import Collections
 import Foundation
 
+extension IdentifierCorrection: Identifiable {
+  var id: UInt { persistentID }
+}
+
 private func historicalChanges<
-  Guide: Hashable & Sendable, Change: Hashable & Sendable, HistoricalID: Hashable
+  Guide: Hashable & Identifiable & Sendable, Change: Hashable & Sendable
 >(
   configuration: GitTagData.Configuration,
   createGuide: @escaping @Sendable ([Track]) -> [Guide],
-  historicalID: @escaping @Sendable (Guide) -> HistoricalID,
-  relevantChanges: @escaping @Sendable ([HistoricalID: [Guide]]) -> [Change]
+  relevantChanges: @escaping @Sendable ([Guide.ID: [Guide]]) -> [Change]
 ) async throws -> [Change] {
   // Get all git historical data.
   let allHistoricalGuides = try await GitTagData(configuration: configuration).transformTracks {
@@ -28,12 +31,11 @@ private func historicalChanges<
   }
 
   // Create a [HistoricalID: OrderedSet<Guide>]. This will get all unique Guides in tag order. Then covert it into [HistoricalID: [Guide]].
-  let historicalLookup = allHistoricalGuidesSorted.reduce(into: [HistoricalID: OrderedSet<Guide>]())
-  {
-    (partialResult: inout [HistoricalID: OrderedSet<Guide>], item: [Guide]) in
+  let historicalLookup = allHistoricalGuidesSorted.reduce(into: [Guide.ID: OrderedSet<Guide>]()) {
+    (partialResult: inout [Guide.ID: OrderedSet<Guide>], item: [Guide]) in
     partialResult = item.reduce(into: partialResult) {
-      (partialResult: inout [HistoricalID: OrderedSet<Guide>], item: Guide) in
-      let id = historicalID(item)
+      (partialResult: inout [Guide.ID: OrderedSet<Guide>], item: Guide) in
+      let id = item.id
       var results = partialResult[id] ?? []
       results.append(item)
       partialResult[id] = results
@@ -157,17 +159,16 @@ private func identifierCorrections(
   ).addIdentifierCorrections(additionalIdentifiers)
 }
 
-private func historicalIdentifierCorrections(
+private func historicalIdentifierCorrections<Guide: Hashable & Identifiable & Sendable>(
   configuration: GitTagData.Configuration,
-  createIdentifier: @escaping @Sendable (_ track: Track) -> IdentifierCorrection,
-  relevantChanges: @escaping @Sendable ([UInt: [IdentifierCorrection]]) -> [IdentifierCorrection]
+  createIdentifier: @escaping @Sendable (_ track: Track) -> Guide,
+  relevantChanges: @escaping @Sendable ([Guide.ID: [Guide]]) -> [IdentifierCorrection]
 ) async throws -> Patch {
   .identifierCorrections(
     Set(
       try await historicalChanges(
         configuration: configuration,
         createGuide: { $0.filter { $0.isSQLEncodable }.map { createIdentifier($0) } },
-        historicalID: { $0.persistentID },
         relevantChanges: relevantChanges)
     ).sorted())
 }
