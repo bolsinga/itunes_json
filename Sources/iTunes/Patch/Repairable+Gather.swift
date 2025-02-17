@@ -161,14 +161,14 @@ private func identifierCorrections(
 
 private func historicalIdentifierCorrections<Guide: Hashable & Identifiable & Sendable>(
   configuration: GitTagData.Configuration,
-  createIdentifier: @escaping @Sendable (_ track: Track) -> Guide,
+  createIdentifier: @escaping @Sendable (_ track: Track) -> Guide?,
   relevantChanges: @escaping @Sendable ([Guide.ID: [Guide]]) -> [IdentifierCorrection]
 ) async throws -> Patch {
   .identifierCorrections(
     Set(
       try await historicalChanges(
         configuration: configuration,
-        createGuide: { $0.filter { $0.isSQLEncodable }.map { createIdentifier($0) } },
+        createGuide: { $0.filter { $0.isSQLEncodable }.compactMap { createIdentifier($0) } },
         relevantChanges: relevantChanges)
     ).sorted())
 }
