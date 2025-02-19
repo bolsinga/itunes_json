@@ -1147,9 +1147,9 @@ extension Track {
       guard let newValue else { return self }
       if artistName == newValue { return self }
       return self.apply(patch: newValue, tag: tag)
-    case .play(let badPlay, let goodPlay):
-      guard badPlay == self.play else { return self }
-      guard let date = goodPlay.date, let count = goodPlay.count else { return self }
+    case .play(let old, let new):
+      guard old == self.play else { return self }
+      guard let date = new.date, let count = new.count else { return self }
       return self.apply(playDate: date, count: count, tag: tag)
     }
   }
