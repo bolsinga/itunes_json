@@ -30,7 +30,7 @@ private enum Check {
   /// They are duplicates.
   case duplicate
 
-  /// The Play has a duplicate Date (including may be a DST one hour change). The associated Date should be used. The Play count is validly ascending.
+  /// The Play has a duplicate Date (including may be a DST quirk change). The associated Date should be used. The Play count is validly ascending.
   case duplicateDate(Date)
 
   /// The Play has a Date earlier than its self (which is not DST shifted).
@@ -49,7 +49,7 @@ private enum Check {
 private enum DateComparisonResult {
   case orderedAscending
   case orderedSame
-  case orderedExactlyOneHour
+  case orderedSameQuirk
   case orderedDescending
 }
 
@@ -68,7 +68,9 @@ extension ComparisonResult {
 
 extension Date {
   fileprivate func compareQuirk(_ other: Date) -> DateComparisonResult {
-    guard abs(self.distance(to: other)) != 60 * 60 else { return .orderedExactlyOneHour }
+    guard abs(self.distance(to: other)).truncatingRemainder(dividingBy: 60 * 60) != 0 else {
+      return .orderedSameQuirk
+    }
 
     return self.compare(other).dateComparisonResult
   }
@@ -77,7 +79,7 @@ extension Date {
 private enum PlayComparisonResult {
   case orderedAscending
   case orderedSame
-  case orderedExactlyOneHour
+  case orderedSameQuirk
   case orderedDescending
 
   case invalid
@@ -90,8 +92,8 @@ extension DateComparisonResult {
       return .orderedAscending
     case .orderedSame:
       return .orderedSame
-    case .orderedExactlyOneHour:
-      return .orderedExactlyOneHour
+    case .orderedSameQuirk:
+      return .orderedSameQuirk
     case .orderedDescending:
       return .orderedDescending
     }
@@ -133,8 +135,8 @@ extension Play {
       return (dateCompare, dateCompare, countCompare)
     }
 
-    if dateCompare == .orderedExactlyOneHour && countCompare == .orderedSame {
-      return (.orderedExactlyOneHour, dateCompare, countCompare)
+    if dateCompare == .orderedSameQuirk && countCompare == .orderedSame {
+      return (.orderedSameQuirk, dateCompare, countCompare)
     }
 
     return (.invalid, dateCompare, countCompare)
@@ -148,7 +150,7 @@ extension Play {
       return .good
     case .orderedSame:
       return .duplicate
-    case .orderedExactlyOneHour:
+    case .orderedSameQuirk:
       guard let date else { return .invalid }
       return .duplicateDate(date)
     case .orderedDescending:

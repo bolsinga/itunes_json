@@ -101,4 +101,12 @@ struct PlayTests {
     let other = valid.incremented(by: -(valid.count ?? 0))
     #expect([valid, other].normalize() == [valid])
   }
+
+  @Test func multipleOneHourDrifts() async throws {
+    #expect(
+      [
+        valid, valid.advanced(by: -60 * 60), valid.advanced(by: -60 * 60),
+        valid.advanced(by: -2 * 60 * 60),
+      ].normalize() == [valid, valid, valid, valid])
+  }
 }
