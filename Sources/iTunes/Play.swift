@@ -6,6 +6,11 @@
 //
 
 import Foundation
+import os
+
+extension Logger {
+  fileprivate static let playCompare = Logger(category: "play.compare")
+}
 
 struct Play: Codable, Comparable, Hashable, Sendable {
   let date: Date?
@@ -142,26 +147,39 @@ extension Play {
     case .orderedSame, .orderedSameQuirk:
       return .duplicate
     case .orderedDescending:
+      Logger.playCompare.info("Descending")
       return .invalid
     case .invalid:
       switch (dateCompare, countCompare) {
       case (.orderedDescending, .orderedAscending):
         /// The Play has a Date earlier than its self (which is not DST shifted).
+        Logger.playCompare.info("Date Descending, Count Ascending")
         return .invalid
       case (.orderedAscending, .orderedDescending):
-        guard let count else { return .invalid }
+        guard let count else {
+          Logger.playCompare.info("Date Ascending, Count Descending, No Self Count")
+          return .invalid
+        }
         let countIncrease = (other.count != nil && other.count! != 0) ? other.count! : 1
         return .updateCount(count + countIncrease)
       case (.orderedAscending, .invalid):
-        guard let count else { return .invalid }
+        guard let count else {
+          Logger.playCompare.info("Date Ascending, Count Invalid, No Self Count")
+          return .invalid
+        }
         return .updateCount(count + 1)
       case (.orderedSame, .orderedDescending), (.orderedSameQuirk, .orderedDescending):
         guard count != nil, let otherCount = other.count, otherCount == 0 else {
+          Logger.playCompare.info(
+            "Date Same, Count Descending, Other Count: \(String(describing: other.count))")
           return .invalid
         }
         return .duplicate
       default:
-        guard isValid, !other.isValid else { return .invalid }
+        guard isValid, !other.isValid else {
+          Logger.playCompare.info("Both Invalid")
+          return .invalid
+        }
         return .duplicate
       }
     }
