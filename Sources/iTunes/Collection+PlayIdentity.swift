@@ -33,7 +33,8 @@ extension Dictionary where Key == UInt, Value == [PlayIdentity] {
         return
       }
       guard oldPlays.count == newPlays.count else {
-        Logger.play.info("Cannot Normalize: \(persistentID)")
+        Logger.play.info(
+          "Cannot Normalize: \(persistentID) old: \(oldPlays.count) new: \(newPlays.count)")
         return
       }
 
