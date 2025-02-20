@@ -168,7 +168,7 @@ extension Play {
         guard let count else { return .invalid }
         return .emptyCount(count + 1)
       case (.orderedSame, .orderedDescending), (.orderedSameQuirk, .orderedDescending):
-        guard let count, let otherCount = other.count, otherCount == 0 else {
+        guard count != nil, let otherCount = other.count, otherCount == 0 else {
           return .invalid
         }
         return .duplicate
