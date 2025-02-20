@@ -42,6 +42,21 @@ private enum Check {
   case invalid
 }
 
+extension Check: CustomStringConvertible {
+  var description: String {
+    switch self {
+    case .good:
+      "good"
+    case .duplicate:
+      "duplicate"
+    case .updateCount(let int):
+      "updateCount: \(int)"
+    case .invalid:
+      "invalid"
+    }
+  }
+}
+
 private enum DateComparisonResult {
   case orderedAscending
   case orderedSame
@@ -185,29 +200,37 @@ extension Play {
     }
   }
 
-  fileprivate func normalize(_ other: Play) -> Play? {
-    switch check(other) {
+  fileprivate func normalize(_ other: Play) -> (Play?, Check) {
+    let check = check(other)
+    switch check {
     case .good:
-      return other
+      return (other, check)
     case .duplicate:
-      return self
+      return (self, check)
     case .updateCount(let count):
-      return Play(date: other.date, count: count)
+      return (Play(date: other.date, count: count), check)
     case .invalid:
-      return nil
+      return (nil, check)
     }
   }
 }
 
 extension Array where Element == Play {
-  func normalize() -> [Element] {
-    return self.reduce(into: [Element]()) { partialResult, item in
-      guard let mostRecent = partialResult.last, mostRecent.isValid else {
-        partialResult.append(item)
-        return
-      }
-      guard let next = mostRecent.normalize(item) else { return }
-      partialResult.append(next)
-    }
+  func normalize() -> ([Element], String) {
+    var check = Check.good
+    return (
+      self.reduce(into: [Element]()) { partialResult, item in
+        guard let mostRecent = partialResult.last, mostRecent.isValid else {
+          partialResult.append(item)
+          return
+        }
+        let (next, nextCheck) = mostRecent.normalize(item)
+        guard let next else {
+          check = nextCheck
+          return
+        }
+        partialResult.append(next)
+      }, "\(check)"
+    )
   }
 }
