@@ -89,7 +89,10 @@ struct PlayTests {
 
   @Test func advanceDateReverseCount() async throws {
     let other = valid.advanced(by: 60).incremented(by: -1)
-    #expect([valid, other].normalize() == [valid])
+    #expect(
+      [valid, other].normalize() == [
+        valid, valid.advanced(by: 60).incremented(by: (valid.count ?? 0) - 1),
+      ])
   }
 
   @Test func advanceDateCountZero() async throws {

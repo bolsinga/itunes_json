@@ -33,11 +33,8 @@ private enum Check {
   /// The Play has a Date earlier than its self (which is not DST shifted).
   case recedingDate
 
-  /// The count is receding, but the Date is OK.
-  case recedingCount
-
-  /// The count is empty. The Date has changed, so the count should reflect at least the associated count value.
-  case emptyCount(Int)
+  /// The count is not increasing, and the date is increasing. This looks like when iTunes forgets the count, so use the Date and the associated count value
+  case updateCount(Int)
 
   /// The Play is invalid; cannot determine what may be fixed.
   case invalid
@@ -154,13 +151,12 @@ extension Play {
       case (.orderedDescending, .orderedAscending):
         return .recedingDate
       case (.orderedAscending, .orderedDescending):
-        guard let count, let otherCount = other.count, otherCount == 0 else {
-          return .recedingCount
-        }
-        return .emptyCount(count + 1)
+        guard let count else { return .invalid }
+        let countIncrease = (other.count != nil && other.count! != 0) ? other.count! : 1
+        return .updateCount(count + countIncrease)
       case (.orderedAscending, .invalid):
         guard let count else { return .invalid }
-        return .emptyCount(count + 1)
+        return .updateCount(count + 1)
       case (.orderedSame, .orderedDescending), (.orderedSameQuirk, .orderedDescending):
         guard count != nil, let otherCount = other.count, otherCount == 0 else {
           return .invalid
@@ -181,9 +177,7 @@ extension Play {
       return self
     case .recedingDate:
       return nil
-    case .recedingCount:
-      return nil
-    case .emptyCount(let count):
+    case .updateCount(let count):
       return Play(date: other.date, count: count)
     case .invalid:
       return nil
