@@ -40,7 +40,12 @@ struct PlayTests {
   }
 
   @Test func invalidOther() async throws {
-    #expect([valid, invalid].normalize() == [valid])
+    #expect([valid, invalid].normalize() == [valid, valid])
+  }
+
+  @Test func invalidMidstream() async throws {
+    let other = valid.advanced(by: 60).incremented(by: 1)
+    #expect([valid, invalid, other].normalize() == [valid, valid, other])
   }
 
   @Test func valid() async throws {
