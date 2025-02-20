@@ -15,7 +15,10 @@ extension Logger {
 extension Dictionary where Key == UInt, Value == [PlayIdentity] {
   func relevantChanges() -> [IdentifierCorrection] {
     let oldPlays = self.mapValues { $0.map { $0.play } }
-    let newPlays = oldPlays.mapValues { $0.normalize() }
+    let normalized = oldPlays.mapValues { $0.normalize() }
+    let newPlays = normalized.mapValues { $0.0 }
+
+    let checks = normalized.mapValues { $0.1 }
 
     guard oldPlays.count == newPlays.count else { return [] }
 
@@ -34,7 +37,8 @@ extension Dictionary where Key == UInt, Value == [PlayIdentity] {
       }
       guard oldPlays.count == newPlays.count else {
         Logger.play.info(
-          "Cannot Normalize: \(persistentID) old: \(oldPlays.count) new: \(newPlays.count)")
+          "Cannot Normalize: \(persistentID) old: \(oldPlays.count) new: \(newPlays.count) check: \(checks[persistentID] ?? "n/a")"
+        )
         return
       }
 
