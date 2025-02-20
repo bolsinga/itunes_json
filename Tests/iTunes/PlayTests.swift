@@ -32,11 +32,11 @@ struct PlayTests {
   }
 
   @Test func singleInvalid() async throws {
-    #expect([invalid].normalize() == [])
+    #expect([invalid].normalize() == [invalid])
   }
 
   @Test func invalidInitial() async throws {
-    #expect([invalid, valid].normalize() == [])
+    #expect([invalid, valid].normalize() == [invalid, valid])
   }
 
   @Test func invalidOther() async throws {
