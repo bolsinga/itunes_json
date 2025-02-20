@@ -192,10 +192,11 @@ extension Play {
 
 extension Array where Element == Play {
   func normalize() -> [Element] {
-    guard let first, first.isValid else { return [] }
-
-    return self[1...].reduce(into: [first]) { partialResult, item in
-      guard let mostRecent = partialResult.last else { return }
+    return self.reduce(into: [Element]()) { partialResult, item in
+      guard let mostRecent = partialResult.last, mostRecent.isValid else {
+        partialResult.append(item)
+        return
+      }
       guard let next = mostRecent.normalize(item) else { return }
       partialResult.append(next)
     }
