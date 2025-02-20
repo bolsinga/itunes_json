@@ -167,7 +167,8 @@ extension Play {
         }
         return .duplicate
       default:
-        return .invalid
+        guard isValid, !other.isValid else { return .invalid }
+        return .duplicate
       }
     }
   }
