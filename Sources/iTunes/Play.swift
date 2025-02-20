@@ -30,9 +30,6 @@ private enum Check {
   /// They are duplicates.
   case duplicate
 
-  /// The Play has a Date earlier than its self (which is not DST shifted).
-  case recedingDate
-
   /// The count is not increasing, and the date is increasing. This looks like when iTunes forgets the count, so use the Date and the associated count value
   case updateCount(Int)
 
@@ -149,7 +146,8 @@ extension Play {
     case .invalid:
       switch (dateCompare, countCompare) {
       case (.orderedDescending, .orderedAscending):
-        return .recedingDate
+        /// The Play has a Date earlier than its self (which is not DST shifted).
+        return .invalid
       case (.orderedAscending, .orderedDescending):
         guard let count else { return .invalid }
         let countIncrease = (other.count != nil && other.count! != 0) ? other.count! : 1
@@ -175,8 +173,6 @@ extension Play {
       return other
     case .duplicate:
       return self
-    case .recedingDate:
-      return nil
     case .updateCount(let count):
       return Play(date: other.date, count: count)
     case .invalid:
