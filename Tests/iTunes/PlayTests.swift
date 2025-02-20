@@ -20,6 +20,12 @@ extension Play {
   }
 }
 
+extension Array where Element == Play {
+  fileprivate func normalize() -> [Element] {
+    normalize().0
+  }
+}
+
 struct PlayTests {
   var date: Date { try! Date.ISO8601FormatStyle().parse("2005-12-22T23:06:50Z") }
   let count = 5
