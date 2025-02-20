@@ -167,6 +167,11 @@ extension Play {
       case (.orderedAscending, .invalid):
         guard let count else { return .invalid }
         return .emptyCount(count + 1)
+      case (.orderedSame, .orderedDescending), (.orderedSameQuirk, .orderedDescending):
+        guard count != nil, let otherCount = other.count, otherCount == 0 else {
+          return .invalid
+        }
+        return .duplicate
       default:
         return .invalid
       }

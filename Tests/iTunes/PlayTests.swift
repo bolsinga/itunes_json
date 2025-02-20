@@ -99,6 +99,31 @@ struct PlayTests {
 
   @Test func sameDateCountZero() async throws {
     let other = valid.incremented(by: -(valid.count ?? 0))
+    #expect([valid, other].normalize() == [valid, valid])
+  }
+
+  @Test func quirkDateCountZero() async throws {
+    let other = valid.advanced(by: 60 * 60).incremented(by: -(valid.count ?? 0))
+    #expect([valid, other].normalize() == [valid, valid])
+  }
+
+  @Test func sameDateCountDescending() async throws {
+    let other = valid.incremented(by: -1)
+    #expect([valid, other].normalize() == [valid])
+  }
+
+  @Test func quirkDateCountDescending() async throws {
+    let other = valid.advanced(by: 60 * 60).incremented(by: -1)
+    #expect([valid, other].normalize() == [valid])
+  }
+
+  @Test func sameDateCountJump() async throws {
+    let other = valid.incremented(by: 2)
+    #expect([valid, other].normalize() == [valid])
+  }
+
+  @Test func quirkDateCountJump() async throws {
+    let other = valid.advanced(by: 60 * 60).incremented(by: 2)
     #expect([valid, other].normalize() == [valid])
   }
 
