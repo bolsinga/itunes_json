@@ -30,9 +30,6 @@ private enum Check {
   /// They are duplicates.
   case duplicate
 
-  /// The Play has a duplicate Date (including may be a DST quirk change). The associated Date should be used. The Play count is validly ascending.
-  case duplicateDate(Date)
-
   /// The Play has a Date earlier than its self (which is not DST shifted).
   case recedingDate
 
@@ -148,11 +145,8 @@ extension Play {
     switch comparison {
     case .orderedAscending:
       return .good
-    case .orderedSame:
+    case .orderedSame, .orderedSameQuirk:
       return .duplicate
-    case .orderedSameQuirk:
-      guard let date else { return .invalid }
-      return .duplicateDate(date)
     case .orderedDescending:
       return .invalid
     case .invalid:
@@ -184,8 +178,6 @@ extension Play {
       return other
     case .duplicate:
       return self
-    case .duplicateDate(let date):
-      return Play(date: date, count: other.count)
     case .recedingDate:
       return nil
     case .recedingCount:
