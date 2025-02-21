@@ -40,6 +40,12 @@ private enum Check {
 
   /// The Play is invalid; cannot determine what may be fixed.
   case invalid
+
+  case invalidBothDescending
+  case invalidDateDescendingCountAscending
+  case invalidSameDateCountDescending(Int?, Int?)
+  case invalidSameDateCountAscending(Int?, Int?)
+  case invalidBoth
 }
 
 extension Check: CustomStringConvertible {
@@ -53,6 +59,16 @@ extension Check: CustomStringConvertible {
       "updateCount: \(int)"
     case .invalid:
       "invalid"
+    case .invalidBothDescending:
+      "invalidBothDescending"
+    case .invalidDateDescendingCountAscending:
+      "invalidDateDescendingCountAscending"
+    case .invalidSameDateCountDescending(let previous, let next):
+      "invalidSameDateCountDescending: (\(previous ?? -1) -> \(next ?? -1))"
+    case .invalidSameDateCountAscending(let previous, let next):
+      "invalidSameDateCountAscending: (\(previous ?? -1) -> \(next ?? -1))"
+    case .invalidBoth:
+      "invalidBoth"
     }
   }
 }
@@ -163,13 +179,13 @@ extension Play {
       return .duplicate
     case .orderedDescending:
       Logger.playCompare.info("Descending")
-      return .invalid
+      return .invalidBothDescending
     case .invalid:
       switch (dateCompare, countCompare) {
       case (.orderedDescending, .orderedAscending):
         /// The Play has a Date earlier than its self (which is not DST shifted).
         Logger.playCompare.info("Date Descending, Count Ascending")
-        return .invalid
+        return .invalidDateDescendingCountAscending
       case (.orderedAscending, .orderedDescending):
         guard let count else {
           Logger.playCompare.info("Date Ascending, Count Descending, No Self Count")
@@ -187,13 +203,17 @@ extension Play {
         guard count != nil, let otherCount = other.count, otherCount == 0 else {
           Logger.playCompare.info(
             "Date Same, Count Descending, Other Count: \(String(describing: other.count))")
-          return .invalid
+          return .invalidSameDateCountDescending(count, other.count)
         }
         return .duplicate
+      case (.orderedSame, .orderedAscending), (.orderedSameQuirk, .orderedAscending):
+        Logger.playCompare.info(
+          "Date Same, Count Ascending, Other Count: \(String(describing: other.count))")
+        return .invalidSameDateCountAscending(count, other.count)
       default:
         guard isValid, !other.isValid else {
           Logger.playCompare.info("Both Invalid")
-          return .invalid
+          return .invalidBoth
         }
         return .duplicate
       }
@@ -209,7 +229,8 @@ extension Play {
       return (self, check)
     case .updateCount(let count):
       return (Play(date: other.date, count: count), check)
-    case .invalid:
+    case .invalid, .invalidBothDescending, .invalidDateDescendingCountAscending,
+      .invalidSameDateCountDescending(_, _), .invalidSameDateCountAscending(_, _), .invalidBoth:
       return (nil, check)
     }
   }
