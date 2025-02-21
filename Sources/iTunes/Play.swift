@@ -207,12 +207,9 @@ extension Play {
         }
         return .duplicate
       case (.orderedSame, .orderedAscending), (.orderedSameQuirk, .orderedAscending):
-        guard count != nil, let otherCount = other.count, otherCount == 0 else {
-          Logger.playCompare.info(
-            "Date Same, Count Ascending, Other Count: \(String(describing: other.count))")
-          return .invalidSameDateCountAscending(count, other.count)
-        }
-        return .duplicate
+        Logger.playCompare.info(
+          "Date Same, Count Ascending, Other Count: \(String(describing: other.count))")
+        return .invalidSameDateCountAscending(count, other.count)
       default:
         guard isValid, !other.isValid else {
           Logger.playCompare.info("Both Invalid")
