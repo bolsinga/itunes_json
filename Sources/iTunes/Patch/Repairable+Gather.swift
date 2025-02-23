@@ -264,22 +264,6 @@ extension Repairable {
           }
         ).sorted()
       )
-    case .missingTrackNumbers:
-      let correction = try songIntCorrections(from: correction)
-      return .trackNumbers(
-        Set(
-          try await corrections(configuration: configuration) {
-            try await currentSongTrackNumbers()
-          } brokenGuides: {
-            $0.filter { $0.isSQLEncodable }.songTrackNumbers.filter { $0.trackNumber == nil }
-          } createChange: { item, currentItems in
-            if item.trackNumber == nil {
-              return Set(currentItems).union(correction).filter { $0.song == item.song }.first
-            }
-            return nil
-          }
-        ).sorted()
-      )
     case .missingYears:
       let correction = try songIntCorrections(from: correction)
       return .years(
