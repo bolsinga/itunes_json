@@ -34,8 +34,6 @@ extension Array where Element: Codable {
 extension Patchable {
   func createPatch(_ fileURL: URL) throws -> Patch {
     switch self {
-    case .artists:
-      Patch.artists(try ArtistPatchLookup.load(from: fileURL))
     case .albums:
       Patch.albums(try AlbumPatchLookup.load(from: fileURL))
     case .missingTitleAlbums:

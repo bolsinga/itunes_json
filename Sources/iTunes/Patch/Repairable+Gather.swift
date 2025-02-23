@@ -196,16 +196,6 @@ extension Repairable {
     return data
   }
 
-  private func correctionLookup(from string: String) throws -> [String: String] {
-    let data = try data(from: string)
-    guard !data.isEmpty else { return [:] }
-    return try JSONDecoder().decode(Dictionary<String, String>.self, from: data)
-  }
-
-  fileprivate func artistCorrections(from string: String) throws -> [String: String] {
-    try correctionLookup(from: string)
-  }
-
   fileprivate func albumCorrection(from string: String) throws -> AlbumCorrection {
     let data = try data(from: string)
     guard !data.isEmpty else { return AlbumCorrection() }
@@ -246,25 +236,6 @@ extension Repairable {
 extension Repairable {
   func gather(_ configuration: GitTagData.Configuration, correction: String) async throws -> Patch {
     switch self {
-    case .artists:
-      let corrections = try artistCorrections(from: correction)
-      return .artists(
-        try await changes(configuration: configuration) {
-          try await currentArtists()
-        } createGuide: {
-          $0.artistNames
-        } createChange: {
-          guard let valid = $1.correctedSimilarName(to: $0, corrections: corrections) else {
-            return nil
-          }
-          return ($0, valid)
-        }.reduce(into: ArtistPatchLookup()) {
-          (partialResult: inout ArtistPatchLookup, pair: ArtistPatchLookup.Element) in
-          guard partialResult[pair.key] == nil else {
-            preconditionFailure("unexpected duplicate name: \(pair.key)")
-          }
-          partialResult[pair.key] = pair.value
-        })
     case .albums:
       let correction = try albumCorrection(from: correction)
       return .albums(

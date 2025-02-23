@@ -7,11 +7,9 @@
 
 import Foundation
 
-typealias ArtistPatchLookup = [SortableName: SortableName]
 typealias AlbumPatchLookup = [AlbumArtistName: AlbumArtistName]
 
 enum Patch: Sendable {
-  case artists(ArtistPatchLookup)
   case albums(AlbumPatchLookup)
   case missingTitleAlbums([SongArtistAlbum])
   case trackCounts([AlbumTrackCount])
@@ -50,8 +48,6 @@ extension Dictionary where Key: Codable & Comparable, Value: Codable & Comparabl
 extension Patch: CustomStringConvertible {
   var description: String {
     switch self {
-    case .artists(let items):
-      return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     case .albums(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     case .missingTitleAlbums(let items):
