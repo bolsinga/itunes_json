@@ -19,7 +19,7 @@ extension AlbumArtistName.AlbumType {
 }
 
 extension Track {
-  fileprivate func apply(patch: ArtistPatchLookup.Value, tag: String) -> Track {
+  fileprivate func apply(patch: SortableName, tag: String) -> Track {
     Logger.patch.info("Patching: \(patch) - \(tag)")
 
     return Track(
@@ -1156,13 +1156,6 @@ extension Track {
 }
 
 extension Array where Element == Track {
-  fileprivate func patchArtists(_ lookup: ArtistPatchLookup, tag: String) throws -> [Track] {
-    self.map { track in
-      guard let name = track.artistName, let patch = lookup[name] else { return track }
-      return track.apply(patch: patch, tag: tag)
-    }
-  }
-
   fileprivate func patchAlbums(_ lookup: AlbumPatchLookup, tag: String) throws -> [Track] {
     self.map { track in
       guard let name = track.albumArtistName, let patch = lookup[name] else { return track }
@@ -1291,8 +1284,6 @@ extension Array where Element == Track {
 
   fileprivate func patchTracks(_ patch: Patch, tag: String) throws -> [Track] {
     switch patch {
-    case .artists(let lookup):
-      try patchArtists(lookup, tag: tag)
     case .albums(let lookup):
       try patchAlbums(lookup, tag: tag)
     case .missingTitleAlbums(let lookup):

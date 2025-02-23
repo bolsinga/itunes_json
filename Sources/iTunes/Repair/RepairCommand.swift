@@ -13,7 +13,7 @@ struct RepairCommand: AsyncParsableCommand {
   )
 
   /// Input source type.
-  @Flag(help: "Patchable type to build.") var patchable: Patchable = .artists
+  @Flag(help: "Patchable type to build.") var patchable: Patchable = .replaceDurations
 
   /// Git Directory to read and write data from.
   @Option(

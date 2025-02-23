@@ -8,7 +8,6 @@
 import Foundation
 
 enum Patchable: String, CaseIterable {
-  case artists
   case albums
   case missingTitleAlbums
   case missingTrackCounts
