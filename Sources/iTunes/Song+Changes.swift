@@ -22,13 +22,3 @@ extension Track {
     return SongArtistAlbum(songArtist: songArtist, album: albumName)
   }
 }
-
-extension Array where Element == Track {
-  var songArtistAlbums: [SongArtistAlbum] {
-    [SongArtistAlbum](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.songArtistAlbum }))
-  }
-}
-
-func currentSongArtistAlbums() async throws -> [SongArtistAlbum] {
-  try await Source.itunes.gather(reduce: false).songArtistAlbums
-}

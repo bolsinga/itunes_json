@@ -1090,25 +1090,6 @@ extension Track {
 }
 
 extension Array where Element == Track {
-  fileprivate func patchMissingAlbumTitles(_ items: [SongArtistAlbum], tag: String)
-    throws
-    -> [Track]
-  {
-    let lookup = items.reduce(
-      into: [SongArtist: SortableName](),
-      { partialResult, item in
-        guard let album = item.album else { return }
-        partialResult[item.songArtist] = album
-      })
-
-    return self.map { track in
-      guard track.albumName == nil, let songArtist = track.songArtist,
-        let title = lookup[songArtist]
-      else { return track }
-      return track.apply(albumTitle: title, tag: tag)
-    }
-  }
-
   fileprivate func patchAlbumTrackCounts(_ items: [AlbumTrackCount], tag: String) throws
     -> [Track]
   {
@@ -1179,8 +1160,6 @@ extension Array where Element == Track {
 
   fileprivate func patchTracks(_ patch: Patch, tag: String) throws -> [Track] {
     switch patch {
-    case .missingTitleAlbums(let lookup):
-      try patchMissingAlbumTitles(lookup, tag: tag)
     case .trackCounts(let lookup):
       try patchAlbumTrackCounts(lookup, tag: tag)
     case .trackCorrections(let lookup):

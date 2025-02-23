@@ -8,7 +8,6 @@
 import Foundation
 
 enum Patch: Sendable {
-  case missingTitleAlbums([SongArtistAlbum])
   case trackCounts([AlbumTrackCount])
   case trackCorrections([TrackCorrection])
   case years([SongYear])
@@ -43,8 +42,6 @@ extension Dictionary where Key: Codable & Comparable, Value: Codable & Comparabl
 extension Patch: CustomStringConvertible {
   var description: String {
     switch self {
-    case .missingTitleAlbums(let items):
-      return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     case .trackCounts(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     case .trackCorrections(let items):
