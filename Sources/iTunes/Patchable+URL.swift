@@ -23,7 +23,7 @@ extension Patchable {
   func createPatch(_ fileURL: URL) throws -> Patch {
     switch self {
     case .replaceDurations, .replacePersistentIds, .replaceDateAddeds, .replaceComposers,
-      .replaceComments, .replaceDateReleased, .replaceAlbumTitle, .replaceSongTitle, .replaceYear,
+      .replaceComments, .replaceDateReleased, .replaceAlbumTitle, .replaceYear,
       .replaceTrackNumber, .replaceIdSongTitle, .replaceIdDiscCount, .replaceIdDiscNumber,
       .replaceArtist, .replacePlay:
       try Self.identifierCorrections(fileURL)

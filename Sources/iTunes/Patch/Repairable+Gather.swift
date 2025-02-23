@@ -277,18 +277,6 @@ extension Repairable {
         }
       }
 
-    case .replaceSongTitle:
-      return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.songTitle(track.songName))
-      } qualifies: { item, current in
-        switch (item.correction, current.correction) {
-        case (.songTitle(let itemValue), .songTitle(let currentValue)):
-          return itemValue != currentValue
-        default:
-          return false
-        }
-      }
-
     case .replaceYear:
       return try await identifierCorrections(configuration: configuration) { track in
         track.identifierCorrection(.year(track.year ?? 0))
@@ -321,7 +309,7 @@ extension Repairable {
       return try await identifierCorrections(
         configuration: configuration, additionalIdentifiers: additionalIdentifiers
       ) { track in
-        track.identifierCorrection(.songTitle(track.songName))
+        track.identifierCorrection(.replaceSongTitle(track.songName))
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.replaceSongTitle(_), .replaceSongTitle(_)):

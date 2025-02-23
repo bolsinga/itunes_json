@@ -966,9 +966,6 @@ extension Track {
       guard let newValue else { return self }
       if let albumName, albumName == newValue { return self }
       return self.apply(albumTitle: newValue, tag: tag)
-    case .songTitle(let newValue):
-      if songName == newValue { return self }
-      return self.apply(song: newValue, tag: tag)
     case .year(let newValue):
       if year == newValue { return self }
       return self.apply(year: newValue, tag: tag)
