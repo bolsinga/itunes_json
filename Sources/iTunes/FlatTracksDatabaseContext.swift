@@ -1,5 +1,5 @@
 //
-//  FlatDatabaseContext.swift
+//  FlatTracksDatabaseContext.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 1/29/25.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FlatDatabaseContext: FlatDBEncoderContext {
+struct FlatTracksDatabaseContext: FlatDBEncoderContext {
   let storage: DatabaseStorage
   let loggingToken: String?
 

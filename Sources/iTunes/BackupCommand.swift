@@ -52,7 +52,7 @@ enum DestinationContext: EnumerableFlag {
     case .flat:
       switch output {
       case .file(let outputFile):
-        return .db(.flat(FlatDatabaseContext(storage: .file(outputFile), loggingToken: nil)))
+        return .db(.flat(FlatTracksDatabaseContext(storage: .file(outputFile), loggingToken: nil)))
       case .standardOut, .update:
         throw DestinationError.noDBOutputFile
       }

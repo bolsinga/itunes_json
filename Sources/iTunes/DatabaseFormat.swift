@@ -9,7 +9,7 @@ import Foundation
 
 enum DatabaseFormat {
   case normalized(DatabaseContext)
-  case flat(FlatDatabaseContext)
+  case flat(FlatTracksDatabaseContext)
 }
 
 extension DatabaseFormat {
@@ -61,7 +61,7 @@ extension Array where Element == Track {
   }
 }
 
-extension FlatDatabaseContext {
+extension FlatTracksDatabaseContext {
   fileprivate func flatDatabase(_ tracks: [Track]) async throws -> Database {
     let dbEncoder = try FlatDBEncoder(context: self)
     do {

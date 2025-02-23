@@ -36,10 +36,10 @@ extension DatabaseContext {
   }
 }
 
-extension FlatDatabaseContext {
-  fileprivate func append(tag: String) -> FlatDatabaseContext {
+extension FlatTracksDatabaseContext {
+  fileprivate func append(tag: String) -> FlatTracksDatabaseContext {
     guard let loggingToken else { return self }
-    return FlatDatabaseContext(storage: storage, loggingToken: "\(loggingToken)-\(tag)")
+    return FlatTracksDatabaseContext(storage: storage, loggingToken: "\(loggingToken)-\(tag)")
   }
 }
 
