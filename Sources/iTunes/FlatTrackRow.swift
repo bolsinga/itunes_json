@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FlatTrackRow {
+struct FlatTrackRow: FlatRow {
   let track: Track
 
   fileprivate var itunesid: String { String(track.persistentID) }
@@ -40,5 +40,9 @@ struct FlatTrackRow {
 
   static var insertStatement: Database.Statement {
     FlatTrackRow(track: Track(name: "fake", persistentID: 0)).insert
+  }
+
+  var parameters: [Database.Value] {
+    insert.parameters
   }
 }
