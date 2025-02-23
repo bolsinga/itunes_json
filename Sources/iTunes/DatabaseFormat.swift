@@ -55,12 +55,6 @@ extension Array where Element == Track {
   }
 }
 
-extension FlatDatabaseContext: FlatTracksDBEncoderContext {
-  var context: Database.Context {
-    Database.Context(storage: storage, loggingToken: loggingToken)
-  }
-}
-
 extension Array where Element == Track {
   fileprivate func flatDatabase(_ context: FlatDatabaseContext) async throws -> Database {
     let dbEncoder = try FlatTracksDBEncoder(context: context)
