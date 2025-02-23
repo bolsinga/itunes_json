@@ -28,21 +28,3 @@ extension SongIdentifier: CustomStringConvertible {
     return (try? data.asUTF8String()) ?? ""
   }
 }
-
-extension SongArtist {
-  fileprivate func matchesExcludingSongName(_ other: Self) -> Bool {
-    artist == other.artist
-  }
-}
-
-extension SongArtistAlbum {
-  fileprivate func matchesExcludingSongName(_ other: Self) -> Bool {
-    songArtist.matchesExcludingSongName(other.songArtist) && album == other.album
-  }
-}
-
-extension SongIdentifier {
-  func matchesExcludingSongName(_ other: Self) -> Bool {
-    song.matchesExcludingSongName(other.song) && persistentID == other.persistentID
-  }
-}

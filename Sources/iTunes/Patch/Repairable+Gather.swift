@@ -321,25 +321,6 @@ extension Repairable {
           }
         ).sorted()
       )
-    case .songs:
-      return .songs(
-        Set(
-          try await corrections(configuration: configuration) {
-            try await currentSongIdentifiers()
-          } brokenGuides: {
-            $0.filter { $0.isSQLEncodable }.songIdentifiers
-          } createChange: { (item: SongIdentifier, currentItems: [SongIdentifier]) in
-            if let songIdentifier = currentItems.filter({ $0.matchesExcludingSongName(item) })
-              .first,
-              songIdentifier.song.songArtist.song != item.song.songArtist.song
-            {
-              return SongTitleCorrection(
-                song: item, correctedTitle: songIdentifier.song.songArtist.song)
-            }
-            return nil
-          }
-        ).sorted()
-      )
     case .replaceTrackCounts:
       return try await trackCorrections(configuration: configuration) {
         (item: TrackIdentifier, identifier: TrackIdentifier) in
