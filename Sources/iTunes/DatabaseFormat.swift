@@ -56,7 +56,9 @@ extension Array where Element == Track {
 }
 
 extension Array where Element == Track {
-  fileprivate func flatDatabase(_ context: FlatDatabaseContext) async throws -> Database {
+  fileprivate func flatDatabase<Context: FlatTracksDBEncoderContext>(_ context: Context)
+    async throws -> Database
+  {
     let dbEncoder = try FlatTracksDBEncoder(context: context)
     do {
       try await dbEncoder.encode(tracks: self.filter { $0.isSQLEncodable })
@@ -67,7 +69,8 @@ extension Array where Element == Track {
     }
   }
 
-  fileprivate func flatDatabase(_ context: FlatDatabaseContext) async throws
+  fileprivate func flatDatabase<Context: FlatTracksDBEncoderContext>(_ context: Context)
+    async throws
     -> Data
   {
     let db: Database = try await flatDatabase(context)
