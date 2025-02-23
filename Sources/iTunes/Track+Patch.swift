@@ -1162,20 +1162,6 @@ extension Array where Element == Track {
     }
   }
 
-  fileprivate func patchSongYears(_ items: [SongYear], tag: String) throws -> [Track] {
-    let lookup = items.reduce(
-      into: [SongArtistAlbum: Int](),
-      { partialResult, item in
-        guard let year = item.year else { return }
-        partialResult[item.song] = year
-      })
-    return self.map { track in
-      guard track.isSQLEncodable, let name = track.songArtistAlbum, let correctedYear = lookup[name]
-      else { return track }
-      return track.apply(year: correctedYear, tag: tag)
-    }
-  }
-
   fileprivate func patchIdentifierCorrections(_ corrections: [IdentifierCorrection], tag: String)
     throws
     -> [Track]
@@ -1206,8 +1192,6 @@ extension Array where Element == Track {
       try patchTrackCorrections(lookup, tag: tag)
     case .trackNumbers(let lookup):
       try patchSongTrackNumbers(lookup, tag: tag)
-    case .years(let lookup):
-      try patchSongYears(lookup, tag: tag)
     case .identifierCorrections(let items):
       try patchIdentifierCorrections(items, tag: tag)
     }

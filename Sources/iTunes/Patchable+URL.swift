@@ -30,8 +30,6 @@ extension Patchable {
       Patch.trackCorrections(try Array<TrackCorrection>.load(from: fileURL))
     case .missingTrackNumbers:
       Patch.trackNumbers(try Array<SongTrackNumber>.load(from: fileURL))
-    case .missingYears:
-      Patch.years(try Array<SongYear>.load(from: fileURL))
     case .replaceDurations, .replacePersistentIds, .replaceDateAddeds, .replaceComposers,
       .replaceComments, .replaceDateReleased, .replaceAlbumTitle, .replaceSongTitle, .replaceYear,
       .replaceTrackNumber, .replaceIdSongTitle, .replaceIdDiscCount, .replaceIdDiscNumber,
