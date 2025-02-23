@@ -85,72 +85,6 @@ extension Track {
       isrc: isrc)
   }
 
-  fileprivate func apply(patch: AlbumPatchLookup.Value, tag: String) -> Track {
-    Logger.patch.info("Patching: \(patch) - \(tag)")
-
-    return Track(
-      album: patch.name.name,
-      albumArtist: albumArtist,
-      albumRating: albumRating,
-      albumRatingComputed: albumRatingComputed,
-      artist: artist,
-      bitRate: bitRate,
-      bPM: bPM,
-      comments: comments,
-      compilation: patch.type.compilation,
-      composer: composer,
-      contentRating: contentRating,
-      dateAdded: dateAdded,
-      dateModified: dateModified,
-      disabled: disabled,
-      discCount: discCount,
-      discNumber: discNumber,
-      episode: episode,
-      episodeOrder: episodeOrder,
-      explicit: explicit,
-      genre: genre,
-      grouping: grouping,
-      hasVideo: hasVideo,
-      hD: hD,
-      kind: kind,
-      location: location,
-      movie: movie,
-      musicVideo: musicVideo,
-      name: name,
-      partOfGaplessAlbum: partOfGaplessAlbum,
-      persistentID: persistentID,
-      playCount: playCount,
-      playDateUTC: playDateUTC,
-      podcast: podcast,
-      protected: protected,
-      purchased: purchased,
-      rating: rating,
-      ratingComputed: ratingComputed,
-      releaseDate: releaseDate,
-      sampleRate: sampleRate,
-      season: season,
-      series: series,
-      size: size,
-      skipCount: skipCount,
-      skipDate: skipDate,
-      sortAlbum: !patch.name.sorted.isEmpty ? patch.name.sorted : nil,
-      sortAlbumArtist: sortAlbumArtist,
-      sortArtist: sortArtist,
-      sortComposer: sortComposer,
-      sortName: sortName,
-      sortSeries: sortSeries,
-      totalTime: totalTime,
-      trackCount: trackCount,
-      trackNumber: trackNumber,
-      trackType: trackType,
-      tVShow: tVShow,
-      unplayed: unplayed,
-      videoHeight: videoHeight,
-      videoWidth: videoWidth,
-      year: year,
-      isrc: isrc)
-  }
-
   fileprivate func apply(albumTitle newAlbumTitle: SortableName, tag: String) -> Track {
     Logger.patch.info("Patching Title: \(newAlbumTitle) - \(tag)")
 
@@ -1156,13 +1090,6 @@ extension Track {
 }
 
 extension Array where Element == Track {
-  fileprivate func patchAlbums(_ lookup: AlbumPatchLookup, tag: String) throws -> [Track] {
-    self.map { track in
-      guard let name = track.albumArtistName, let patch = lookup[name] else { return track }
-      return track.apply(patch: patch, tag: tag)
-    }
-  }
-
   fileprivate func patchMissingAlbumTitles(_ items: [SongArtistAlbum], tag: String)
     throws
     -> [Track]
@@ -1284,8 +1211,6 @@ extension Array where Element == Track {
 
   fileprivate func patchTracks(_ patch: Patch, tag: String) throws -> [Track] {
     switch patch {
-    case .albums(let lookup):
-      try patchAlbums(lookup, tag: tag)
     case .missingTitleAlbums(let lookup):
       try patchMissingAlbumTitles(lookup, tag: tag)
     case .trackCounts(let lookup):

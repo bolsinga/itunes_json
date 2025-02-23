@@ -7,18 +7,7 @@
 
 import Foundation
 
-extension Dictionary where Key: Codable & Comparable, Value: Codable & Comparable, Key == Value {
-  static fileprivate func load(from url: URL) throws -> Self {
-    try load(from: try Data(contentsOf: url, options: .mappedIfSafe))
-  }
-
-  static fileprivate func load(from data: Data) throws -> Self {
-    let decoder = JSONDecoder()
-    decoder.dateDecodingStrategy = .iso8601
-    return try decoder.decode(Self.self, from: data)
-  }
-}
-
+q
 extension Array where Element: Codable {
   static fileprivate func load(from url: URL) throws -> Self {
     try load(from: try Data(contentsOf: url, options: .mappedIfSafe))
@@ -34,8 +23,6 @@ extension Array where Element: Codable {
 extension Patchable {
   func createPatch(_ fileURL: URL) throws -> Patch {
     switch self {
-    case .albums:
-      Patch.albums(try AlbumPatchLookup.load(from: fileURL))
     case .missingTitleAlbums:
       Patch.missingTitleAlbums(try Array<SongArtistAlbum>.load(from: fileURL))
     case .missingTrackCounts:
