@@ -22,8 +22,6 @@ extension Array where Element: Codable {
 extension Patchable {
   func createPatch(_ fileURL: URL) throws -> Patch {
     switch self {
-    case .trackCorrections, .replaceTrackCounts, .replaceDiscCounts, .replaceDiscNumbers:
-      Patch.trackCorrections(try Array<TrackCorrection>.load(from: fileURL))
     case .replaceDurations, .replacePersistentIds, .replaceDateAddeds, .replaceComposers,
       .replaceComments, .replaceDateReleased, .replaceAlbumTitle, .replaceSongTitle, .replaceYear,
       .replaceTrackNumber, .replaceIdSongTitle, .replaceIdDiscCount, .replaceIdDiscNumber,

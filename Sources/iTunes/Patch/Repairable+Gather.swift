@@ -12,6 +12,10 @@ extension IdentifierCorrection: Identifiable {
   var id: UInt { persistentID }
 }
 
+private func currentTracks() async throws -> [Track] {
+  try await Source.itunes.gather(reduce: false)
+}
+
 private func historicalChanges<
   Guide: Hashable & Identifiable & Sendable, Change: Hashable & Sendable
 >(
@@ -82,28 +86,6 @@ private func corrections<Guide: Sendable, Change: Sendable>(
   let currentGuides = try await asyncCurrentGuides
 
   return await allBrokenGuides.changes { createChange($0, currentGuides) }
-}
-
-private func trackCorrections(
-  configuration: GitTagData.Configuration,
-  createCorrection: @escaping @Sendable (_ item: TrackIdentifier, _ identifier: TrackIdentifier) ->
-    TrackCorrection.Property?
-) async throws -> Patch {
-  .trackCorrections(
-    Set(
-      try await changes(
-        configuration: configuration,
-        currentGuides: { try await currentTrackIdentifiers() },
-        createGuide: { $0.filter { $0.isSQLEncodable }.trackIdentifiers },
-        createChange: {
-          (item: TrackIdentifier, currentItems: [TrackIdentifier]) in
-          guard let identifier = currentItems.filter({ $0.matchesSongIdentifier(item) }).first
-          else { return nil }
-          guard let property = createCorrection(item, identifier) else { return nil }
-          return TrackCorrection(
-            songArtistAlbum: identifier.songIdentifier.song, correction: property)
-        })
-    ).sorted())
 }
 
 private func identifierCorrections(
@@ -212,31 +194,6 @@ extension Repairable {
 extension Repairable {
   func gather(_ configuration: GitTagData.Configuration, correction: String) async throws -> Patch {
     switch self {
-    case .replaceTrackCounts:
-      return try await trackCorrections(configuration: configuration) {
-        (item: TrackIdentifier, identifier: TrackIdentifier) in
-        guard let trackCount = identifier.trackCount else { return nil }
-        guard trackCount != item.trackCount else { return nil }
-
-        return .trackCount(trackCount)
-      }
-    case .replaceDiscCounts:
-      return try await trackCorrections(configuration: configuration) {
-        (item: TrackIdentifier, identifier: TrackIdentifier) in
-        guard let discCount = identifier.discCount else { return nil }
-        guard discCount != item.discCount else { return nil }
-
-        return .discCount(discCount)
-      }
-    case .replaceDiscNumbers:
-      return try await trackCorrections(configuration: configuration) {
-        (item: TrackIdentifier, identifier: TrackIdentifier) in
-        guard let discNumber = identifier.discNumber else { return nil }
-        guard discNumber != item.discNumber else { return nil }
-
-        return .discNumber(discNumber)
-      }
-
     case .replaceDurations:
       return try await identifierCorrections(configuration: configuration) { track in
         track.identifierCorrection(.duration(track.totalTime))

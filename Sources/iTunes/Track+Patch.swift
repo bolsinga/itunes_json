@@ -145,72 +145,6 @@ extension Track {
       isrc: isrc)
   }
 
-  fileprivate func apply(trackCount newTrackCount: Int, tag: String) -> Track {
-    Logger.patch.info("Patching TrackCount: \(newTrackCount) - \(tag)")
-
-    return Track(
-      album: album,
-      albumArtist: albumArtist,
-      albumRating: albumRating,
-      albumRatingComputed: albumRatingComputed,
-      artist: artist,
-      bitRate: bitRate,
-      bPM: bPM,
-      comments: comments,
-      compilation: compilation,
-      composer: composer,
-      contentRating: contentRating,
-      dateAdded: dateAdded,
-      dateModified: dateModified,
-      disabled: disabled,
-      discCount: discCount,
-      discNumber: discNumber,
-      episode: episode,
-      episodeOrder: episodeOrder,
-      explicit: explicit,
-      genre: genre,
-      grouping: grouping,
-      hasVideo: hasVideo,
-      hD: hD,
-      kind: kind,
-      location: location,
-      movie: movie,
-      musicVideo: musicVideo,
-      name: name,
-      partOfGaplessAlbum: partOfGaplessAlbum,
-      persistentID: persistentID,
-      playCount: playCount,
-      playDateUTC: playDateUTC,
-      podcast: podcast,
-      protected: protected,
-      purchased: purchased,
-      rating: rating,
-      ratingComputed: ratingComputed,
-      releaseDate: releaseDate,
-      sampleRate: sampleRate,
-      season: season,
-      series: series,
-      size: size,
-      skipCount: skipCount,
-      skipDate: skipDate,
-      sortAlbum: sortAlbum,
-      sortAlbumArtist: sortAlbumArtist,
-      sortArtist: sortArtist,
-      sortComposer: sortComposer,
-      sortName: sortName,
-      sortSeries: sortSeries,
-      totalTime: totalTime,
-      trackCount: newTrackCount,
-      trackNumber: trackNumber,
-      trackType: trackType,
-      tVShow: tVShow,
-      unplayed: unplayed,
-      videoHeight: videoHeight,
-      videoWidth: videoWidth,
-      year: year,
-      isrc: isrc)
-  }
-
   fileprivate func apply(discCount newDiscCount: Int, tag: String) -> Track {
     Logger.patch.info("Patching DiscCount: \(newDiscCount) - \(tag)")
 
@@ -739,27 +673,6 @@ extension Track {
       isrc: isrc)
   }
 
-  fileprivate func apply(trackCorrection: TrackCorrection, tag: String) -> Track {
-    Logger.patch.info("Patching TrackCorrection: \(trackCorrection) - \(tag)")
-    switch trackCorrection.correction {
-    case .albumTitle(let newTitle):
-      guard albumName != newTitle else { return self }
-      return apply(albumTitle: newTitle, tag: tag)
-    case .trackCount(let newTrackCount):
-      guard let trackCount, trackCount != newTrackCount else { return self }
-      return apply(trackCount: newTrackCount, tag: tag)
-    case .artistName(let newArtistName):
-      guard newArtistName != artistName else { return self }
-      return apply(patch: newArtistName, tag: tag)
-    case .discCount(let newDiscCount):
-      guard let discCount, discCount != newDiscCount else { return self }
-      return apply(discCount: newDiscCount, tag: tag)
-    case .discNumber(let newDiscNumber):
-      guard let discNumber, discNumber != newDiscNumber else { return self }
-      return apply(discNumber: newDiscNumber, tag: tag)
-    }
-  }
-
   fileprivate func apply(trackNumber newTrackNumber: Int, tag: String) -> Track {
     Logger.patch.info("Patching TrackNumber: \(newTrackNumber) - \(tag)")
 
@@ -1084,21 +997,6 @@ extension Track {
 }
 
 extension Array where Element == Track {
-  fileprivate func patchTrackCorrections(_ corrections: [TrackCorrection], tag: String) throws
-    -> [Track]
-  {
-    self.map { track in
-      guard let songArtistAlbum = track.songArtistAlbum else { return track }
-      let applicableCorrections = corrections.matches(songArtistAlbum)
-      guard !applicableCorrections.isEmpty else { return track }
-      guard applicableCorrections.count == 1 else {
-        Logger.patch.info("Too Many Applicable Corrections: \(applicableCorrections) - \(tag)")
-        return track
-      }
-      return track.apply(trackCorrection: applicableCorrections[0], tag: tag)
-    }
-  }
-
   fileprivate func patchIdentifierCorrections(_ corrections: [IdentifierCorrection], tag: String)
     throws
     -> [Track]
@@ -1121,8 +1019,6 @@ extension Array where Element == Track {
 
   fileprivate func patchTracks(_ patch: Patch, tag: String) throws -> [Track] {
     switch patch {
-    case .trackCorrections(let lookup):
-      try patchTrackCorrections(lookup, tag: tag)
     case .identifierCorrections(let items):
       try patchIdentifierCorrections(items, tag: tag)
     }
