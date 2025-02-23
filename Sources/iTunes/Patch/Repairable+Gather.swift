@@ -196,12 +196,6 @@ extension Repairable {
     return data
   }
 
-  fileprivate func songArtistAlbums(from string: String) throws -> [SongArtistAlbum] {
-    let data = try data(from: string)
-    guard !data.isEmpty else { return [] }
-    return try JSONDecoder().decode(Array<SongArtistAlbum>.self, from: data)
-  }
-
   fileprivate func albumTrackCounts(from string: String) throws -> [AlbumTrackCount] {
     let data = try data(from: string)
     guard !data.isEmpty else { return [] }
@@ -230,23 +224,6 @@ extension Repairable {
 extension Repairable {
   func gather(_ configuration: GitTagData.Configuration, correction: String) async throws -> Patch {
     switch self {
-    case .missingTitleAlbums:
-      let correction = try songArtistAlbums(from: correction)
-      return .missingTitleAlbums(
-        Set(
-          try await corrections(configuration: configuration) {
-            try await currentSongArtistAlbums()
-          } brokenGuides: {
-            $0.filter { $0.isSQLEncodable }.songArtistAlbums.filter { $0.album == nil }
-          } createChange: {
-            let similar = $1.similarName(to: $0)
-            if similar == nil {
-              return correction.similarName(to: $0)
-            }
-            return similar
-          }
-        ).sorted()
-      )
     case .missingTrackCounts:
       let correction = try albumTrackCounts(from: correction)
       return .trackCounts(
