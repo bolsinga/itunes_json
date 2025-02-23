@@ -77,10 +77,6 @@ extension Track {
 }
 
 extension Array where Element == Track {
-  var albumNames: [AlbumArtistName] {
-    [AlbumArtistName](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumArtistName }))
-  }
-
   var albumTrackCounts: [AlbumTrackCount] {
     [AlbumTrackCount](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumTrackCount }))
   }
@@ -104,10 +100,6 @@ extension Array where Element == Track {
 
 func currentTracks() async throws -> [Track] {
   try await Source.itunes.gather(reduce: false)
-}
-
-func currentAlbums() async throws -> [AlbumArtistName] {
-  try await currentTracks().albumNames
 }
 
 func currentAlbumTrackCounts() async throws -> [AlbumTrackCount] {
