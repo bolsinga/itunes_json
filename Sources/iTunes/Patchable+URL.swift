@@ -7,7 +7,6 @@
 
 import Foundation
 
-q
 extension Array where Element: Codable {
   static fileprivate func load(from url: URL) throws -> Self {
     try load(from: try Data(contentsOf: url, options: .mappedIfSafe))
