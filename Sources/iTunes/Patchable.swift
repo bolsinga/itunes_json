@@ -8,7 +8,6 @@
 import Foundation
 
 enum Patchable: String, CaseIterable {
-  case missingTrackCounts
   case trackCorrections
   case replaceTrackCounts
   case replaceDiscCounts

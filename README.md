@@ -21,11 +21,6 @@ There are two database formats.
 ### patch
 This will create patch files for the repair tool to use. It makes the assumption that the current data found in the Music application is correct. It then will go through the backups in git history to find "patches" to tracks that are "similar".
 
-- `missing-title-albums` - **Missing** album names using songs and artists.
-- `missing-track-counts` - Track counts for albums that are **missing** track counts.
-- `missing-track-numbers` - Track numbers for songs that are **missing** track numbers.
-- `missing-years` - Years for songs that are **missing** years.
-- `songs` - Song names based upon artist, album, and Music "persistentID".
 - `replace-track-counts` - Replace track counts for albums.
 - `replace-disc-counts` - Replace disc counts for albums.
 - `replace-disc-numbers` - Replace disc numbers for albums.
