@@ -11,7 +11,6 @@ enum Patchable: String, CaseIterable {
   case missingTitleAlbums
   case missingTrackCounts
   case trackCorrections
-  case missingTrackNumbers
   case replaceTrackCounts
   case replaceDiscCounts
   case replaceDiscNumbers

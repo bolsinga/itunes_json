@@ -7,16 +7,6 @@
 
 import Foundation
 
-typealias SongTrackNumber = SongIntCorrection
-
-extension SongTrackNumber {
-  init(song: SongArtistAlbum, trackNumber: Int?) {
-    self.init(song: song, value: trackNumber)
-  }
-
-  var trackNumber: Int? { value }
-}
-
 extension Track {
   private var isCompilation: Bool {
     guard let compilation else { return false }
@@ -43,11 +33,6 @@ extension Track {
     return AlbumTrackCount(album: albumArtistName, trackCount: trackCount)
   }
 
-  var songTrackNumber: SongTrackNumber? {
-    guard let songArtistAlbum else { return nil }
-    return SongTrackNumber(song: songArtistAlbum, trackNumber: normalizedTrackNumber)
-  }
-
   private var songIdentifier: SongIdentifier? {
     guard let songArtistAlbum else { return nil }
     return SongIdentifier(song: songArtistAlbum, persistentID: persistentID)
@@ -66,10 +51,6 @@ extension Array where Element == Track {
     [AlbumTrackCount](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.albumTrackCount }))
   }
 
-  var songTrackNumbers: [SongTrackNumber] {
-    [SongTrackNumber](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.songTrackNumber }))
-  }
-
   var trackIdentifiers: [TrackIdentifier] {
     [TrackIdentifier](Set(self.filter { $0.isSQLEncodable }.compactMap { $0.trackIdentifier }))
   }
@@ -81,10 +62,6 @@ func currentTracks() async throws -> [Track] {
 
 func currentAlbumTrackCounts() async throws -> [AlbumTrackCount] {
   try await currentTracks().albumTrackCounts
-}
-
-func currentSongTrackNumbers() async throws -> [SongTrackNumber] {
-  try await currentTracks().songTrackNumbers
 }
 
 func currentTrackIdentifiers() async throws -> [TrackIdentifier] {

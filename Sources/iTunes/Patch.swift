@@ -11,7 +11,6 @@ enum Patch: Sendable {
   case missingTitleAlbums([SongArtistAlbum])
   case trackCounts([AlbumTrackCount])
   case trackCorrections([TrackCorrection])
-  case trackNumbers([SongTrackNumber])
   case identifierCorrections([IdentifierCorrection])
 }
 
@@ -48,8 +47,6 @@ extension Patch: CustomStringConvertible {
     case .trackCounts(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     case .trackCorrections(let items):
-      return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
-    case .trackNumbers(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     case .identifierCorrections(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
