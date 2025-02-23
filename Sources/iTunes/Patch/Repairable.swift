@@ -12,7 +12,6 @@ enum Repairable: CaseIterable {
   case missingTrackCounts
   case missingTrackNumbers
   case missingYears
-  case songs
   case replaceTrackCounts
   case replaceDiscCounts
   case replaceDiscNumbers
