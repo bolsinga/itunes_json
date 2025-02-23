@@ -16,7 +16,6 @@ struct IdentifierCorrection: Codable, Comparable, Hashable, Sendable {
     case comments(String)
     case dateReleased(Date?)
     case albumTitle(SortableName?)
-    case songTitle(SortableName)
     case year(Int)
     case trackNumber(Int)
     case replaceSongTitle(SortableName)
@@ -40,8 +39,6 @@ struct IdentifierCorrection: Codable, Comparable, Hashable, Sendable {
       case (.dateReleased(let lhv), .dateReleased(let rhv)):
         return lhv < rhv
       case (.albumTitle(let lhv), .albumTitle(let rhv)):
-        return lhv < rhv
-      case (.songTitle(let lhv), .songTitle(let rhv)):
         return lhv < rhv
       case (.year(let lhv), .year(let rhv)):
         return lhv < rhv
