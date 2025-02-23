@@ -10,7 +10,6 @@ import Foundation
 enum Patch: Sendable {
   case trackCounts([AlbumTrackCount])
   case trackCorrections([TrackCorrection])
-  case years([SongYear])
   case identifierCorrections([IdentifierCorrection])
 }
 
@@ -45,8 +44,6 @@ extension Patch: CustomStringConvertible {
     case .trackCounts(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     case .trackCorrections(let items):
-      return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
-    case .years(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     case .identifierCorrections(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""

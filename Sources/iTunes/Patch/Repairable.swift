@@ -9,7 +9,6 @@ import Foundation
 
 enum Repairable: CaseIterable {
   case missingTrackCounts
-  case missingYears
   case replaceTrackCounts
   case replaceDiscCounts
   case replaceDiscNumbers
