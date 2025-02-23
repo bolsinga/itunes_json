@@ -12,12 +12,6 @@ extension Logger {
   fileprivate static let patch = Logger(category: "patch")
 }
 
-extension AlbumArtistName.AlbumType {
-  fileprivate var compilation: Bool? {
-    isCompilation ? true : nil
-  }
-}
-
 extension Track {
   fileprivate func apply(patch: SortableName, tag: String) -> Track {
     Logger.patch.info("Patching: \(patch) - \(tag)")
@@ -1090,25 +1084,6 @@ extension Track {
 }
 
 extension Array where Element == Track {
-  fileprivate func patchAlbumTrackCounts(_ items: [AlbumTrackCount], tag: String) throws
-    -> [Track]
-  {
-    let lookup = items.reduce(
-      into: [AlbumArtistName: Int](),
-      { partialResult, item in
-        guard let trackCount = item.trackCount else { return }
-        partialResult[item.album] = trackCount
-      })
-    return self.map { track in
-      guard track.isSQLEncodable, let name = track.albumArtistName,
-        let correctedTrackCount = lookup[name]
-      else {
-        return track
-      }
-      return track.apply(trackCount: correctedTrackCount, tag: tag)
-    }
-  }
-
   fileprivate func patchTrackCorrections(_ corrections: [TrackCorrection], tag: String) throws
     -> [Track]
   {
@@ -1146,8 +1121,6 @@ extension Array where Element == Track {
 
   fileprivate func patchTracks(_ patch: Patch, tag: String) throws -> [Track] {
     switch patch {
-    case .trackCounts(let lookup):
-      try patchAlbumTrackCounts(lookup, tag: tag)
     case .trackCorrections(let lookup):
       try patchTrackCorrections(lookup, tag: tag)
     case .identifierCorrections(let items):

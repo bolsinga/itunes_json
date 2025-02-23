@@ -195,19 +195,7 @@ extension Repairable {
     }
     return data
   }
-
-  fileprivate func albumTrackCounts(from string: String) throws -> [AlbumTrackCount] {
-    let data = try data(from: string)
-    guard !data.isEmpty else { return [] }
-    return try JSONDecoder().decode(Array<AlbumTrackCount>.self, from: data)
-  }
-
-  fileprivate func songIntCorrections(from string: String) throws -> [SongIntCorrection] {
-    let data = try data(from: string)
-    guard !data.isEmpty else { return [] }
-    return try JSONDecoder().decode(Array<SongIntCorrection>.self, from: data)
-  }
-
+q
   fileprivate func identifierLookupCorrections(from string: String) throws -> [UInt: UInt] {
     let data = try data(from: string)
     guard !data.isEmpty else { return [:] }
@@ -224,23 +212,6 @@ extension Repairable {
 extension Repairable {
   func gather(_ configuration: GitTagData.Configuration, correction: String) async throws -> Patch {
     switch self {
-    case .missingTrackCounts:
-      let correction = try albumTrackCounts(from: correction)
-      return .trackCounts(
-        Set(
-          try await corrections(configuration: configuration) {
-            try await currentAlbumTrackCounts()
-          } brokenGuides: {
-            $0.filter { $0.isSQLEncodable }.albumTrackCounts.filter { $0.trackCount == nil }
-          } createChange: {
-            let similar = $1.needsChangeAndSimilar(to: $0)
-            if similar == nil {
-              return correction.similarName(to: $0)
-            }
-            return similar
-          }
-        ).sorted()
-      )
     case .replaceTrackCounts:
       return try await trackCorrections(configuration: configuration) {
         (item: TrackIdentifier, identifier: TrackIdentifier) in
