@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FlatDatabaseContext: FlatTracksDBEncoderContext {
+struct FlatDatabaseContext: FlatDBEncoderContext {
   let storage: DatabaseStorage
   let loggingToken: String?
 
@@ -17,8 +17,8 @@ struct FlatDatabaseContext: FlatTracksDBEncoderContext {
 
   var insertStatement: Database.Statement { FlatTrackRow.insertStatement }
 
-  func row(for track: Track) -> FlatTrackRow {
-    FlatTrackRow(track: track)
+  func row(for item: Track) -> FlatTrackRow {
+    FlatTrackRow(track: item)
   }
 
   var schema: String = """
