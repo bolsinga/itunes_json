@@ -1,5 +1,5 @@
 //
-//  FlatTracksDBEncoder.swift
+//  FlatDBEncoder.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 1/28/25.
@@ -11,8 +11,9 @@ protocol FlatRow: Sendable {
   var parameters: [Database.Value] { get }
 }
 
-protocol FlatTracksDBEncoderContext: Sendable {
+protocol FlatDBEncoderContext: Sendable {
   associatedtype Row: FlatRow
+  associatedtype Item
 
   var context: Database.Context { get }
 
@@ -20,10 +21,10 @@ protocol FlatTracksDBEncoderContext: Sendable {
 
   var insertStatement: Database.Statement { get }
 
-  func row(for track: Track) -> Row
+  func row(for item: Item) -> Row
 }
 
-struct FlatTracksDBEncoder<Context: FlatTracksDBEncoderContext> {
+struct FlatDBEncoder<Context: FlatDBEncoderContext> {
   let context: Context
   let db: Database
 
@@ -32,8 +33,8 @@ struct FlatTracksDBEncoder<Context: FlatTracksDBEncoderContext> {
     self.db = try Database(context: context.context)
   }
 
-  func encode(tracks: [Track]) async throws {
-    let rows = tracks.map { context.row(for: $0) }
+  func encode(items: [Context.Item]) async throws {
+    let rows = items.map { context.row(for: $0) }
 
     try await db.transaction { db in
       try db.execute(context.schema)

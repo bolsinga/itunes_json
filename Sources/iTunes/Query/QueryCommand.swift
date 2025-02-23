@@ -120,7 +120,7 @@ struct QueryCommand: AsyncParsableCommand {
     case .raw:
       return .raw(.normalized(context))
     case .flat:
-      return .raw(.flat(FlatDatabaseContext(storage: .memory, loggingToken: "query")))
+      return .raw(.flat(FlatTracksDatabaseContext(storage: .memory, loggingToken: "query")))
     }
   }
 

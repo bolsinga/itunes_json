@@ -50,7 +50,7 @@ extension Batch {
                   storage: .memory, schemaOptions: schemaOptions, loggingToken: "batch-\(tag)")))
           case .flat:
             Destination.db(
-              .flat(FlatDatabaseContext(storage: .memory, loggingToken: "batch-\(tag)")))
+              .flat(FlatTracksDatabaseContext(storage: .memory, loggingToken: "batch-\(tag)")))
           }
         }()
 

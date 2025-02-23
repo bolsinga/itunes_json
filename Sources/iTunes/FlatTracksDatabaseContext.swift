@@ -1,5 +1,5 @@
 //
-//  FlatDatabaseContext.swift
+//  FlatTracksDatabaseContext.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 1/29/25.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FlatDatabaseContext: FlatTracksDBEncoderContext {
+struct FlatTracksDatabaseContext: FlatDBEncoderContext {
   let storage: DatabaseStorage
   let loggingToken: String?
 
@@ -17,8 +17,8 @@ struct FlatDatabaseContext: FlatTracksDBEncoderContext {
 
   var insertStatement: Database.Statement { FlatTrackRow.insertStatement }
 
-  func row(for track: Track) -> FlatTrackRow {
-    FlatTrackRow(track: track)
+  func row(for item: Track) -> FlatTrackRow {
+    FlatTrackRow(track: item)
   }
 
   var schema: String = """

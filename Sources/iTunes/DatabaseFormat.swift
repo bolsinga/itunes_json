@@ -9,7 +9,7 @@ import Foundation
 
 enum DatabaseFormat {
   case normalized(DatabaseContext)
-  case flat(FlatDatabaseContext)
+  case flat(FlatTracksDatabaseContext)
 }
 
 extension DatabaseFormat {
@@ -56,12 +56,16 @@ extension Array where Element == Track {
 }
 
 extension Array where Element == Track {
-  fileprivate func flatDatabase<Context: FlatTracksDBEncoderContext>(_ context: Context)
-    async throws -> Database
-  {
-    let dbEncoder = try FlatTracksDBEncoder(context: context)
+  fileprivate var encodables: [Element] {
+    self.filter { $0.isSQLEncodable }
+  }
+}
+
+extension FlatTracksDatabaseContext {
+  fileprivate func flatDatabase(_ tracks: [Track]) async throws -> Database {
+    let dbEncoder = try FlatDBEncoder(context: self)
     do {
-      try await dbEncoder.encode(tracks: self.filter { $0.isSQLEncodable })
+      try await dbEncoder.encode(items: tracks.encodables)
       return dbEncoder.db
     } catch {
       await dbEncoder.close()
@@ -69,11 +73,8 @@ extension Array where Element == Track {
     }
   }
 
-  fileprivate func flatDatabase<Context: FlatTracksDBEncoderContext>(_ context: Context)
-    async throws
-    -> Data
-  {
-    let db: Database = try await flatDatabase(context)
+  fileprivate func flatDatabase(_ tracks: [Track]) async throws -> Data {
+    let db: Database = try await flatDatabase(tracks)
     do {
       let data = try await db.data()
       await db.close()
@@ -91,7 +92,7 @@ extension DatabaseFormat {
     case .normalized(let context):
       try await tracks.database(context)
     case .flat(let context):
-      try await tracks.flatDatabase(context)
+      try await context.flatDatabase(tracks)
     }
   }
 
@@ -100,7 +101,7 @@ extension DatabaseFormat {
     case .normalized(let context):
       try await tracks.database(context)
     case .flat(let context):
-      try await tracks.flatDatabase(context)
+      try await context.flatDatabase(tracks)
     }
   }
 }
