@@ -31,7 +31,7 @@ struct FlatTrackRow: FlatRow {
   fileprivate var playdate: String { track.datePlayedISO8601 }
   fileprivate var playcount: Int { track.playCount ?? 0 }
 
-  var insert: Database.Statement {
+  private var insert: Database.Statement {
     """
     INSERT INTO tracks (itunesid, name, sortname, artist, sortartist, album, sortalbum, tracknumber, trackcount, disccount, discnumber, year, duration, dateadded, compilation, composer, datereleased, comments, playdate, playcount)
     VALUES (\(itunesid), \(name), \(sortname), \(artist), \(sortartist), \(album), \(sortalbum), \(tracknumber), \(trackcount), \(disccount), \(discnumber), \(year), \(duration), \(dateadded), \(compilation), \(composer), \(datereleased), \(comments), \(playdate), \(playcount));
