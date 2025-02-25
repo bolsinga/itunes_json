@@ -7,34 +7,7 @@
 
 import Foundation
 
-typealias DatabaseRowLookup = [String: Database.Value]
-
 extension DatabaseRowLookup {
-  init(row: Database.Row) {
-    self.init(uniqueKeysWithValues: row)
-  }
-
-  fileprivate func string(_ key: String) -> String? {
-    guard let s = self[key]?.string, !s.isEmpty else { return nil }
-    return s
-  }
-
-  fileprivate func integer(_ key: String) -> Int? {
-    guard let i = self[key]?.integer else { return nil }
-    return Int(i)
-  }
-
-  fileprivate func boolean(_ key: String) -> Bool? {
-    guard let v = integer(key) else { return nil }
-    guard v == 1 else { return nil }
-    return true
-  }
-
-  fileprivate func date(_ key: String) -> Date? {
-    guard let v = string(key) else { return nil }
-    return ISO8601DateFormatter().date(from: v)
-  }
-
   fileprivate var itunesid: UInt? { if let v = string("itunesid") { UInt(v) } else { nil } }
   fileprivate var name: String? { string("name") }
   fileprivate var sortname: String? { string("sortname") }
