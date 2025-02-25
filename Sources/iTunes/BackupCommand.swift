@@ -46,14 +46,14 @@ enum DestinationContext: EnumerableFlag {
           .normalized(
             DatabaseContext(
               storage: .file(outputFile), schemaOptions: schemaOptions, loggingToken: nil)))
-      case .standardOut, .update:
+      case .standardOut:
         throw DestinationError.noDBOutputFile
       }
     case .flat:
       switch output {
       case .file(let outputFile):
         return .db(.flat(FlatTracksDatabaseContext(storage: .file(outputFile), loggingToken: nil)))
-      case .standardOut, .update:
+      case .standardOut:
         throw DestinationError.noDBOutputFile
       }
     }

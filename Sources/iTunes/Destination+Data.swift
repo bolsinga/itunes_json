@@ -7,10 +7,6 @@
 
 import Foundation
 
-private enum DestinationDataError: Error {
-  case noDataForUpdateDB
-}
-
 extension Destination {
   func data(for tracks: [Track]) async throws -> Data {
     switch self {
@@ -20,8 +16,6 @@ extension Destination {
       try tracks.sqlData(context)
     case .db(let format):
       try await format.database(tracks: tracks)
-    case .updateDB(_):
-      throw DestinationDataError.noDataForUpdateDB
     }
   }
 }
