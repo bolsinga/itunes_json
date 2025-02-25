@@ -37,13 +37,6 @@ extension Destination {
       case .memory:
         return nil
       }
-    case .updateDB(let context):
-      switch context.storage {
-      case .file(let url):
-        return .update(url)
-      case .memory:
-        return nil
-      }
     }
   }
 
@@ -72,8 +65,6 @@ extension Destination {
       try await self.fileWriter(for: url, context: context).write(data: try await dataProvider())
     case .standardOut:
       print("\(try await dataProvider().asUTF8String())")
-    case .update(let url):
-      try await self.updateDB(at: url, tracks: tracks)
     }
   }
 }
