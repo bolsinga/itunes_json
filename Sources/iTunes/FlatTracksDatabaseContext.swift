@@ -15,7 +15,7 @@ struct FlatTracksDatabaseContext: FlatDBEncoderContext {
     Database.Context(storage: storage, loggingToken: loggingToken)
   }
 
-  var insertStatement: Database.Statement { FlatTrackRow.insertStatement }
+  func insertStatement(_ item: Item) -> Database.Statement { FlatTrackRow.insertStatement(item) }
 
   func row(for item: Track) -> FlatTrackRow {
     FlatTrackRow(track: item)

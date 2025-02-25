@@ -38,8 +38,8 @@ struct FlatTrackRow: FlatRow {
     """
   }
 
-  static var insertStatement: Database.Statement {
-    FlatTrackRow(track: Track(name: "fake", persistentID: 0)).insert
+  static func insertStatement(_ first: Track) -> Database.Statement {
+    FlatTrackRow(track: first).insert
   }
 
   var parameters: [Database.Value] {

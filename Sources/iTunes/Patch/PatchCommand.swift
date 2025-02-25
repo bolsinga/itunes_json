@@ -51,6 +51,7 @@ struct PatchCommand: AsyncParsableCommand {
   func run() async throws {
     let configuration = GitTagData.Configuration(
       directory: gitDirectory, fileName: PatchCommand.fileName)
-    try await repairDestination().emit(try await repairable.gather(configuration, correction: correction))
+    try await repairDestination().emit(
+      try await repairable.gather(configuration, correction: correction))
   }
 }
