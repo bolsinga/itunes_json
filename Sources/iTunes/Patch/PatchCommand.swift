@@ -3,6 +3,10 @@ import Foundation
 
 extension Repairable: EnumerableFlag {}
 
+private enum DestinationFlag: CaseIterable, EnumerableFlag {
+  case standardOut
+}
+
 struct PatchCommand: AsyncParsableCommand {
   private static let fileName = "itunes.json"
 
@@ -30,13 +34,23 @@ struct PatchCommand: AsyncParsableCommand {
   )
   var gitDirectory: URL
 
+  @Flag(help: "Destination for the patch file.")
+  fileprivate var destination: DestinationFlag = .standardOut
+
   /// Optional corrections to use when creating this patch.
   @Option(help: "The corrections to apply when creating this patch (as a JSON string).")
   var correction: String = ""
 
+  private func repairDestination() throws -> RepairDestination {
+    switch destination {
+    case .standardOut:
+      return .standardOut
+    }
+  }
+
   func run() async throws {
     let configuration = GitTagData.Configuration(
       directory: gitDirectory, fileName: PatchCommand.fileName)
-    print(try await repairable.gather(configuration, correction: correction))
+    try await repairDestination().emit(try await repairable.gather(configuration, correction: correction))
   }
 }
