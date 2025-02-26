@@ -165,7 +165,7 @@ struct BackupCommand: AsyncParsableCommand {
   func tracks() async throws -> [Track] {
     var tracks = try await source.gather(reduce: reduce)
     if let patchURL {
-      tracks = try tracks.backupPatch(patchURL)
+      tracks = try await tracks.backupPatch(patchURL)
     }
     return tracks
   }

@@ -41,7 +41,7 @@ struct RepairCommand: AsyncParsableCommand {
   var destinationBranch: String?
 
   func run() async throws {
-    let patch = try patchable.createPatch(patchURL)
+    let patch = try await patchable.createPatch(patchURL)
 
     let sourceConfiguration = GitTagData.Configuration(
       directory: gitDirectory, fileName: Self.fileName)

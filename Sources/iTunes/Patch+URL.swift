@@ -19,9 +19,36 @@ extension Array where Element: Codable {
   }
 }
 
+private enum PatchType {
+  case unknown
+  case json
+}
+
+extension URL {
+  fileprivate var patchType: PatchType {
+    switch pathExtension {
+    case "json":
+      .json
+    default:
+      .unknown
+    }
+  }
+
+  fileprivate func corrections(in url: URL) async throws -> [IdentifierCorrection] {
+    enum CorrectionsError: Error {
+      case unknownPatchFileType
+    }
+    switch patchType {
+    case .unknown:
+      throw CorrectionsError.unknownPatchFileType
+    case .json:
+      return try Array<IdentifierCorrection>.load(from: url)
+    }
+  }
+}
+
 extension Patch {
-  static func load(_ url: URL) throws -> Patch {
-    let corrections = try Array<IdentifierCorrection>.load(from: url)
-    return .identifierCorrections(corrections)
+  static func load(_ url: URL) async throws -> Patch {
+    .identifierCorrections(try await url.corrections(in: url))
   }
 }

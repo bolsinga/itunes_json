@@ -1025,7 +1025,7 @@ extension Array where Element == Track {
     try patchTracks(patch, tag: tag).jsonData()
   }
 
-  func backupPatch(_ patchURL: URL) throws -> [Track] {
-    try patchTracks(try Patch.load(patchURL), tag: "")
+  func backupPatch(_ patchURL: URL) async throws -> [Track] {
+    try patchTracks(try await Patch.load(patchURL), tag: "")
   }
 }
