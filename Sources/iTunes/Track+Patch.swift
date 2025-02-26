@@ -1026,6 +1026,6 @@ extension Array where Element == Track {
   }
 
   func backupPatch(_ patchURL: URL) throws -> [Track] {
-    try patchTracks(Patchable.identifierCorrections(patchURL), tag: "")
+    try patchTracks(try Patch.load(patchURL), tag: "")
   }
 }
