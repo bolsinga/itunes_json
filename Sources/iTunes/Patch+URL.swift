@@ -34,7 +34,7 @@ extension URL {
     }
   }
 
-  fileprivate func corrections(in url: URL) async throws -> [IdentifierCorrection] {
+  fileprivate func corrections() async throws -> [IdentifierCorrection] {
     enum CorrectionsError: Error {
       case unknownPatchFileType
     }
@@ -42,13 +42,13 @@ extension URL {
     case .unknown:
       throw CorrectionsError.unknownPatchFileType
     case .json:
-      return try Array<IdentifierCorrection>.load(from: url)
+      return try Array<IdentifierCorrection>.load(from: self)
     }
   }
 }
 
 extension Patch {
   static func load(_ url: URL) async throws -> Patch {
-    .identifierCorrections(try await url.corrections(in: url))
+    .identifierCorrections(try await url.corrections())
   }
 }
