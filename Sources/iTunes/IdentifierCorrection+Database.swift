@@ -7,22 +7,22 @@
 
 import Foundation
 
-private var duration: String { "SELECT * FROM 'correct_duration';" }
-private var persistentID: String { "SELECT * FROM 'correct_id';" }
-private var dateAdded: String { "SELECT * FROM 'correct_added';" }
-private var composer: String { "SELECT * FROM 'correct_composer';" }
-private var comments: String { "SELECT * FROM 'correct_comment';" }
-private var dateReleased: String { "SELECT * FROM 'correct_released';" }
-private var albumTitle: String { "SELECT * FROM 'correct_album';" }
-private var year: String { "SELECT * FROM 'correct_year';" }
-private var trackNumber: String { "SELECT * FROM 'correct_tracknumber';" }
-private var replaceSongTitle: String { "SELECT * FROM 'correct_song';" }
-private var discCount: String { "SELECT * FROM 'correct_disccount';" }
-private var discNumber: String { "SELECT * FROM 'correct_discnumber';" }
-private var artist: String { "SELECT * FROM 'correct_artist';" }
-private var play: String { "SELECT * FROM 'correct_play';" }
+private let duration = "SELECT * FROM 'correct_duration';"
+private let persistentID = "SELECT * FROM 'correct_id';"
+private let dateAdded = "SELECT * FROM 'correct_added';"
+private let composer = "SELECT * FROM 'correct_composer';"
+private let comments = "SELECT * FROM 'correct_comment';"
+private let dateReleased = "SELECT * FROM 'correct_released';"
+private let albumTitle = "SELECT * FROM 'correct_album';"
+private let year = "SELECT * FROM 'correct_year';"
+private let trackNumber = "SELECT * FROM 'correct_tracknumber';"
+private let replaceSongTitle = "SELECT * FROM 'correct_song';"
+private let discCount = "SELECT * FROM 'correct_disccount';"
+private let discNumber = "SELECT * FROM 'correct_discnumber';"
+private let artist = "SELECT * FROM 'correct_artist';"
+private let play = "SELECT * FROM 'correct_play';"
 
-private var statementConverters: [(String, (Database.Row) -> IdentifierCorrection?)] {
+private let statementConverters =
   [
     (duration, IdentifierCorrection.duration(row:)),
     (persistentID, IdentifierCorrection.persistentID(row:)),
@@ -39,7 +39,6 @@ private var statementConverters: [(String, (Database.Row) -> IdentifierCorrectio
     (artist, IdentifierCorrection.artist(row:)),
     (play, IdentifierCorrection.play(row:)),
   ]
-}
 
 extension Database {
   func identifierCorrections() throws -> [IdentifierCorrection] {
