@@ -9,6 +9,27 @@ import Foundation
 
 enum RepairDestination {
   case standardOut
+  case database(URL)
+}
+
+extension Patch {
+  fileprivate var identifierCorrections: [IdentifierCorrection] {
+    switch self {
+    case .identifierCorrections(let items):
+      return items
+    }
+  }
+
+  fileprivate func writeDatabase(to url: URL) async throws {
+    let dbEncoder = try FlatDBEncoder(context: CorrectionsDBContext(storage: .file(url)))
+    do {
+      try await dbEncoder.encode(items: self.identifierCorrections)
+      await dbEncoder.close()
+    } catch {
+      await dbEncoder.close()
+      throw error
+    }
+  }
 }
 
 extension RepairDestination {
@@ -16,6 +37,8 @@ extension RepairDestination {
     switch self {
     case .standardOut:
       print(patch)
+    case .database(let url):
+      try await patch.writeDatabase(to: url)
     }
   }
 }

@@ -22,6 +22,7 @@ extension Array where Element: Codable {
 private enum PatchType {
   case unknown
   case json
+  case database
 }
 
 extension URL {
@@ -29,9 +30,15 @@ extension URL {
     switch pathExtension {
     case "json":
       .json
+    case "db":
+      .database
     default:
       .unknown
     }
+  }
+
+  fileprivate func database() throws -> Database {
+    try Database(context: Database.Context(storage: .file(self), loggingToken: nil))
   }
 
   fileprivate func corrections() async throws -> [IdentifierCorrection] {
@@ -43,6 +50,8 @@ extension URL {
       throw CorrectionsError.unknownPatchFileType
     case .json:
       return try Array<IdentifierCorrection>.load(from: self)
+    case .database:
+      return try await database().identifierCorrections()
     }
   }
 }

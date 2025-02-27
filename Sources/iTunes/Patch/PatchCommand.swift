@@ -5,6 +5,7 @@ extension Repairable: EnumerableFlag {}
 
 private enum DestinationFlag: CaseIterable, EnumerableFlag {
   case standardOut
+  case database
 }
 
 struct PatchCommand: AsyncParsableCommand {
@@ -34,6 +35,9 @@ struct PatchCommand: AsyncParsableCommand {
   )
   var gitDirectory: URL
 
+  /// Database File URL.
+  @Option(help: "Database file path.", transform: ({ URL(filePath: $0) })) var databaseURL: URL?
+
   @Flag(help: "Destination for the patch file.")
   fileprivate var destination: DestinationFlag = .standardOut
 
@@ -42,9 +46,21 @@ struct PatchCommand: AsyncParsableCommand {
   var correction: String = ""
 
   private func repairDestination() throws -> RepairDestination {
+    enum DestinationError: Error {
+      case noDBOutputFile
+    }
     switch destination {
     case .standardOut:
       return .standardOut
+    case .database:
+      guard let databaseURL else { throw DestinationError.noDBOutputFile }
+      return .database(databaseURL)
+    }
+  }
+
+  func validate() throws {
+    if destination == .database && databaseURL == nil {
+      throw ValidationError("--database requires databaseURL to be set")
     }
   }
 
