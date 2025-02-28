@@ -73,7 +73,7 @@ private func changes<Guide: Hashable & Sendable, Change: Sendable>(
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
   current: @escaping @Sendable () async throws -> [IdentifierCorrection],
-  createIdentifier: @escaping @Sendable (_ track: Track) -> IdentifierCorrection,
+  createProperty: @escaping @Sendable (_ track: Track) -> IdentifierCorrection.Property,
   qualifies: @escaping @Sendable (_ item: IdentifierCorrection, _ current: IdentifierCorrection) ->
     Bool
 ) async throws -> Patch {
@@ -83,7 +83,7 @@ private func identifierCorrections(
         configuration: configuration,
         currentGuides: { try await current() },
         createGuide: {
-          $0.filter { $0.isSQLEncodable }.map { createIdentifier($0) }
+          $0.filter { $0.isSQLEncodable }.map { $0.identifierCorrection(createProperty($0)) }
         },
         createChange: {
           (item: IdentifierCorrection, currentItems: [IdentifierCorrection]) in
@@ -99,14 +99,14 @@ private func identifierCorrections(
 
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
-  createIdentifier: @escaping @Sendable (_ track: Track) -> IdentifierCorrection,
+  createProperty: @escaping @Sendable (_ track: Track) -> IdentifierCorrection.Property,
   qualifies: @escaping @Sendable (_ item: IdentifierCorrection, _ current: IdentifierCorrection) ->
     Bool
 ) async throws -> Patch {
   try await identifierCorrections(
     configuration: configuration,
-    current: { try await currentTracks().map { createIdentifier($0) } },
-    createIdentifier: createIdentifier, qualifies: qualifies
+    current: { try await currentTracks().map { $0.identifierCorrection(createProperty($0)) } },
+    createProperty: createProperty, qualifies: qualifies
   )
 }
 
@@ -144,8 +144,8 @@ extension Repairable {
   func gather(_ configuration: GitTagData.Configuration, correction: String) async throws -> Patch {
     switch self {
     case .replaceDurations:
-      return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.duration(track.totalTime))
+      return try await identifierCorrections(configuration: configuration) {
+        .duration($0.totalTime)
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.duration(let itemValue), .duration(let currentValue)):
@@ -161,8 +161,8 @@ extension Repairable {
         lookup.map {
           IdentifierCorrection(persistentID: $0.key, correction: .persistentID($0.value))
         }
-      } createIdentifier: { track in
-        track.identifierCorrection(.persistentID(track.persistentID))
+      } createProperty: {
+        .persistentID($0.persistentID)
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.persistentID(let itemValue), .persistentID(let currentValue)):
@@ -181,8 +181,8 @@ extension Repairable {
       }
 
     case .replaceComposers:
-      return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.composer(track.composer ?? ""))
+      return try await identifierCorrections(configuration: configuration) {
+        .composer($0.composer ?? "")
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.composer(let itemValue), .composer(let currentValue)):
@@ -193,8 +193,8 @@ extension Repairable {
       }
 
     case .replaceComments:
-      return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.comments(track.comments ?? ""))
+      return try await identifierCorrections(configuration: configuration) {
+        .comments($0.comments ?? "")
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.comments(let itemValue), .comments(let currentValue)):
@@ -215,8 +215,8 @@ extension Repairable {
       }
 
     case .replaceAlbumTitle:
-      return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.albumTitle(track.albumName))
+      return try await identifierCorrections(configuration: configuration) {
+        .albumTitle($0.albumName)
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.albumTitle(let itemValue), .albumTitle(let currentValue)):
@@ -227,8 +227,8 @@ extension Repairable {
       }
 
     case .replaceYear:
-      return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.year(track.year ?? 0))
+      return try await identifierCorrections(configuration: configuration) {
+        .year($0.year ?? 0)
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.year(let itemValue), .year(let currentValue)):
@@ -239,8 +239,8 @@ extension Repairable {
       }
 
     case .replaceTrackNumber:
-      return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.trackNumber(track.trackNumber ?? 0))
+      return try await identifierCorrections(configuration: configuration) {
+        .trackNumber($0.trackNumber ?? 0)
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.trackNumber(let itemValue), .trackNumber(let currentValue)):
@@ -251,8 +251,8 @@ extension Repairable {
       }
 
     case .replaceIdSongTitle:
-      return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.replaceSongTitle(track.songName))
+      return try await identifierCorrections(configuration: configuration) {
+        .replaceSongTitle($0.songName)
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.replaceSongTitle(_), .replaceSongTitle(_)):
@@ -263,8 +263,8 @@ extension Repairable {
       }
 
     case .replaceIdDiscCount:
-      return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.discCount(track.discCount ?? 1))
+      return try await identifierCorrections(configuration: configuration) {
+        .discCount($0.discCount ?? 1)
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.discCount(let itemValue), .discCount(let currentValue)):
@@ -275,8 +275,8 @@ extension Repairable {
       }
 
     case .replaceIdDiscNumber:
-      return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.discNumber(track.discNumber ?? 1))
+      return try await identifierCorrections(configuration: configuration) {
+        .discNumber($0.discNumber ?? 1)
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.discNumber(let itemValue), .discNumber(let currentValue)):
@@ -287,8 +287,8 @@ extension Repairable {
       }
 
     case .replaceArtist:
-      return try await identifierCorrections(configuration: configuration) { track in
-        track.identifierCorrection(.artist(track.artistName))
+      return try await identifierCorrections(configuration: configuration) {
+        .artist($0.artistName)
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
         case (.artist(let itemValue), .artist(let currentValue)):
