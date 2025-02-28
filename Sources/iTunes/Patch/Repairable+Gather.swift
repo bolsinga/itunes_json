@@ -165,6 +165,37 @@ private enum RepairableError: Error {
 }
 
 extension Repairable {
+  private var isLibraryRepair: Bool {
+    switch self {
+    case .replaceDurations, .replaceComposers, .replaceComments, .replaceAlbumTitle, .replaceYear,
+      .replaceTrackNumber, .replaceIdSongTitle, .replaceIdDiscCount, .replaceIdDiscNumber,
+      .replaceArtist:
+      return true
+
+    case .replaceDateAddeds, .replaceDateReleased, .replacePlay:
+      return false
+
+    case .replacePersistentIds, .libraryRepairs, .historyRepairs, .allRepairs:
+      return false
+    }
+  }
+
+  static var libraryRepairable: [Repairable] {
+    Self.allCases.filter { $0.isLibraryRepair }
+  }
+}
+
+extension Patch {
+  func merge(_ other: Patch) -> Patch {
+    .identityRepairs(Array(Set(self.identityRepairs).union(Set(other.identityRepairs))))
+  }
+
+  func sorted() -> Patch {
+    .identityRepairs(self.identityRepairs.sorted())
+  }
+}
+
+extension Repairable {
   private func gatherLibraryPatch(_ backupFile: URL) async throws -> Patch {
     guard let createCorrection = libraryCorrections[self] else {
       throw RepairableError.missingRepairableCorrection
@@ -172,7 +203,35 @@ extension Repairable {
     return try await identifierCorrections(backupFile: backupFile) { [createCorrection($0)] }
   }
 
-  func gather(_ backupFile: URL, correction: String) async throws -> Patch {
+  /// The Library is the Source of truth. This is where the data can be corrected in Music.app. Duration is a tricky one, in that Music.app is the source of truth, but its value changes at indeterminate moments.
+  private static func gatherLibraryPatches(_ backupFile: URL) async throws -> Patch {
+    try await identifierCorrections(
+      backupFile: backupFile,
+      createCorrection: { track in
+        Self.libraryRepairable.compactMap {
+          guard let createCorrection = libraryCorrections[$0] else { return nil }
+          return createCorrection(track)
+        }
+      })
+  }
+
+  /// History is the Source of truth. This is simple data, such as date added, date released. It's more complex, but date played and play count is also historically true. This is all data that is not modifiable in Music.app.
+  /// These are done with async let, which means the backupFile versions are iterated for each. It's hard to re-use (as done for Library patches) since there are two Guide types, and finding relevant changes depends upon the Guide.
+  private static func gatherHistoryPatches(_ backupFile: URL) async throws -> Patch {
+    async let dateAddedPatch = Repairable.replaceDateAddeds.gather(backupFile)
+    async let dateReleasedPatch = Repairable.replaceDateReleased.gather(backupFile)
+    // .replacePlay is still experimental.
+    return try await dateAddedPatch.merge(try await dateReleasedPatch).sorted()
+  }
+
+  private static func gatherAllPatches(_ backupFile: URL) async throws -> Patch {
+    async let libraryChanges = try await gatherLibraryPatches(backupFile)
+    async let historyChanges = try await gatherHistoryPatches(backupFile)
+
+    return try await libraryChanges.merge(try await historyChanges).sorted()
+  }
+
+  func gather(_ backupFile: URL, correction: String = "") async throws -> Patch {
     switch self {
     case .replacePersistentIds:
       let lookup = try identifierLookupCorrections(from: correction)
@@ -212,6 +271,15 @@ extension Repairable {
       .replaceTrackNumber, .replaceIdSongTitle, .replaceIdDiscCount, .replaceIdDiscNumber,
       .replaceArtist:
       return try await gatherLibraryPatch(backupFile)
+
+    case .libraryRepairs:
+      return try await Self.gatherLibraryPatches(backupFile)
+
+    case .historyRepairs:
+      return try await Self.gatherHistoryPatches(backupFile)
+
+    case .allRepairs:
+      return try await Self.gatherAllPatches(backupFile)
     }
   }
 }
