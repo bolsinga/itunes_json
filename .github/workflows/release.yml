@@ -19,7 +19,7 @@ jobs:
     - name: Show SDKs
       run: xcodebuild -showsdks
     - name: Show Destinations
-      run: xcodebuild -showdestinations
+      run: xcodebuild -scheme iTunes -showdestinations
     - name: Build / Test
       run: swift test -v
     - name: Build iOS / macOS
