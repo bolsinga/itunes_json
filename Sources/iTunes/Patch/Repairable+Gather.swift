@@ -155,6 +155,14 @@ private enum RepairableError: Error {
 }
 
 extension Repairable {
+  private func gatherLibraryPatch(_ configuration: GitTagData.Configuration) async throws -> Patch {
+    guard let createCorrection = libraryCorrections[self] else {
+      throw RepairableError.missingRepairableCorrection
+    }
+    return try await identifierCorrections(
+      configuration: configuration, createCorrection: createCorrection)
+  }
+
   func gather(_ configuration: GitTagData.Configuration, correction: String) async throws -> Patch {
     switch self {
     case .replacePersistentIds:
@@ -195,11 +203,7 @@ extension Repairable {
     case .replaceDurations, .replaceComposers, .replaceComments, .replaceAlbumTitle, .replaceYear,
       .replaceTrackNumber, .replaceIdSongTitle, .replaceIdDiscCount, .replaceIdDiscNumber,
       .replaceArtist:
-      guard let createCorrection = libraryCorrections[self] else {
-        throw RepairableError.missingRepairableCorrection
-      }
-      return try await identifierCorrections(
-        configuration: configuration, createCorrection: createCorrection)
+      return try await gatherLibraryPatch(configuration)
     }
   }
 }
