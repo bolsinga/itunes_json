@@ -70,24 +70,6 @@ private func changes<Guide: Hashable & Sendable, Change: Sendable>(
   return await unknownGuides.changes { createChange($0, currentGuides) }
 }
 
-private func corrections<Guide: Sendable, Change: Sendable>(
-  configuration: GitTagData.Configuration,
-  currentGuides: @Sendable () async throws -> [Guide],
-  brokenGuides: @escaping @Sendable ([Track]) -> [Guide],
-  createChange: @escaping @Sendable (Guide, [Guide]) -> Change?
-) async throws -> [Change] {
-  async let asyncCurrentGuides = try await currentGuides()
-
-  let allBrokenGuides = try await GitTagData(configuration: configuration).transformTracks {
-    _, tracks in
-    brokenGuides(tracks)
-  }.flatMap { $0.item }
-
-  let currentGuides = try await asyncCurrentGuides
-
-  return await allBrokenGuides.changes { createChange($0, currentGuides) }
-}
-
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
   current: @escaping @Sendable () async throws -> [IdentifierCorrection],
