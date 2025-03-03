@@ -223,12 +223,7 @@ extension Repairable {
       return try await identifierCorrections(configuration: configuration) {
         .replaceSongTitle($0.songName)
       } qualifies: {
-        switch ($0, $1) {
-        case (.replaceSongTitle(_), .replaceSongTitle(_)):
-          return true
-        default:
-          return false
-        }
+        $0 != $1
       }
 
     case .replaceIdDiscCount:
