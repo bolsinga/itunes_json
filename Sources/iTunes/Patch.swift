@@ -11,15 +11,6 @@ enum Patch: Sendable {
   case identifierCorrections([IdentifierCorrection])
 }
 
-extension Patch {
-  func addIdentifierCorrections(_ corrections: [IdentifierCorrection]) -> Patch {
-    switch self {
-    case .identifierCorrections(let array):
-      return .identifierCorrections(array + corrections)
-    }
-  }
-}
-
 extension Patch: CustomStringConvertible {
   var description: String {
     switch self {
