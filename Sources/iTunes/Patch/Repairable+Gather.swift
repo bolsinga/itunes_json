@@ -97,19 +97,17 @@ private func identifierCorrections(
     ).sorted())
 }
 
-// .replaceIdSongTitle is sole use of additionalIdentifiers.
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
-  additionalIdentifiers: [IdentifierCorrection] = [],
   createIdentifier: @escaping @Sendable (_ track: Track) -> IdentifierCorrection,
   qualifies: @escaping @Sendable (_ item: IdentifierCorrection, _ current: IdentifierCorrection) ->
     Bool
 ) async throws -> Patch {
   try await identifierCorrections(
     configuration: configuration,
-    current: { try await currentTracks().map { createIdentifier($0) } + additionalIdentifiers },
+    current: { try await currentTracks().map { createIdentifier($0) } },
     createIdentifier: createIdentifier, qualifies: qualifies
-  ).addIdentifierCorrections(additionalIdentifiers)
+  )
 }
 
 private func historicalIdentifierCorrections<Guide: Hashable & Identifiable & Sendable>(
@@ -140,11 +138,6 @@ extension IdentifierCorrection.Property {
 private func identifierLookupCorrections(from string: String) throws -> [UInt: UInt] {
   guard let data = string.data(using: .utf8), !data.isEmpty else { return [:] }
   return try JSONDecoder().decode(Dictionary<UInt, UInt>.self, from: data)
-}
-
-private func identifierStringLookupCorrections(from string: String) throws -> [UInt: String] {
-  guard let data = string.data(using: .utf8), !data.isEmpty else { return [:] }
-  return try JSONDecoder().decode(Dictionary<UInt, String>.self, from: data)
 }
 
 extension Repairable {
@@ -258,13 +251,7 @@ extension Repairable {
       }
 
     case .replaceIdSongTitle:
-      let additionalIdentifiers = try identifierStringLookupCorrections(from: correction).map {
-        IdentifierCorrection(
-          persistentID: $0.key, correction: .replaceSongTitle(SortableName(name: $0.value)))
-      }
-      return try await identifierCorrections(
-        configuration: configuration, additionalIdentifiers: additionalIdentifiers
-      ) { track in
+      return try await identifierCorrections(configuration: configuration) { track in
         track.identifierCorrection(.replaceSongTitle(track.songName))
       } qualifies: { item, current in
         switch (item.correction, current.correction) {
