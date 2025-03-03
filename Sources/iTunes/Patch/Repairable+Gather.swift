@@ -97,18 +97,7 @@ private func identifierCorrections(
     ).sorted())
 }
 
-private func identifierCorrections(
-  configuration: GitTagData.Configuration,
-  createIdentifier: @escaping @Sendable (_ track: Track) -> IdentifierCorrection,
-  qualifies: @escaping @Sendable (_ item: IdentifierCorrection, _ current: IdentifierCorrection) ->
-    Bool
-) async throws -> Patch {
-  try await identifierCorrections(
-    configuration: configuration,
-    current: { try await currentTracks().map { createIdentifier($0) } },
-    createIdentifier: createIdentifier, qualifies: qualifies)
-}
-
+// .replaceIdSongTitle is sole use of additionalIdentifiers.
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
   additionalIdentifiers: [IdentifierCorrection] = [],
