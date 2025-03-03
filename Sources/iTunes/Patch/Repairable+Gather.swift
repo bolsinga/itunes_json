@@ -137,29 +137,14 @@ extension IdentifierCorrection.Property {
   }
 }
 
-extension Repairable {
-  enum CorrectionError: Error {
-    case noData
-  }
+private func identifierLookupCorrections(from string: String) throws -> [UInt: UInt] {
+  guard let data = string.data(using: .utf8), !data.isEmpty else { return [:] }
+  return try JSONDecoder().decode(Dictionary<UInt, UInt>.self, from: data)
+}
 
-  private func data(from string: String) throws -> Data {
-    guard let data = string.data(using: .utf8) else {
-      throw CorrectionError.noData
-    }
-    return data
-  }
-
-  fileprivate func identifierLookupCorrections(from string: String) throws -> [UInt: UInt] {
-    let data = try data(from: string)
-    guard !data.isEmpty else { return [:] }
-    return try JSONDecoder().decode(Dictionary<UInt, UInt>.self, from: data)
-  }
-
-  fileprivate func identifierStringLookupCorrections(from string: String) throws -> [UInt: String] {
-    let data = try data(from: string)
-    guard !data.isEmpty else { return [:] }
-    return try JSONDecoder().decode(Dictionary<UInt, String>.self, from: data)
-  }
+private func identifierStringLookupCorrections(from string: String) throws -> [UInt: String] {
+  guard let data = string.data(using: .utf8), !data.isEmpty else { return [:] }
+  return try JSONDecoder().decode(Dictionary<UInt, String>.self, from: data)
 }
 
 extension Repairable {
