@@ -192,7 +192,9 @@ extension Repairable {
         $0.relevantChanges()
       }
 
-    default:
+    case .replaceDurations, .replaceComposers, .replaceComments, .replaceAlbumTitle, .replaceYear,
+      .replaceTrackNumber, .replaceIdSongTitle, .replaceIdDiscCount, .replaceIdDiscNumber,
+      .replaceArtist:
       guard let createProperty = libraryCorrectionProperties[self] else {
         throw RepairableError.missingRepairableCorrection
       }
