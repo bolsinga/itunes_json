@@ -73,11 +73,7 @@ private func changes<Guide: Hashable & Sendable, Change: Sendable>(
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
   current: @escaping @Sendable () async throws -> [IdentifierCorrection],
-  createProperty: @escaping @Sendable (_ track: Track) -> IdentifierCorrection.Property,
-  qualifies: @escaping @Sendable (
-    _ item: IdentifierCorrection.Property, _ current: IdentifierCorrection.Property
-  ) ->
-    Bool
+  createProperty: @escaping @Sendable (_ track: Track) -> IdentifierCorrection.Property
 ) async throws -> Patch {
   .identifierCorrections(
     Set(
@@ -93,7 +89,7 @@ private func identifierCorrections(
             let identifierMatch = currentItems.filter({ $0.persistentID == item.persistentID })
               .first
           else { return nil }
-          guard qualifies(item.correction, identifierMatch.correction) else { return nil }
+          guard item.correction != identifierMatch.correction else { return nil }
           return identifierMatch
         })
     ).sorted())
@@ -101,17 +97,12 @@ private func identifierCorrections(
 
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
-  createProperty: @escaping @Sendable (_ track: Track) -> IdentifierCorrection.Property,
-  qualifies: @escaping @Sendable (
-    _ item: IdentifierCorrection.Property, _ current: IdentifierCorrection.Property
-  ) ->
-    Bool
+  createProperty: @escaping @Sendable (_ track: Track) -> IdentifierCorrection.Property
 ) async throws -> Patch {
   try await identifierCorrections(
     configuration: configuration,
     current: { try await currentTracks().map { $0.identifierCorrection(createProperty($0)) } },
-    createProperty: createProperty, qualifies: qualifies
-  )
+    createProperty: createProperty)
 }
 
 private func historicalIdentifierCorrections<Guide: Hashable & Identifiable & Sendable>(
@@ -150,8 +141,6 @@ extension Repairable {
     case .replaceDurations:
       return try await identifierCorrections(configuration: configuration) {
         .duration($0.totalTime)
-      } qualifies: {
-        $0 != $1
       }
 
     case .replacePersistentIds:
@@ -162,8 +151,6 @@ extension Repairable {
         }
       } createProperty: {
         .persistentID($0.persistentID)
-      } qualifies: {
-        $0 != $1
       }
 
     case .replaceDateAddeds:
@@ -177,15 +164,11 @@ extension Repairable {
     case .replaceComposers:
       return try await identifierCorrections(configuration: configuration) {
         .composer($0.composer ?? "")
-      } qualifies: {
-        $0 != $1
       }
 
     case .replaceComments:
       return try await identifierCorrections(configuration: configuration) {
         .comments($0.comments ?? "")
-      } qualifies: {
-        $0 != $1
       }
 
     case .replaceDateReleased:
@@ -201,50 +184,36 @@ extension Repairable {
     case .replaceAlbumTitle:
       return try await identifierCorrections(configuration: configuration) {
         .albumTitle($0.albumName)
-      } qualifies: {
-        $0 != $1
       }
 
     case .replaceYear:
       return try await identifierCorrections(configuration: configuration) {
         .year($0.year ?? 0)
-      } qualifies: {
-        $0 != $1
       }
 
     case .replaceTrackNumber:
       return try await identifierCorrections(configuration: configuration) {
         .trackNumber($0.trackNumber ?? 0)
-      } qualifies: {
-        $0 != $1
       }
 
     case .replaceIdSongTitle:
       return try await identifierCorrections(configuration: configuration) {
         .replaceSongTitle($0.songName)
-      } qualifies: {
-        $0 != $1
       }
 
     case .replaceIdDiscCount:
       return try await identifierCorrections(configuration: configuration) {
         .discCount($0.discCount ?? 1)
-      } qualifies: {
-        $0 != $1
       }
 
     case .replaceIdDiscNumber:
       return try await identifierCorrections(configuration: configuration) {
         .discNumber($0.discNumber ?? 1)
-      } qualifies: {
-        $0 != $1
       }
 
     case .replaceArtist:
       return try await identifierCorrections(configuration: configuration) {
         .artist($0.artistName)
-      } qualifies: {
-        $0 != $1
       }
 
     case .replacePlay:
