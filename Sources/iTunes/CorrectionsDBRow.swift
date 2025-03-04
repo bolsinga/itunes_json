@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension IdentifierCorrection.Property {
+extension IdentifierCorrection.Correction {
   fileprivate var newitunesid: String? {
     if case .persistentID(let v) = self { String(v) } else { nil }
   }

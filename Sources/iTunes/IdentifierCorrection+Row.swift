@@ -26,73 +26,73 @@ extension DatabaseRowLookup {
   fileprivate var oldPlay: Play { Play(date: date("olddate"), count: integer("oldcount")) }
   fileprivate var newPlay: Play { Play(date: date("newdate"), count: integer("newcount")) }
 
-  fileprivate var duration: IdentifierCorrection.Property? {
+  fileprivate var duration: IdentifierCorrection.Correction? {
     .duration(integerValue)
   }
 
-  fileprivate var persistentID: IdentifierCorrection.Property? {
+  fileprivate var persistentID: IdentifierCorrection.Correction? {
     guard let value = stringValue, let id = UInt(value) else { return nil }
     return .persistentID(id)
   }
 
-  fileprivate var dateAdded: IdentifierCorrection.Property? {
+  fileprivate var dateAdded: IdentifierCorrection.Correction? {
     .dateAdded(date)
   }
 
-  fileprivate var composer: IdentifierCorrection.Property? {
+  fileprivate var composer: IdentifierCorrection.Correction? {
     guard let value = stringValue else { return nil }
     return .composer(value)
   }
 
-  fileprivate var comments: IdentifierCorrection.Property? {
+  fileprivate var comments: IdentifierCorrection.Correction? {
     guard let value = stringValue else { return nil }
     return .comments(value)
   }
 
-  fileprivate var dateReleased: IdentifierCorrection.Property? {
+  fileprivate var dateReleased: IdentifierCorrection.Correction? {
     .dateReleased(date)
   }
 
-  fileprivate var albumTitle: IdentifierCorrection.Property? {
+  fileprivate var albumTitle: IdentifierCorrection.Correction? {
     .albumTitle(sortableName)
   }
 
-  fileprivate var year: IdentifierCorrection.Property? {
+  fileprivate var year: IdentifierCorrection.Correction? {
     guard let value = integerValue else { return nil }
     return .year(value)
   }
 
-  fileprivate var trackNumber: IdentifierCorrection.Property? {
+  fileprivate var trackNumber: IdentifierCorrection.Correction? {
     guard let value = integerValue else { return nil }
     return .trackNumber(value)
   }
 
-  fileprivate var replaceSongTitle: IdentifierCorrection.Property? {
+  fileprivate var replaceSongTitle: IdentifierCorrection.Correction? {
     guard let sortableName else { return nil }
     return .replaceSongTitle(sortableName)
   }
 
-  fileprivate var discCount: IdentifierCorrection.Property? {
+  fileprivate var discCount: IdentifierCorrection.Correction? {
     guard let value = integerValue else { return nil }
     return .discCount(value)
   }
 
-  fileprivate var discNumber: IdentifierCorrection.Property? {
+  fileprivate var discNumber: IdentifierCorrection.Correction? {
     guard let value = integerValue else { return nil }
     return .discNumber(value)
   }
 
-  fileprivate var artist: IdentifierCorrection.Property? {
+  fileprivate var artist: IdentifierCorrection.Correction? {
     .artist(sortableName)
   }
 
-  fileprivate var play: IdentifierCorrection.Property? {
+  fileprivate var play: IdentifierCorrection.Correction? {
     .play(old: oldPlay, new: newPlay)
   }
 }
 
 extension IdentifierCorrection {
-  init?(row: Database.Row, property: (DatabaseRowLookup) -> Property?) {
+  init?(row: Database.Row, property: (DatabaseRowLookup) -> Correction?) {
     let lookup = DatabaseRowLookup(row: row)
 
     guard let itunesid = lookup.itunesid else { return nil }

@@ -70,7 +70,7 @@ private func changes<Guide: Hashable & Sendable, Change: Sendable>(
   return await unknownGuides.changes { createChange($0, currentGuides) }
 }
 
-private typealias TrackProperty = @Sendable (Track) -> IdentifierCorrection.Property
+private typealias TrackProperty = @Sendable (Track) -> IdentifierCorrection.Correction
 
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
@@ -121,7 +121,7 @@ private func historicalIdentifierCorrections<Guide: Hashable & Identifiable & Se
     ).sorted())
 }
 
-extension IdentifierCorrection.Property {
+extension IdentifierCorrection.Correction {
   fileprivate var hasReleaseDate: Bool {
     switch self {
     case .dateReleased(let date):
