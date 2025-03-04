@@ -137,7 +137,7 @@ private func identifierLookupCorrections(from string: String) throws -> [UInt: U
   return try JSONDecoder().decode(Dictionary<UInt, UInt>.self, from: data)
 }
 
-private let libraryCorrectionProperties: [Repairable: TrackCorrection] = [
+private let libraryCorrections: [Repairable: TrackCorrection] = [
   .replaceDurations: { .duration($0.totalTime) },
   .replaceComposers: { .composer($0.composer ?? "") },
   .replaceComments: { .comments($0.comments ?? "") },
@@ -195,11 +195,11 @@ extension Repairable {
     case .replaceDurations, .replaceComposers, .replaceComments, .replaceAlbumTitle, .replaceYear,
       .replaceTrackNumber, .replaceIdSongTitle, .replaceIdDiscCount, .replaceIdDiscNumber,
       .replaceArtist:
-      guard let createProperty = libraryCorrectionProperties[self] else {
+      guard let createCorrection = libraryCorrections[self] else {
         throw RepairableError.missingRepairableCorrection
       }
       return try await identifierCorrections(
-        configuration: configuration, createCorrection: createProperty)
+        configuration: configuration, createCorrection: createCorrection)
     }
   }
 }

@@ -92,13 +92,13 @@ extension DatabaseRowLookup {
 }
 
 extension IdentifierCorrection {
-  init?(row: Database.Row, property: (DatabaseRowLookup) -> Correction?) {
+  init?(row: Database.Row, correctionLookup: (DatabaseRowLookup) -> Correction?) {
     let lookup = DatabaseRowLookup(row: row)
 
     guard let itunesid = lookup.itunesid else { return nil }
-    guard let property = property(lookup) else { return nil }
+    guard let correction = correctionLookup(lookup) else { return nil }
 
-    self.init(persistentID: itunesid, correction: property)
+    self.init(persistentID: itunesid, correction: correction)
   }
 
   static func duration(row: Database.Row) -> IdentifierCorrection? {
