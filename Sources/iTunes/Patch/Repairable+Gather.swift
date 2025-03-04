@@ -70,10 +70,12 @@ private func changes<Guide: Hashable & Sendable, Change: Sendable>(
   return await unknownGuides.changes { createChange($0, currentGuides) }
 }
 
+private typealias TrackProperty = @Sendable (Track) -> IdentifierCorrection.Property
+
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
   current: @escaping @Sendable () async throws -> [IdentifierCorrection],
-  createProperty: @escaping @Sendable (_ track: Track) -> IdentifierCorrection.Property
+  createProperty: @escaping TrackProperty
 ) async throws -> Patch {
   .identifierCorrections(
     Set(
@@ -97,7 +99,7 @@ private func identifierCorrections(
 
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
-  createProperty: @escaping @Sendable (_ track: Track) -> IdentifierCorrection.Property
+  createProperty: @escaping TrackProperty
 ) async throws -> Patch {
   try await identifierCorrections(
     configuration: configuration,
@@ -135,14 +137,26 @@ private func identifierLookupCorrections(from string: String) throws -> [UInt: U
   return try JSONDecoder().decode(Dictionary<UInt, UInt>.self, from: data)
 }
 
+private let libraryCorrectionProperties: [Repairable: TrackProperty] = [
+  .replaceDurations: { .duration($0.totalTime) },
+  .replaceComposers: { .composer($0.composer ?? "") },
+  .replaceComments: { .comments($0.comments ?? "") },
+  .replaceAlbumTitle: { .albumTitle($0.albumName) },
+  .replaceYear: { .year($0.year ?? 0) },
+  .replaceTrackNumber: { .trackNumber($0.trackNumber ?? 0) },
+  .replaceIdSongTitle: { .replaceSongTitle($0.songName) },
+  .replaceIdDiscCount: { .discCount($0.discCount ?? 1) },
+  .replaceIdDiscNumber: { .discNumber($0.discNumber ?? 1) },
+  .replaceArtist: { .artist($0.artistName) },
+]
+
+private enum RepairableError: Error {
+  case missingRepairableCorrection
+}
+
 extension Repairable {
   func gather(_ configuration: GitTagData.Configuration, correction: String) async throws -> Patch {
     switch self {
-    case .replaceDurations:
-      return try await identifierCorrections(configuration: configuration) {
-        .duration($0.totalTime)
-      }
-
     case .replacePersistentIds:
       let lookup = try identifierLookupCorrections(from: correction)
       return try await identifierCorrections(configuration: configuration) {
@@ -161,16 +175,6 @@ extension Repairable {
         $0.filter { $0.value.count > 1 }.compactMap { $0.value.first }
       }
 
-    case .replaceComposers:
-      return try await identifierCorrections(configuration: configuration) {
-        .composer($0.composer ?? "")
-      }
-
-    case .replaceComments:
-      return try await identifierCorrections(configuration: configuration) {
-        .comments($0.comments ?? "")
-      }
-
     case .replaceDateReleased:
       return try await historicalIdentifierCorrections(configuration: configuration) {
         $0.identifierCorrection(.dateReleased($0.releaseDate))
@@ -181,47 +185,19 @@ extension Repairable {
         }
       }
 
-    case .replaceAlbumTitle:
-      return try await identifierCorrections(configuration: configuration) {
-        .albumTitle($0.albumName)
-      }
-
-    case .replaceYear:
-      return try await identifierCorrections(configuration: configuration) {
-        .year($0.year ?? 0)
-      }
-
-    case .replaceTrackNumber:
-      return try await identifierCorrections(configuration: configuration) {
-        .trackNumber($0.trackNumber ?? 0)
-      }
-
-    case .replaceIdSongTitle:
-      return try await identifierCorrections(configuration: configuration) {
-        .replaceSongTitle($0.songName)
-      }
-
-    case .replaceIdDiscCount:
-      return try await identifierCorrections(configuration: configuration) {
-        .discCount($0.discCount ?? 1)
-      }
-
-    case .replaceIdDiscNumber:
-      return try await identifierCorrections(configuration: configuration) {
-        .discNumber($0.discNumber ?? 1)
-      }
-
-    case .replaceArtist:
-      return try await identifierCorrections(configuration: configuration) {
-        .artist($0.artistName)
-      }
-
     case .replacePlay:
       return try await historicalIdentifierCorrections(configuration: configuration) {
         $0.playIdentity
       } relevantChanges: {
         $0.relevantChanges()
       }
+
+    default:
+      guard let createProperty = libraryCorrectionProperties[self] else {
+        throw RepairableError.missingRepairableCorrection
+      }
+      return try await identifierCorrections(
+        configuration: configuration, createProperty: createProperty)
     }
   }
 }
