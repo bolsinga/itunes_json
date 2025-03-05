@@ -70,12 +70,12 @@ private func changes<Guide: Hashable & Sendable, Change: Sendable>(
   return await unknownGuides.changes { createChange($0, currentGuides) }
 }
 
-private typealias TrackProperty = @Sendable (Track) -> IdentifierCorrection.Property
+private typealias TrackCorrection = @Sendable (Track) -> IdentifierCorrection.Correction
 
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
   current: @escaping @Sendable () async throws -> [IdentifierCorrection],
-  createProperty: @escaping TrackProperty
+  createCorrection: @escaping TrackCorrection
 ) async throws -> Patch {
   .identifierCorrections(
     Set(
@@ -83,7 +83,7 @@ private func identifierCorrections(
         configuration: configuration,
         currentGuides: { try await current() },
         createGuide: {
-          $0.filter { $0.isSQLEncodable }.map { $0.identifierCorrection(createProperty($0)) }
+          $0.filter { $0.isSQLEncodable }.map { $0.identifierCorrection(createCorrection($0)) }
         },
         createChange: {
           (item: IdentifierCorrection, currentItems: [IdentifierCorrection]) in
@@ -99,12 +99,12 @@ private func identifierCorrections(
 
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
-  createProperty: @escaping TrackProperty
+  createCorrection: @escaping TrackCorrection
 ) async throws -> Patch {
   try await identifierCorrections(
     configuration: configuration,
-    current: { try await currentTracks().map { $0.identifierCorrection(createProperty($0)) } },
-    createProperty: createProperty)
+    current: { try await currentTracks().map { $0.identifierCorrection(createCorrection($0)) } },
+    createCorrection: createCorrection)
 }
 
 private func historicalIdentifierCorrections<Guide: Hashable & Identifiable & Sendable>(
@@ -121,7 +121,7 @@ private func historicalIdentifierCorrections<Guide: Hashable & Identifiable & Se
     ).sorted())
 }
 
-extension IdentifierCorrection.Property {
+extension IdentifierCorrection.Correction {
   fileprivate var hasReleaseDate: Bool {
     switch self {
     case .dateReleased(let date):
@@ -137,7 +137,7 @@ private func identifierLookupCorrections(from string: String) throws -> [UInt: U
   return try JSONDecoder().decode(Dictionary<UInt, UInt>.self, from: data)
 }
 
-private let libraryCorrectionProperties: [Repairable: TrackProperty] = [
+private let libraryCorrections: [Repairable: TrackCorrection] = [
   .replaceDurations: { .duration($0.totalTime) },
   .replaceComposers: { .composer($0.composer ?? "") },
   .replaceComments: { .comments($0.comments ?? "") },
@@ -163,7 +163,7 @@ extension Repairable {
         lookup.map {
           IdentifierCorrection(persistentID: $0.key, correction: .persistentID($0.value))
         }
-      } createProperty: {
+      } createCorrection: {
         .persistentID($0.persistentID)
       }
 
@@ -195,11 +195,11 @@ extension Repairable {
     case .replaceDurations, .replaceComposers, .replaceComments, .replaceAlbumTitle, .replaceYear,
       .replaceTrackNumber, .replaceIdSongTitle, .replaceIdDiscCount, .replaceIdDiscNumber,
       .replaceArtist:
-      guard let createProperty = libraryCorrectionProperties[self] else {
+      guard let createCorrection = libraryCorrections[self] else {
         throw RepairableError.missingRepairableCorrection
       }
       return try await identifierCorrections(
-        configuration: configuration, createProperty: createProperty)
+        configuration: configuration, createCorrection: createCorrection)
     }
   }
 }

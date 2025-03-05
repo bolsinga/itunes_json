@@ -8,7 +8,7 @@
 import Foundation
 
 extension Track {
-  func identifierCorrection(_ correction: IdentifierCorrection.Property) -> IdentifierCorrection {
+  func identifierCorrection(_ correction: IdentifierCorrection.Correction) -> IdentifierCorrection {
     IdentifierCorrection(persistentID: persistentID, correction: correction)
   }
 }

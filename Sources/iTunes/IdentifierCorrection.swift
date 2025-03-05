@@ -8,7 +8,7 @@
 import Foundation
 
 struct IdentifierCorrection: Codable, Comparable, Hashable, Sendable {
-  enum Property: Codable, Comparable, Hashable, Sendable {
+  enum Correction: Codable, Comparable, Hashable, Sendable {
     case duration(Int?)
     case persistentID(UInt)
     case dateAdded(Date?)
@@ -24,7 +24,9 @@ struct IdentifierCorrection: Codable, Comparable, Hashable, Sendable {
     case artist(SortableName?)
     case play(old: Play, new: Play)
 
-    static func < (lhs: IdentifierCorrection.Property, rhs: IdentifierCorrection.Property) -> Bool {
+    static func < (lhs: IdentifierCorrection.Correction, rhs: IdentifierCorrection.Correction)
+      -> Bool
+    {
       switch (lhs, rhs) {
       case (.duration(let lhv), .duration(let rhv)):
         return lhv < rhv
@@ -64,7 +66,7 @@ struct IdentifierCorrection: Codable, Comparable, Hashable, Sendable {
   }
 
   let persistentID: UInt
-  let correction: Property
+  let correction: Correction
 
   static func < (lhs: Self, rhs: Self) -> Bool {
     if lhs.persistentID == rhs.persistentID {
