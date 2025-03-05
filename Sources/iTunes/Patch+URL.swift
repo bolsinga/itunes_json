@@ -41,7 +41,7 @@ extension URL {
     try Database(context: Database.Context(storage: .file(self), loggingToken: nil))
   }
 
-  fileprivate func corrections() async throws -> [IdentifierCorrection] {
+  fileprivate func repairs() async throws -> [IdentityRepair] {
     enum CorrectionsError: Error {
       case unknownPatchFileType
     }
@@ -49,15 +49,15 @@ extension URL {
     case .unknown:
       throw CorrectionsError.unknownPatchFileType
     case .json:
-      return try Array<IdentifierCorrection>.load(from: self)
+      return try Array<IdentityRepair>.load(from: self)
     case .database:
-      return try await database().identifierCorrections()
+      return try await database().identityRepairs()
     }
   }
 }
 
 extension Patch {
   static func load(_ url: URL) async throws -> Patch {
-    .identifierCorrections(try await url.corrections())
+    .identityRepairs(try await url.repairs())
   }
 }

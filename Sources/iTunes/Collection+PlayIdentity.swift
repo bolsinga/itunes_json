@@ -13,7 +13,7 @@ extension Logger {
 }
 
 extension Dictionary where Key == UInt, Value == [PlayIdentity] {
-  func relevantChanges() -> [IdentifierCorrection] {
+  func relevantChanges() -> [IdentityRepair] {
     let oldPlays = self.mapValues { $0.map { $0.play } }
     let normalized = oldPlays.mapValues { $0.normalize() }
     let newPlays = normalized.mapValues { $0.0 }
@@ -22,9 +22,9 @@ extension Dictionary where Key == UInt, Value == [PlayIdentity] {
 
     guard oldPlays.count == newPlays.count else { return [] }
 
-    return zip(oldPlays, newPlays).reduce(into: [IdentifierCorrection]()) {
+    return zip(oldPlays, newPlays).reduce(into: [IdentityRepair]()) {
       (
-        partialResult: inout [IdentifierCorrection],
+        partialResult: inout [IdentityRepair],
         item: (Dictionary<UInt, [Play]>.Element, Dictionary<UInt, [Play]>.Element)
       ) in
       let persistentID = item.0.key
@@ -43,12 +43,11 @@ extension Dictionary where Key == UInt, Value == [PlayIdentity] {
       }
 
       partialResult = zip(oldPlays, newPlays).reduce(into: partialResult) {
-        (partialResult: inout [IdentifierCorrection], item: (Play, Play)) in
+        (partialResult: inout [IdentityRepair], item: (Play, Play)) in
         let (old, new) = item
         guard old != new else { return }
         partialResult.append(
-          IdentifierCorrection(
-            persistentID: persistentID, correction: .play(old: old, new: new)))
+          IdentityRepair(persistentID: persistentID, correction: .play(old: old, new: new)))
       }
     }
   }

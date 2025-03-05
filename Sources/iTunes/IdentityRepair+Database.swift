@@ -1,5 +1,5 @@
 //
-//  IdentifierCorrection+Database.swift
+//  IdentityRepair+Database.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 2/25/25.
@@ -24,24 +24,24 @@ private let play = "SELECT * FROM 'correct_play';"
 
 private let statementConverters =
   [
-    (duration, IdentifierCorrection.duration(row:)),
-    (persistentID, IdentifierCorrection.persistentID(row:)),
-    (dateAdded, IdentifierCorrection.dateAdded(row:)),
-    (composer, IdentifierCorrection.composer(row:)),
-    (comments, IdentifierCorrection.comments(row:)),
-    (dateReleased, IdentifierCorrection.dateReleased(row:)),
-    (albumTitle, IdentifierCorrection.albumTitle(row:)),
-    (year, IdentifierCorrection.year(row:)),
-    (trackNumber, IdentifierCorrection.trackNumber(row:)),
-    (replaceSongTitle, IdentifierCorrection.replaceSongTitle(row:)),
-    (discCount, IdentifierCorrection.discCount(row:)),
-    (discNumber, IdentifierCorrection.discNumber(row:)),
-    (artist, IdentifierCorrection.artist(row:)),
-    (play, IdentifierCorrection.play(row:)),
+    (duration, IdentityRepair.duration(row:)),
+    (persistentID, IdentityRepair.persistentID(row:)),
+    (dateAdded, IdentityRepair.dateAdded(row:)),
+    (composer, IdentityRepair.composer(row:)),
+    (comments, IdentityRepair.comments(row:)),
+    (dateReleased, IdentityRepair.dateReleased(row:)),
+    (albumTitle, IdentityRepair.albumTitle(row:)),
+    (year, IdentityRepair.year(row:)),
+    (trackNumber, IdentityRepair.trackNumber(row:)),
+    (replaceSongTitle, IdentityRepair.replaceSongTitle(row:)),
+    (discCount, IdentityRepair.discCount(row:)),
+    (discNumber, IdentityRepair.discNumber(row:)),
+    (artist, IdentityRepair.artist(row:)),
+    (play, IdentityRepair.play(row:)),
   ]
 
 extension Database {
-  func identifierCorrections() throws -> [IdentifierCorrection] {
+  func identityRepairs() throws -> [IdentityRepair] {
     let corrections = try statementConverters.flatMap { pair in
       let (statement, converter) = pair
       return try execute(query: statement, arguments: []).flatMap {
