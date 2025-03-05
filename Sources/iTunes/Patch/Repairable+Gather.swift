@@ -8,7 +8,7 @@
 import Collections
 import Foundation
 
-extension IdentifierCorrection: Identifiable {
+extension IdentityRepair: Identifiable {
   var id: UInt { persistentID }
 }
 
@@ -70,23 +70,23 @@ private func changes<Guide: Hashable & Sendable, Change: Sendable>(
   return await unknownGuides.changes { createChange($0, currentGuides) }
 }
 
-private typealias TrackCorrection = @Sendable (Track) -> IdentifierCorrection.Correction
+private typealias TrackCorrection = @Sendable (Track) -> IdentityRepair.Correction
 
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
-  current: @escaping @Sendable () async throws -> [IdentifierCorrection],
+  current: @escaping @Sendable () async throws -> [IdentityRepair],
   createCorrection: @escaping TrackCorrection
 ) async throws -> Patch {
-  .identifierCorrections(
+  .identityRepairs(
     Set(
       try await changes(
         configuration: configuration,
         currentGuides: { try await current() },
         createGuide: {
-          $0.filter { $0.isSQLEncodable }.map { $0.identifierCorrection(createCorrection($0)) }
+          $0.filter { $0.isSQLEncodable }.map { $0.identityRepair(createCorrection($0)) }
         },
         createChange: {
-          (item: IdentifierCorrection, currentItems: [IdentifierCorrection]) in
+          (item: IdentityRepair, currentItems: [IdentityRepair]) in
           guard
             let identifierMatch = currentItems.filter({ $0.persistentID == item.persistentID })
               .first
@@ -103,16 +103,16 @@ private func identifierCorrections(
 ) async throws -> Patch {
   try await identifierCorrections(
     configuration: configuration,
-    current: { try await currentTracks().map { $0.identifierCorrection(createCorrection($0)) } },
+    current: { try await currentTracks().map { $0.identityRepair(createCorrection($0)) } },
     createCorrection: createCorrection)
 }
 
 private func historicalIdentifierCorrections<Guide: Hashable & Identifiable & Sendable>(
   configuration: GitTagData.Configuration,
   createIdentifier: @escaping @Sendable (_ track: Track) -> Guide,
-  relevantChanges: @escaping @Sendable ([Guide.ID: [Guide]]) -> [IdentifierCorrection]
+  relevantChanges: @escaping @Sendable ([Guide.ID: [Guide]]) -> [IdentityRepair]
 ) async throws -> Patch {
-  .identifierCorrections(
+  .identityRepairs(
     Set(
       try await historicalChanges(
         configuration: configuration,
@@ -121,7 +121,7 @@ private func historicalIdentifierCorrections<Guide: Hashable & Identifiable & Se
     ).sorted())
 }
 
-extension IdentifierCorrection.Correction {
+extension IdentityRepair.Correction {
   fileprivate var hasReleaseDate: Bool {
     switch self {
     case .dateReleased(let date):
@@ -161,7 +161,7 @@ extension Repairable {
       let lookup = try identifierLookupCorrections(from: correction)
       return try await identifierCorrections(configuration: configuration) {
         lookup.map {
-          IdentifierCorrection(persistentID: $0.key, correction: .persistentID($0.value))
+          IdentityRepair(persistentID: $0.key, correction: .persistentID($0.value))
         }
       } createCorrection: {
         .persistentID($0.persistentID)
@@ -169,7 +169,7 @@ extension Repairable {
 
     case .replaceDateAddeds:
       return try await historicalIdentifierCorrections(configuration: configuration) {
-        $0.identifierCorrection(.dateAdded($0.dateAdded))
+        $0.identityRepair(.dateAdded($0.dateAdded))
       } relevantChanges: {
         // For ids with more than 1 dateAdded correction, use the first correction, since it is sorted by tag.
         $0.filter { $0.value.count > 1 }.compactMap { $0.value.first }
@@ -177,7 +177,7 @@ extension Repairable {
 
     case .replaceDateReleased:
       return try await historicalIdentifierCorrections(configuration: configuration) {
-        $0.identifierCorrection(.dateReleased($0.releaseDate))
+        $0.identityRepair(.dateReleased($0.releaseDate))
       } relevantChanges: {
         // For ids with more than 1 dateReleased, use the earliest (sorted) correction.
         $0.filter { $0.value.count > 1 }.compactMap {

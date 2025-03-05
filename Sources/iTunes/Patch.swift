@@ -8,13 +8,13 @@
 import Foundation
 
 enum Patch: Sendable {
-  case identifierCorrections([IdentifierCorrection])
+  case identityRepairs([IdentityRepair])
 }
 
 extension Patch: CustomStringConvertible {
   var description: String {
     switch self {
-    case .identifierCorrections(let items):
+    case .identityRepairs(let items):
       return (try? (try? items.jsonData())?.asUTF8String()) ?? ""
     }
   }

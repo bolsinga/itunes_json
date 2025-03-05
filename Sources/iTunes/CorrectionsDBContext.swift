@@ -14,12 +14,12 @@ struct CorrectionsDBContext: FlatDBEncoderContext {
     Database.Context(storage: storage, loggingToken: nil)
   }
 
-  func insertStatement(_ item: IdentifierCorrection) -> Database.Statement {
+  func insertStatement(_ item: IdentityRepair) -> Database.Statement {
     CorrectionsDBRow.insertStatement(item)
   }
 
-  func row(for item: IdentifierCorrection) -> CorrectionsDBRow {
-    CorrectionsDBRow(correction: item)
+  func row(for item: IdentityRepair) -> CorrectionsDBRow {
+    CorrectionsDBRow(repair: item)
   }
 
   var schema: String = """

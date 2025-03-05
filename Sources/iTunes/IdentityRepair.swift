@@ -1,5 +1,5 @@
 //
-//  IdentifierCorrection.swift
+//  IdentityRepair.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 2/2/25.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct IdentifierCorrection: Codable, Comparable, Hashable, Sendable {
+struct IdentityRepair: Codable, Comparable, Hashable, Sendable {
   enum Correction: Codable, Comparable, Hashable, Sendable {
     case duration(Int?)
     case persistentID(UInt)
@@ -24,7 +24,7 @@ struct IdentifierCorrection: Codable, Comparable, Hashable, Sendable {
     case artist(SortableName?)
     case play(old: Play, new: Play)
 
-    static func < (lhs: IdentifierCorrection.Correction, rhs: IdentifierCorrection.Correction)
+    static func < (lhs: IdentityRepair.Correction, rhs: IdentityRepair.Correction)
       -> Bool
     {
       switch (lhs, rhs) {
@@ -76,7 +76,7 @@ struct IdentifierCorrection: Codable, Comparable, Hashable, Sendable {
   }
 }
 
-extension IdentifierCorrection: CustomStringConvertible {
+extension IdentityRepair: CustomStringConvertible {
   var description: String {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys]
@@ -86,7 +86,7 @@ extension IdentifierCorrection: CustomStringConvertible {
   }
 }
 
-extension IdentifierCorrection.Correction: CustomStringConvertible {
+extension IdentityRepair.Correction: CustomStringConvertible {
   var description: String {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys]

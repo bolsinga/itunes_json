@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension IdentifierCorrection.Correction {
+extension IdentityRepair.Correction {
   fileprivate var newitunesid: String? {
     if case .persistentID(let v) = self { String(v) } else { nil }
   }
@@ -73,31 +73,31 @@ extension IdentifierCorrection.Correction {
 }
 
 struct CorrectionsDBRow: FlatRow {
-  let correction: IdentifierCorrection
+  let repair: IdentityRepair
 
-  fileprivate var itunesid: String { String(correction.persistentID) }
-  fileprivate var newitunesid: String? { correction.correction.newitunesid }
-  fileprivate var name: String? { correction.correction.name }
-  fileprivate var sortname: String? { correction.correction.sortname }
-  fileprivate var artist: String? { correction.correction.artist }
-  fileprivate var sortartist: String? { correction.correction.sortartist }
-  fileprivate var album: String? { correction.correction.album }
-  fileprivate var sortalbum: String? { correction.correction.sortalbum }
-  fileprivate var tracknumber: Int? { correction.correction.tracknumber }
-  fileprivate var trackcount: Int? { correction.correction.trackcount }
-  fileprivate var disccount: Int? { correction.correction.disccount }
-  fileprivate var discnumber: Int? { correction.correction.discnumber }
-  fileprivate var year: Int? { correction.correction.year }
-  fileprivate var duration: Int? { correction.correction.duration }
-  fileprivate var dateadded: String? { correction.correction.dateadded }
-  fileprivate var compilation: Int? { correction.correction.compilation }
-  fileprivate var composer: String? { correction.correction.composer }
-  fileprivate var datereleased: String? { correction.correction.datereleased }
-  fileprivate var comments: String? { correction.correction.comments }
-  fileprivate var oldplaydate: String? { correction.correction.oldplaydate }
-  fileprivate var oldplaycount: Int? { correction.correction.oldplaycount }
-  fileprivate var newplaydate: String? { correction.correction.newplaydate }
-  fileprivate var newplaycount: Int? { correction.correction.newplaycount }
+  fileprivate var itunesid: String { String(repair.persistentID) }
+  fileprivate var newitunesid: String? { repair.correction.newitunesid }
+  fileprivate var name: String? { repair.correction.name }
+  fileprivate var sortname: String? { repair.correction.sortname }
+  fileprivate var artist: String? { repair.correction.artist }
+  fileprivate var sortartist: String? { repair.correction.sortartist }
+  fileprivate var album: String? { repair.correction.album }
+  fileprivate var sortalbum: String? { repair.correction.sortalbum }
+  fileprivate var tracknumber: Int? { repair.correction.tracknumber }
+  fileprivate var trackcount: Int? { repair.correction.trackcount }
+  fileprivate var disccount: Int? { repair.correction.disccount }
+  fileprivate var discnumber: Int? { repair.correction.discnumber }
+  fileprivate var year: Int? { repair.correction.year }
+  fileprivate var duration: Int? { repair.correction.duration }
+  fileprivate var dateadded: String? { repair.correction.dateadded }
+  fileprivate var compilation: Int? { repair.correction.compilation }
+  fileprivate var composer: String? { repair.correction.composer }
+  fileprivate var datereleased: String? { repair.correction.datereleased }
+  fileprivate var comments: String? { repair.correction.comments }
+  fileprivate var oldplaydate: String? { repair.correction.oldplaydate }
+  fileprivate var oldplaycount: Int? { repair.correction.oldplaycount }
+  fileprivate var newplaydate: String? { repair.correction.newplaydate }
+  fileprivate var newplaycount: Int? { repair.correction.newplaycount }
 
   var parameters: [Database.Value] { insert.parameters }
 
@@ -166,7 +166,7 @@ struct CorrectionsDBRow: FlatRow {
   }
 
   private var insert: Database.Statement {
-    switch correction.correction {
+    switch repair.correction {
     case .duration(_):
       correctDuration
     case .persistentID(_):
@@ -198,7 +198,7 @@ struct CorrectionsDBRow: FlatRow {
     }
   }
 
-  static func insertStatement(_ item: IdentifierCorrection) -> Database.Statement {
-    CorrectionsDBRow(correction: item).insert
+  static func insertStatement(_ item: IdentityRepair) -> Database.Statement {
+    CorrectionsDBRow(repair: item).insert
   }
 }

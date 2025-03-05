@@ -938,7 +938,7 @@ extension Track {
       isrc: isrc)
   }
 
-  fileprivate func apply(correction: IdentifierCorrection.Correction, tag: String) -> Track {
+  fileprivate func apply(correction: IdentityRepair.Correction, tag: String) -> Track {
     Logger.patch.info("Patching Correction: \(correction) - \(tag)")
     switch correction {
     case .duration(let newValue):
@@ -992,28 +992,28 @@ extension Track {
     }
   }
 
-  fileprivate func apply(identifierCorrection: IdentifierCorrection, tag: String) -> Track {
-    Logger.patch.info("Patching IdentifierCorrection: \(identifierCorrection) - \(tag)")
-    return apply(correction: identifierCorrection.correction, tag: tag)
+  fileprivate func apply(identityRepair: IdentityRepair, tag: String) -> Track {
+    Logger.patch.info("Patching IdentityRepair: \(identityRepair) - \(tag)")
+    return apply(correction: identityRepair.correction, tag: tag)
   }
 }
 
 extension Array where Element == Track {
-  fileprivate func patchIdentifierCorrections(_ corrections: [IdentifierCorrection], tag: String)
+  fileprivate func patchIdentityRepairs(_ repairs: [IdentityRepair], tag: String)
     throws
     -> [Track]
   {
-    let lookup = corrections.reduce(into: [UInt: [IdentifierCorrection]]()) {
-      var corrections = $0[$1.persistentID] ?? []
-      corrections.append($1)
-      $0[$1.persistentID] = corrections
+    let lookup = repairs.reduce(into: [UInt: [IdentityRepair]]()) {
+      var result = $0[$1.persistentID] ?? []
+      result.append($1)
+      $0[$1.persistentID] = result
     }
     return self.map {
-      guard let corrections = lookup[$0.persistentID] else { return $0 }
+      guard let repairs = lookup[$0.persistentID] else { return $0 }
 
       var result = $0
-      corrections.forEach { correction in
-        result = result.apply(identifierCorrection: correction, tag: tag)
+      repairs.forEach { repair in
+        result = result.apply(identityRepair: repair, tag: tag)
       }
       return result
     }
@@ -1021,8 +1021,8 @@ extension Array where Element == Track {
 
   fileprivate func patchTracks(_ patch: Patch, tag: String) throws -> [Track] {
     switch patch {
-    case .identifierCorrections(let items):
-      try patchIdentifierCorrections(items, tag: tag)
+    case .identityRepairs(let items):
+      try patchIdentityRepairs(items, tag: tag)
     }
   }
 

@@ -13,9 +13,9 @@ enum RepairDestination {
 }
 
 extension Patch {
-  fileprivate var identifierCorrections: [IdentifierCorrection] {
+  fileprivate var identityRepairs: [IdentityRepair] {
     switch self {
-    case .identifierCorrections(let items):
+    case .identityRepairs(let items):
       return items
     }
   }
@@ -23,7 +23,7 @@ extension Patch {
   fileprivate func writeDatabase(to url: URL) async throws {
     let dbEncoder = try FlatDBEncoder(context: CorrectionsDBContext(storage: .file(url)))
     do {
-      try await dbEncoder.encode(items: self.identifierCorrections)
+      try await dbEncoder.encode(items: self.identityRepairs)
       await dbEncoder.close()
     } catch {
       await dbEncoder.close()
