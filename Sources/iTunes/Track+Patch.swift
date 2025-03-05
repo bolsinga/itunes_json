@@ -938,9 +938,9 @@ extension Track {
       isrc: isrc)
   }
 
-  fileprivate func apply(identifierCorrection: IdentifierCorrection, tag: String) -> Track {
-    Logger.patch.info("Patching IdentifierCorrection: \(identifierCorrection) - \(tag)")
-    switch identifierCorrection.correction {
+  fileprivate func apply(correction: IdentifierCorrection.Correction, tag: String) -> Track {
+    Logger.patch.info("Patching Correction: \(correction) - \(tag)")
+    switch correction {
     case .duration(let newValue):
       guard let newValue else { return self }
       if let totalTime, totalTime == newValue { return self }
@@ -990,6 +990,11 @@ extension Track {
       guard let date = new.date, let count = new.count else { return self }
       return self.apply(playDate: date, count: count, tag: tag)
     }
+  }
+
+  fileprivate func apply(identifierCorrection: IdentifierCorrection, tag: String) -> Track {
+    Logger.patch.info("Patching IdentifierCorrection: \(identifierCorrection) - \(tag)")
+    return apply(correction: identifierCorrection.correction, tag: tag)
   }
 }
 

@@ -85,3 +85,13 @@ extension IdentifierCorrection: CustomStringConvertible {
     return (try? data.asUTF8String()) ?? ""
   }
 }
+
+extension IdentifierCorrection.Correction: CustomStringConvertible {
+  var description: String {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys]
+    encoder.dateEncodingStrategy = .iso8601
+    guard let data = try? encoder.encode(self) else { return "" }
+    return (try? data.asUTF8String()) ?? ""
+  }
+}
