@@ -46,12 +46,18 @@ private func historicalChanges<
   return Array(Set(relevantChanges(historicalLookup)))
 }
 
+extension Array where Element: Hashable & Identifiable {
+  fileprivate var lookup: [Element.ID: [Element]] {
+    Dictionary(grouping: self) { $0.id }
+  }
+}
+
 private func changes<Guide: Hashable & Identifiable & Sendable, Change: Sendable>(
   configuration: GitTagData.Configuration,
   currentGuides: @Sendable () async throws -> [Guide],
   createGuide: @escaping @Sendable ([Track]) -> [Guide],
   createChange: @escaping @Sendable (Guide, [Guide]) -> [Change]
-) async throws -> [Change] {
+) async throws -> [Change] where Guide.ID: Sendable {
   async let asyncCurrentGuides = try await currentGuides()
 
   let allKnownGuides = try await GitTagData(configuration: configuration).transformTracks {
@@ -63,8 +69,11 @@ private func changes<Guide: Hashable & Identifiable & Sendable, Change: Sendable
 
   let unknownGuides = Array(Set(allKnownGuides).subtracting(Set(currentGuides)))
 
+  let currentLookup = currentGuides.lookup
+
   return await unknownGuides.changes { item in
-    createChange(item, currentGuides.filter { $0.id == item.id })
+    guard let current = currentLookup[item.id] else { return [] }
+    return createChange(item, current)
   }
 }
 
