@@ -50,7 +50,7 @@ private func historicalChanges<
   return Array(Set(relevantChanges(historicalLookup)))
 }
 
-private func changes<Guide: Hashable & Sendable, Change: Sendable>(
+private func changes<Guide: Hashable & Identifiable & Sendable, Change: Sendable>(
   configuration: GitTagData.Configuration,
   currentGuides: @Sendable () async throws -> [Guide],
   createGuide: @escaping @Sendable ([Track]) -> [Guide],
