@@ -70,7 +70,7 @@ private func changes<Guide: Hashable & Sendable, Change: Sendable>(
   return await unknownGuides.changes { createChange($0, currentGuides) }
 }
 
-private typealias TrackCorrection = @Sendable (Track) -> IdentityRepair.Correction
+private typealias TrackCorrection = @Sendable (Track) -> [IdentityRepair.Correction]
 
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
@@ -83,7 +83,9 @@ private func identifierCorrections(
         configuration: configuration,
         currentGuides: { try await current() },
         createGuide: {
-          $0.filter { $0.isSQLEncodable }.map { $0.identityRepair(createCorrection($0)) }
+          $0.filter { $0.isSQLEncodable }.flatMap { track in
+            createCorrection(track).map { track.identityRepair($0) }
+          }
         },
         createChange: {
           (item: IdentityRepair, currentItems: [IdentityRepair]) in
@@ -103,7 +105,11 @@ private func identifierCorrections(
 ) async throws -> Patch {
   try await identifierCorrections(
     configuration: configuration,
-    current: { try await currentTracks().map { $0.identityRepair(createCorrection($0)) } },
+    current: {
+      try await currentTracks().flatMap { track in
+        createCorrection(track).map { track.identityRepair($0) }
+      }
+    },
     createCorrection: createCorrection)
 }
 
@@ -137,7 +143,7 @@ private func identifierLookupCorrections(from string: String) throws -> [UInt: U
   return try JSONDecoder().decode(Dictionary<UInt, UInt>.self, from: data)
 }
 
-private let libraryCorrections: [Repairable: TrackCorrection] = [
+private let libraryCorrections: [Repairable: @Sendable (Track) -> IdentityRepair.Correction] = [
   .replaceDurations: { .duration($0.totalTime) },
   .replaceComposers: { .composer($0.composer ?? "") },
   .replaceComments: { .comments($0.comments ?? "") },
@@ -159,8 +165,7 @@ extension Repairable {
     guard let createCorrection = libraryCorrections[self] else {
       throw RepairableError.missingRepairableCorrection
     }
-    return try await identifierCorrections(
-      configuration: configuration, createCorrection: createCorrection)
+    return try await identifierCorrections(configuration: configuration) { [createCorrection($0)] }
   }
 
   func gather(_ configuration: GitTagData.Configuration, correction: String) async throws -> Patch {
@@ -172,7 +177,7 @@ extension Repairable {
           IdentityRepair(persistentID: $0.key, correction: .persistentID($0.value))
         }
       } createCorrection: {
-        .persistentID($0.persistentID)
+        [.persistentID($0.persistentID)]
       }
 
     case .replaceDateAddeds:
