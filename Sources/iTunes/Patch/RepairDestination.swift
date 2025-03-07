@@ -65,13 +65,6 @@ extension IdentityRepair.Correction {
 }
 
 extension Patch {
-  fileprivate var identityRepairs: [IdentityRepair] {
-    switch self {
-    case .identityRepairs(let items):
-      return items
-    }
-  }
-
   fileprivate func writeDatabase(to url: URL) async throws {
     let dbEncoder = try FlatDBEncoder(context: CorrectionsDBContext(storage: .file(url)))
     do {
