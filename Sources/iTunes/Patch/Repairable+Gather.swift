@@ -63,7 +63,9 @@ private func changes<Guide: Hashable & Identifiable & Sendable, Change: Sendable
 
   let unknownGuides = Array(Set(allKnownGuides).subtracting(Set(currentGuides)))
 
-  return await unknownGuides.changes { createChange($0, currentGuides) }
+  return await unknownGuides.changes { item in
+    createChange(item, currentGuides.filter { $0.id == item.id })
+  }
 }
 
 private typealias TrackCorrection = @Sendable (Track) -> [IdentityRepair.Correction]
@@ -83,10 +85,8 @@ private func identifierCorrections(
             createCorrection(track).map { track.identityRepair($0) }
           }
         },
-        createChange: { (item: IdentityRepair, currentItems: [IdentityRepair]) in
-          currentItems.filter { $0.persistentID == item.persistentID }.filter {
-            $0.correction != item.correction
-          }
+        createChange: { item, currentItems in
+          currentItems.filter { $0.correction != item.correction }
         })
     ).sorted())
 }
