@@ -11,6 +11,15 @@ enum Patch: Sendable {
   case identityRepairs([IdentityRepair])
 }
 
+extension Patch {
+  var identityRepairs: [IdentityRepair] {
+    switch self {
+    case .identityRepairs(let items):
+      return items
+    }
+  }
+}
+
 extension Patch: CustomStringConvertible {
   var description: String {
     switch self {
