@@ -50,7 +50,7 @@ private func changes<Guide: Hashable & Identifiable & Sendable, Change: Sendable
   configuration: GitTagData.Configuration,
   currentGuides: @Sendable () async throws -> [Guide],
   createGuide: @escaping @Sendable ([Track]) -> [Guide],
-  createChange: @escaping @Sendable (Guide, [Guide]) -> Change?
+  createChange: @escaping @Sendable (Guide, [Guide]) -> [Change]
 ) async throws -> [Change] {
   async let asyncCurrentGuides = try await currentGuides()
 
@@ -83,14 +83,10 @@ private func identifierCorrections(
             createCorrection(track).map { track.identityRepair($0) }
           }
         },
-        createChange: {
-          (item: IdentityRepair, currentItems: [IdentityRepair]) in
-          guard
-            let identifierMatch = currentItems.filter({ $0.persistentID == item.persistentID })
-              .first
-          else { return nil }
-          guard item.correction != identifierMatch.correction else { return nil }
-          return identifierMatch
+        createChange: { (item: IdentityRepair, currentItems: [IdentityRepair]) in
+          currentItems.filter { $0.persistentID == item.persistentID }.filter {
+            $0.correction != item.correction
+          }
         })
     ).sorted())
 }
