@@ -8,10 +8,6 @@
 import Collections
 import Foundation
 
-extension IdentityRepair: Identifiable {
-  var id: UInt { persistentID }
-}
-
 private func currentTracks() async throws -> [Track] {
   try await Source.itunes.gather(reduce: false)
 }

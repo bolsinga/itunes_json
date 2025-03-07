@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct IdentityRepair: Codable, Comparable, Hashable, Sendable {
+struct IdentityRepair: Codable, Comparable, Hashable, Identifiable, Sendable {
   enum Correction: Codable, Comparable, Hashable, Sendable {
     case duration(Int?)
     case persistentID(UInt)
@@ -67,6 +67,8 @@ struct IdentityRepair: Codable, Comparable, Hashable, Sendable {
 
   let persistentID: UInt
   let correction: Correction
+
+  var id: UInt { persistentID }
 
   static func < (lhs: Self, rhs: Self) -> Bool {
     if lhs.persistentID == rhs.persistentID {
