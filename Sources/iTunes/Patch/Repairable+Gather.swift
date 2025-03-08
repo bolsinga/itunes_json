@@ -95,7 +95,7 @@ private func identifierCorrections(
           }
         },
         createChange: { item, currentItems in
-          currentItems.filter { $0.correction != item.correction }
+          currentItems.filter { $0.isCorrectionValueDifferent(from: item) }
         })
     ).sorted())
 }

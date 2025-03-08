@@ -63,6 +63,44 @@ struct IdentityRepair: Codable, Comparable, Hashable, Identifiable, Sendable {
         return false
       }
     }
+
+    func isValueDifferent(from other: Correction) -> Bool {
+      switch (self, other) {
+      case (.duration(let lhv), .duration(let rhv)):
+        return lhv != rhv
+      case (.persistentID(let lhv), .persistentID(let rhv)):
+        return lhv != rhv
+      case (.dateAdded(let lhv), .dateAdded(let rhv)):
+        return lhv != rhv
+      case (.composer(let lhv), .composer(let rhv)):
+        return lhv != rhv
+      case (.comments(let lhv), .comments(let rhv)):
+        return lhv != rhv
+      case (.dateReleased(let lhv), .dateReleased(let rhv)):
+        return lhv != rhv
+      case (.albumTitle(let lhv), .albumTitle(let rhv)):
+        return lhv != rhv
+      case (.year(let lhv), .year(let rhv)):
+        return lhv != rhv
+      case (.trackNumber(let lhv), .trackNumber(let rhv)):
+        return lhv != rhv
+      case (.replaceSongTitle(let lhv), .replaceSongTitle(let rhv)):
+        return lhv != rhv
+      case (.discCount(let lhv), .discCount(let rhv)):
+        return lhv != rhv
+      case (.discNumber(let lhv), .discNumber(let rhv)):
+        return lhv != rhv
+      case (.artist(let lhv), .artist(let rhv)):
+        return lhv != rhv
+      case (.play(let lho, let lhn), .play(let rho, let rhn)):
+        if lho == rho {
+          return lhn != rhn
+        }
+        return false
+      default:
+        return false
+      }
+    }
   }
 
   let persistentID: UInt
@@ -75,6 +113,11 @@ struct IdentityRepair: Codable, Comparable, Hashable, Identifiable, Sendable {
       return lhs.correction < rhs.correction
     }
     return lhs.persistentID < rhs.persistentID
+  }
+
+  func isCorrectionValueDifferent(from other: IdentityRepair) -> Bool {
+    guard persistentID == other.persistentID else { return false }
+    return correction.isValueDifferent(from: other.correction)
   }
 }
 
