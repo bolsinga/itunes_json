@@ -5,8 +5,8 @@
 //  Created by Greg Bolsinga on 11/18/24.
 //
 
-import OrderedCollections
 import Foundation
+import OrderedCollections
 
 private func currentTracks() async throws -> [Track] {
   try await Source.itunes.gather(reduce: false)
