@@ -46,7 +46,7 @@ private func historicalChanges<
   return Array(Set(relevantChanges(historicalLookup)))
 }
 
-extension Array where Element: Hashable & Identifiable {
+extension Collection where Element: Hashable & Identifiable {
   fileprivate var lookup: [Element.ID: [Element]] {
     Dictionary(grouping: self) { $0.id }
   }
@@ -54,20 +54,21 @@ extension Array where Element: Hashable & Identifiable {
 
 private func changes<Guide: Hashable & Identifiable & Sendable, Change: Sendable>(
   configuration: GitTagData.Configuration,
-  currentGuides: @Sendable () async throws -> [Guide],
-  createGuide: @escaping @Sendable ([Track]) -> [Guide],
+  currentGuides: @Sendable () async throws -> Set<Guide>,
+  createGuide: @escaping @Sendable ([Track]) -> Set<Guide>,
   createChange: @escaping @Sendable (Guide, [Guide]) -> [Change]
 ) async throws -> [Change] where Guide.ID: Sendable {
   async let asyncCurrentGuides = try await currentGuides()
 
-  let allKnownGuides = try await GitTagData(configuration: configuration).transformTracks {
-    _, tracks in
-    createGuide(tracks)
-  }.flatMap { $0.item }
+  let allKnownGuides = Set(
+    try await GitTagData(configuration: configuration).transformTracks {
+      _, tracks in
+      createGuide(tracks)
+    }.flatMap { $0.item })
 
   let currentGuides = try await asyncCurrentGuides
 
-  let unknownGuides = Array(Set(allKnownGuides).subtracting(Set(currentGuides)))
+  let unknownGuides = Array(allKnownGuides.subtracting(currentGuides))
 
   let currentLookup = currentGuides.lookup
 
@@ -81,7 +82,7 @@ private typealias TrackCorrection = @Sendable (Track) -> [IdentityRepair.Correct
 
 private func identifierCorrections(
   configuration: GitTagData.Configuration,
-  current: @escaping @Sendable () async throws -> [IdentityRepair],
+  current: @escaping @Sendable () async throws -> Set<IdentityRepair>,
   createCorrection: @escaping TrackCorrection
 ) async throws -> Patch {
   .identityRepairs(
@@ -90,9 +91,10 @@ private func identifierCorrections(
         configuration: configuration,
         currentGuides: { try await current() },
         createGuide: {
-          $0.filter { $0.isSQLEncodable }.flatMap { track in
-            createCorrection(track).map { track.identityRepair($0) }
-          }
+          Set(
+            $0.filter { $0.isSQLEncodable }.flatMap { track in
+              createCorrection(track).map { track.identityRepair($0) }
+            })
         },
         createChange: { item, currentItems in
           currentItems.filter { $0.isCorrectionValueDifferent(from: item) }
@@ -107,9 +109,10 @@ private func identifierCorrections(
   try await identifierCorrections(
     configuration: configuration,
     current: {
-      try await currentTracks().flatMap { track in
-        createCorrection(track).map { track.identityRepair($0) }
-      }
+      Set(
+        try await currentTracks().flatMap { track in
+          createCorrection(track).map { track.identityRepair($0) }
+        })
     },
     createCorrection: createCorrection)
 }
@@ -174,9 +177,8 @@ extension Repairable {
     case .replacePersistentIds:
       let lookup = try identifierLookupCorrections(from: correction)
       return try await identifierCorrections(configuration: configuration) {
-        lookup.map {
-          IdentityRepair(persistentID: $0.key, correction: .persistentID($0.value))
-        }
+        Set(
+          lookup.map { IdentityRepair(persistentID: $0.key, correction: .persistentID($0.value)) })
       } createCorrection: {
         [.persistentID($0.persistentID)]
       }
