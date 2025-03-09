@@ -81,11 +81,13 @@ struct GitTagData {
     let git: Git
     let tags: [String]
     let fileName: String
+    let limit: Int?
 
     struct AsyncIterator: AsyncIteratorProtocol {
       let git: Git
       let tags: [String]
       let fileName: String
+      let limit: Int?
 
       var index = 0
 
@@ -93,6 +95,8 @@ struct GitTagData {
         guard !Task.isCancelled else { return nil }
 
         guard index < tags.count else { return nil }
+
+        if let limit, index == limit { return nil }
 
         let tag = tags[index]
 
@@ -107,7 +111,7 @@ struct GitTagData {
     }
 
     func makeAsyncIterator() -> AsyncIterator {
-      AsyncIterator(git: git, tags: tags, fileName: fileName)
+      AsyncIterator(git: git, tags: tags, fileName: fileName, limit: limit)
     }
   }
 
@@ -117,13 +121,10 @@ struct GitTagData {
     var tagDatum: [Tag<Data>] = []
     for try await tagData in ReadSequence(
       git: git, tags: configuration.filter(tags: try await git.tags()),
-      fileName: configuration.fileName)
+      fileName: configuration.fileName, limit: configuration.limit)
     {
       tagDatum.append(tagData)
 
-      if let limit = configuration.limit, tagDatum.count == limit {
-        break
-      }
     }
     return tagDatum
   }
