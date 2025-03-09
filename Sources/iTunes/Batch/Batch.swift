@@ -31,40 +31,41 @@ extension Tag where Item == Data {
 }
 
 extension Batch {
+  @inlinable
+  func destination(tag: String, schemaOptions: SchemaOptions) -> Destination {
+    switch self {
+    case .sql:
+      Destination.sqlCode(
+        SQLCodeContext(
+          output: .standardOut, schemaOptions: schemaOptions, loggingToken: "batch-\(tag)"))
+    case .db:
+      Destination.db(
+        .normalized(
+          DatabaseContext(
+            storage: .memory, schemaOptions: schemaOptions, loggingToken: "batch-\(tag)")))
+    case .flat:
+      Destination.db(
+        .flat(FlatTracksDatabaseContext(storage: .memory, loggingToken: "batch-\(tag)")))
+    }
+  }
+
+  @inlinable
+  var pathExtension: String {
+    switch self {
+    case .sql:
+      "sql"
+    case .db, .flat:
+      "db"
+    }
+  }
+
   func build(
-    _ configuration: GitTagData.Configuration, outputDirectory: URL,
-    schemaOptions: SchemaOptions
+    _ configuration: GitTagData.Configuration, outputDirectory: URL, schemaOptions: SchemaOptions
   ) async throws {
     var patchedTracksData = try await GitTagData(configuration: configuration)
       .transformTracks { tag, tracks in
-        let destination = {
-          switch self {
-          case .sql:
-            Destination.sqlCode(
-              SQLCodeContext(
-                output: .standardOut, schemaOptions: schemaOptions, loggingToken: "batch-\(tag)"))
-          case .db:
-            Destination.db(
-              .normalized(
-                DatabaseContext(
-                  storage: .memory, schemaOptions: schemaOptions, loggingToken: "batch-\(tag)")))
-          case .flat:
-            Destination.db(
-              .flat(FlatTracksDatabaseContext(storage: .memory, loggingToken: "batch-\(tag)")))
-          }
-        }()
-
-        return try await destination.data(for: tracks)
+        try await destination(tag: tag, schemaOptions: schemaOptions).data(for: tracks)
       }
-
-    let pathExtension = {
-      switch self {
-      case .sql:
-        "sql"
-      case .db, .flat:
-        "db"
-      }
-    }()
 
     for tagData in patchedTracksData.reversed() {
       patchedTracksData.removeLast()
