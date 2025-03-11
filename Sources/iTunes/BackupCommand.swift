@@ -20,7 +20,9 @@ enum DestinationContext: EnumerableFlag {
   /// Emit a Flat sqlite3 database that represents the Tracks.
   case flat
 
-  func context(outputFile: URL?, schemaOptions: SchemaOptions) throws -> Destination {
+  func context(outputFile: URL?, schemaOptions: SchemaOptions, context: BackupContext) throws
+    -> Destination
+  {
     enum DestinationError: Error {
       case noDBOutputFile
       case invalidUpdateDB
@@ -35,7 +37,7 @@ enum DestinationContext: EnumerableFlag {
     case .json:
       return .json(output)
     case .jsonGit:
-      return .jsonGit(output)
+      return .jsonGit(output, context)
     case .sqlCode:
       return .sqlCode(
         SQLCodeContext(output: output, schemaOptions: schemaOptions, loggingToken: nil))
@@ -143,10 +145,6 @@ struct BackupCommand: AsyncParsableCommand {
     return destination.outputFile(using: outputDirectory, name: fileName)
   }
 
-  private var context: BackupContext {
-    BackupContext(version: Self.configuration.version)
-  }
-
   /// Validates the input matrix.
   func validate() throws {
     if destination == .db && outputFile == nil {
@@ -167,7 +165,10 @@ struct BackupCommand: AsyncParsableCommand {
   }
 
   func run() async throws {
-    try await destination.context(outputFile: outputFile, schemaOptions: laxSchema.schemaOptions)
-      .emit(tracks(), context: context)
+    try await destination.context(
+      outputFile: outputFile, schemaOptions: laxSchema.schemaOptions,
+      context: BackupContext(version: Self.configuration.version)
+    )
+    .emit(tracks())
   }
 }
