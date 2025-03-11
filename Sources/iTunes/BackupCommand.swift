@@ -148,7 +148,7 @@ struct BackupCommand: AsyncParsableCommand {
   }
 
   private var context: BackupContext {
-    BackupContext(branch: "main", tagPrefix: tagPrefix, version: Self.configuration.version)
+    BackupContext(tagPrefix: tagPrefix, version: Self.configuration.version)
   }
 
   /// Validates the input matrix.

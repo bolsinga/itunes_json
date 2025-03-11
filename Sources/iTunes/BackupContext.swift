@@ -11,7 +11,6 @@ import GitLibrary
 struct BackupContext: Sendable {
   static let defaultTag = "iTunes"
 
-  let branch: String
   let tagPrefix: String?
   let version: String
 

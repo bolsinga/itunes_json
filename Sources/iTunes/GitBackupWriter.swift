@@ -15,9 +15,9 @@ extension URL {
 }
 
 extension Git {
-  fileprivate func validateAndCheckout(branch: String) async throws {
+  fileprivate func validateAndCheckout() async throws {
     try await status()
-    try await checkout(commit: branch)
+    try await checkout(commit: "main")
   }
 
   fileprivate func latestTags(matching tagPrefix: String) async -> [String] {
@@ -76,7 +76,7 @@ struct GitBackupWriter: DestinationFileWriting {
   func write(data: Data) async throws {
     let git = outputFile.parentDirectoryGit
 
-    try await git.validateAndCheckout(branch: context.branch)
+    try await git.validateAndCheckout()
     let tagPrefix = try await context.tag(git)
     try await fileWriter.write(data: data)
 
