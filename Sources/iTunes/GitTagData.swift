@@ -13,19 +13,14 @@ extension Logger {
   fileprivate static let gitTagData = Logger(category: "gitTagData")
 }
 
-extension Tag where Item == Data {
-  fileprivate func add(to git: Git, file: URL, version: String) async throws {
-    Logger.gitTagData.info("Add: \(tag)")
-
-    // this makes memory shoot up, unexpectedly.
-    try item.write(to: file)
-
-    try await git.add(file.lastPathComponent)
+extension Git {
+  func addAndTag(fileName: String, tag tagName: String, version: String) async throws {
+    try await add(fileName)
 
     let hasChanges = await {
       do {
-        try await git.diff()
-        Logger.gitTagData.info("Empty Tag: \(tag)")
+        try await diff()
+        Logger.gitTagData.info("Empty Tag: \(tagName)")
         return false
       } catch {
         return true
@@ -33,9 +28,20 @@ extension Tag where Item == Data {
     }()
 
     if hasChanges {
-      try await git.commit("\(tag)\n\(version)")
+      try await commit("\(tagName)\n\(version)")
     }
-    try await git.tag(tag)
+    try await tag(tagName)
+  }
+}
+
+extension Tag where Item == Data {
+  fileprivate func add(to git: Git, file: URL, version: String) async throws {
+    Logger.gitTagData.info("Add: \(tag)")
+
+    // this makes memory shoot up, unexpectedly.
+    try item.write(to: file)
+
+    try await git.addAndTag(fileName: file.lastPathComponent, tag: tag, version: version)
   }
 }
 
