@@ -129,10 +129,6 @@ struct BackupCommand: AsyncParsableCommand {
   )
   var fileName: String?
 
-  @Option(
-    help: "The prefix to use for the git tags. If not set, will try to find most recent tag prefix."
-  ) var tagPrefix: String?
-
   /// Patch File URL.
   @Option(
     help: "Patch JSON file path.",
@@ -148,7 +144,7 @@ struct BackupCommand: AsyncParsableCommand {
   }
 
   private var context: BackupContext {
-    BackupContext(tagPrefix: tagPrefix, version: Self.configuration.version)
+    BackupContext(version: Self.configuration.version)
   }
 
   /// Validates the input matrix.
