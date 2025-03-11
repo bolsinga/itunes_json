@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import GitLibrary
 
 struct BackupContext: Sendable {
   static let defaultTag = "iTunes"
@@ -14,9 +13,9 @@ struct BackupContext: Sendable {
   let tagPrefix: String?
   let version: String
 
-  func tag(_ git: Git) async throws -> String {
+  func tag(_ tagProvider: @autoclosure () async throws -> String?) async throws -> String {
     if let tagPrefix { return tagPrefix }
-    guard let currentPrefix = try await git.describeTag()?.tagPrefix else {
+    guard let currentPrefix = try await tagProvider()?.tagPrefix else {
       return Self.defaultTag
     }
     return currentPrefix
