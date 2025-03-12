@@ -46,9 +46,9 @@ extension Git {
     let backup = await {
       do {
         try await diff()
-        return GitBackup.noChanges
+        return Backup.noChanges
       } catch {
-        return GitBackup.changes
+        return Backup.changes
       }
     }()
 
