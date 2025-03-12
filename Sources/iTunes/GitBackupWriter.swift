@@ -24,18 +24,6 @@ extension Git {
     try await checkout(commit: "main")
   }
 
-  private func latestTags(matching tagPrefix: String) async -> [String] {
-    guard let allTags = try? await tags() else { return [] }
-
-    let latest = allTags.filter {
-      guard let prefix = $0.tagPrefix else {
-        return false
-      }
-      return prefix.starts(with: tagPrefix)
-    }.sorted()
-    return latest
-  }
-
   fileprivate func addCommitTagPush(filename: String, tagPrefix: String, version: String)
     async throws
   {
@@ -53,7 +41,7 @@ extension Git {
     }()
 
     let backupName = backup.backupName(
-      baseName: message, existingNames: await latestTags(matching: tagPrefix))
+      baseName: message, existingNames: tagPrefix.allMatchingTags(try? await tags()))
 
     switch backup {
     case .noChanges:
