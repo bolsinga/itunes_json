@@ -12,6 +12,14 @@ extension URL {
   fileprivate var filename: String {
     self.lastPathComponent
   }
+
+  fileprivate var parentDirectory: URL {
+    self.deletingLastPathComponent()
+  }
+
+  fileprivate var parentDirectoryGit: Git {
+    Git(directory: self.parentDirectory)
+  }
 }
 
 extension Git {
