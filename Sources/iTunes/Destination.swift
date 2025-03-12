@@ -12,7 +12,7 @@ enum Destination {
   /// Emit a JSON string representing the Tracks.
   case json(Output)
   /// Emit JSON representing the Tracks and add to a git repository
-  case jsonGit(Output)
+  case jsonGit(Output, BackupContext)
   /// Emit Normalized SQLite code that represents the Tracks.
   case sqlCode(SQLCodeContext)
   /// Emit a Normalized sqlite3 database that represents the Tracks.
