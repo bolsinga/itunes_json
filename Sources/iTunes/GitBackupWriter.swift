@@ -16,10 +16,6 @@ extension URL {
   fileprivate var parentDirectory: URL {
     self.deletingLastPathComponent()
   }
-
-  fileprivate var parentDirectoryGit: Git {
-    Git(directory: self.parentDirectory)
-  }
 }
 
 extension Git {
@@ -28,7 +24,7 @@ extension Git {
     try await checkout(commit: "main")
   }
 
-  fileprivate func latestTags(matching tagPrefix: String) async -> [String] {
+  private func latestTags(matching tagPrefix: String) async -> [String] {
     guard let allTags = try? await tags() else { return [] }
 
     let latest = allTags.filter {
@@ -82,7 +78,7 @@ struct GitBackupWriter: DestinationFileWriting {
   var outputFile: URL { fileWriter.outputFile }
 
   func write(data: Data) async throws {
-    let git = outputFile.parentDirectoryGit
+    let git = Git(directory: outputFile.parentDirectory)
 
     try await git.validateAndCheckout()
     let tagPrefix = try await context.tag(try await git.describeTag())
