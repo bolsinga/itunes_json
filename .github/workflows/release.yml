@@ -21,6 +21,6 @@ jobs:
     - name: Show Destinations
       run: xcodebuild -scheme iTunes -showdestinations
     - name: Build / Test
-      run: swift test -v
+      run: swift test -v -Xswiftc -warnings-as-errors
     - name: Build iOS / macOS
       run: xcodebuild -verbose -skipPackagePluginValidation -scheme iTunes -destination "generic/platform=iOS Simulator" -destination "generic/platform=macOS"
