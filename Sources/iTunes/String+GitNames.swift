@@ -43,4 +43,14 @@ extension String {
       return self
     }
   }
+
+  func calculateBackupName(from existingNames: [String]) -> String {
+    let existingBaseNames = Set(
+      existingNames.filter { $0.starts(with: self) }.map {
+        $0.replacingOccurrences(of: String.emptySuffix, with: "")
+      }
+    ).sorted().reversed()
+    guard !existingBaseNames.isEmpty else { return self }
+    return existingBaseNames.first!.nextTag
+  }
 }
