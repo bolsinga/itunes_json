@@ -53,4 +53,15 @@ extension String {
     guard !existingBaseNames.isEmpty else { return self }
     return existingBaseNames.first!.nextTag
   }
+
+  func allMatchingTags(_ tags: [String]?) -> [String] {
+    guard let tags else { return [] }
+    let latest = tags.filter {
+      guard let prefix = $0.tagPrefix else {
+        return false
+      }
+      return prefix.starts(with: self)
+    }.sorted()
+    return latest
+  }
 }
