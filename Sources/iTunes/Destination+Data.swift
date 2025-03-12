@@ -10,7 +10,7 @@ import Foundation
 extension Destination {
   func data(for tracks: [Track]) async throws -> Data {
     switch self {
-    case .json(_), .jsonGit(_):
+    case .json(_), .jsonGit(_, _):
       try tracks.jsonData()
     case .sqlCode(let context):
       try tracks.sqlData(context)
