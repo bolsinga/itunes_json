@@ -24,7 +24,7 @@ let package = Package(
       name: "iTunes",
       dependencies: [
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
-        .product(name: "Collections", package: "swift-collections"),
+        .product(name: "OrderedCollections", package: "swift-collections"),
         .product(name: "GitLibrary", package: "GitLibrary"),
       ],
       resources: [.process("Resources/Localizable.xcstrings")],
