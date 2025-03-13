@@ -84,16 +84,18 @@ struct GitTagData {
   private struct ReadSequence: AsyncSequence {
     typealias Element = Tag<Data>
 
-    let git: Git
     let tags: [String]
     let fileName: String
     let limit: Int?
+    /// tag, path
+    let dataProvider: (String, String) async throws -> Data
 
     struct AsyncIterator: AsyncIteratorProtocol {
-      let git: Git
       let tags: [String]
       let fileName: String
       let limit: Int?
+      /// tag, path
+      let dataProvider: (String, String) async throws -> Data
 
       var index = 0
 
@@ -108,7 +110,7 @@ struct GitTagData {
 
         Logger.gitTagData.info("tag: \(tag)")
 
-        let data = try await git.show(commit: tag, path: fileName)
+        let data = try await dataProvider(tag, fileName)
 
         index += 1
 
@@ -117,7 +119,7 @@ struct GitTagData {
     }
 
     func makeAsyncIterator() -> AsyncIterator {
-      AsyncIterator(git: git, tags: tags, fileName: fileName, limit: limit)
+      AsyncIterator(tags: tags, fileName: fileName, limit: limit, dataProvider: dataProvider)
     }
   }
 
@@ -126,8 +128,11 @@ struct GitTagData {
 
     var tagDatum: [Tag<Data>] = []
     for try await tagData in ReadSequence(
-      git: git, tags: configuration.filter(tags: try await git.tags()),
-      fileName: configuration.fileName, limit: configuration.limit)
+      tags: configuration.filter(tags: try await git.tags()), fileName: configuration.fileName,
+      limit: configuration.limit,
+      dataProvider: {
+        try await git.show(commit: $0, path: $1)
+      })
     {
       tagDatum.append(tagData)
 
