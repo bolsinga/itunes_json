@@ -48,17 +48,15 @@ extension Tag where Item == Data {
 struct GitTagData {
   struct Configuration {
     let directory: URL
-    let branch: String?
     let fileName: String
     let serializeDatabaseQueries: Bool
     let limit: Int?
 
     init(
-      directory: URL, branch: String? = nil, fileName: String,
+      directory: URL, fileName: String,
       serializeDatabaseQueries: Bool = false, limit: Int? = nil
     ) {
       self.directory = directory
-      self.branch = branch
       self.fileName = fileName
       self.serializeDatabaseQueries = serializeDatabaseQueries
       self.limit = limit
@@ -140,13 +138,9 @@ struct GitTagData {
     return tagDatum
   }
 
-  func write(tagDatum: [Tag<Data>], initialCommit: String, version: String) async throws {
-    enum WriteError: Error {
-      case noBranch
-    }
-
-    guard let branch = configuration.branch else { throw WriteError.noBranch }
-
+  func write(tagDatum: [Tag<Data>], initialCommit: String, branch: String, version: String)
+    async throws
+  {
     try await git.status()
 
     try await git.createBranch(named: branch, initialCommit: initialCommit)

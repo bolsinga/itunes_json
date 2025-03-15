@@ -49,10 +49,11 @@ struct RepairCommand: AsyncParsableCommand {
     let destinationBranch = destinationBranch ?? patchable.rawValue
 
     let destinationConfiguration = GitTagData.Configuration(
-      directory: gitDirectory, branch: destinationBranch, fileName: Self.fileName)
+      directory: gitDirectory, fileName: Self.fileName)
 
     try await patch.patch(
       sourceConfiguration: sourceConfiguration, patch: patch,
-      destinationConfiguration: destinationConfiguration, version: Self.configuration.version)
+      destinationConfiguration: destinationConfiguration, branch: destinationBranch,
+      version: Self.configuration.version)
   }
 }

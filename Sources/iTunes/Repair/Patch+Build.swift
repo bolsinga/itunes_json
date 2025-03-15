@@ -21,7 +21,7 @@ extension Tag {
 extension Patch {
   func patch(
     sourceConfiguration: GitTagData.Configuration, patch: Patch,
-    destinationConfiguration: GitTagData.Configuration, version: String
+    destinationConfiguration: GitTagData.Configuration, branch: String, version: String
   ) async throws {
     let patchedTracksData = try await GitTagData(configuration: sourceConfiguration)
       .transformTracks { try $1.patch(patch, tag: $0) }
@@ -30,6 +30,6 @@ extension Patch {
 
     try await GitTagData(configuration: destinationConfiguration).write(
       tagDatum: patchedTracksData.map { try $0.nextVersion() },
-      initialCommit: initialCommit, version: version)
+      initialCommit: initialCommit, branch: branch, version: version)
   }
 }
