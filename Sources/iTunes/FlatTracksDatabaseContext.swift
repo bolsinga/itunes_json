@@ -10,6 +10,15 @@ import Foundation
 struct FlatTracksDatabaseContext: FlatDBEncoderContext {
   let storage: DatabaseStorage
   let loggingToken: String?
+  let serializeDatabaseQueries: Bool
+
+  internal init(
+    storage: DatabaseStorage, loggingToken: String? = nil, serializeDatabaseQueries: Bool = false
+  ) {
+    self.storage = storage
+    self.loggingToken = loggingToken
+    self.serializeDatabaseQueries = serializeDatabaseQueries
+  }
 
   var context: Database.Context {
     Database.Context(storage: storage, loggingToken: loggingToken)

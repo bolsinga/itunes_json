@@ -49,16 +49,11 @@ struct GitTagData {
   struct Configuration {
     let directory: URL
     let fileName: String
-    let serializeDatabaseQueries: Bool
     let limit: Int?
 
-    init(
-      directory: URL, fileName: String,
-      serializeDatabaseQueries: Bool = false, limit: Int? = nil
-    ) {
+    init(directory: URL, fileName: String, limit: Int? = nil) {
       self.directory = directory
       self.fileName = fileName
-      self.serializeDatabaseQueries = serializeDatabaseQueries
       self.limit = limit
     }
 

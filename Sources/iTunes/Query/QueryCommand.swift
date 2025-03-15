@@ -113,21 +113,24 @@ struct QueryCommand: AsyncParsableCommand {
 
   fileprivate var context: TransformContext {
     let context = DatabaseContext(
-      storage: .memory, schemaOptions: laxSchema.schemaOptions, loggingToken: "query")
+      storage: .memory, schemaOptions: laxSchema.schemaOptions, loggingToken: "query",
+      serializeDatabaseQueries: serializeDatabaseQueries)
     switch transform {
     case .tracks:
       return .tracks(context)
     case .raw:
       return .raw(.normalized(context))
     case .flat:
-      return .raw(.flat(FlatTracksDatabaseContext(storage: .memory, loggingToken: "query")))
+      return .raw(
+        .flat(
+          FlatTracksDatabaseContext(
+            storage: .memory, loggingToken: "query",
+            serializeDatabaseQueries: serializeDatabaseQueries)))
     }
   }
 
   func run() async throws {
-    let configuration = GitTagData.Configuration(
-      directory: gitDirectory, fileName: Self.fileName,
-      serializeDatabaseQueries: serializeDatabaseQueries)
+    let configuration = GitTagData.Configuration(directory: gitDirectory, fileName: Self.fileName)
     try await context.query(query, configuration: configuration)
   }
 }

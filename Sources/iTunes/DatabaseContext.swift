@@ -11,4 +11,15 @@ struct DatabaseContext {
   let storage: DatabaseStorage
   let schemaOptions: SchemaOptions
   let loggingToken: String?
+  let serializeDatabaseQueries: Bool
+
+  internal init(
+    storage: DatabaseStorage, schemaOptions: SchemaOptions, loggingToken: String? = nil,
+    serializeDatabaseQueries: Bool = false
+  ) {
+    self.storage = storage
+    self.schemaOptions = schemaOptions
+    self.loggingToken = loggingToken
+    self.serializeDatabaseQueries = serializeDatabaseQueries
+  }
 }
