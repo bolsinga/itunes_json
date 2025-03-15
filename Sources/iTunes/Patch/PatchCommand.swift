@@ -9,8 +9,6 @@ private enum DestinationFlag: CaseIterable, EnumerableFlag {
 }
 
 struct PatchCommand: AsyncParsableCommand {
-  private static let fileName = "itunes.json"
-
   static let configuration = CommandConfiguration(
     commandName: "patch",
     abstract: "Creates patches for itunes.json data.",
@@ -65,9 +63,7 @@ struct PatchCommand: AsyncParsableCommand {
   }
 
   func run() async throws {
-    let configuration = GitTagData.Configuration(
-      directory: gitDirectory, fileName: PatchCommand.fileName)
     try await repairDestination().emit(
-      try await repairable.gather(configuration, correction: correction))
+      try await repairable.gather(gitDirectory.configuration, correction: correction))
   }
 }

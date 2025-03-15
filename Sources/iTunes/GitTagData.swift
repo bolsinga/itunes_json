@@ -13,6 +13,14 @@ extension Logger {
   fileprivate static let gitTagData = Logger(category: "gitTagData")
 }
 
+extension URL {
+  private static var backupFileName: String { "itunes.json" }
+
+  var configuration: GitTagData.Configuration {
+    GitTagData.Configuration(file: self.appending(path: Self.backupFileName))
+  }
+}
+
 extension Git {
   func addAndTag(fileName: String, tag tagName: String, version: String) async throws {
     try await add(fileName)
@@ -47,18 +55,20 @@ extension Tag where Item == Data {
 
 struct GitTagData {
   struct Configuration {
-    let directory: URL
-    let fileName: String
+    let file: URL
     let limit: Int?
 
-    init(directory: URL, fileName: String, limit: Int? = nil) {
-      self.directory = directory
-      self.fileName = fileName
+    init(file: URL, limit: Int? = nil) {
+      self.file = file
       self.limit = limit
     }
 
-    var file: URL {
-      directory.appending(path: fileName)
+    var directory: URL {
+      file.deletingLastPathComponent()
+    }
+
+    var fileName: String {
+      file.lastPathComponent
     }
 
     func filter(tags: [String]) -> [String] {

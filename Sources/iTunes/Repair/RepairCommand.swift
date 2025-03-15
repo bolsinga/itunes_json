@@ -4,8 +4,6 @@ import Foundation
 extension Patchable: EnumerableFlag {}
 
 struct RepairCommand: AsyncParsableCommand {
-  private static let fileName = "itunes.json"
-
   static let configuration = CommandConfiguration(
     commandName: "repair",
     abstract: "Repairs git repositories with itunes.json using a patch file.",
@@ -43,17 +41,11 @@ struct RepairCommand: AsyncParsableCommand {
   func run() async throws {
     let patch = try await patchable.createPatch(patchURL)
 
-    let sourceConfiguration = GitTagData.Configuration(
-      directory: gitDirectory, fileName: Self.fileName)
-
     let destinationBranch = destinationBranch ?? patchable.rawValue
 
-    let destinationConfiguration = GitTagData.Configuration(
-      directory: gitDirectory, fileName: Self.fileName)
-
     try await patch.patch(
-      sourceConfiguration: sourceConfiguration, patch: patch,
-      destinationConfiguration: destinationConfiguration, branch: destinationBranch,
+      sourceConfiguration: gitDirectory.configuration, patch: patch,
+      destinationConfiguration: gitDirectory.configuration, branch: destinationBranch,
       version: Self.configuration.version)
   }
 }
