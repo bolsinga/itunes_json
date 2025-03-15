@@ -66,7 +66,7 @@ extension GitTagData {
   >] {
     var taggedDBs = try await databases(format)
 
-    if configuration.serializeDatabaseQueries {
+    if format.serializeDatabaseQueries {
       var tags: [Tag<[[Database.Row]]>] = []
       for taggedDB in taggedDBs.sorted(by: { $0.tag < $1.tag }) {
         tags.append(try await taggedDB.execute(query: query))

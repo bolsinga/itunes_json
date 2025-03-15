@@ -21,6 +21,15 @@ extension DatabaseFormat {
       context.storage
     }
   }
+
+  var serializeDatabaseQueries: Bool {
+    switch self {
+    case .normalized(let context):
+      context.serializeDatabaseQueries
+    case .flat(let context):
+      context.serializeDatabaseQueries
+    }
+  }
 }
 
 extension DatabaseContext: TracksDBEncoderContext {
