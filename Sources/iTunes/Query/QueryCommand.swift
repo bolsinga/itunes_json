@@ -67,8 +67,6 @@ extension GitTagData {
 }
 
 struct QueryCommand: AsyncParsableCommand {
-  private static let fileName = "itunes.json"
-
   static let configuration = CommandConfiguration(
     commandName: "query",
     abstract: "Query sql databases from a git repository.",
@@ -130,7 +128,6 @@ struct QueryCommand: AsyncParsableCommand {
   }
 
   func run() async throws {
-    let configuration = GitTagData.Configuration(directory: gitDirectory, fileName: Self.fileName)
-    try await context.query(query, configuration: configuration)
+    try await context.query(query, configuration: gitDirectory.configuration)
   }
 }

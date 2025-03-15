@@ -11,8 +11,6 @@ import Foundation
 extension Batch: EnumerableFlag {}
 
 struct BatchCommand: AsyncParsableCommand {
-  private static let fileName = "itunes.json"
-
   static let configuration = CommandConfiguration(
     commandName: "batch",
     abstract: "Create many sql source or databases from a git repository.",
@@ -58,9 +56,8 @@ struct BatchCommand: AsyncParsableCommand {
   var outputDirectory: URL
 
   func run() async throws {
-    let configuration = GitTagData.Configuration(directory: gitDirectory, fileName: Self.fileName)
     try await batch.build(
-      configuration, outputDirectory: outputDirectory,
+      gitDirectory.configuration, outputDirectory: outputDirectory,
       schemaOptions: laxSchema.schemaOptions)
   }
 }
