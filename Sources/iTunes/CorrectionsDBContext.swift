@@ -22,7 +22,7 @@ struct CorrectionsDBContext: FlatDBEncoderContext {
     CorrectionsDBRow(repair: item)
   }
 
-  var schema: String = """
+  let schema: String = """
     CREATE TABLE IF NOT EXISTS correct_id (
       itunesid TEXT NOT NULL PRIMARY KEY,
       value TEXT,
