@@ -56,12 +56,6 @@ extension Tag where Item == Data {
 struct GitTagData {
   struct Configuration {
     let file: URL
-    let limit: Int?
-
-    init(file: URL, limit: Int? = nil) {
-      self.file = file
-      self.limit = limit
-    }
 
     fileprivate var directory: URL {
       file.deletingLastPathComponent()
@@ -88,13 +82,20 @@ struct GitTagData {
     typealias Element = Tag<Data>
 
     let tags: [String]
-    let limit: Int?
     let dataProvider: (String) async throws -> Data
 
     struct AsyncIterator: AsyncIteratorProtocol {
       let tags: [String]
-      let limit: Int?
+      let limit: Int
       let dataProvider: (String) async throws -> Data
+
+      internal init(
+        tags: [String], limit: Int = Int.max, dataProvider: @escaping (String) async throws -> Data
+      ) {
+        self.tags = tags
+        self.limit = limit
+        self.dataProvider = dataProvider
+      }
 
       var index = 0
 
@@ -103,7 +104,7 @@ struct GitTagData {
 
         guard index < tags.count else { return nil }
 
-        if let limit, index == limit { return nil }
+        guard index < limit else { return nil }
 
         let tag = tags[index]
 
@@ -118,7 +119,7 @@ struct GitTagData {
     }
 
     func makeAsyncIterator() -> AsyncIterator {
-      AsyncIterator(tags: tags, limit: limit, dataProvider: dataProvider)
+      AsyncIterator(tags: tags, dataProvider: dataProvider)
     }
   }
 
@@ -127,7 +128,7 @@ struct GitTagData {
 
     var tagDatum: [Tag<Data>] = []
     for try await tagData in ReadSequence(
-      tags: configuration.filter(tags: try await git.tags()), limit: configuration.limit,
+      tags: configuration.filter(tags: try await git.tags()),
       dataProvider: {
         try await git.show(commit: $0, path: configuration.fileName)
       })
