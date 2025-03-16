@@ -31,8 +31,7 @@ extension Tag where Item == Data {
 }
 
 extension Batch {
-  @inlinable
-  func destination(tag: String, schemaOptions: SchemaOptions) -> Destination {
+  fileprivate func destination(tag: String, schemaOptions: SchemaOptions) -> Destination {
     switch self {
     case .sql:
       Destination.sqlCode(
@@ -49,8 +48,7 @@ extension Batch {
     }
   }
 
-  @inlinable
-  var pathExtension: String {
+  fileprivate var pathExtension: String {
     switch self {
     case .sql:
       "sql"
