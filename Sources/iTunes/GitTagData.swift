@@ -22,7 +22,7 @@ extension URL {
 }
 
 extension Git {
-  func addAndTag(fileName: String, tag tagName: String, version: String) async throws {
+  fileprivate func addAndTag(fileName: String, tag tagName: String, version: String) async throws {
     try await add(fileName)
 
     let hasChanges = await {
@@ -63,15 +63,15 @@ struct GitTagData {
       self.limit = limit
     }
 
-    var directory: URL {
+    fileprivate var directory: URL {
       file.deletingLastPathComponent()
     }
 
-    var fileName: String {
+    fileprivate var fileName: String {
       file.lastPathComponent
     }
 
-    func filter(tags: [String]) -> [String] {
+    fileprivate func filter(tags: [String]) -> [String] {
       tags.stampOrderedMatching
     }
   }
