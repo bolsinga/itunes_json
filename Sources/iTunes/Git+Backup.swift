@@ -8,16 +8,6 @@
 import Foundation
 import GitLibrary
 
-extension URL {
-  fileprivate var filename: String {
-    self.lastPathComponent
-  }
-
-  fileprivate var parentDirectory: URL {
-    self.deletingLastPathComponent()
-  }
-}
-
 extension Git {
   private func validateAndCheckout() async throws {
     try await status()

@@ -56,14 +56,6 @@ extension Tag where Item == Data {
 struct GitTagData {
   struct Configuration {
     let file: URL
-
-    fileprivate var directory: URL {
-      file.deletingLastPathComponent()
-    }
-
-    fileprivate var fileName: String {
-      file.lastPathComponent
-    }
   }
 
   let configuration: Configuration
@@ -71,7 +63,7 @@ struct GitTagData {
 
   init(configuration: Configuration) throws {
     self.configuration = configuration
-    self.git = Git(directory: configuration.directory, suppressStandardErr: true)
+    self.git = Git(directory: configuration.file.parentDirectory, suppressStandardErr: true)
   }
 
   private struct ReadSequence: AsyncSequence {
@@ -126,7 +118,7 @@ struct GitTagData {
     for try await tagData in ReadSequence(
       tags: try await git.tags().stampOrderedMatching,
       dataProvider: {
-        try await git.show(commit: $0, path: configuration.fileName)
+        try await git.show(commit: $0, path: configuration.file.filename)
       })
     {
       tagDatum.append(tagData)
