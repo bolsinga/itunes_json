@@ -44,7 +44,7 @@ struct RepairCommand: AsyncParsableCommand {
     let destinationBranch = destinationBranch ?? patchable.rawValue
 
     try await patch.patch(
-      sourceConfiguration: gitDirectory.configuration, patch: patch,
+      sourceConfiguration: gitDirectory.configuration,
       destinationConfiguration: gitDirectory.configuration, branch: destinationBranch,
       version: Self.configuration.version)
   }
