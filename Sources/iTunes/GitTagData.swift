@@ -13,13 +13,6 @@ extension Logger {
   fileprivate static let gitTagData = Logger(category: "gitTagData")
 }
 
-extension URL {
-  private static var backupFileName: String { "itunes.json" }
-
-  var backupFile: URL {
-    self.appending(path: Self.backupFileName)
-  }
-}
 
 extension Git {
   fileprivate func addAndTag(fileName: String, tag tagName: String, version: String) async throws {
