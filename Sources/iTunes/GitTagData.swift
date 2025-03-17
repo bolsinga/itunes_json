@@ -13,7 +13,6 @@ extension Logger {
   fileprivate static let gitTagData = Logger(category: "gitTagData")
 }
 
-
 extension Git {
   fileprivate func addAndTag(fileName: String, tag tagName: String, version: String) async throws {
     try await add(fileName)
