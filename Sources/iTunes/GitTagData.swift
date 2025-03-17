@@ -64,10 +64,6 @@ struct GitTagData {
     fileprivate var fileName: String {
       file.lastPathComponent
     }
-
-    fileprivate func filter(tags: [String]) -> [String] {
-      tags.stampOrderedMatching
-    }
   }
 
   let configuration: Configuration
@@ -128,7 +124,7 @@ struct GitTagData {
 
     var tagDatum: [Tag<Data>] = []
     for try await tagData in ReadSequence(
-      tags: configuration.filter(tags: try await git.tags()),
+      tags: try await git.tags().stampOrderedMatching,
       dataProvider: {
         try await git.show(commit: $0, path: configuration.fileName)
       })
