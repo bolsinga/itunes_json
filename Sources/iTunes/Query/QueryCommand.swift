@@ -26,10 +26,10 @@ private enum TransformContext {
 }
 
 extension TransformContext {
-  fileprivate func query(_ query: String, configuration: GitTagData.Configuration) async throws {
+  fileprivate func query(_ query: String, backupFile: URL) async throws {
     switch self {
     case .tracks(let context):
-      try await GitTagData(configuration: configuration).uniqueTracks(
+      try await GitTagData(backupFile: backupFile).uniqueTracks(
         query: query, format: DatabaseFormat.normalized(context)
       )
       .forEach {
@@ -37,7 +37,7 @@ extension TransformContext {
         print(try $0.item.jsonData().asUTF8String())
       }
     case .raw(let format):
-      try await GitTagData(configuration: configuration).printOutput(query: query, format: format)
+      try await GitTagData(backupFile: backupFile).printOutput(query: query, format: format)
     }
   }
 }
@@ -128,6 +128,6 @@ struct QueryCommand: AsyncParsableCommand {
   }
 
   func run() async throws {
-    try await context.query(query, configuration: gitDirectory.configuration)
+    try await context.query(query, backupFile: gitDirectory.backupFile)
   }
 }

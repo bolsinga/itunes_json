@@ -64,6 +64,6 @@ struct PatchCommand: AsyncParsableCommand {
 
   func run() async throws {
     try await repairDestination().emit(
-      try await repairable.gather(gitDirectory.configuration, correction: correction))
+      try await repairable.gather(gitDirectory.backupFile, correction: correction))
   }
 }

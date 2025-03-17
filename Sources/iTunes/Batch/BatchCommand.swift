@@ -57,7 +57,7 @@ struct BatchCommand: AsyncParsableCommand {
 
   func run() async throws {
     try await batch.build(
-      gitDirectory.configuration, outputDirectory: outputDirectory,
+      gitDirectory.backupFile, outputDirectory: outputDirectory,
       schemaOptions: laxSchema.schemaOptions)
   }
 }
