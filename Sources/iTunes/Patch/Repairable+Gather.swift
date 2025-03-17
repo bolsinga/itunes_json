@@ -15,12 +15,12 @@ private func currentTracks() async throws -> [Track] {
 private func historicalChanges<
   Guide: Hashable & Identifiable & Sendable, Change: Hashable & Sendable
 >(
-  configuration: GitTagData.Configuration,
+  backupFile: URL,
   createGuide: @escaping @Sendable ([Track]) -> [Guide],
   relevantChanges: @escaping @Sendable ([Guide.ID: [Guide]]) -> [Change]
 ) async throws -> [Change] {
   // Get all git historical data.
-  let allHistoricalGuides = try await GitTagData(configuration: configuration).transformTracks {
+  let allHistoricalGuides = try await GitTagData(backupFile: backupFile).transformTracks {
     _, tracks in
     createGuide(tracks)
   }
@@ -53,7 +53,7 @@ extension Collection where Element: Hashable & Identifiable {
 }
 
 private func changes<Guide: Hashable & Identifiable & Sendable, Change: Sendable>(
-  configuration: GitTagData.Configuration,
+  backupFile: URL,
   currentGuides: @Sendable () async throws -> Set<Guide>,
   createGuide: @escaping @Sendable ([Track]) -> Set<Guide>,
   createChange: @escaping @Sendable (Guide, [Guide]) -> [Change]
@@ -61,7 +61,7 @@ private func changes<Guide: Hashable & Identifiable & Sendable, Change: Sendable
   async let asyncCurrentGuides = try await currentGuides()
 
   let allKnownGuides = Set(
-    try await GitTagData(configuration: configuration).transformTracks {
+    try await GitTagData(backupFile: backupFile).transformTracks {
       _, tracks in
       createGuide(tracks)
     }.flatMap { $0.item })
@@ -81,14 +81,14 @@ private func changes<Guide: Hashable & Identifiable & Sendable, Change: Sendable
 private typealias TrackCorrection = @Sendable (Track) -> [IdentityRepair.Correction]
 
 private func identifierCorrections(
-  configuration: GitTagData.Configuration,
+  backupFile: URL,
   current: @escaping @Sendable () async throws -> Set<IdentityRepair>,
   createCorrection: @escaping TrackCorrection
 ) async throws -> Patch {
   .identityRepairs(
     Set(
       try await changes(
-        configuration: configuration,
+        backupFile: backupFile,
         currentGuides: { try await current() },
         createGuide: {
           Set(
@@ -102,12 +102,11 @@ private func identifierCorrections(
     ).sorted())
 }
 
-private func identifierCorrections(
-  configuration: GitTagData.Configuration,
-  createCorrection: @escaping TrackCorrection
-) async throws -> Patch {
+private func identifierCorrections(backupFile: URL, createCorrection: @escaping TrackCorrection)
+  async throws -> Patch
+{
   try await identifierCorrections(
-    configuration: configuration,
+    backupFile: backupFile,
     current: {
       Set(
         try await currentTracks().flatMap { track in
@@ -118,14 +117,14 @@ private func identifierCorrections(
 }
 
 private func historicalIdentifierCorrections<Guide: Hashable & Identifiable & Sendable>(
-  configuration: GitTagData.Configuration,
+  backupFile: URL,
   createIdentifier: @escaping @Sendable (_ track: Track) -> Guide,
   relevantChanges: @escaping @Sendable ([Guide.ID: [Guide]]) -> [IdentityRepair]
 ) async throws -> Patch {
   .identityRepairs(
     Set(
       try await historicalChanges(
-        configuration: configuration,
+        backupFile: backupFile,
         createGuide: { $0.filter { $0.isSQLEncodable }.map { createIdentifier($0) } },
         relevantChanges: relevantChanges)
     ).sorted())
@@ -165,18 +164,18 @@ private enum RepairableError: Error {
 }
 
 extension Repairable {
-  private func gatherLibraryPatch(_ configuration: GitTagData.Configuration) async throws -> Patch {
+  private func gatherLibraryPatch(_ backupFile: URL) async throws -> Patch {
     guard let createCorrection = libraryCorrections[self] else {
       throw RepairableError.missingRepairableCorrection
     }
-    return try await identifierCorrections(configuration: configuration) { [createCorrection($0)] }
+    return try await identifierCorrections(backupFile: backupFile) { [createCorrection($0)] }
   }
 
-  func gather(_ configuration: GitTagData.Configuration, correction: String) async throws -> Patch {
+  func gather(_ backupFile: URL, correction: String) async throws -> Patch {
     switch self {
     case .replacePersistentIds:
       let lookup = try identifierLookupCorrections(from: correction)
-      return try await identifierCorrections(configuration: configuration) {
+      return try await identifierCorrections(backupFile: backupFile) {
         Set(
           lookup.map { IdentityRepair(persistentID: $0.key, correction: .persistentID($0.value)) })
       } createCorrection: {
@@ -184,7 +183,7 @@ extension Repairable {
       }
 
     case .replaceDateAddeds:
-      return try await historicalIdentifierCorrections(configuration: configuration) {
+      return try await historicalIdentifierCorrections(backupFile: backupFile) {
         $0.identityRepair(.dateAdded($0.dateAdded))
       } relevantChanges: {
         // For ids with more than 1 dateAdded correction, use the first correction, since it is sorted by tag.
@@ -192,7 +191,7 @@ extension Repairable {
       }
 
     case .replaceDateReleased:
-      return try await historicalIdentifierCorrections(configuration: configuration) {
+      return try await historicalIdentifierCorrections(backupFile: backupFile) {
         $0.identityRepair(.dateReleased($0.releaseDate))
       } relevantChanges: {
         // For ids with more than 1 dateReleased, use the earliest (sorted) correction.
@@ -202,7 +201,7 @@ extension Repairable {
       }
 
     case .replacePlay:
-      return try await historicalIdentifierCorrections(configuration: configuration) {
+      return try await historicalIdentifierCorrections(backupFile: backupFile) {
         $0.playIdentity
       } relevantChanges: {
         $0.relevantChanges()
@@ -211,7 +210,7 @@ extension Repairable {
     case .replaceDurations, .replaceComposers, .replaceComments, .replaceAlbumTitle, .replaceYear,
       .replaceTrackNumber, .replaceIdSongTitle, .replaceIdDiscCount, .replaceIdDiscNumber,
       .replaceArtist:
-      return try await gatherLibraryPatch(configuration)
+      return try await gatherLibraryPatch(backupFile)
     }
   }
 }

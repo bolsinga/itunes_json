@@ -16,8 +16,8 @@ extension Logger {
 extension URL {
   private static var backupFileName: String { "itunes.json" }
 
-  var configuration: GitTagData.Configuration {
-    GitTagData.Configuration(file: self.appending(path: Self.backupFileName))
+  var backupFile: URL {
+    self.appending(path: Self.backupFileName)
   }
 }
 
@@ -43,27 +43,23 @@ extension Git {
 }
 
 extension Tag where Item == Data {
-  fileprivate func add(to git: Git, file: URL, version: String) async throws {
+  fileprivate func add(to git: Git, backupFile: URL, version: String) async throws {
     Logger.gitTagData.info("Add: \(tag)")
 
     // this makes memory shoot up, unexpectedly.
-    try item.write(to: file)
+    try item.write(to: backupFile)
 
-    try await git.addAndTag(fileName: file.lastPathComponent, tag: tag, version: version)
+    try await git.addAndTag(fileName: backupFile.lastPathComponent, tag: tag, version: version)
   }
 }
 
 struct GitTagData {
-  struct Configuration {
-    let file: URL
-  }
-
-  let configuration: Configuration
+  let backupFile: URL
   private let git: Git
 
-  init(configuration: Configuration) throws {
-    self.configuration = configuration
-    self.git = Git(directory: configuration.file.parentDirectory, suppressStandardErr: true)
+  init(backupFile: URL) throws {
+    self.backupFile = backupFile
+    self.git = Git(directory: backupFile.parentDirectory, suppressStandardErr: true)
   }
 
   private struct ReadSequence: AsyncSequence {
@@ -118,7 +114,7 @@ struct GitTagData {
     for try await tagData in ReadSequence(
       tags: try await git.tags().stampOrderedMatching,
       dataProvider: {
-        try await git.show(commit: $0, path: configuration.file.filename)
+        try await git.show(commit: $0, path: backupFile.filename)
       })
     {
       tagDatum.append(tagData)
@@ -139,7 +135,7 @@ struct GitTagData {
     for tagData in tagDatum.reversed() {
       tagDatum.removeLast()
 
-      try await tagData.add(to: git, file: configuration.file, version: version)
+      try await tagData.add(to: git, backupFile: backupFile, version: version)
     }
 
     //    try await git.push()

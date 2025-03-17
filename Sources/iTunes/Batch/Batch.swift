@@ -57,10 +57,8 @@ extension Batch {
     }
   }
 
-  func build(
-    _ configuration: GitTagData.Configuration, outputDirectory: URL, schemaOptions: SchemaOptions
-  ) async throws {
-    var patchedTracksData = try await GitTagData(configuration: configuration)
+  func build(_ backupFile: URL, outputDirectory: URL, schemaOptions: SchemaOptions) async throws {
+    var patchedTracksData = try await GitTagData(backupFile: backupFile)
       .transformTracks { tag, tracks in
         try await destination(tag: tag, schemaOptions: schemaOptions).data(for: tracks)
       }
