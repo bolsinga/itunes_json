@@ -20,7 +20,7 @@ extension Tag {
 
 extension Patch {
   func patch(
-    sourceConfiguration: GitTagData.Configuration
+    sourceConfiguration: GitTagData.Configuration,
     destinationConfiguration: GitTagData.Configuration, branch: String, version: String
   ) async throws {
     let patchedTracksData = try await GitTagData(configuration: sourceConfiguration)
