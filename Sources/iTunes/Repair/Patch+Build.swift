@@ -25,8 +25,8 @@ extension Patch {
 
     guard let initialCommit = patchedTracksData.initialTag else { return }
 
-    try await GitTagData(backupFile: backupFile).write(
-      tagDatum: patchedTracksData.map { try $0.nextVersion() },
-      initialCommit: initialCommit, branch: branch, version: version)
+    try await backupFile.write(
+      tagDatum: patchedTracksData.map { try $0.nextVersion() }, initialCommit: initialCommit,
+      branch: branch, version: version)
   }
 }
