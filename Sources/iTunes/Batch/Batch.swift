@@ -58,10 +58,9 @@ extension Batch {
   }
 
   func build(_ backupFile: URL, outputDirectory: URL, schemaOptions: SchemaOptions) async throws {
-    var patchedTracksData = try await GitTagData(backupFile: backupFile)
-      .transformTracks { tag, tracks in
-        try await destination(tag: tag, schemaOptions: schemaOptions).data(for: tracks)
-      }
+    var patchedTracksData = try await backupFile.transformTracks { tag, tracks in
+      try await destination(tag: tag, schemaOptions: schemaOptions).data(for: tracks)
+    }
 
     for tagData in patchedTracksData.reversed() {
       patchedTracksData.removeLast()
