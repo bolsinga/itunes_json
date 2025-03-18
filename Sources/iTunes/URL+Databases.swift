@@ -1,5 +1,5 @@
 //
-//  GitTagData+Databases.swift
+//  URL+Databases.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 1/24/25.
@@ -54,9 +54,9 @@ extension DatabaseFormat {
   }
 }
 
-extension GitTagData {
+extension URL {
   fileprivate func databases(_ format: DatabaseFormat) async throws -> [Tag<Database>] {
-    try await transformTracks {
+    try await GitTagData(backupFile: self).transformTracks {
       try await format.append(tag: $0).database(tracks: $1)
     }
   }

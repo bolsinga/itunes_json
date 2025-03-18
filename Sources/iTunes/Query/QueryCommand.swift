@@ -29,20 +29,18 @@ extension TransformContext {
   fileprivate func query(_ query: String, backupFile: URL) async throws {
     switch self {
     case .tracks(let context):
-      try await GitTagData(backupFile: backupFile).uniqueTracks(
-        query: query, format: DatabaseFormat.normalized(context)
-      )
-      .forEach {
-        print($0.tag)
-        print(try $0.item.jsonData().asUTF8String())
-      }
+      try await backupFile.uniqueTracks(query: query, format: DatabaseFormat.normalized(context))
+        .forEach {
+          print($0.tag)
+          print(try $0.item.jsonData().asUTF8String())
+        }
     case .raw(let format):
-      try await GitTagData(backupFile: backupFile).printOutput(query: query, format: format)
+      try await backupFile.printOutput(query: query, format: format)
     }
   }
 }
 
-extension GitTagData {
+extension URL {
   fileprivate func rowOutput(query: String, format: DatabaseFormat) async throws -> [Tag<[String]>]
   {
     try await transformRows(query: query, format: format) { queryRows in

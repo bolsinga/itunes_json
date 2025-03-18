@@ -1,13 +1,15 @@
 //
-//  GitTagData+TracksQuery.swift
+//  URL+TracksQuery.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 1/25/25.
 //
 
+import Foundation
+
 typealias TaggedTracks = Tag<[Track]>
 
-extension GitTagData {
+extension URL {
   fileprivate func tracks(query: String, format: DatabaseFormat) async throws
     -> [TaggedTracks]
   {
