@@ -56,7 +56,7 @@ extension DatabaseFormat {
 
 extension URL {
   fileprivate func databases(_ format: DatabaseFormat) async throws -> [Tag<Database>] {
-    try await GitTagData(backupFile: self).transformTracks {
+    try await transformTracks {
       try await format.append(tag: $0).database(tracks: $1)
     }
   }

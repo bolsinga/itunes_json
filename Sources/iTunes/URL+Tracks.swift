@@ -1,5 +1,5 @@
 //
-//  GitTagData+Tracks.swift
+//  URL+Tracks.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 11/30/24.
@@ -18,11 +18,11 @@ extension Tag where Item == Data {
   }
 }
 
-extension GitTagData {
+extension URL {
   func transformTracks<T: Sendable>(
     transform: @escaping @Sendable (String, [Track]) async throws -> T
   ) async throws -> [Tag<T>] {
-    var tagDatum = try await self.tagDatum()
+    var tagDatum = try await GitTagData(backupFile: self).tagDatum()
 
     return try await withThrowingTaskGroup(of: Tag<T>.self) { group in
       for tagData in tagDatum.reversed() {
