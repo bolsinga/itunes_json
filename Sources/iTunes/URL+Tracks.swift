@@ -22,7 +22,7 @@ extension URL {
   func transformTracks<T: Sendable>(
     transform: @escaping @Sendable (String, [Track]) async throws -> T
   ) async throws -> [Tag<T>] {
-    var tagDatum = try await GitTagData(backupFile: self).tagDatum()
+    var tagDatum = try await self.tagDatum()
 
     return try await withThrowingTaskGroup(of: Tag<T>.self) { group in
       for tagData in tagDatum.reversed() {
