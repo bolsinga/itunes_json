@@ -13,7 +13,8 @@ struct BackupContext: Sendable {
   let version: String
 
   func tag(_ tagProvider: @autoclosure () async throws -> String?) async throws -> String {
-    guard let currentPrefix = try await tagProvider()?.tagPrefix else {
+    let tagParser = TagParser()
+    guard let tag = try await tagProvider(), let currentPrefix = tagParser.tagPrefix(tag) else {
       return Self.defaultTag
     }
     return currentPrefix

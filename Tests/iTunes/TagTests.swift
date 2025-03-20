@@ -9,6 +9,20 @@ import Testing
 
 @testable import iTunes
 
+extension String {
+  var tagPrefixAndStamp: (String, String)? {
+    TagParser().tagPrefixAndStamp(self)
+  }
+
+  var tagVersion: (String, Int)? {
+    TagParser().tagVersion(self)
+  }
+
+  var structuredTag: StructuredTag? {
+    TagParser().structuredTag(self)
+  }
+}
+
 struct TagTests {
   @Test func test_StandardFormat() throws {
     #expect(try #require("ZZZ-2024-10-25".tagPrefixAndStamp) == ("ZZZ", "2024-10-25"))

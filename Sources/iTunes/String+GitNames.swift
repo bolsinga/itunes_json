@@ -56,8 +56,9 @@ extension String {
 
   func allMatchingTags(_ tags: [String]?) -> [String] {
     guard let tags else { return [] }
+    let tagParser = TagParser()
     let latest = tags.filter {
-      guard let prefix = $0.tagPrefix else {
+      guard let prefix = tagParser.tagPrefix($0) else {
         return false
       }
       return prefix.starts(with: self)

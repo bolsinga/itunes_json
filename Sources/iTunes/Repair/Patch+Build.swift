@@ -12,8 +12,8 @@ private enum TagError: Error {
 }
 
 extension Tag {
-  fileprivate func nextVersion() throws -> Tag {
-    guard let structuredTag = tag.structuredTag else { throw TagError.unstructuredTag }
+  fileprivate func nextVersion(_ tagParser: TagParser) throws -> Tag {
+    guard let structuredTag = tagParser.structuredTag(tag) else { throw TagError.unstructuredTag }
     return Tag(tag: structuredTag.next.description, item: item)
   }
 }
@@ -24,8 +24,11 @@ extension Patch {
 
     guard let initialCommit = patchedTracksData.initialTag else { return }
 
+    let tagParser = TagParser()
+
     try await backupFile.write(
-      tagDatum: patchedTracksData.map { try $0.nextVersion() }, initialCommit: initialCommit,
+      tagDatum: patchedTracksData.map { try $0.nextVersion(tagParser) },
+      initialCommit: initialCommit,
       branch: branch, version: version)
   }
 }

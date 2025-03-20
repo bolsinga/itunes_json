@@ -19,6 +19,9 @@ extension Array where Element == StructuredTag {
 
 extension Array where Element == String {
   var stampOrderedMatching: [Element] {
-    self.compactMap { $0.structuredTag }.stampOrderedMatching.map { $0.description }
+    let tagParser = TagParser()
+    return self.compactMap { tagParser.structuredTag($0) }.stampOrderedMatching.map {
+      $0.description
+    }
   }
 }
