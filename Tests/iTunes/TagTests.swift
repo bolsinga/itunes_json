@@ -103,18 +103,6 @@ struct TagTests {
     #expect("2024-10-25".tagPrefixAndStamp == nil)
   }
 
-  @Test func appendInvalid() throws {
-    #expect("-2024-12-05".appendToPrefix(appendix: "x") == nil)
-  }
-
-  @Test func appendNonConforming() throws {
-    #expect("xxxxx".appendToPrefix(appendix: "x") == nil)
-  }
-
-  @Test func append() throws {
-    #expect("tag-2024-12-05".appendToPrefix(appendix: "x") == "tag.x-2024-12-05")
-  }
-
   @Test func bad() throws {
     #expect("iTunes-2024-05-12-empty.01-empty".tagPrefixAndStamp == nil)
   }

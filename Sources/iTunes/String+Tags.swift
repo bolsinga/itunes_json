@@ -78,10 +78,4 @@ extension String {
   var tagPrefix: String? {
     tagPrefixAndStamp?.0
   }
-
-  func appendToPrefix(appendix: String) -> String? {
-    guard let prefix = tagPrefix else { return nil }
-
-    return self.replacing(prefix, with: "\(prefix).\(appendix)")
-  }
 }
