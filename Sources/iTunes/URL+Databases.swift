@@ -55,8 +55,10 @@ extension DatabaseFormat {
 }
 
 extension URL {
-  fileprivate func databases(_ format: DatabaseFormat) async throws -> [Tag<Database>] {
-    try await transformTracks {
+  fileprivate func databases(_ format: DatabaseFormat) -> AsyncThrowingStream<
+    Tag<Database>, any Error
+  > {
+    transformTracks {
       try await format.append(tag: $0).database(tracks: $1)
     }
   }
@@ -64,7 +66,9 @@ extension URL {
   fileprivate func rows(query: String, format: DatabaseFormat) async throws -> [Tag<
     [[Database.Row]]
   >] {
-    var taggedDBs = try await databases(format)
+    var taggedDBs = try await databases(format).reduce(into: [Tag<Database>]()) {
+      $0.append($1)
+    }
 
     if format.serializeDatabaseQueries {
       var tags: [Tag<[[Database.Row]]>] = []

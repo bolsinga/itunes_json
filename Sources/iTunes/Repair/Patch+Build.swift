@@ -21,6 +21,7 @@ extension Tag {
 extension Patch {
   func patch(backupFile: URL, branch: String, version: String) async throws {
     let patchedTracksData = try await backupFile.transformTracks { try $1.patch(self, tag: $0) }
+      .reduce(into: [Tag<Data>]()) { $0.append($1) }
 
     guard let initialCommit = patchedTracksData.initialTag else { return }
 

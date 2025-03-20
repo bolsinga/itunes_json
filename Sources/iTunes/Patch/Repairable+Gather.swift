@@ -20,9 +20,10 @@ private func historicalChanges<
   relevantChanges: @escaping @Sendable ([Guide.ID: [Guide]]) -> [Change]
 ) async throws -> [Change] {
   // Get all git historical data.
-  let allHistoricalGuides = try await backupFile.transformTracks {
-    _, tracks in
+  let allHistoricalGuides = try await backupFile.transformTracks { _, tracks in
     createGuide(tracks)
+  }.reduce(into: [Tag<[Guide]>]()) { partialResult, item in
+    partialResult.append(item)
   }
 
   // sort data by tag ascending (oldest to newest).
@@ -60,11 +61,11 @@ private func changes<Guide: Hashable & Identifiable & Sendable, Change: Sendable
 ) async throws -> [Change] where Guide.ID: Sendable {
   async let asyncCurrentGuides = try await currentGuides()
 
-  let allKnownGuides = Set(
-    try await backupFile.transformTracks {
-      _, tracks in
-      createGuide(tracks)
-    }.flatMap { $0.item })
+  let allKnownGuides = try await backupFile.transformTracks { _, tracks in
+    createGuide(tracks)
+  }.reduce(into: Set<Guide>()) {
+    $0.formUnion($1.item)
+  }
 
   let currentGuides = try await asyncCurrentGuides
 
