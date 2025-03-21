@@ -15,7 +15,7 @@ extension Destination {
     case .sqlCode(let context):
       try tracks.sqlData(context)
     case .db(let format):
-      try await format.database(tracks: tracks)
+      try await format.databaseData(tracks: tracks)
     }
   }
 }

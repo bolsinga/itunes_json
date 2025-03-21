@@ -51,7 +51,7 @@ extension Array where Element == Track {
     }
   }
 
-  fileprivate func database(_ context: DatabaseContext) async throws -> Data {
+  fileprivate func databaseData(_ context: DatabaseContext) async throws -> Data {
     let db: Database = try await database(context)
     do {
       let data = try await db.data()
@@ -82,7 +82,7 @@ extension FlatTracksDatabaseContext {
     }
   }
 
-  fileprivate func flatDatabase(_ tracks: [Track]) async throws -> Data {
+  fileprivate func flatDatabaseData(_ tracks: [Track]) async throws -> Data {
     let db: Database = try await flatDatabase(tracks)
     do {
       let data = try await db.data()
@@ -105,12 +105,12 @@ extension DatabaseFormat {
     }
   }
 
-  func database(tracks: [Track]) async throws -> Data {
+  func databaseData(tracks: [Track]) async throws -> Data {
     switch self {
     case .normalized(let context):
-      try await tracks.database(context)
+      try await tracks.databaseData(context)
     case .flat(let context):
-      try await context.flatDatabase(tracks)
+      try await context.flatDatabaseData(tracks)
     }
   }
 }
