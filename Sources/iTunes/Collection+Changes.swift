@@ -11,11 +11,7 @@ extension Collection where Element: Sendable {
       self.forEach { element in
         group.addTask { createChange(element) }
       }
-      var changes: [T] = []
-      for await change in group {
-        changes.append(contentsOf: change)
-      }
-      return changes
+      return await group.reduce(into: [T]()) { $0.append(contentsOf: $1) }
     }
   }
 }
