@@ -21,12 +21,26 @@ extension Tag where Item == Data {
 extension URL {
   func transformTracks<T: Sendable>(
     transform: @escaping @Sendable (String, [Track]) async throws -> T
-  ) async throws -> [Tag<T>] {
-    try await tagDatum.map { tagData in
-      Logger.transform.info("Transform Tag: \(tagData.tag)")
-      return Tag(tag: tagData.tag, item: try await transform(tagData.tag, try tagData.tracks()))
-    }.reduce(into: [Tag<T>]()) {
-      $0.append($1)
+  ) -> AsyncThrowingStream<Tag<T>, any Error> {
+    let (stream, continuation) = AsyncThrowingStream<Tag<T>, Error>.makeStream()
+    Task.detached {
+      defer { continuation.finish() }
+
+      do {
+        try await withThrowingTaskGroup(of: Void.self) { group in
+          for try await tagData in tagDatum {
+            group.addTask {
+              Logger.transform.info("Transform Tag: \(tagData.tag)")
+              continuation.yield(
+                Tag(tag: tagData.tag, item: try await transform(tagData.tag, try tagData.tracks())))
+            }
+          }
+        }
+      } catch {
+        continuation.finish(throwing: error)
+      }
     }
+
+    return stream
   }
 }
