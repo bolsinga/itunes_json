@@ -7,22 +7,33 @@
 
 import Foundation
 import GitLibrary
+import os
+
+extension Logger {
+  fileprivate static let tagStream = Logger(category: "tagStream")
+}
 
 extension URL {
-  func tagDatum() async throws -> [Tag<Data>] {
-    let git = Git(directory: self.parentDirectory, suppressStandardErr: true)
+  var tagDatum: AsyncThrowingStream<Tag<Data>, Error> {
+    let (stream, continuation) = AsyncThrowingStream<Tag<Data>, Error>.makeStream()
+    Task.detached {
+      defer { continuation.finish() }
 
-    try await git.status()
+      let git = Git(directory: self.parentDirectory, suppressStandardErr: true)
 
-    var tagDatum: [Tag<Data>] = []
-    for try await tagData in TagSequence(
-      tags: try await git.tags().stampOrderedMatching,
-      dataProvider: {
-        try await git.show(commit: $0, path: self.filename)
-      })
-    {
-      tagDatum.append(tagData)
+      do {
+        try await git.status()
+
+        for tag in try await git.tags().stampOrderedMatching {
+          Logger.tagStream.info("tag: \(tag)")
+
+          continuation.yield(
+            Tag(tag: tag, item: try await git.show(commit: tag, path: self.filename)))
+        }
+      } catch {
+        continuation.finish(throwing: error)
+      }
     }
-    return tagDatum
+    return stream
   }
 }
