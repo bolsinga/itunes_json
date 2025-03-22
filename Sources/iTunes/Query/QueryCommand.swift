@@ -43,13 +43,15 @@ extension TransformContext {
 extension URL {
   fileprivate func rowOutput(query: String, format: DatabaseFormat) async throws -> [Tag<[String]>]
   {
-    try await transformRows(query: query, format: format) { queryRows in
-      queryRows.flatMap { rows in
+    try await transformRows(query: query, format: format) {
+      $0.flatMap { rows in
         guard !rows.isEmpty else { return [String]() }
         let columnNames = rows[0].map { $0.column }.joined(separator: "|")
         let output = rows.map { $0.map { "\($0.value)" }.joined(separator: "|") }
         return [columnNames] + output
       }
+    }.reduce(into: [Tag<[String]>]()) {
+      $0.append($1)
     }
   }
 
