@@ -63,41 +63,58 @@ extension URL {
     }
   }
 
-  fileprivate func rows(query: String, format: DatabaseFormat) async throws -> [Tag<
-    [[Database.Row]]
-  >] {
-    var taggedDBs = try await databases(format).reduce(into: [Tag<Database>]()) {
-      $0.append($1)
+  fileprivate func serializedDatabaseQueryRows(query: String, format: DatabaseFormat)
+    -> AsyncThrowingStream<Tag<[[Database.Row]]>, any Error>
+  {
+    let (stream, continuation) = AsyncThrowingStream<Tag<[[Database.Row]]>, any Error>.makeStream()
+    Task.detached {
+      defer { continuation.finish() }
+      do {
+        for taggedDB in try await databases(format).reduce(
+          into: [Tag<Database>](), { $0.append($1) }
+        ).sorted(by: { $0.tag < $1.tag }) {
+          continuation.yield(try await taggedDB.execute(query: query))
+        }
+      } catch {
+        continuation.finish(throwing: error)
+      }
     }
 
-    if format.serializeDatabaseQueries {
-      var tags: [Tag<[[Database.Row]]>] = []
-      for taggedDB in taggedDBs.sorted(by: { $0.tag < $1.tag }) {
-        tags.append(try await taggedDB.execute(query: query))
-      }
-      return tags
-    } else {
-      return try await withThrowingTaskGroup(of: Tag<[[Database.Row]]>.self) { group in
-        for taggedDB in taggedDBs.reversed() {
-          taggedDBs.removeLast()
-          group.addTask {
-            try await taggedDB.execute(query: query)
-          }
-        }
+    return stream
+  }
 
-        var tags: [Tag<[[Database.Row]]>] = []
-        for try await tag in group {
-          tags.append(tag)
+  fileprivate func databaseQueryRows(query: String, format: DatabaseFormat) -> AsyncThrowingStream<
+    Tag<[[Database.Row]]>, any Error
+  > {
+    let (stream, continuation) = AsyncThrowingStream<Tag<[[Database.Row]]>, any Error>.makeStream()
+    Task.detached {
+      defer { continuation.finish() }
+      do {
+        for try await taggedDB in databases(format) {
+          continuation.yield(try await taggedDB.execute(query: query))
         }
-        return tags
+      } catch {
+        continuation.finish(throwing: error)
       }
+    }
+    return stream
+  }
+
+  fileprivate func rows(query: String, format: DatabaseFormat) -> some AsyncSequence<
+    Tag<[[Database.Row]]>, any Error
+  > {
+    if format.serializeDatabaseQueries {
+      return serializedDatabaseQueryRows(query: query, format: format)
+    } else {
+      return databaseQueryRows(query: query, format: format)
     }
   }
 
   func transformRows<T: Sendable>(
-    query: String, format: DatabaseFormat, transform: @escaping ([[Database.Row]]) throws -> T
-  ) async throws -> [Tag<T>] {
-    try await rows(query: query, format: format).filter { !$0.item.isEmpty }.map {
+    query: String, format: DatabaseFormat,
+    transform: @escaping @Sendable ([[Database.Row]]) throws -> T
+  ) -> some AsyncSequence<Tag<T>, any Error> {
+    rows(query: query, format: format).filter { !$0.item.isEmpty }.map {
       Tag(tag: $0.tag, item: try transform($0.item))
     }
   }

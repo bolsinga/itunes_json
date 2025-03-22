@@ -10,11 +10,11 @@ import Foundation
 typealias TaggedTracks = Tag<[Track]>
 
 extension URL {
-  fileprivate func tracks(query: String, format: DatabaseFormat) async throws
-    -> [TaggedTracks]
-  {
+  fileprivate func tracks(query: String, format: DatabaseFormat) async throws -> [TaggedTracks] {
     try await transformRows(query: query, format: format) { queryRows in
       queryRows.flatMap { $0.compactMap { Track(row: $0) } }
+    }.reduce(into: [TaggedTracks]()) {
+      $0.append($1)
     }
   }
 
