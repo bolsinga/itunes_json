@@ -73,36 +73,6 @@ extension Check: CustomStringConvertible {
   }
 }
 
-private enum DateComparisonResult {
-  case orderedAscending
-  case orderedSame
-  case orderedSameQuirk
-  case orderedDescending
-}
-
-extension ComparisonResult {
-  fileprivate var dateComparisonResult: DateComparisonResult {
-    switch self {
-    case .orderedAscending:
-      return .orderedAscending
-    case .orderedSame:
-      return .orderedSame
-    case .orderedDescending:
-      return .orderedDescending
-    }
-  }
-}
-
-extension Date {
-  fileprivate func compareQuirk(_ other: Date) -> DateComparisonResult {
-    guard abs(self.distance(to: other)).truncatingRemainder(dividingBy: 60 * 60) != 0 else {
-      return .orderedSameQuirk
-    }
-
-    return self.compare(other).dateComparisonResult
-  }
-}
-
 private enum PlayComparisonResult {
   case orderedAscending
   case orderedSame
