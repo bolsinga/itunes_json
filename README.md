@@ -26,10 +26,10 @@ This will create patch files for the repair tool to use. It makes the assumption
 - `replace-disc-numbers` - Replace disc numbers for albums.
 - `replace-durations` - Replace track durations.
 - `replace-persistent-ids` - Replace track persistent IDs. This should be used with caution.
-- `replace-date-addeds` - Replace date added for a track.
+- `replace-date-addeds` - Replace date added for a track (uses history as truth).
 - `replace-composers` - Replace composer for a track.
 - `replace-comments` - Replace comments for a track.
-- `replace-date-released` - Replace date released for a track.
+- `replace-date-released` - Replace date released for a track (uses history as truth).
 - `replace-album-title` - Replace album title for a track.
 - `replace-song-title` - Replace song title for a track.
 - `replace-year` - Replace year for a track.
@@ -38,7 +38,10 @@ This will create patch files for the repair tool to use. It makes the assumption
 - `replace-id-disc-count` - Replace a disc count, using persistent ID, no other criteria.
 - `replace-id-disc-number` - Replace a disc number, using persistent ID, no other criteria.
 - `replace-artist` - Replace an artist name, using persistent ID, no other criteria.
-- `replace-play` - Replace play date and count looking at historical data.
+- `replace-play` - Replace play date and count (uses history as truth).
+- `library-repairs` - A single Patch for all the Patches above that use the library as the source of truth.
+- `history-repairs` - A single Patch for all the Patches above that use history as the source of truth (except for replace-play).
+- `all-repairs` - A single Patch combining `library-repairs` and `history-repairs`.
 
 ### repair
 This will repair a git repository with listening history, given a file created with the patch tool. It has all the same options as the patch tool, found above. It has one additional option, listed below.

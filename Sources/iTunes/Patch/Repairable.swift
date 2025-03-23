@@ -22,4 +22,9 @@ enum Repairable: CaseIterable {
   case replaceIdDiscNumber
   case replaceArtist
   case replacePlay
+
+  case libraryRepairs
+  case historyRepairs
+
+  case allRepairs
 }
