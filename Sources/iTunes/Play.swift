@@ -82,7 +82,7 @@ private enum PlayComparisonResult {
   case invalid
 }
 
-extension DateComparisonResult {
+extension DateQuirkComparisonResult {
   fileprivate var playComparisonResult: PlayComparisonResult {
     switch self {
     case .orderedAscending:

@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum DateComparisonResult {
+enum DateQuirkComparisonResult {
   case orderedAscending
   case orderedSame
   case orderedSameQuirk
@@ -15,7 +15,7 @@ enum DateComparisonResult {
 }
 
 extension ComparisonResult {
-  fileprivate var dateComparisonResult: DateComparisonResult {
+  fileprivate var dateQuirkComparisonResult: DateQuirkComparisonResult {
     switch self {
     case .orderedAscending:
       return .orderedAscending
@@ -28,11 +28,11 @@ extension ComparisonResult {
 }
 
 extension Date {
-  func compareQuirk(_ other: Date) -> DateComparisonResult {
+  func compareQuirk(_ other: Date) -> DateQuirkComparisonResult {
     guard abs(self.distance(to: other)).truncatingRemainder(dividingBy: 60 * 60) != 0 else {
       return .orderedSameQuirk
     }
 
-    return self.compare(other).dateComparisonResult
+    return self.compare(other).dateQuirkComparisonResult
   }
 }
