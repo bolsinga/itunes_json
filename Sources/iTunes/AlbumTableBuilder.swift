@@ -9,7 +9,7 @@ import Foundation
 
 struct AlbumTableBuilder: TableBuilder {
   private let strictSchema: String = """
-    UNIQUE(name, trackcount, disccount, discnumber, compilation),
+    UNIQUE(artistid, name, trackcount, disccount, discnumber, compilation),
     CHECK(length(name) > 0),
     CHECK(name != sortname),
     CHECK(trackcount > 0),
@@ -19,12 +19,14 @@ struct AlbumTableBuilder: TableBuilder {
     """
     CREATE TABLE albums (
       id INTEGER PRIMARY KEY,
+      artistid INTEGER NON NULL,
       name TEXT NOT NULL,
       sortname TEXT NOT NULL DEFAULT '',
       trackcount INTEGER NOT NULL,
       disccount INTEGER NOT NULL,
       discnumber INTEGER NOT NULL,
       compilation INTEGER NOT NULL,
+      FOREIGN KEY(artistid) REFERENCES artists(id),
       \(constraints == .strict ? strictSchema : "")
       CHECK(disccount > 0),
       CHECK(discnumber > 0),
@@ -33,15 +35,26 @@ struct AlbumTableBuilder: TableBuilder {
     """
   }
 
-  let rows: [RowAlbum]
+  let tracks: [TrackRow]
 
-  init(rows: [RowAlbum]) {
-    self.rows = rows.sorted(by: { $0.name < $1.name })
+  var rows: [RowAlbum] { Array(Set(tracks.map { $0.album })) }
+  var argumentBuilder: (@Sendable (Row) -> [Database.Value])?
+
+  init(tracks: [TrackRow], artistLookup: [RowArtist: Int64]?) {
+    self.tracks = tracks.sorted(by: { $0.album.name < $1.album.name })
+
+    if let artistLookup {
+      let artistIDs = self.tracks.reduce(into: [RowAlbum: Int64]()) {
+        $0[$1.album] = artistLookup[$1.artist] ?? -1
+      }
+
+      self.argumentBuilder = {
+        $0.insert(artistID: "\(artistIDs[$0])").parameters
+      }
+    }
   }
 
-  var argumentBuilder: (@Sendable (Row) -> [Database.Value])? {
-    { $0.insert.parameters }
+  var statements: [Database.Statement] {
+    tracks.map { $0.album.insert(artistID: $0.artist.selectID) }
   }
-
-  var statements: [Database.Statement] { rows.map { $0.insert } }
 }

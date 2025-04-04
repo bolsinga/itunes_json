@@ -8,5 +8,5 @@
 import Foundation
 
 extension RowAlbum: SQLBindableInsert {
-  static var insertBinding: Database.Statement { RowAlbum().insert }
+  static var insertBinding: Database.Statement { RowAlbum().insert(artistID: .empty) }
 }

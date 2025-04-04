@@ -44,4 +44,8 @@ extension Track: RowAlbumInterface {
     }
     return 0
   }
+
+  var albumArtistName: SortableName? {
+    artistName
+  }
 }
