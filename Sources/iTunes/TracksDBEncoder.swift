@@ -28,8 +28,12 @@ struct TracksDBEncoder<Context: TracksDBEncoderContext> {
     try await db.createTable(rowEncoder.artistTableBuilder, schemaConstraints: schemaConstrainsts)
   }
 
-  private func emitAlbums(schemaConstrainsts: SchemaConstraints) async throws -> [RowAlbum: Int64] {
-    try await db.createTable(rowEncoder.albumTableBuilder, schemaConstraints: schemaConstrainsts)
+  private func emitAlbums(artistLookup: [RowArtist: Int64], schemaConstrainsts: SchemaConstraints)
+    async throws -> [RowAlbum: Int64]
+  {
+    try await db.createTable(
+      rowEncoder.albumTableBuilder(artistLookup: artistLookup),
+      schemaConstraints: schemaConstrainsts)
   }
 
   private func emitSongs(
@@ -53,7 +57,8 @@ struct TracksDBEncoder<Context: TracksDBEncoderContext> {
     try await db.execute("PRAGMA foreign_keys = ON;")
     let schemaOptions = context.schemaOptions
     let artistLookup = try await emitArtists(schemaConstrainsts: schemaOptions.artistConstraints)
-    let albumLookup = try await emitAlbums(schemaConstrainsts: schemaOptions.albumConstraints)
+    let albumLookup = try await emitAlbums(
+      artistLookup: artistLookup, schemaConstrainsts: schemaOptions.albumConstraints)
     let songLookup = try await emitSongs(
       artistLookup: artistLookup, albumLookup: albumLookup,
       schemaConstrainsts: schemaOptions.songConstraints)

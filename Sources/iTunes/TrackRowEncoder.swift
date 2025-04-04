@@ -52,8 +52,8 @@ struct TrackRowEncoder {
     return ArtistTableBuilder(rows: artistRows)
   }
 
-  var albumTableBuilder: AlbumTableBuilder {
-    AlbumTableBuilder(rows: Array(Set(rows.map { $0.album })))
+  func albumTableBuilder(artistLookup: [RowArtist: Int64]? = nil) -> AlbumTableBuilder {
+    AlbumTableBuilder(tracks: rows, artistLookup: artistLookup)
   }
 
   func songTableBuilder(
