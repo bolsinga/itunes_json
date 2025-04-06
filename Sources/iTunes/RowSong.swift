@@ -61,11 +61,7 @@ struct RowSong: Hashable, Sendable {
   let dateReleased: String
   let comments: String
 
-  func selectID(artistID: Database.Statement, albumID: Database.Statement) -> Database.Statement {
-    "(SELECT id FROM songs WHERE name = \(name.name) AND itunesid = \(itunesid) AND artistid = \(artistID) AND albumid = \(albumID) AND tracknumber = \(trackNumber) AND year = \(year) AND duration = \(duration) AND dateadded = \(dateAdded))"
-  }
-
   func insert(artistID: Database.Statement, albumID: Database.Statement) -> Database.Statement {
-    "INSERT INTO songs (name, sortname, itunesid, composer, tracknumber, year, duration, dateadded, datereleased, comments, artistid, albumid) VALUES (\(name.name), \(name.sorted), \(itunesid), \(composer), \(trackNumber), \(year), \(duration), \(dateAdded), \(dateReleased), \(comments), \(artistID), \(albumID));"
+    "INSERT INTO songs (itunesid, name, sortname, composer, tracknumber, year, duration, dateadded, datereleased, comments, artistid, albumid) VALUES (\(itunesid), \(name.name), \(name.sorted), \(composer), \(trackNumber), \(year), \(duration), \(dateAdded), \(dateReleased), \(comments), \(artistID), \(albumID));"
   }
 }

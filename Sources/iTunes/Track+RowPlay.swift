@@ -10,7 +10,7 @@ import os
 
 extension Track: RowPlayInterface {
   func songPlayedInformation(_ validation: TrackValidation) -> (
-    datePlayedISO8601: String, playCount: Int
+    itunesid: String, datePlayedISO8601: String, playCount: Int
   ) {
     let datePlayed = datePlayedISO8601
     let playCount = songPlayCount
@@ -24,7 +24,7 @@ extension Track: RowPlayInterface {
       }
     }
 
-    return (datePlayed, playCount)
+    return (String(persistentID), datePlayed, playCount)
   }
 
   var datePlayedISO8601: String {
