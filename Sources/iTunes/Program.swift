@@ -8,7 +8,7 @@ public struct Program: AsyncParsableCommand {
     version: iTunesVersion,
     subcommands: [
       BackupCommand.self, PatchCommand.self, RepairCommand.self, BatchCommand.self,
-      QueryCommand.self,
+      QueryCommand.self, ArchiveCommand.self,
     ],
     defaultSubcommand: BackupCommand.self
   )

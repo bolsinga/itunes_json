@@ -416,6 +416,10 @@ actor Database {
     handle.sqlError
   }
 
+  var filename: String {
+    String(cString: sqlite3_db_filename(handle, nil), encoding: .utf8) ?? ""
+  }
+
   func data() throws -> Data {
     var size: sqlite3_int64 = 0
     guard let bytes = sqlite3_serialize(handle, "main", &size, 0) else {
