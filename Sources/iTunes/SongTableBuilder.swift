@@ -25,10 +25,9 @@ struct SongTableBuilder: TableBuilder {
     // itunesid is TEXT since UInt is bigger than Int64 in sqlite
     """
     CREATE TABLE songs (
-      id INTEGER PRIMARY KEY,
+      itunesid TEXT NOT NULL PRIMARY KEY,
       name TEXT NOT NULL,
       sortname TEXT NOT NULL DEFAULT '',
-      itunesid TEXT NOT NULL,
       artistid INTEGER NOT NULL,
       albumid INTEGER NOT NULL,
       composer TEXT NOT NULL DEFAULT '',
@@ -38,7 +37,7 @@ struct SongTableBuilder: TableBuilder {
       dateadded TEXT NOT NULL,
       datereleased TEXT NOT NULL DEFAULT '',
       comments TEXT NOT NULL DEFAULT '',
-      UNIQUE(name, sortname, itunesid, artistid, albumid, composer, tracknumber, year, duration, dateadded, datereleased, comments),
+      UNIQUE(itunesid, name, sortname, artistid, albumid, composer, tracknumber, year, duration, dateadded, datereleased, comments),
       FOREIGN KEY(artistid) REFERENCES artists(id),
       FOREIGN KEY(albumid) REFERENCES albums(id),
       CHECK(length(name) > 0),

@@ -33,7 +33,7 @@ struct TracksSQLSourceEncoder<Context: TracksSQLSourceEncoderContext> {
         (rowEncoder.artistTableBuilder, schemaOptions.artistConstraints),
         (rowEncoder.albumTableBuilder(), schemaOptions.albumConstraints),
         (rowEncoder.songTableBuilder(), schemaOptions.songConstraints),
-        (rowEncoder.playTableBuilder(), schemaOptions.playsConstraints),
+        (rowEncoder.playTableBuilder, schemaOptions.playsConstraints),
       ]
     }
 

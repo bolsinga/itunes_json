@@ -36,6 +36,7 @@ struct TracksDBEncoder<Context: TracksDBEncoderContext> {
       schemaConstraints: schemaConstrainsts)
   }
 
+  @discardableResult
   private func emitSongs(
     artistLookup: [RowArtist: Int64], albumLookup: [RowAlbum: Int64],
     schemaConstrainsts: SchemaConstraints
@@ -46,11 +47,8 @@ struct TracksDBEncoder<Context: TracksDBEncoderContext> {
   }
 
   @discardableResult
-  private func emitPlays(songLookup: [RowSong: Int64], schemaConstrainsts: SchemaConstraints)
-    async throws -> [RowPlay: Int64]
-  {
-    try await db.createTable(
-      rowEncoder.playTableBuilder(songLookup), schemaConstraints: schemaConstrainsts)
+  private func emitPlays(schemaConstrainsts: SchemaConstraints) async throws -> [RowPlay: Int64] {
+    try await db.createTable(rowEncoder.playTableBuilder, schemaConstraints: schemaConstrainsts)
   }
 
   func encode() async throws {
@@ -59,11 +57,10 @@ struct TracksDBEncoder<Context: TracksDBEncoderContext> {
     let artistLookup = try await emitArtists(schemaConstrainsts: schemaOptions.artistConstraints)
     let albumLookup = try await emitAlbums(
       artistLookup: artistLookup, schemaConstrainsts: schemaOptions.albumConstraints)
-    let songLookup = try await emitSongs(
+    try await emitSongs(
       artistLookup: artistLookup, albumLookup: albumLookup,
       schemaConstrainsts: schemaOptions.songConstraints)
-    try await emitPlays(
-      songLookup: songLookup, schemaConstrainsts: schemaOptions.playsConstraints)
+    try await emitPlays(schemaConstrainsts: schemaOptions.playsConstraints)
     try await db.execute(rowEncoder.views)
   }
 

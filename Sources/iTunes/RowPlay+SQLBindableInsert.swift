@@ -8,5 +8,5 @@
 import Foundation
 
 extension RowPlay: SQLBindableInsert {
-  static var insertBinding: Database.Statement { RowPlay().insert(songid: .empty) }
+  static var insertBinding: Database.Statement { RowPlay().insert }
 }

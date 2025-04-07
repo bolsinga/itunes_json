@@ -9,7 +9,7 @@ import Foundation
 
 protocol RowPlayInterface {
   func songPlayedInformation(_ validation: TrackValidation) -> (
-    datePlayedISO8601: String, playCount: Int
+    itunesid: String, datePlayedISO8601: String, playCount: Int
   )
 }
 
@@ -19,22 +19,24 @@ struct RowPlay: Hashable, Sendable {
 
     guard info.playCount > 0 || !info.datePlayedISO8601.isEmpty else { return nil }
 
-    self.init(date: info.datePlayedISO8601, delta: info.playCount)
+    self.init(itunesid: info.itunesid, date: info.datePlayedISO8601, delta: info.playCount)
   }
 
   init() {
-    self.init(date: "", delta: 0)
+    self.init(itunesid: "", date: "", delta: 0)
   }
 
-  private init(date: String, delta: Int) {
+  private init(itunesid: String, date: String, delta: Int) {
+    self.itunesid = itunesid
     self.date = date
     self.delta = delta
   }
 
+  let itunesid: String
   let date: String
   let delta: Int
 
-  func insert(songid: Database.Statement) -> Database.Statement {
-    "INSERT INTO plays (date, delta, songid) VALUES (\(date), \(delta), \(songid));"
+  var insert: Database.Statement {
+    "INSERT INTO plays (date, delta, itunesid) VALUES (\(date), \(delta), \(itunesid));"
   }
 }

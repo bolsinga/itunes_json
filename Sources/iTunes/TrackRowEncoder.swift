@@ -64,16 +64,14 @@ struct TrackRowEncoder {
     SongTableBuilder(tracks: rows, artistLookup: artistLookup, albumLookup: albumLookup)
   }
 
-  func playTableBuilder(_ songLookup: [RowSong: Int64]? = nil)
-    -> PlayTableBuilder
-  {
+  var playTableBuilder: PlayTableBuilder {
     let playRows = rows.filter { $0.play != nil }
 
     playRows.duplicatePlayDates.forEach {
       validation.duplicatePlayDate.error("\($0.debugLogInformation, privacy: .public)")
     }
 
-    return PlayTableBuilder(tracks: playRows, songLookup: songLookup)
+    return PlayTableBuilder(tracks: playRows)
   }
 
   var views = """
