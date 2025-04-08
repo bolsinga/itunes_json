@@ -43,15 +43,16 @@ extension Database {
   func createTable<B: TableBuilder>(_ builder: B, schemaConstraints: SchemaConstraints) throws -> [B
     .Row: Int64]
   {
-    guard !builder.rows.isEmpty else { return [:] }
-
-    return try self.transaction { db in
+    try self.transaction { db in
       try db.execute(builder.schema(constraints: schemaConstraints))
+
+      let rows = builder.rows
+      guard !rows.isEmpty else { return [:] }
 
       let statement = try builder.preparedStatement(using: db)
 
       return try statement.executeAndClose(db) { statement, db in
-        try builder.rows.reduce(into: [B.Row: Int64](minimumCapacity: builder.rows.count)) {
+        try rows.reduce(into: [B.Row: Int64](minimumCapacity: rows.count)) {
           $0[$1] = try statement.insert(builder.arguments(for: $1), into: db)
         }
       }
