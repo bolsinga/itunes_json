@@ -100,7 +100,7 @@ struct TrackRowEncoder {
     FROM songs s
     LEFT JOIN artists a ON s.artistid=a.id
     LEFT JOIN albums al ON s.albumid=al.id
-    LEFT JOIN plays p ON s.id=p.songid
+    LEFT JOIN plays p ON s.itunesid=p.itunesid
     ;
     """
 }
