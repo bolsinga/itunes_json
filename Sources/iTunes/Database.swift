@@ -204,6 +204,10 @@ actor Database {
       return try PreparedStatement(cString: cString, offset: offset, db: db)
     }
 
+    private var expandedSQL: String {
+      String(cString: sqlite3_expanded_sql(handle), encoding: .utf8) ?? "unknown"
+    }
+
     var parameterCount: Int {
       Int(sqlite3_bind_parameter_count(handle))
     }
@@ -293,7 +297,8 @@ actor Database {
 
       guard result == SQLITE_ROW || result == SQLITE_DONE else {
         let message = errorStringBuilder()
-        logging.step.error("\(message, privacy: .public)")
+        logging.step.error(
+          "sql: \(expandedSQL, privacy: .public) error: \(message, privacy: .public)")
         throw DatabaseError.cannotStep(message)
       }
 
