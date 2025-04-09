@@ -19,24 +19,24 @@ struct RowPlay: Hashable, Sendable {
 
     guard info.playCount > 0 || !info.datePlayedISO8601.isEmpty else { return nil }
 
-    self.init(itunesid: info.itunesid, date: info.datePlayedISO8601, delta: info.playCount)
+    self.init(itunesid: info.itunesid, date: info.datePlayedISO8601, count: info.playCount)
   }
 
   init() {
-    self.init(itunesid: "", date: "", delta: 0)
+    self.init(itunesid: "", date: "", count: 0)
   }
 
-  private init(itunesid: String, date: String, delta: Int) {
+  private init(itunesid: String, date: String, count: Int) {
     self.itunesid = itunesid
     self.date = date
-    self.delta = delta
+    self.count = count
   }
 
   let itunesid: String
   let date: String
-  let delta: Int
+  let count: Int
 
   var insert: Database.Statement {
-    "INSERT INTO plays (date, delta, itunesid) VALUES (\(date), \(delta), \(itunesid));"
+    "INSERT INTO plays (date, count, itunesid) VALUES (\(date), \(count), \(itunesid));"
   }
 }

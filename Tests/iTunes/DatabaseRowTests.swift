@@ -183,11 +183,11 @@ struct DatabaseRowTests {
     #expect(Track(row: row(("playdate", .string("2003-12-15T17:02:56Z"))))?.playDateUTC != nil)
   }
 
-  @Test func delta() async throws {
+  @Test func count() async throws {
     #expect(Track(row: basic)?.playCount == nil)
-    #expect(Track(row: row(("delta", .string("Z"))))?.playCount == nil)
-    #expect(Track(row: row(("delta", .string(""))))?.playCount == nil)
-    #expect(Track(row: row(("delta", .integer(3))))?.playCount == 3)
-    #expect(Track(row: row(("delta", .null)))?.playCount == nil)
+    #expect(Track(row: row(("count", .string("Z"))))?.playCount == nil)
+    #expect(Track(row: row(("count", .string(""))))?.playCount == nil)
+    #expect(Track(row: row(("count", .integer(3))))?.playCount == 3)
+    #expect(Track(row: row(("count", .null)))?.playCount == nil)
   }
 }
