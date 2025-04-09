@@ -24,7 +24,7 @@ struct PlayTableBuilder: TableBuilder {
 
   func schema(constraints: SchemaConstraints) -> String {
     """
-    CREATE TABLE plays (
+    CREATE TABLE IF NOT EXISTS plays (
       id INTEGER PRIMARY KEY,
       itunesid TEXT NOT NULL,
       date TEXT NOT NULL,

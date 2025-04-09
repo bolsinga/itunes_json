@@ -24,7 +24,7 @@ struct SongTableBuilder: TableBuilder {
   func schema(constraints: SchemaConstraints) -> String {
     // itunesid is TEXT since UInt is bigger than Int64 in sqlite
     """
-    CREATE TABLE songs (
+    CREATE TABLE IF NOT EXISTS songs (
       itunesid TEXT NOT NULL PRIMARY KEY,
       name TEXT NOT NULL,
       sortname TEXT NOT NULL DEFAULT '',

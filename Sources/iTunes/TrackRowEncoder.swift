@@ -75,7 +75,7 @@ struct TrackRowEncoder {
   }
 
   var views = """
-    CREATE VIEW tracks AS
+    CREATE VIEW IF NOT EXISTS tracks AS
     SELECT
       s.itunesid AS itunesid,
       s.name AS name,
