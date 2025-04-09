@@ -22,7 +22,7 @@ struct ArtistTableBuilder: TableBuilder {
 
   func schema(constraints: SchemaConstraints) -> String {
     """
-    CREATE TABLE artists (
+    CREATE TABLE IF NOT EXISTS artists (
       id INTEGER PRIMARY KEY,
       \(constraints == .strict ? strictSchema : laxSchema)
     );

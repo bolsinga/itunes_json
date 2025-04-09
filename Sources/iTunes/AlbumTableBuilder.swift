@@ -17,7 +17,7 @@ struct AlbumTableBuilder: TableBuilder {
 
   func schema(constraints: SchemaConstraints) -> String {
     """
-    CREATE TABLE albums (
+    CREATE TABLE IF NOT EXISTS albums (
       id INTEGER PRIMARY KEY,
       artistid INTEGER NON NULL,
       name TEXT NOT NULL,
