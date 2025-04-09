@@ -9,11 +9,11 @@ import Foundation
 
 struct PlayTableBuilder: TableBuilder {
   private let strictSchema: String = """
-    UNIQUE(itunesid, date, delta),
+    UNIQUE(itunesid, date, count),
     UNIQUE(date),
     FOREIGN KEY(itunesid) REFERENCES songs(itunesid),
     CHECK(length(date) > 0),
-    CHECK(delta > 0)
+    CHECK(count > 0)
     """
 
   private let laxSchema: String = """
@@ -28,7 +28,7 @@ struct PlayTableBuilder: TableBuilder {
       id INTEGER PRIMARY KEY,
       itunesid TEXT NOT NULL,
       date TEXT NOT NULL,
-      delta INTEGER NOT NULL,
+      count INTEGER NOT NULL,
       \(constraints == .strict ? strictSchema : laxSchema)
     );
     """

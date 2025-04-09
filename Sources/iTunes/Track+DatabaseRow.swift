@@ -27,7 +27,7 @@ extension DatabaseRowLookup {
   fileprivate var datereleased: Date? { date("datereleased") }
   fileprivate var comments: String? { string("comments") }
   fileprivate var playdate: Date? { date("playdate") }
-  fileprivate var delta: Int? { integer("delta") }
+  fileprivate var count: Int? { integer("count") }
 }
 
 extension Track {
@@ -68,7 +68,7 @@ extension Track {
       name: name,
       partOfGaplessAlbum: nil,
       persistentID: itunesid,
-      playCount: rowLookup.delta,
+      playCount: rowLookup.count,
       playDateUTC: rowLookup.playdate,
       podcast: nil,
       protected: nil,

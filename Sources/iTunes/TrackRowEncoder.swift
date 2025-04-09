@@ -28,7 +28,7 @@ extension RowSong {
 
 extension RowPlay {
   var debugLogInformation: String {
-    "date: \(date) delta: \(delta)"
+    "date: \(date) delta: \(count)"
   }
 }
 
@@ -96,7 +96,7 @@ struct TrackRowEncoder {
       s.datereleased AS datereleased,
       s.comments AS comments,
       p.date AS playdate,
-      p.delta AS delta
+      p.count AS count
     FROM songs s
     LEFT JOIN artists a ON s.artistid=a.id
     LEFT JOIN albums al ON s.albumid=al.id
