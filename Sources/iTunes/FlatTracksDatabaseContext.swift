@@ -32,8 +32,7 @@ struct FlatTracksDatabaseContext: FlatDBEncoderContext {
 
   let schema: String = """
     CREATE TABLE tracks (
-      id INTEGER PRIMARY KEY,
-      itunesid TEXT NOT NULL,
+      itunesid TEXT NOT NULL PRIMARY KEY,
       name TEXT NOT NULL,
       sortname TEXT NOT NULL DEFAULT '',
       artist TEXT NOT NULL,
