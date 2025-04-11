@@ -55,9 +55,7 @@ extension DatabaseFormat {
 }
 
 extension URL {
-  fileprivate func databases(_ format: DatabaseFormat) -> AsyncThrowingStream<
-    Tag<Database>, any Error
-  > {
+  func databases(_ format: DatabaseFormat) -> AsyncThrowingStream<Tag<Database>, any Error> {
     transformTracks {
       try await format.append(tag: $0).database(tracks: $1)
     }
