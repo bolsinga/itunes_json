@@ -12,4 +12,6 @@ struct TrackRow {
   let artist: RowArtist
   let song: RowSong
   let play: RowPlay?
+  let add: RowAdd
+  let release: RowRelease
 }
