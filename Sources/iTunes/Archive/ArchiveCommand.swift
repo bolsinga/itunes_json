@@ -30,12 +30,42 @@ private let updateArtists: String =
   DROP TABLE new_names;
   """
 
+private let updateAlbums: String =
+  """
+  -- Create a table of itunesid to album data
+  CREATE TEMPORARY TABLE changed_albums (itunesid TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL, sortname TEXT NOT NULL DEFAULT '', trackcount INTEGER NOT NULL, disccount INTEGER NOT NULL, discnumber INTEGER NOT NULL, compilation INTEGER NOT NULL);
+  -- Insert all the new album data
+  INSERT INTO changed_albums (itunesid, name, sortname, trackcount, disccount, discnumber, compilation) SELECT itunesid, album, sortalbum, trackcount, disccount, discnumber, compilation FROM tracks EXCEPT SELECT album_ids.itunesid, ara.name, ara.sortname, ara.trackcount, ara.disccount, ara.discnumber, ara.compilation FROM archive.albums ara LEFT JOIN archive.albumids album_ids ON ara.id = album_ids.albumid;
+  -- Fix new names to be name, sortname if some are set and some are not.
+  UPDATE changed_albums AS a SET sortname = n.sortname FROM (WITH names AS (SELECT DISTINCT name, sortname FROM changed_albums) SELECT DISTINCT a.name AS name, COALESCE(NULLIF(a.sortname, ''), NULLIF(o.sortname, ''), '') AS sortname FROM names a LEFT JOIN names o ON a.name=o.name AND a.sortname!=o.sortname ORDER BY name) AS n WHERE a.name = n.name AND a.sortname != n.sortname;
+  CREATE TEMPORARY TABLE new_albums (itunesid TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL, sortname TEXT NOT NULL DEFAULT '', trackcount INTEGER NOT NULL, disccount INTEGER NOT NULL, discnumber INTEGER NOT NULL, compilation INTEGER NOT NULL);
+  INSERT INTO new_albums (itunesid, name, sortname, trackcount, disccount, discnumber, compilation) SELECT * FROM changed_albums new WHERE itunesid NOT IN (SELECT itunesid FROM archive.albumids);
+  CREATE TEMPORARY TABLE updated_albums (itunesid TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL, sortname TEXT NOT NULL DEFAULT '', trackcount INTEGER NOT NULL, disccount INTEGER NOT NULL, discnumber INTEGER NOT NULL, compilation INTEGER NOT NULL);
+  INSERT INTO updated_albums (itunesid, name, sortname, trackcount, disccount, discnumber, compilation) SELECT * FROM changed_albums new WHERE itunesid IN (SELECT itunesid FROM archive.albumids);
+  DROP TABLE changed_albums;
+  -- Update albums that change to existing albums (ie trackcount for one track of an album is fixed; the correct album already exists!)
+  UPDATE archive.albumids AS ualids SET albumid = n.id FROM (SELECT updated.itunesid, album.id FROM updated_albums updated LEFT JOIN archive.albums album ON updated.name = album.name AND updated.sortname = album.sortname AND updated.trackcount = album.trackcount AND updated.disccount = album.disccount AND updated.discnumber = album.discnumber AND updated.compilation = album.compilation LEFT JOIN archive.albumids alids ON alids.itunesid = updated.itunesid AND alids.albumid = album.id WHERE id IS NOT NULL) AS n WHERE ualids.itunesid = n.itunesid;
+  -- Update any changed album data.
+  UPDATE archive.albums AS a SET name = new.name, sortname = new.sortname, trackcount = new.trackcount, disccount = new.disccount, discnumber = new.discnumber, compilation = new.compilation FROM (SELECT DISTINCT al.id, new.name, new.sortname, new.trackcount, new.disccount, new.discnumber, new.compilation FROM archive.albumids album_ids INNER JOIN updated_albums new ON new.itunesid = album_ids.itunesid INNER JOIN archive.albums al ON al.id = album_ids.albumid) AS new WHERE a.id = new.id;
+  -- Insert all the new album data
+  INSERT INTO archive.albums (artistid, name, sortname, trackcount, disccount, discnumber, compilation) SELECT DISTINCT arid.artistid, name, sortname, trackcount, disccount, discnumber, compilation FROM new_albums n LEFT JOIN artistids arid ON n.itunesid = arid.itunesid EXCEPT SELECT artistid, name, sortname, trackcount, disccount, discnumber, compilation FROM archive.albums;
+  -- Insert all the new itunesid and albumids that aren't already present, in case of an album data update.
+  INSERT INTO archive.albumids (itunesid, albumid) SELECT new.itunesid, a.id FROM new_albums new INNER JOIN archive.albums a ON new.name = a.name AND new.sortname = a.sortname AND new.trackcount = a.trackcount AND new.disccount = a.disccount AND new.discnumber = a.discnumber AND new.compilation = a.compilation INNER JOIN archive.artistids ar ON a.artistid = ar.artistid AND ar.itunesid = new.itunesid EXCEPT SELECT album_ids.itunesid, album_ids.albumid FROM archive.albumids album_ids;
+  -- Remove unused albums
+  DELETE FROM archive.albums AS al WHERE al.id NOT IN (SELECT albumid FROM archive.albumids);
+  DROP TABLE new_albums;
+  DROP TABLE updated_albums;
+  """
+
 extension Database {
   func archive(into archivePath: String) async throws {
-    try self.transaction { db in
-      try db.execute("ATTACH DATABASE '\(archivePath)' AS archive;")
+    try self.execute("ATTACH DATABASE '\(archivePath)' AS archive;")
 
+    try self.transaction { db in
       try db.execute(updateArtists)
+    }
+    try self.transaction { db in
+      try db.execute(updateAlbums)
     }
   }
 }
