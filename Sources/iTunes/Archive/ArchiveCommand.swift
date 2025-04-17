@@ -63,6 +63,26 @@ private let updateAdded: String =
 private let updateReleased: String =
   "INSERT OR IGNORE INTO released (itunesid, date) SELECT itunesid, datereleased FROM tracks WHERE datereleased != '';"
 
+private let updateSongs =
+  """
+    CREATE TEMPORARY TABLE changed_songs (itunesid TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL, sortname TEXT NOT NULL DEFAULT '', composer TEXT NOT NULL DEFAULT '', tracknumber INTEGER NOT NULL, year INTEGER NOT NULL, duration INTEGER NOT NULL, comments TEXT NOT NULL DEFAULT '');
+    -- Insert all the new song data
+    INSERT INTO changed_songs (itunesid, name, sortname, composer, tracknumber, year, duration, comments) SELECT itunesid, name, sortname, composer, tracknumber, year, duration, comments FROM tracks EXCEPT SELECT ars.itunesid, ars.name, ars.sortname, ars.composer, ars.tracknumber, ars.year, ars.duration, ars.comments FROM archive.songs ars;
+    UPDATE changed_songs AS a SET sortname = n.sortname FROM (WITH names AS (SELECT DISTINCT name, sortname FROM changed_songs) SELECT DISTINCT a.name AS name, COALESCE(NULLIF(a.sortname, ''), NULLIF(o.sortname, ''), '') AS sortname FROM names a LEFT JOIN names o ON a.name=o.name AND a.sortname!=o.sortname ORDER BY name) AS n WHERE a.name = n.name AND a.sortname != n.sortname;
+
+    CREATE TEMPORARY TABLE new_songs (itunesid TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL, sortname TEXT NOT NULL DEFAULT '', composer TEXT NOT NULL DEFAULT '', tracknumber INTEGER NOT NULL, year INTEGER NOT NULL, duration INTEGER NOT NULL, comments TEXT NOT NULL DEFAULT '');
+    INSERT INTO new_songs (itunesid, name, sortname, composer, tracknumber, year, duration, comments) SELECT * FROM changed_songs new WHERE itunesid NOT IN (SELECT itunesid FROM archive.songs);
+    CREATE TEMPORARY TABLE updated_songs (itunesid TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL, sortname TEXT NOT NULL DEFAULT '', composer TEXT NOT NULL DEFAULT '', tracknumber INTEGER NOT NULL, year INTEGER NOT NULL, duration INTEGER NOT NULL, comments TEXT NOT NULL DEFAULT '');
+    INSERT INTO updated_songs (itunesid, name, sortname, composer, tracknumber, year, duration, comments) SELECT * FROM changed_songs new WHERE itunesid IN (SELECT itunesid FROM archive.songs);
+    DROP TABLE changed_songs;
+
+    UPDATE archive.songs AS a SET name = new.name, sortname = new.sortname, composer = new.composer, tracknumber = new.tracknumber, year = new.year, duration = new.duration, comments = new.comments FROM (SELECT * FROM updated_songs) AS new WHERE a.itunesid = new.itunesid;
+
+    INSERT INTO archive.songs (itunesid, name, sortname, artistid, albumid, composer, tracknumber, year, duration, comments) SELECT n.itunesid, n.name, n.sortname, arid.artistid, alid.albumid, n.composer, n.tracknumber, n.year, n.duration, n.comments FROM new_songs n INNER JOIN archive.artistids arid ON arid.itunesid = n.itunesid INNER JOIN archive.albumids alid ON alid.itunesid = n.itunesid;
+    DROP TABLE new_songs;
+    DROP TABLE updated_songs;
+  """
+
 extension Database {
   func archive(into archivePath: String) async throws {
     try self.execute("ATTACH DATABASE '\(archivePath)' AS archive;")
@@ -78,6 +98,9 @@ extension Database {
     }
     try self.transaction { db in
       try db.execute(updateReleased)
+    }
+    try self.transaction { db in
+      try db.execute(updateSongs)
     }
   }
 }
