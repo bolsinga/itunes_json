@@ -46,6 +46,14 @@ struct TracksDBEncoder<Context: TracksDBEncoderContext> {
       schemaConstraints: schemaConstrainsts)
   }
 
+  private func emitAdded() async throws {
+    _ = try await db.createTable(rowEncoder.addedTableBuilder, schemaConstraints: .strict)
+  }
+
+  private func emitReleased() async throws {
+    _ = try await db.createTable(rowEncoder.releasedTableBuilder, schemaConstraints: .strict)
+  }
+
   @discardableResult
   private func emitPlays(schemaConstrainsts: SchemaConstraints) async throws -> [RowPlay: Int64] {
     try await db.createTable(rowEncoder.playTableBuilder, schemaConstraints: schemaConstrainsts)
@@ -60,6 +68,8 @@ struct TracksDBEncoder<Context: TracksDBEncoderContext> {
     try await emitSongs(
       artistLookup: artistLookup, albumLookup: albumLookup,
       schemaConstrainsts: schemaOptions.songConstraints)
+    try await emitAdded()
+    try await emitReleased()
     try await emitPlays(schemaConstrainsts: schemaOptions.playsConstraints)
     try await db.execute(rowEncoder.views)
   }

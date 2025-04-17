@@ -57,6 +57,12 @@ private let updateAlbums: String =
   DROP TABLE updated_albums;
   """
 
+private let updateAdded: String =
+  "INSERT OR IGNORE INTO added (itunesid, date) SELECT itunesid, dateadded FROM tracks;"
+
+private let updateReleased: String =
+  "INSERT OR IGNORE INTO released (itunesid, date) SELECT itunesid, datereleased FROM tracks WHERE datereleased != '';"
+
 extension Database {
   func archive(into archivePath: String) async throws {
     try self.execute("ATTACH DATABASE '\(archivePath)' AS archive;")
@@ -66,6 +72,12 @@ extension Database {
     }
     try self.transaction { db in
       try db.execute(updateAlbums)
+    }
+    try self.transaction { db in
+      try db.execute(updateAdded)
+    }
+    try self.transaction { db in
+      try db.execute(updateReleased)
     }
   }
 }

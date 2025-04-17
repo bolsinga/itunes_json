@@ -64,6 +64,14 @@ struct TrackRowEncoder {
     SongTableBuilder(tracks: rows, artistLookup: artistLookup, albumLookup: albumLookup)
   }
 
+  var addedTableBuilder: AddedTableBuilder {
+    AddedTableBuilder(rows: rows.map { $0.add })
+  }
+
+  var releasedTableBuilder: ReleasedTableBuilder {
+    ReleasedTableBuilder(rows: rows.map { $0.release })
+  }
+
   var playTableBuilder: PlayTableBuilder {
     let playRows = rows.filter { $0.play != nil }
 
@@ -90,10 +98,10 @@ struct TrackRowEncoder {
       al.discnumber AS discnumber,
       s.year AS year,
       s.duration AS duration,
-      s.dateadded AS dateadded,
+      da.date AS dateadded,
       al.compilation AS compilation,
       s.composer AS composer,
-      s.datereleased AS datereleased,
+      COALESCE(dr.date, '') AS datereleased,
       s.comments AS comments,
       p.date AS playdate,
       p.count AS count
@@ -101,6 +109,8 @@ struct TrackRowEncoder {
     LEFT JOIN artists a ON s.artistid=a.id
     LEFT JOIN albums al ON s.albumid=al.id
     LEFT JOIN plays p ON s.itunesid=p.itunesid
+    LEFT JOIN added da ON s.itunesid=da.itunesid
+    LEFT JOIN released dr ON s.itunesid=dr.itunesid
     ;
     """
 }
