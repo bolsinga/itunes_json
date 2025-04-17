@@ -9,19 +9,20 @@ import Foundation
 
 struct RowRelease: Hashable, Sendable, SQLBindableInsert {
   let itunesid: String
-  let date: String
+  let date: String?
 
   var insert: Database.Statement {
     "INSERT OR IGNORE INTO released (itunesid, date) VALUES (\(itunesid), \(date));"
   }
 
-  static var insertBinding: Database.Statement { RowRelease(itunesid: String(0), date: "").insert }
+  static var insertBinding: Database.Statement { RowRelease(itunesid: String(0), date: nil).insert }
 }
 
 extension RowRelease {
   init(_ track: Track) {
     self.itunesid = track.songPersistentID
-    self.date = track.dateReleasedISO8601
+    let dateReleasedISO8601 = track.dateReleasedISO8601
+    self.date = dateReleasedISO8601.isEmpty ? nil : dateReleasedISO8601
   }
 }
 
