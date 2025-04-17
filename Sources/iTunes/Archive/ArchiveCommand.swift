@@ -83,6 +83,17 @@ private let updateSongs =
     DROP TABLE updated_songs;
   """
 
+private let updatePlays =
+  """
+  CREATE TEMPORARY TABLE non_empty_tracks (itunesid TEXT NOT NULL, date TEXT NOT NULL, count INTEGER NOT NULL);
+  INSERT INTO non_empty_tracks (itunesid, date, count) SELECT itunesid, playdate, playcount FROM tracks WHERE playdate != '';
+  CREATE TEMPORARY TABLE changed_no_quirk_tracks (itunesid TEXT NOT NULL, date TEXT NOT NULL, count INTEGER NOT NULL);
+  INSERT INTO changed_no_quirk_tracks (itunesid, date, count) SELECT a.itunesid, CASE WHEN MOD(ABS(strftime('%s', a.date) - strftime('%s', b.date)), 60 * 60) = 0 THEN b.date ELSE a.date END date, a.count FROM non_empty_tracks a LEFT JOIN archive.lastplays b ON a.itunesid=b.itunesid;
+  DROP TABLE non_empty_tracks;
+  INSERT INTO archive.plays (itunesid, date, count) SELECT * FROM changed_no_quirk_tracks EXCEPT SELECT arp.itunesid, arp.date, arp.count FROM archive.lastplays AS arp;
+  DROP TABLE changed_no_quirk_tracks;
+  """
+
 extension Database {
   func archive(into archivePath: String) async throws {
     try self.execute("ATTACH DATABASE '\(archivePath)' AS archive;")
@@ -101,6 +112,9 @@ extension Database {
     }
     try self.transaction { db in
       try db.execute(updateSongs)
+    }
+    try self.transaction { db in
+      try db.execute(updatePlays)
     }
   }
 }
