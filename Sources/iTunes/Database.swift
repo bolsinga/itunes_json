@@ -227,7 +227,9 @@ actor Database {
             statementHandle: handle, index: index, errorStringBuilder: errorStringBuilder)
         }
       } catch {
-        logging.bind.error("\(error.localizedDescription, privacy: .public)")
+        logging.bind.error(
+          "sql: \(expandedSQL, privacy: .public) error: \(error.localizedDescription, privacy: .public)"
+        )
         throw error
       }
     }
