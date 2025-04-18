@@ -113,9 +113,11 @@ struct TrackRowEncoder {
     LEFT JOIN released dr ON s.itunesid=dr.itunesid
     ;
     CREATE VIEW IF NOT EXISTS lastplays AS
-      SELECT DISTINCT
-        itunesid,
-        FIRST_VALUE(date) OVER (PARTITION BY itunesid ORDER BY date DESC) AS date
-    FROM plays;
+      SELECT itunesid, date, count
+        FROM (
+          SELECT *, RANK() OVER (PARTITION BY itunesid ORDER BY date DESC) AS filter FROM plays
+        ) AS foo
+      WHERE filter = 1
+    ;
     """
 }
