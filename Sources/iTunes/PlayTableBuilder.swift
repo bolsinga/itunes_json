@@ -12,12 +12,12 @@ struct PlayTableBuilder: TableBuilder {
     UNIQUE(itunesid, date, count),
     UNIQUE(date),
     FOREIGN KEY(itunesid) REFERENCES songs(itunesid),
-    CHECK(length(date) > 0),
     CHECK(count > 0)
     """
 
   private let laxSchema: String = """
-    FOREIGN KEY(itunesid) REFERENCES songs(itunesid)
+    FOREIGN KEY(itunesid) REFERENCES songs(itunesid),
+    CHECK(length(date) > 0)
     """
 
   let tracks: [TrackRow]
