@@ -90,6 +90,13 @@ private let updatePlays =
   CREATE TEMPORARY TABLE changed_no_quirk_tracks (itunesid TEXT NOT NULL, date TEXT NOT NULL, count INTEGER NOT NULL);
   INSERT INTO changed_no_quirk_tracks (itunesid, date, count) SELECT a.itunesid, CASE WHEN MOD(ABS(strftime('%s', a.date) - strftime('%s', b.date)), 60 * 60) = 0 THEN b.date ELSE a.date END date, a.count FROM non_empty_tracks a LEFT JOIN archive.lastplays b ON a.itunesid=b.itunesid;
   DROP TABLE non_empty_tracks;
+
+  -- Handle when two tracks from the same album have the same date. Find the earlier tracknumber's duration and add it to the timestamp of the previous date.
+  CREATE TEMPORARY TABLE changed_no_quirk_no_duplicate_album_date_tracks (itunesid TEXT NOT NULL, date TEXT NOT NULL, count INTEGER NOT NULL);
+  WITH no_duplicate_date_albums AS (WITH fix_duplicate_date_albums AS (WITH duplicate_date_albums AS (WITH duplicate_dates AS (SELECT * FROM changed_no_quirk_tracks WHERE date IN (SELECT date FROM changed_no_quirk_tracks GROUP BY date HAVING COUNT(*) > 1)) SELECT dd.itunesid, dd.date, dd.count, s.albumid FROM duplicate_dates dd INNER JOIN archive.songs s ON s.itunesid = dd.itunesid) SELECT * FROM duplicate_date_albums dda WHERE albumid IN (SELECT albumid FROM duplicate_date_albums GROUP BY albumid HAVING COUNT(*) > 1)) SELECT a.itunesid, a.date AS date, a.count, CASE WHEN sa.tracknumber + 1 = sb.tracknumber THEN a.date ELSE strftime('%Y-%m-%dT%H:%M:%SZ', datetime(strftime('%s', b.date) + ROUND(sa.duration / 1000), 'unixepoch')) END fixdate FROM fix_duplicate_date_albums a INNER JOIN fix_duplicate_date_albums b ON a.date = b.date AND a.albumid = b.albumid INNER JOIN archive.songs sa ON sa.itunesid = a.itunesid INNER JOIN archive.songs sb ON sb.itunesid = b.itunesid AND sa.tracknumber != sb.tracknumber) INSERT INTO changed_no_quirk_no_duplicate_album_date_tracks (itunesid, date, count) SELECT itunesid, fixdate AS date, count FROM no_duplicate_date_albums WHERE date != fixdate;
+  UPDATE changed_no_quirk_tracks AS a SET date = new.date FROM (SELECT * FROM changed_no_quirk_no_duplicate_album_date_tracks) AS new WHERE a.itunesid = new.itunesid;
+  DROP TABLE changed_no_quirk_no_duplicate_album_date_tracks;
+
   INSERT INTO archive.plays (itunesid, date, count) SELECT * FROM changed_no_quirk_tracks EXCEPT SELECT arp.itunesid, arp.date, arp.count FROM archive.lastplays AS arp;
   DROP TABLE changed_no_quirk_tracks;
   """
