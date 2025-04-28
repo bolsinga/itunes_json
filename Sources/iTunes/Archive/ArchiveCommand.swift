@@ -94,7 +94,7 @@ private let updatePlays =
   UPDATE non_empty_tracks AS a SET date = new.date FROM (SELECT * FROM no_duplicate_date_tracks) AS new WHERE a.itunesid = new.itunesid;
 
   CREATE TEMPORARY TABLE changed_no_quirk_tracks (itunesid TEXT NOT NULL, date TEXT NOT NULL, count INTEGER NOT NULL);
-  INSERT INTO changed_no_quirk_tracks (itunesid, date, count) SELECT a.itunesid, CASE WHEN MOD(ABS(strftime('%s', a.date) - strftime('%s', b.date)), 60 * 60) = 0 THEN b.date ELSE a.date END date, a.count FROM non_empty_tracks a LEFT JOIN archive.lastplays b ON a.itunesid=b.itunesid;
+  WITH non_empty_offset_tracks AS (SELECT a.itunesid, a.count, a.date AS adate, b.date AS bdate, ABS(strftime('%s', a.date) - strftime('%s', b.date)) AS difference FROM non_empty_tracks a LEFT JOIN archive.lastplays b ON a.itunesid=b.itunesid WHERE difference IS NULL OR difference > 0) INSERT INTO changed_no_quirk_tracks (itunesid, date, count) SELECT itunesid, CASE WHEN difference IS NOT NULL AND difference < 12 * 60 * 60 AND MOD(difference, 60 * 60) = 0 THEN bdate ELSE adate END AS date, count FROM non_empty_offset_tracks;
   DROP TABLE non_empty_tracks;
 
   INSERT INTO archive.plays (itunesid, date, count) SELECT * FROM changed_no_quirk_tracks EXCEPT SELECT arp.itunesid, arp.date, arp.count FROM archive.lastplays AS arp;
