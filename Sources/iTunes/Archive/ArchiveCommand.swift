@@ -191,7 +191,11 @@ struct ArchiveCommand: AsyncParsableCommand {
 
     async let archiveDBPath = archiveDB.filename
 
-    for try await database in databases {
+    for database in try await databases.reduce(into: [Tag<Database>](), { $0.append($1) }).sorted(
+      by: {
+        $0.tag < $1.tag
+      })
+    {
       Logger.archive.info("\(database.tag)")
       try await database.item.archive(into: await archiveDBPath)
     }
