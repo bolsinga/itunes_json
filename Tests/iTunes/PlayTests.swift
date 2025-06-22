@@ -12,7 +12,12 @@ import Testing
 
 extension Play {
   fileprivate func advanced(by interval: TimeInterval) -> Play {
-    Play(date: date?.advanced(by: interval), count: count)
+    guard let date else {
+      return Play(date: nil, count: count)
+    }
+    let advancedDate = ISO8601DateFormatter().date(from: date)?.advanced(by: interval).formatted(
+      .iso8601)
+    return Play(date: advancedDate, count: count)
   }
 
   fileprivate func incremented(by difference: Int) -> Play {
@@ -30,7 +35,7 @@ struct PlayTests {
   var date: Date { try! Date.ISO8601FormatStyle().parse("2005-12-22T23:06:50Z") }
   let count = 5
 
-  var valid: Play { Play(date: self.date, count: count) }
+  var valid: Play { Play(date: self.date.formatted(.iso8601), count: count) }
   var invalid: Play { Play(date: nil, count: nil) }
 
   @Test func singleValid() async throws {
@@ -107,7 +112,7 @@ struct PlayTests {
   }
 
   @Test func advanceDateCountNil() async throws {
-    let other = Play(date: date.advanced(by: 60), count: nil)
+    let other = Play(date: date.advanced(by: 60).formatted(.iso8601), count: nil)
     #expect([valid, other].normalize() == [valid, valid.advanced(by: 60).incremented(by: 1)])
   }
 

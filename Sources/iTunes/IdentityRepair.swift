@@ -11,10 +11,10 @@ struct IdentityRepair: Codable, Comparable, Hashable, Identifiable, Sendable {
   enum Correction: Codable, Comparable, Hashable, Sendable {
     case duration(Int?)
     case persistentID(UInt)
-    case dateAdded(Date?)
+    case dateAdded(String?)
     case composer(String)
     case comments(String)
-    case dateReleased(Date?)
+    case dateReleased(String?)
     case albumTitle(SortableName?)
     case year(Int)
     case trackNumber(Int)
@@ -125,7 +125,6 @@ extension IdentityRepair: CustomStringConvertible {
   var description: String {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys]
-    encoder.dateEncodingStrategy = .iso8601
     guard let data = try? encoder.encode(self) else { return "" }
     return (try? data.asUTF8String()) ?? ""
   }
@@ -135,7 +134,6 @@ extension IdentityRepair.Correction: CustomStringConvertible {
   var description: String {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys]
-    encoder.dateEncodingStrategy = .iso8601
     guard let data = try? encoder.encode(self) else { return "" }
     return (try? data.asUTF8String()) ?? ""
   }

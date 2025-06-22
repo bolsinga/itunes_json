@@ -18,7 +18,6 @@ extension Decodable {
 
   static func array(from data: Data) throws -> [Self] {
     let decoder = JSONDecoder()
-    decoder.dateDecodingStrategy = .iso8601
     return try decoder.decode([Self].self, from: data)
   }
 

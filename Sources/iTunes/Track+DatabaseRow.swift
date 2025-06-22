@@ -21,13 +21,20 @@ extension DatabaseRowLookup {
   fileprivate var discnumber: Int? { integer("discnumber") }
   fileprivate var year: Int? { integer("year") }
   fileprivate var duration: Int? { integer("duration") }
-  fileprivate var dateadded: Date? { date("dateadded") }
+  fileprivate var dateadded: String? { date("dateadded") }
   fileprivate var compilation: Bool? { boolean("compilation") }
   fileprivate var composer: String? { string("composer") }
-  fileprivate var datereleased: Date? { date("datereleased") }
+  fileprivate var datereleased: String? { date("datereleased") }
   fileprivate var comments: String? { string("comments") }
-  fileprivate var playdate: Date? { date("playdate") }
+  fileprivate var playdate: String? { date("playdate") }
   fileprivate var count: Int? { integer("count") }
+}
+
+extension String {
+  fileprivate var validatedDateString: String? {
+    guard ISO8601DateFormatter().date(from: self) != nil else { return nil }
+    return self
+  }
 }
 
 extension Track {
@@ -36,6 +43,11 @@ extension Track {
 
     guard let name = rowLookup.name else { return nil }
     guard let itunesid = rowLookup.itunesid else { return nil }
+
+    let addedDate = (rowLookup.dateadded != nil) ? rowLookup.dateadded!.validatedDateString : nil
+    let playDate = (rowLookup.playdate != nil) ? rowLookup.playdate!.validatedDateString : nil
+    let releaseDate =
+      (rowLookup.datereleased != nil) ? rowLookup.datereleased!.validatedDateString : nil
 
     self.init(
       album: rowLookup.album,
@@ -49,7 +61,7 @@ extension Track {
       compilation: rowLookup.compilation,
       composer: rowLookup.composer,
       contentRating: nil,
-      dateAdded: rowLookup.dateadded,
+      dateAdded: addedDate,
       dateModified: nil,
       disabled: nil,
       discCount: rowLookup.disccount,
@@ -69,13 +81,13 @@ extension Track {
       partOfGaplessAlbum: nil,
       persistentID: itunesid,
       playCount: rowLookup.count,
-      playDateUTC: rowLookup.playdate,
+      playDateUTC: playDate,
       podcast: nil,
       protected: nil,
       purchased: nil,
       rating: nil,
       ratingComputed: nil,
-      releaseDate: rowLookup.datereleased,
+      releaseDate: releaseDate,
       sampleRate: nil,
       season: nil,
       series: nil,

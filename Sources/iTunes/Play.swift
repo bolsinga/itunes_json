@@ -13,7 +13,7 @@ extension Logger {
 }
 
 struct Play: Codable, Comparable, Hashable, Sendable {
-  let date: Date?
+  let date: String?
   let count: Int?
 
   static func < (lhs: Self, rhs: Self) -> Bool {
@@ -97,6 +97,16 @@ extension DateQuirkComparisonResult {
   }
 }
 
+extension String {
+  // This codepath is not efficient; however it is part of Repairs which will be sunset in the future.
+  fileprivate func compareDate(_ other: String) -> PlayComparisonResult {
+    guard let sDate = ISO8601DateFormatter().date(from: self),
+      let oDate = ISO8601DateFormatter().date(from: other)
+    else { return .invalid }
+    return sDate.compareQuirk(oDate).playComparisonResult
+  }
+}
+
 extension Play {
   fileprivate var isValid: Bool {
     date != nil && count != nil
@@ -105,7 +115,7 @@ extension Play {
   private func compareDate(_ other: Play) -> PlayComparisonResult {
     switch (self.date, other.date) {
     case (.some(let sDate), .some(let oDate)):
-      return sDate.compareQuirk(oDate).playComparisonResult
+      return sDate.compareDate(oDate)
     default:
       return .invalid
     }

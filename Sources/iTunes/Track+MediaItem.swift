@@ -39,7 +39,7 @@ import Foundation
       if let contentRating = mediaItem.contentRating {
         self.contentRating = contentRating
       }
-      self.dateAdded = mediaItem.addedDate
+      self.dateAdded = mediaItem.addedDate?.formatted(.iso8601)
       self.dateModified = mediaItem.modifiedDate
       if mediaItem.isUserDisabled {
         self.disabled = mediaItem.isUserDisabled
@@ -79,7 +79,7 @@ import Foundation
       }
       self.persistentID = mediaItem.persistentID.uintValue  // Hex?
       self.playCount = mediaItem.playCount
-      self.playDateUTC = mediaItem.lastPlayedDate
+      self.playDateUTC = mediaItem.lastPlayedDate?.formatted(.iso8601)
       if mediaItem.isDRMProtected {
         self.protected = mediaItem.isDRMProtected
       }
@@ -92,7 +92,7 @@ import Foundation
       if mediaItem.isRatingComputed {
         self.ratingComputed = mediaItem.isRatingComputed
       }
-      self.releaseDate = mediaItem.releaseDate
+      self.releaseDate = mediaItem.releaseDate?.formatted(.iso8601)
       self.sampleRate = mediaItem.sampleRate
       self.size = mediaItem.fileSize
       if mediaItem.skipCount != 0 {

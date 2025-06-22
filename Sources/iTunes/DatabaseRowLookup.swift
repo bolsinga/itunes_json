@@ -30,8 +30,7 @@ extension DatabaseRowLookup {
     return true
   }
 
-  func date(_ key: String) -> Date? {
-    guard let v = string(key) else { return nil }
-    return ISO8601DateFormatter().date(from: v)
+  func date(_ key: String) -> String? {
+    string(key)
   }
 }
