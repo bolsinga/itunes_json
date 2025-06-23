@@ -44,11 +44,6 @@ extension Track {
     guard let name = rowLookup.name else { return nil }
     guard let itunesid = rowLookup.itunesid else { return nil }
 
-    let addedDate = (rowLookup.dateadded != nil) ? rowLookup.dateadded!.validatedDateString : nil
-    let playDate = (rowLookup.playdate != nil) ? rowLookup.playdate!.validatedDateString : nil
-    let releaseDate =
-      (rowLookup.datereleased != nil) ? rowLookup.datereleased!.validatedDateString : nil
-
     self.init(
       album: rowLookup.album,
       albumArtist: nil,
@@ -61,7 +56,7 @@ extension Track {
       compilation: rowLookup.compilation,
       composer: rowLookup.composer,
       contentRating: nil,
-      dateAdded: addedDate,
+      dateAdded: rowLookup.dateadded?.validatedDateString,
       dateModified: nil,
       disabled: nil,
       discCount: rowLookup.disccount,
@@ -81,13 +76,13 @@ extension Track {
       partOfGaplessAlbum: nil,
       persistentID: itunesid,
       playCount: rowLookup.count,
-      playDateUTC: playDate,
+      playDateUTC: rowLookup.playdate?.validatedDateString,
       podcast: nil,
       protected: nil,
       purchased: nil,
       rating: nil,
       ratingComputed: nil,
-      releaseDate: releaseDate,
+      releaseDate: rowLookup.datereleased?.validatedDateString,
       sampleRate: nil,
       season: nil,
       series: nil,
