@@ -23,7 +23,7 @@ extension Track {
     }
     self.composer = song.composerName
     //      self.contentRating = contentRating // tv
-    self.dateAdded = song.libraryAddedDate
+    self.dateAdded = song.libraryAddedDate?.formatted(.iso8601)
     //      self.dateModified = date
     //      self.disabled = song.isUserDisabled
     //      self.discCount = album.discCount
@@ -49,12 +49,12 @@ extension Track {
       self.persistentID = 0
     }
     self.playCount = song.playCount
-    self.playDateUTC = song.lastPlayedDate
+    self.playDateUTC = song.lastPlayedDate?.formatted(.iso8601)
     //      self.protected = song.isDRMProtected
     //      self.purchased = song.isPurchased
     //      self.rating = song.rating
     //      self.ratingComputed = song.isRatingComputed
-    self.releaseDate = song.releaseDate
+    self.releaseDate = song.releaseDate?.formatted(.iso8601)
     //    self.sampleRate = song.sampleRate
     //    self.size = song.fileSize
     //      self.skipCount = song.skipCount

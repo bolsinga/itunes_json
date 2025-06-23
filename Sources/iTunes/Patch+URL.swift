@@ -14,7 +14,6 @@ extension Array where Element: Codable {
 
   static fileprivate func load(from data: Data) throws -> Self {
     let decoder = JSONDecoder()
-    decoder.dateDecodingStrategy = .iso8601
     return try decoder.decode(Self.self, from: data)
   }
 }

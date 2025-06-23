@@ -21,13 +21,20 @@ extension DatabaseRowLookup {
   fileprivate var discnumber: Int? { integer("discnumber") }
   fileprivate var year: Int? { integer("year") }
   fileprivate var duration: Int? { integer("duration") }
-  fileprivate var dateadded: Date? { date("dateadded") }
+  fileprivate var dateadded: String? { date("dateadded") }
   fileprivate var compilation: Bool? { boolean("compilation") }
   fileprivate var composer: String? { string("composer") }
-  fileprivate var datereleased: Date? { date("datereleased") }
+  fileprivate var datereleased: String? { date("datereleased") }
   fileprivate var comments: String? { string("comments") }
-  fileprivate var playdate: Date? { date("playdate") }
+  fileprivate var playdate: String? { date("playdate") }
   fileprivate var count: Int? { integer("count") }
+}
+
+extension String {
+  fileprivate var validatedDateString: String? {
+    guard ISO8601DateFormatter().date(from: self) != nil else { return nil }
+    return self
+  }
 }
 
 extension Track {
@@ -49,7 +56,7 @@ extension Track {
       compilation: rowLookup.compilation,
       composer: rowLookup.composer,
       contentRating: nil,
-      dateAdded: rowLookup.dateadded,
+      dateAdded: rowLookup.dateadded?.validatedDateString,
       dateModified: nil,
       disabled: nil,
       discCount: rowLookup.disccount,
@@ -69,13 +76,13 @@ extension Track {
       partOfGaplessAlbum: nil,
       persistentID: itunesid,
       playCount: rowLookup.count,
-      playDateUTC: rowLookup.playdate,
+      playDateUTC: rowLookup.playdate?.validatedDateString,
       podcast: nil,
       protected: nil,
       purchased: nil,
       rating: nil,
       ratingComputed: nil,
-      releaseDate: rowLookup.datereleased,
+      releaseDate: rowLookup.datereleased?.validatedDateString,
       sampleRate: nil,
       season: nil,
       series: nil,

@@ -409,7 +409,7 @@ extension Track {
       isrc: isrc)
   }
 
-  fileprivate func apply(dateAdded newDateAdded: Date, tag: String) -> Track {
+  fileprivate func apply(dateAdded newDateAdded: String, tag: String) -> Track {
     Logger.patch.info("Patching DateAdded: \(newDateAdded) - \(tag)")
 
     return Track(
@@ -607,7 +607,7 @@ extension Track {
       isrc: isrc)
   }
 
-  fileprivate func apply(dateReleased newDateReleased: Date, tag: String) -> Track {
+  fileprivate func apply(dateReleased newDateReleased: String, tag: String) -> Track {
     Logger.patch.info("Patching DateReleased: \(newDateReleased) - \(tag)")
 
     return Track(
@@ -805,7 +805,8 @@ extension Track {
       isrc: isrc)
   }
 
-  fileprivate func apply(playDate newPlayDate: Date, count newPlayCount: Int, tag: String) -> Track
+  fileprivate func apply(playDate newPlayDate: String, count newPlayCount: Int, tag: String)
+    -> Track
   {
     Logger.patch.info("Patching Play: \(newPlayDate) (\(newPlayCount)) - \(tag)")
 

@@ -21,7 +21,7 @@ extension DatabaseRowLookup {
   fileprivate var integerValue: Int? { integer("value") }
   fileprivate var stringValue: String? { string("value") }
 
-  fileprivate var date: Date? { date("date") }
+  fileprivate var date: String? { date("date") }
 
   fileprivate var oldPlay: Play { Play(date: date("olddate"), count: integer("oldcount")) }
   fileprivate var newPlay: Play { Play(date: date("newdate"), count: integer("newcount")) }

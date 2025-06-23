@@ -29,7 +29,7 @@ extension Track: RowPlayInterface {
 
   var datePlayedISO8601: String {
     guard let playDateUTC else { return "" }
-    return playDateUTC.formatted(.iso8601)
+    return playDateUTC
   }
 
   private var songPlayCount: Int {

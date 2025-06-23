@@ -23,7 +23,7 @@ extension Track: RowSongInterface {
 
   var dateReleasedISO8601: String {
     guard let releaseDate else { return "" }
-    return releaseDate.formatted(.iso8601)
+    return releaseDate
   }
 
   var songName: SortableName {
@@ -57,6 +57,6 @@ extension Track: RowSongInterface {
 
   var dateAddedISO8601: String {
     guard let dateAdded else { return "" }
-    return dateAdded.formatted(.iso8601)
+    return dateAdded
   }
 }

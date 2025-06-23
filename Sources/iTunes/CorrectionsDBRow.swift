@@ -46,26 +46,26 @@ extension IdentityRepair.Correction {
     if case .trackNumber(let v) = self { v } else { nil }
   }
   fileprivate var dateadded: String? {
-    if case .dateAdded(let v) = self { v?.formatted(.iso8601) } else { nil }
+    if case .dateAdded(let v) = self { v } else { nil }
   }
   fileprivate var compilation: Int? { nil }
   fileprivate var composer: String? {
     if case .composer(let v) = self { v } else { nil }
   }
   fileprivate var datereleased: String? {
-    if case .dateReleased(let v) = self { v?.formatted(.iso8601) } else { nil }
+    if case .dateReleased(let v) = self { v } else { nil }
   }
   fileprivate var comments: String? {
     if case .comments(let v) = self { v } else { nil }
   }
   fileprivate var oldplaydate: String? {
-    if case .play(let v, _) = self { v.date?.formatted(.iso8601) } else { nil }
+    if case .play(let v, _) = self { v.date } else { nil }
   }
   fileprivate var oldplaycount: Int? {
     if case .play(let v, _) = self { v.count } else { nil }
   }
   fileprivate var newplaydate: String? {
-    if case .play(_, let v) = self { v.date?.formatted(.iso8601) } else { nil }
+    if case .play(_, let v) = self { v.date } else { nil }
   }
   fileprivate var newplaycount: Int? {
     if case .play(_, let v) = self { v.count } else { nil }
