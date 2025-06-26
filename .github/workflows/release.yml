@@ -16,6 +16,8 @@ jobs:
       run: sw_vers
     - name: Switch to Xcode 26 Beta
       run: sudo xcode-select -s "/Applications/Xcode_26_beta.app/Contents/Developer"
+    - name: Xcode Version
+      run: xcodebuild -version
     - name: Install iOS
       run: xcodebuild -downloadPlatform iOS
     - name: Show SDKs
