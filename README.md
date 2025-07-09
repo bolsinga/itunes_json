@@ -58,5 +58,8 @@ This will iterate through a git repository with listening history and execute th
 - `tracks` - This will attempt to transform the query result from the normalized database `tracks` view into `[Track]`. It will just emit these tracks as JSON.
 - `flat` - This will query the flat databases, written to standard out.
 
+### archive
+This will iterate through a git repository and create an archive (normalized) database of all the artists, albums, songs, and plays. It needs some work to properly fix some issues with the data. Right now the data used for testing requires the plays table to have a lax schema. Once this is straightened out, this logic will be used to backup the music data nightly into the archive (normalized) database.
+
 ## Future
 Back up to a single already existing database file, instead of many snapshots of data. Music will only tell you the last time a song was played. This database will have all the times it was played. I have backup data dating to 01/01/2006 to work with.
