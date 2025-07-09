@@ -40,7 +40,7 @@ import Foundation
         self.contentRating = contentRating
       }
       self.dateAdded = mediaItem.addedDate?.formatted(.iso8601)
-      self.dateModified = mediaItem.modifiedDate
+      self.dateModified = mediaItem.modifiedDate?.formatted(.iso8601)
       if mediaItem.isUserDisabled {
         self.disabled = mediaItem.isUserDisabled
       }
