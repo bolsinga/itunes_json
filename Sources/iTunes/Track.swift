@@ -21,7 +21,7 @@ struct Track: Codable, Hashable, Sendable {
   var composer: String? = nil  // "Composer"
   var contentRating: String? = nil  // "Content Rating"
   var dateAdded: String? = nil  // "Date Added"
-  var dateModified: Date? = nil  // "Date Modified"
+  var dateModified: String? = nil  // "Date Modified"
   var disabled: Bool? = nil  // "Disabled"
   var discCount: Int? = nil  // "Disc Count"
   var discNumber: Int? = nil  // "Disc Number"
