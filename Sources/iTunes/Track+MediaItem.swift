@@ -98,7 +98,7 @@ import Foundation
       if mediaItem.skipCount != 0 {
         self.skipCount = mediaItem.skipCount
       }
-      self.skipDate = mediaItem.skipDate
+      self.skipDate = mediaItem.skipDate?.formatted(.iso8601)
       self.sortAlbum = album.sortTitle
       self.sortAlbumArtist = album.sortAlbumArtist
       self.sortArtist = artist?.sortName
