@@ -52,7 +52,7 @@ struct Track: Codable, Hashable, Sendable {
   var series: String? = nil  // "Series"
   var size: UInt64? = nil  // "Size"
   var skipCount: Int? = nil  // "Skip Count"
-  var skipDate: Date? = nil  // "Skip Date"
+  var skipDate: String? = nil  // "Skip Date"
   var sortAlbum: String? = nil  // "Sort Album"
   var sortAlbumArtist: String? = nil  // "Sort Album Artist"
   var sortArtist: String? = nil  // "Sort Artist"
