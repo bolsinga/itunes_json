@@ -14,10 +14,10 @@ let package = Package(
     .executable(name: "tunes", targets: ["tunes"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
+    .package(url: "https://github.com/apple/swift-argument-parser", from: "1.6.1"),
     .package(url: "https://github.com/bolsinga/GitLibrary", from: "1.1.2"),
     .package(url: "https://github.com/bolsinga/PackageBuildInfo", exact: "2.0.0"),
-    .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.4"),
+    .package(url: "https://github.com/apple/swift-collections.git", from: "1.2.0"),
   ],
   targets: [
     .target(
