@@ -11,7 +11,7 @@ jobs:
     runs-on: macos-15
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: sw_vers
       run: sw_vers
     - name: Available Xcodes
