@@ -64,6 +64,6 @@ func gitBackup(
   file outputFile: URL, version: String, tagBuilder: (String?) async throws -> String,
   dataWriter: () async throws -> Void
 ) async throws {
-  try await Git(directory: outputFile.parentDirectory).backup(
+  try await Implementation.outOfProcess(directory: outputFile.parentDirectory).create().backup(
     outputFile.filename, version: version, tagBuilder: tagBuilder, dataWriter: dataWriter)
 }

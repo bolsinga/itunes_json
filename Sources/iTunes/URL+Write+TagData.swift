@@ -49,7 +49,7 @@ extension URL {
   func write(tagDatum: [Tag<Data>], initialCommit: String, branch: String, version: String)
     async throws
   {
-    let git = Git(directory: self.parentDirectory, suppressStandardErr: true)
+    let git = try Implementation.outOfProcess(directory: self.parentDirectory, suppressStandardErr: true).create()
 
     try await git.status()
 
