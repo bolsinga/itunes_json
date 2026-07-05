@@ -7,6 +7,7 @@
 
 import ArgumentParser
 import Foundation
+import GitLibrary
 import os
 
 extension Logger {
@@ -188,8 +189,14 @@ struct ArchiveCommand: AsyncParsableCommand {
       DatabaseContext(storage: .file(outputFile), schemaOptions: laxSchema.schemaOptions))
     let archiveDB = try await format.database(tracks: [])
 
-    let databases = gitDirectory.backupFile.databases(
-      .flat(FlatTracksDatabaseContext(storage: .memory)))
+    let fileURL = gitDirectory.backupFile
+
+    let git = Implementation.outOfProcess(
+      directory: gitDirectory, suppressStandardErr: true
+    ).create()
+
+    let databases = git.databases(
+      .flat(FlatTracksDatabaseContext(storage: .memory)), filename: fileURL.filename)
 
     async let archiveDBPath = archiveDB.filename
 

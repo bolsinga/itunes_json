@@ -7,6 +7,7 @@
 
 import ArgumentParser
 import Foundation
+import GitLibrary
 
 /// Enum representing how the SQL query result should be transformed.
 enum Transform: CaseIterable {
@@ -43,7 +44,11 @@ extension TransformContext {
 extension URL {
   fileprivate func rowOutput(query: String, format: DatabaseFormat) async throws -> [Tag<[String]>]
   {
-    try await transformRows(query: query, format: format) {
+    let git = Implementation.outOfProcess(
+      directory: self.parentDirectory, suppressStandardErr: true
+    ).create()
+
+    return try await git.transformRows(query: query, format: format, filename: self.filename) {
       $0.flatMap { rows in
         guard !rows.isEmpty else { return [String]() }
         let columnNames = rows[0].map { $0.column }.joined(separator: "|")
