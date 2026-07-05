@@ -1,5 +1,5 @@
 //
-//  URL+Read+TagData.swift
+//  Git+Read+TagData.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 11/30/24.
@@ -15,28 +15,24 @@ extension Logger {
 
 private let limit = Int.max
 
-extension URL {
-  var tagDatum: AsyncThrowingStream<Tag<Data>, Error> {
+extension Git {
+  func tagDatum(filename: String) -> AsyncThrowingStream<Tag<Data>, Error> {
     let (stream, continuation) = AsyncThrowingStream<Tag<Data>, Error>.makeStream()
     Task.detached {
       defer { continuation.finish() }
 
       do {
-        let git = try Implementation.outOfProcess(
-          directory: self.parentDirectory, suppressStandardErr: true
-        ).create()
-
-        try await git.status()
+        try await status()
 
         var count = 0
 
-        for tag in try await git.tags().stampOrderedMatching {
+        for tag in try await tags().stampOrderedMatching {
           guard count < limit else { break }
 
           Logger.tagStream.info("tag: \(tag)")
 
           continuation.yield(
-            Tag(tag: tag, item: try await git.show(commit: tag, path: self.filename)))
+            Tag(tag: tag, item: try await show(commit: tag, path: filename)))
 
           count += 1
         }

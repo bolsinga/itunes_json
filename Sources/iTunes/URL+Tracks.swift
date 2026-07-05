@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import GitLibrary
 import os
 
 extension Logger {
@@ -26,9 +27,15 @@ extension URL {
     Task.detached {
       defer { continuation.finish() }
 
+      let git = Implementation.outOfProcess(
+        directory: self.parentDirectory, suppressStandardErr: true
+      ).create()
+
+      let filename = self.filename
+
       do {
         try await withThrowingTaskGroup(of: Void.self) { group in
-          for try await tagData in tagDatum {
+          for try await tagData in git.tagDatum(filename: filename) {
             group.addTask {
               Logger.transform.info("Transform Tag: \(tagData.tag)")
               continuation.yield(

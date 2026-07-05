@@ -15,7 +15,7 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.8.2"),
-    .package(url: "https://github.com/bolsinga/GitLibrary", exact: "1.1.3"),
+    .package(url: "https://github.com/bolsinga/GitLibrary", exact: "1.1.4"),
     .package(url: "https://github.com/bolsinga/PackageBuildInfo", exact: "2.0.1"),
     .package(url: "https://github.com/apple/swift-collections.git", from: "1.6.0"),
   ],
