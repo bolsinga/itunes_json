@@ -1,5 +1,5 @@
 //
-//  URL+Tracks.swift
+//  Git+Tracks.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 11/30/24.
@@ -19,23 +19,18 @@ extension Tag where Item == Data {
   }
 }
 
-extension URL {
+extension Git {
   func transformTracks<T: Sendable>(
+    filename: String,
     transform: @escaping @Sendable (String, [Track]) async throws -> T
   ) -> AsyncThrowingStream<Tag<T>, any Error> {
     let (stream, continuation) = AsyncThrowingStream<Tag<T>, Error>.makeStream()
     Task.detached {
       defer { continuation.finish() }
 
-      let git = Implementation.outOfProcess(
-        directory: self.parentDirectory, suppressStandardErr: true
-      ).create()
-
-      let filename = self.filename
-
       do {
         try await withThrowingTaskGroup(of: Void.self) { group in
-          for try await tagData in git.tagDatum(filename: filename) {
+          for try await tagData in tagDatum(filename: filename) {
             group.addTask {
               Logger.transform.info("Transform Tag: \(tagData.tag)")
               continuation.yield(
