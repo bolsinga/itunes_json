@@ -1,5 +1,5 @@
 //
-//  URL+TracksQuery.swift
+//  Git+TracksQuery.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 1/25/25.
@@ -10,13 +10,11 @@ import GitLibrary
 
 typealias TaggedTracks = Tag<[Track]>
 
-extension URL {
-  fileprivate func tracks(query: String, format: DatabaseFormat) async throws -> [TaggedTracks] {
-    let git = Implementation.outOfProcess(
-      directory: self.parentDirectory, suppressStandardErr: true
-    ).create()
-
-    return try await git.transformRows(query: query, format: format, filename: self.filename) {
+extension Git {
+  fileprivate func tracks(query: String, format: DatabaseFormat, filename: String) async throws
+    -> [TaggedTracks]
+  {
+    try await transformRows(query: query, format: format, filename: filename) {
       queryRows in
       queryRows.flatMap { $0.compactMap { Track(row: $0) } }
     }.reduce(into: [TaggedTracks]()) {
@@ -24,8 +22,10 @@ extension URL {
     }
   }
 
-  func uniqueTracks(query: String, format: DatabaseFormat) async throws -> [TaggedTracks] {
-    let tags = try await tracks(query: query, format: format).sorted(by: {
+  func uniqueTracks(query: String, format: DatabaseFormat, filename: String) async throws
+    -> [TaggedTracks]
+  {
+    let tags = try await tracks(query: query, format: format, filename: filename).sorted(by: {
       $0.tag < $1.tag
     })
 

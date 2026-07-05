@@ -30,13 +30,19 @@ extension TransformContext {
   fileprivate func query(_ query: String, backupFile: URL) async throws {
     switch self {
     case .tracks(let context):
-      try await backupFile.uniqueTracks(query: query, format: DatabaseFormat.normalized(context))
-        .forEach {
-          print($0.tag)
-          print(try $0.item.jsonData().asUTF8String())
-        }
+      let git = Implementation.outOfProcess(
+        directory: backupFile.parentDirectory, suppressStandardErr: true
+      ).create()
+
+      return try await git.uniqueTracks(
+        query: query, format: DatabaseFormat.normalized(context), filename: backupFile.filename
+      )
+      .forEach {
+        print($0.tag)
+        print(try $0.item.jsonData().asUTF8String())
+      }
     case .raw(let format):
-      try await backupFile.printOutput(query: query, format: format)
+      return try await backupFile.printOutput(query: query, format: format)
     }
   }
 }
