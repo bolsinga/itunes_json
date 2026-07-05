@@ -1,5 +1,5 @@
 //
-//  URL+Databases.swift
+//  Git+Databases.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 1/24/25.
@@ -55,25 +55,27 @@ extension DatabaseFormat {
   }
 }
 
-extension URL {
-  func databases(_ format: DatabaseFormat) -> AsyncThrowingStream<Tag<Database>, any Error> {
-    let git = Implementation.outOfProcess(
-      directory: self.parentDirectory, suppressStandardErr: true
-    ).create()
-
-    return git.transformTracks(filename: self.filename) {
+extension Git {
+  func databases(_ format: DatabaseFormat, filename: String)
+    -> AsyncThrowingStream<Tag<Database>, any Error>
+  {
+    transformTracks(filename: filename) {
       try await format.append(tag: $0).database(tracks: $1)
     }
   }
 
-  fileprivate func serializedDatabaseQueryRows(query: String, format: DatabaseFormat)
+  fileprivate func serializedDatabaseQueryRows(
+    query: String,
+    format: DatabaseFormat,
+    filename: String
+  )
     -> AsyncThrowingStream<Tag<[[Database.Row]]>, any Error>
   {
     let (stream, continuation) = AsyncThrowingStream<Tag<[[Database.Row]]>, any Error>.makeStream()
     Task.detached {
       defer { continuation.finish() }
       do {
-        for taggedDB in try await databases(format).reduce(
+        for taggedDB in try await databases(format, filename: filename).reduce(
           into: [Tag<Database>](), { $0.append($1) }
         ).sorted(by: { $0.tag < $1.tag }) {
           continuation.yield(try await taggedDB.execute(query: query))
@@ -86,14 +88,18 @@ extension URL {
     return stream
   }
 
-  fileprivate func databaseQueryRows(query: String, format: DatabaseFormat) -> AsyncThrowingStream<
-    Tag<[[Database.Row]]>, any Error
-  > {
+  fileprivate func databaseQueryRows(
+    query: String,
+    format: DatabaseFormat,
+    filename: String
+  )
+    -> AsyncThrowingStream<Tag<[[Database.Row]]>, any Error>
+  {
     let (stream, continuation) = AsyncThrowingStream<Tag<[[Database.Row]]>, any Error>.makeStream()
     Task.detached {
       defer { continuation.finish() }
       do {
-        for try await taggedDB in databases(format) {
+        for try await taggedDB in databases(format, filename: filename) {
           continuation.yield(try await taggedDB.execute(query: query))
         }
       } catch {
@@ -103,21 +109,27 @@ extension URL {
     return stream
   }
 
-  fileprivate func rows(query: String, format: DatabaseFormat) -> some AsyncSequence<
-    Tag<[[Database.Row]]>, any Error
-  > {
+  fileprivate func rows(
+    query: String,
+    format: DatabaseFormat,
+    filename: String
+  )
+    -> some AsyncSequence<Tag<[[Database.Row]]>, any Error>
+  {
     if format.serializeDatabaseQueries {
-      return serializedDatabaseQueryRows(query: query, format: format)
+      return serializedDatabaseQueryRows(query: query, format: format, filename: filename)
     } else {
-      return databaseQueryRows(query: query, format: format)
+      return databaseQueryRows(query: query, format: format, filename: filename)
     }
   }
 
   func transformRows<T: Sendable>(
-    query: String, format: DatabaseFormat,
+    query: String,
+    format: DatabaseFormat,
+    filename: String,
     transform: @escaping @Sendable ([[Database.Row]]) throws -> T
   ) -> some AsyncSequence<Tag<T>, any Error> {
-    rows(query: query, format: format).filter { !$0.item.isEmpty }.map {
+    rows(query: query, format: format, filename: filename).filter { !$0.item.isEmpty }.map {
       Tag(tag: $0.tag, item: try transform($0.item))
     }
   }
