@@ -46,10 +46,15 @@ extension Tag where Item == Data {
 }
 
 extension URL {
-  func write(tagDatum: [Tag<Data>], initialCommit: String, branch: String, version: String)
-    async throws
-  {
-    let git = try Implementation.outOfProcess(directory: self.parentDirectory, suppressStandardErr: true).create()
+  func write(
+    tagDatum: [Tag<Data>],
+    initialCommit: String,
+    branch: String,
+    version: String
+  ) async throws {
+    let git = try Implementation.outOfProcess(
+      directory: self.parentDirectory, suppressStandardErr: true
+    ).create()
 
     try await git.status()
 

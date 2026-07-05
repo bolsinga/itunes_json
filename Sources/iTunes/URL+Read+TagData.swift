@@ -22,7 +22,9 @@ extension URL {
       defer { continuation.finish() }
 
       do {
-        let git = try Implementation.outOfProcess(directory: self.parentDirectory, suppressStandardErr: true).create()
+        let git = try Implementation.outOfProcess(
+          directory: self.parentDirectory, suppressStandardErr: true
+        ).create()
 
         try await git.status()
 

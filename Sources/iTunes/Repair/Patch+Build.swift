@@ -19,7 +19,11 @@ extension Tag {
 }
 
 extension Patch {
-  func patch(backupFile: URL, branch: String, version: String) async throws {
+  func patch(
+    backupFile: URL,
+    branch: String,
+    version: String
+  ) async throws {
     let patchedTracksData = try await backupFile.transformTracks { try $1.patch(self, tag: $0) }
       .reduce(into: [Tag<Data>]()) { $0.append($1) }
 
@@ -30,6 +34,7 @@ extension Patch {
     try await backupFile.write(
       tagDatum: patchedTracksData.map { try $0.nextVersion(tagParser) },
       initialCommit: initialCommit,
-      branch: branch, version: version)
+      branch: branch,
+      version: version)
   }
 }

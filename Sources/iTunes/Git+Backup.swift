@@ -61,7 +61,9 @@ extension Git {
 }
 
 func gitBackup(
-  file outputFile: URL, version: String, tagBuilder: (String?) async throws -> String,
+  file outputFile: URL,
+  version: String,
+  tagBuilder: (String?) async throws -> String,
   dataWriter: () async throws -> Void
 ) async throws {
   try await Implementation.outOfProcess(directory: outputFile.parentDirectory).create().backup(
