@@ -27,34 +27,27 @@ private enum TransformContext {
 }
 
 extension TransformContext {
-  fileprivate func query(_ query: String, backupFile: URL) async throws {
+  fileprivate func query(_ query: String, git: Git, filename: String) async throws {
     switch self {
     case .tracks(let context):
-      let git = Implementation.outOfProcess(
-        directory: backupFile.parentDirectory, suppressStandardErr: true
-      ).create()
-
-      return try await git.uniqueTracks(
-        query: query, format: DatabaseFormat.normalized(context), filename: backupFile.filename
+      try await git.uniqueTracks(
+        query: query, format: DatabaseFormat.normalized(context), filename: filename
       )
       .forEach {
         print($0.tag)
         print(try $0.item.jsonData().asUTF8String())
       }
     case .raw(let format):
-      return try await backupFile.printOutput(query: query, format: format)
+      try await git.printOutput(query: query, format: format, filename: filename)
     }
   }
 }
 
-extension URL {
-  fileprivate func rowOutput(query: String, format: DatabaseFormat) async throws -> [Tag<[String]>]
+extension Git {
+  fileprivate func rowOutput(query: String, format: DatabaseFormat, filename: String) async throws
+    -> [Tag<[String]>]
   {
-    let git = Implementation.outOfProcess(
-      directory: self.parentDirectory, suppressStandardErr: true
-    ).create()
-
-    return try await git.transformRows(query: query, format: format, filename: self.filename) {
+    try await transformRows(query: query, format: format, filename: filename) {
       $0.flatMap { rows in
         guard !rows.isEmpty else { return [String]() }
         let columnNames = rows[0].map { $0.column }.joined(separator: "|")
@@ -66,8 +59,9 @@ extension URL {
     }
   }
 
-  fileprivate func printOutput(query: String, format: DatabaseFormat) async throws {
-    let lines = try await rowOutput(query: query, format: format).sorted(by: {
+  fileprivate func printOutput(query: String, format: DatabaseFormat, filename: String) async throws
+  {
+    let lines = try await rowOutput(query: query, format: format, filename: filename).sorted(by: {
       $0.tag < $1.tag
     }).flatMap {
       let tag = $0.tag
@@ -139,6 +133,10 @@ struct QueryCommand: AsyncParsableCommand {
   }
 
   func run() async throws {
-    try await context.query(query, backupFile: gitDirectory.backupFile)
+    let git = Implementation.outOfProcess(
+      directory: gitDirectory, suppressStandardErr: true
+    ).create()
+
+    try await context.query(query, git: git, filename: gitDirectory.backupFile.filename)
   }
 }
