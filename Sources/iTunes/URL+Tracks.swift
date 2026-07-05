@@ -27,7 +27,7 @@ extension URL {
     Task.detached {
       defer { continuation.finish() }
 
-      let git = try Implementation.outOfProcess(
+      let git = Implementation.outOfProcess(
         directory: self.parentDirectory, suppressStandardErr: true
       ).create()
 
