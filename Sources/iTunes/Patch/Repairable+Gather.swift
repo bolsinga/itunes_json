@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import GitLibrary
 import OrderedCollections
 
 private func currentTracks() async throws -> [Track] {
@@ -19,8 +20,13 @@ private func historicalChanges<
   createGuide: @escaping @Sendable ([Track]) -> [Guide],
   relevantChanges: @escaping @Sendable ([Guide.ID: [Guide]]) -> [Change]
 ) async throws -> [Change] {
+  let git = Implementation.outOfProcess(
+    directory: backupFile.parentDirectory, suppressStandardErr: true
+  ).create()
+
   // Get all git historical data.
-  let allHistoricalGuides = try await backupFile.transformTracks { _, tracks in
+  let allHistoricalGuides = try await git.transformTracks(filename: backupFile.filename) {
+    _, tracks in
     createGuide(tracks)
   }.reduce(into: [Tag<[Guide]>]()) { partialResult, item in
     partialResult.append(item)
@@ -61,7 +67,11 @@ private func changes<Guide: Hashable & Identifiable & Sendable, Change: Sendable
 ) async throws -> [Change] where Guide.ID: Sendable {
   async let asyncCurrentGuides = try await currentGuides()
 
-  let allKnownGuides = try await backupFile.transformTracks { _, tracks in
+  let git = Implementation.outOfProcess(
+    directory: backupFile.parentDirectory, suppressStandardErr: true
+  ).create()
+
+  let allKnownGuides = try await git.transformTracks(filename: backupFile.filename) { _, tracks in
     createGuide(tracks)
   }.reduce(into: Set<Guide>()) {
     $0.formUnion($1.item)

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import GitLibrary
 
 private enum TagError: Error {
   case unstructuredTag
@@ -24,8 +25,14 @@ extension Patch {
     branch: String,
     version: String
   ) async throws {
-    let patchedTracksData = try await backupFile.transformTracks { try $1.patch(self, tag: $0) }
-      .reduce(into: [Tag<Data>]()) { $0.append($1) }
+    let git = Implementation.outOfProcess(
+      directory: backupFile.parentDirectory, suppressStandardErr: true
+    ).create()
+
+    let patchedTracksData = try await git.transformTracks(filename: backupFile.filename) {
+      try $1.patch(self, tag: $0)
+    }
+    .reduce(into: [Tag<Data>]()) { $0.append($1) }
 
     guard let initialCommit = patchedTracksData.initialTag else { return }
 

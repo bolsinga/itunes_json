@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import GitLibrary
 import os
 
 extension Logger {
@@ -56,7 +57,11 @@ extension DatabaseFormat {
 
 extension URL {
   func databases(_ format: DatabaseFormat) -> AsyncThrowingStream<Tag<Database>, any Error> {
-    transformTracks {
+    let git = Implementation.outOfProcess(
+      directory: self.parentDirectory, suppressStandardErr: true
+    ).create()
+
+    return git.transformTracks(filename: self.filename) {
       try await format.append(tag: $0).database(tracks: $1)
     }
   }
