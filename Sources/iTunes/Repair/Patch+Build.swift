@@ -21,14 +21,11 @@ extension Tag {
 
 extension Patch {
   func patch(
+    git: Git,
     backupFile: URL,
     branch: String,
     version: String
   ) async throws {
-    let git = Implementation.outOfProcess(
-      directory: backupFile.parentDirectory, suppressStandardErr: true
-    ).create()
-
     let patchedTracksData = try await git.transformTracks(filename: backupFile.filename) {
       try $1.patch(self, tag: $0)
     }
