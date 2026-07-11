@@ -1,5 +1,5 @@
 //
-//  URL+Write+TagData.swift
+//  Git+Write+TagData.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 3/17/25.
@@ -45,31 +45,28 @@ extension Tag where Item == Data {
   }
 }
 
-extension URL {
+extension Git {
   func write(
     tagDatum: [Tag<Data>],
     initialCommit: String,
     branch: String,
-    version: String
+    version: String,
+    fileURL: URL
   ) async throws {
-    let git = try Implementation.outOfProcess(
-      directory: self.parentDirectory, suppressStandardErr: true
-    ).create()
+    try await status()
 
-    try await git.status()
-
-    try await git.createBranch(named: branch, initialCommit: initialCommit)
+    try await createBranch(named: branch, initialCommit: initialCommit)
 
     var tagDatum = tagDatum.sorted(by: { $0.tag > $1.tag })  // latest to oldest.
 
     for tagData in tagDatum.reversed() {
       tagDatum.removeLast()
 
-      try await tagData.add(to: git, backupFile: self, version: version)
+      try await tagData.add(to: self, backupFile: fileURL, version: version)
     }
 
-    //    try await git.push()
-    //    try await git.pushTags()
-    //    try await git.gc()
+    //    try await push()
+    //    try await pushTags()
+    //    try await gc()
   }
 }

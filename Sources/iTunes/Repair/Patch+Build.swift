@@ -38,10 +38,11 @@ extension Patch {
 
     let tagParser = TagParser()
 
-    try await backupFile.write(
+    try await git.write(
       tagDatum: patchedTracksData.map { try $0.nextVersion(tagParser) },
       initialCommit: initialCommit,
       branch: branch,
-      version: version)
+      version: version,
+      fileURL: backupFile)
   }
 }
