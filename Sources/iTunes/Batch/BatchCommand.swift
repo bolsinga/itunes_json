@@ -7,6 +7,7 @@
 
 import ArgumentParser
 import Foundation
+import GitLibrary
 
 extension Batch: EnumerableFlag {}
 
@@ -56,8 +57,14 @@ struct BatchCommand: AsyncParsableCommand {
   var outputDirectory: URL
 
   func run() async throws {
+    let git = Implementation.outOfProcess(
+      directory: gitDirectory, suppressStandardErr: true
+    ).create()
+
     try await batch.build(
-      gitDirectory.backupFile, outputDirectory: outputDirectory,
+      gitDirectory.backupFile,
+      outputDirectory: outputDirectory,
+      git: git,
       schemaOptions: laxSchema.schemaOptions)
   }
 }

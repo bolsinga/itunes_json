@@ -58,11 +58,12 @@ extension Batch {
     }
   }
 
-  func build(_ backupFile: URL, outputDirectory: URL, schemaOptions: SchemaOptions) async throws {
-    let git = Implementation.outOfProcess(
-      directory: backupFile.parentDirectory, suppressStandardErr: true
-    ).create()
-
+  func build(
+    _ backupFile: URL,
+    outputDirectory: URL,
+    git: Git,
+    schemaOptions: SchemaOptions
+  ) async throws {
     let stream = git.transformTracks(filename: backupFile.filename) { tag, tracks in
       Logger.batch.info("Data: \(tag)")
       return try await destination(tag: tag, schemaOptions: schemaOptions).data(for: tracks)
