@@ -1,5 +1,6 @@
 import ArgumentParser
 import Foundation
+import GitLibrary
 
 extension Repairable: EnumerableFlag {}
 
@@ -63,7 +64,10 @@ struct PatchCommand: AsyncParsableCommand {
   }
 
   func run() async throws {
+    let git = Implementation.outOfProcess(directory: gitDirectory, suppressStandardErr: true)
+      .create()
+
     try await repairDestination().emit(
-      try await repairable.gather(gitDirectory.backupFile, correction: correction))
+      try await repairable.gather(gitDirectory.backupFile, git: git, correction: correction))
   }
 }
