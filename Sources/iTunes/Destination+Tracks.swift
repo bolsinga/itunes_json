@@ -16,8 +16,8 @@ extension Destination {
   fileprivate func fileWriter(for outputFile: URL) -> DestinationFileWriting {
     let fileWriter: DestinationFileWriting = FileWriter(outputFile: outputFile)
     switch self {
-    case .jsonGit(_, let context):
-      return GitBackupWriter(fileWriter: fileWriter, context: context)
+    case .jsonGit(_, let gitBackupContext):
+      return GitBackupWriter(fileWriter: fileWriter, gitBackupContext: gitBackupContext)
     default:
       return fileWriter
     }

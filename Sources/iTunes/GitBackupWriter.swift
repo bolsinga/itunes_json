@@ -9,13 +9,13 @@ import Foundation
 
 struct GitBackupWriter: DestinationFileWriting {
   let fileWriter: DestinationFileWriting
-  let context: BackupContext
+  let gitBackupContext: GitBackupContext
 
   var outputFile: URL { fileWriter.outputFile }
 
   func write(data: Data) async throws {
-    try await gitBackup(file: outputFile, version: context.version) {
-      try await context.tag($0)
+    try await gitBackup(file: outputFile, version: gitBackupContext.version) {
+      try await gitBackupContext.tag($0)
     } dataWriter: {
       try await fileWriter.write(data: data)
     }

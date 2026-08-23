@@ -1,5 +1,5 @@
 //
-//  BackupContext.swift
+//  GitBackupContext.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 1/2/25.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct BackupContext: Sendable {
+struct GitBackupContext: Sendable {
   static let defaultTag = "iTunes"
 
   let version: String
