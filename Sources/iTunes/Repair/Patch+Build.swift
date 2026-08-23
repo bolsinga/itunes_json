@@ -19,14 +19,29 @@ extension Tag {
   }
 }
 
+extension Repository {
+  fileprivate func write(
+    tagDatum: [Tag<Data>],
+    initialCommit: String,
+    branch: String,
+    version: String,
+  ) async throws {
+    try await git.write(
+      tagDatum: tagDatum,
+      initialCommit: initialCommit,
+      branch: branch,
+      version: version,
+      fileURL: backupFile)
+  }
+}
+
 extension Patch {
   func patch(
-    git: Git,
-    backupFile: URL,
+    repository: Repository,
     branch: String,
     version: String
   ) async throws {
-    let patchedTracksData = try await git.transformTracks(filename: backupFile.filename) {
+    let patchedTracksData = try await repository.transformTracks {
       try $1.patch(self, tag: $0)
     }
     .reduce(into: [Tag<Data>]()) { $0.append($1) }
@@ -35,11 +50,10 @@ extension Patch {
 
     let tagParser = TagParser()
 
-    try await git.write(
+    try await repository.write(
       tagDatum: patchedTracksData.map { try $0.nextVersion(tagParser) },
       initialCommit: initialCommit,
       branch: branch,
-      version: version,
-      fileURL: backupFile)
+      version: version)
   }
 }

@@ -59,12 +59,11 @@ extension Batch {
   }
 
   func build(
-    _ backupFile: URL,
     outputDirectory: URL,
-    git: Git,
+    repository: Repository,
     schemaOptions: SchemaOptions
   ) async throws {
-    let stream = git.transformTracks(filename: backupFile.filename) { tag, tracks in
+    let stream = repository.transformTracks { tag, tracks in
       Logger.batch.info("Data: \(tag)")
       return try await destination(tag: tag, schemaOptions: schemaOptions).data(for: tracks)
     }

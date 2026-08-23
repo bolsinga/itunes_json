@@ -44,12 +44,8 @@ struct RepairCommand: AsyncParsableCommand {
 
     let destinationBranch = destinationBranch ?? patchable.rawValue
 
-    let git = Implementation.outOfProcess(directory: gitDirectory, suppressStandardErr: true)
-      .create()
-
     try await patch.patch(
-      git: git,
-      backupFile: gitDirectory.backupFile,
+      repository: Repository(directory: gitDirectory),
       branch: destinationBranch,
       version: Self.configuration.version)
   }
