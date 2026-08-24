@@ -25,20 +25,8 @@ struct BatchCommand: AsyncParsableCommand {
   @Flag(help: "Lax normalized database schema table constraints")
   var laxSchema: [SchemaFlag] = []
 
-  /// Git Directory to read and write data from.
-  @Option(
-    help: "The path for the git directory to work with.",
-    transform: ({
-      let url = URL(filePath: $0, directoryHint: .isDirectory)
-      let manager = FileManager.default
-      if !manager.fileExists(atPath: url.relativePath) {
-        try manager.createDirectory(at: url, withIntermediateDirectories: true)
-      }
-
-      return url
-    })
-  )
-  var gitDirectory: URL
+  @OptionGroup var repositoryArguments: RepositoryArguments
+  var repository: Repository { repositoryArguments.repository }
 
   /// Output Directory for batch results.
   @Option(
@@ -59,7 +47,7 @@ struct BatchCommand: AsyncParsableCommand {
   func run() async throws {
     try await batch.build(
       outputDirectory: outputDirectory,
-      repository: Repository(directory: gitDirectory),
+      repository: repository,
       schemaOptions: laxSchema.schemaOptions)
   }
 }
