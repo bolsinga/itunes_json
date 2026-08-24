@@ -26,19 +26,30 @@ private enum TransformContext {
   case raw(DatabaseFormat)
 }
 
+extension Repository {
+  fileprivate func uniqueTracks(query: String, format: DatabaseFormat) async throws
+    -> [TaggedTracks]
+  {
+    try await git.uniqueTracks(
+      query: query, format: format, filename: backupFile.filename)
+  }
+
+  fileprivate func printOutput(query: String, format: DatabaseFormat) async throws {
+    try await git.printOutput(query: query, format: format, filename: backupFile.filename)
+  }
+}
+
 extension TransformContext {
-  fileprivate func query(_ query: String, git: Git, filename: String) async throws {
+  fileprivate func query(_ query: String, repository: Repository) async throws {
     switch self {
     case .tracks(let context):
-      try await git.uniqueTracks(
-        query: query, format: DatabaseFormat.normalized(context), filename: filename
-      )
-      .forEach {
-        print($0.tag)
-        print(try $0.item.jsonData().asUTF8String())
-      }
+      try await repository.uniqueTracks(query: query, format: DatabaseFormat.normalized(context))
+        .forEach {
+          print($0.tag)
+          print(try $0.item.jsonData().asUTF8String())
+        }
     case .raw(let format):
-      try await git.printOutput(query: query, format: format, filename: filename)
+      try await repository.printOutput(query: query, format: format)
     }
   }
 }
@@ -133,10 +144,6 @@ struct QueryCommand: AsyncParsableCommand {
   }
 
   func run() async throws {
-    let git = Implementation.outOfProcess(
-      directory: gitDirectory, suppressStandardErr: true
-    ).create()
-
-    try await context.query(query, git: git, filename: gitDirectory.backupFile.filename)
+    try await context.query(query, repository: Repository(directory: gitDirectory))
   }
 }

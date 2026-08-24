@@ -129,6 +129,14 @@ extension Database {
   }
 }
 
+extension Repository {
+  fileprivate func databases(_ format: DatabaseFormat)
+    -> AsyncThrowingStream<Tag<Database>, any Error>
+  {
+    git.databases(format, filename: backupFile.filename)
+  }
+}
+
 struct ArchiveCommand: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "archive",
@@ -189,14 +197,8 @@ struct ArchiveCommand: AsyncParsableCommand {
       DatabaseContext(storage: .file(outputFile), schemaOptions: laxSchema.schemaOptions))
     let archiveDB = try await format.database(tracks: [])
 
-    let fileURL = gitDirectory.backupFile
-
-    let git = Implementation.outOfProcess(
-      directory: gitDirectory, suppressStandardErr: true
-    ).create()
-
-    let databases = git.databases(
-      .flat(FlatTracksDatabaseContext(storage: .memory)), filename: fileURL.filename)
+    let databases = Repository(directory: gitDirectory).databases(
+      .flat(FlatTracksDatabaseContext(storage: .memory)))
 
     async let archiveDBPath = archiveDB.filename
 

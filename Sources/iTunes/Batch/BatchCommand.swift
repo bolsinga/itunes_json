@@ -57,14 +57,9 @@ struct BatchCommand: AsyncParsableCommand {
   var outputDirectory: URL
 
   func run() async throws {
-    let git = Implementation.outOfProcess(
-      directory: gitDirectory, suppressStandardErr: true
-    ).create()
-
     try await batch.build(
-      gitDirectory.backupFile,
       outputDirectory: outputDirectory,
-      git: git,
+      repository: Repository(directory: gitDirectory),
       schemaOptions: laxSchema.schemaOptions)
   }
 }

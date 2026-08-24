@@ -16,13 +16,12 @@ private func currentTracks() async throws -> [Track] {
 private func historicalChanges<
   Guide: Hashable & Identifiable & Sendable, Change: Hashable & Sendable
 >(
-  git: Git,
-  backupFile: URL,
+  repository: Repository,
   createGuide: @escaping @Sendable ([Track]) -> [Guide],
   relevantChanges: @escaping @Sendable ([Guide.ID: [Guide]]) -> [Change]
 ) async throws -> [Change] {
   // Get all git historical data.
-  let allHistoricalGuides = try await git.transformTracks(filename: backupFile.filename) {
+  let allHistoricalGuides = try await repository.transformTracks {
     _, tracks in
     createGuide(tracks)
   }.reduce(into: [Tag<[Guide]>]()) { partialResult, item in
@@ -57,15 +56,14 @@ extension Collection where Element: Hashable & Identifiable {
 }
 
 private func changes<Guide: Hashable & Identifiable & Sendable, Change: Sendable>(
-  git: Git,
-  backupFile: URL,
+  repository: Repository,
   currentGuides: @Sendable () async throws -> Set<Guide>,
   createGuide: @escaping @Sendable ([Track]) -> Set<Guide>,
   createChange: @escaping @Sendable (Guide, [Guide]) -> [Change]
 ) async throws -> [Change] where Guide.ID: Sendable {
   async let asyncCurrentGuides = try await currentGuides()
 
-  let allKnownGuides = try await git.transformTracks(filename: backupFile.filename) { _, tracks in
+  let allKnownGuides = try await repository.transformTracks { _, tracks in
     createGuide(tracks)
   }.reduce(into: Set<Guide>()) {
     $0.formUnion($1.item)
@@ -86,16 +84,14 @@ private func changes<Guide: Hashable & Identifiable & Sendable, Change: Sendable
 private typealias TrackCorrection = @Sendable (Track) -> [IdentityRepair.Correction]
 
 private func identifierCorrections(
-  backupFile: URL,
-  git: Git,
+  repository: Repository,
   current: @escaping @Sendable () async throws -> Set<IdentityRepair>,
   createCorrection: @escaping TrackCorrection
 ) async throws -> Patch {
   .identityRepairs(
     Set(
       try await changes(
-        git: git,
-        backupFile: backupFile,
+        repository: repository,
         currentGuides: { try await current() },
         createGuide: {
           Set(
@@ -110,15 +106,13 @@ private func identifierCorrections(
 }
 
 private func identifierCorrections(
-  backupFile: URL,
-  git: Git,
+  repository: Repository,
   createCorrection: @escaping TrackCorrection
 )
   async throws -> Patch
 {
   try await identifierCorrections(
-    backupFile: backupFile,
-    git: git,
+    repository: repository,
     current: {
       Set(
         try await currentTracks().flatMap { track in
@@ -129,16 +123,14 @@ private func identifierCorrections(
 }
 
 private func historicalIdentifierCorrections<Guide: Hashable & Identifiable & Sendable>(
-  git: Git,
-  backupFile: URL,
+  repository: Repository,
   createIdentifier: @escaping @Sendable (_ track: Track) -> Guide,
   relevantChanges: @escaping @Sendable ([Guide.ID: [Guide]]) -> [IdentityRepair]
 ) async throws -> Patch {
   .identityRepairs(
     Set(
       try await historicalChanges(
-        git: git,
-        backupFile: backupFile,
+        repository: repository,
         createGuide: { $0.filter { $0.isSQLEncodable }.map { createIdentifier($0) } },
         relevantChanges: relevantChanges)
     ).sorted())
@@ -209,20 +201,19 @@ extension Patch {
 }
 
 extension Repairable {
-  private func gatherLibraryPatch(_ backupFile: URL, git: Git) async throws -> Patch {
+  private func gatherLibraryPatch(_ repository: Repository) async throws -> Patch {
     guard let createCorrection = libraryCorrections[self] else {
       throw RepairableError.missingRepairableCorrection
     }
-    return try await identifierCorrections(backupFile: backupFile, git: git) {
+    return try await identifierCorrections(repository: repository) {
       [createCorrection($0)]
     }
   }
 
   /// The Library is the Source of truth. This is where the data can be corrected in Music.app. Duration is a tricky one, in that Music.app is the source of truth, but its value changes at indeterminate moments.
-  private static func gatherLibraryPatches(_ backupFile: URL, git: Git) async throws -> Patch {
+  private static func gatherLibraryPatches(_ repository: Repository) async throws -> Patch {
     try await identifierCorrections(
-      backupFile: backupFile,
-      git: git,
+      repository: repository,
       createCorrection: { track in
         Self.libraryRepairable.compactMap {
           guard let createCorrection = libraryCorrections[$0] else { return nil }
@@ -233,29 +224,28 @@ extension Repairable {
 
   /// History is the Source of truth. This is simple data, such as date added, date released. It's more complex, but date played and play count is also historically true. This is all data that is not modifiable in Music.app.
   /// These are done with async let, which means the backupFile versions are iterated for each. It's hard to re-use (as done for Library patches) since there are two Guide types, and finding relevant changes depends upon the Guide.
-  private static func gatherHistoryPatches(_ backupFile: URL, git: Git) async throws -> Patch {
-    async let dateAddedPatch = Repairable.replaceDateAddeds.gather(backupFile, git: git)
-    async let dateReleasedPatch = Repairable.replaceDateReleased.gather(backupFile, git: git)
+  private static func gatherHistoryPatches(_ repository: Repository) async throws -> Patch {
+    async let dateAddedPatch = Repairable.replaceDateAddeds.gather(repository: repository)
+    async let dateReleasedPatch = Repairable.replaceDateReleased.gather(repository: repository)
     // .replacePlay is still experimental.
     return try await dateAddedPatch.merge(try await dateReleasedPatch).sorted()
   }
 
-  private static func gatherAllPatches(_ backupFile: URL, git: Git) async throws -> Patch {
-    async let libraryChanges = try await gatherLibraryPatches(backupFile, git: git)
-    async let historyChanges = try await gatherHistoryPatches(backupFile, git: git)
+  private static func gatherAllPatches(_ repository: Repository) async throws -> Patch {
+    async let libraryChanges = try await gatherLibraryPatches(repository)
+    async let historyChanges = try await gatherHistoryPatches(repository)
 
     return try await libraryChanges.merge(try await historyChanges).sorted()
   }
 
   func gather(
-    _ backupFile: URL,
-    git: Git,
+    repository: Repository,
     correction: String = ""
   ) async throws -> Patch {
     switch self {
     case .replacePersistentIds:
       let lookup = try identifierLookupCorrections(from: correction)
-      return try await identifierCorrections(backupFile: backupFile, git: git) {
+      return try await identifierCorrections(repository: repository) {
         Set(
           lookup.map { IdentityRepair(persistentID: $0.key, correction: .persistentID($0.value)) })
       } createCorrection: {
@@ -263,7 +253,7 @@ extension Repairable {
       }
 
     case .replaceDateAddeds:
-      return try await historicalIdentifierCorrections(git: git, backupFile: backupFile) {
+      return try await historicalIdentifierCorrections(repository: repository) {
         $0.identityRepair(.dateAdded($0.dateAdded))
       } relevantChanges: {
         // For ids with more than 1 dateAdded correction, use the first correction, since it is sorted by tag.
@@ -271,7 +261,7 @@ extension Repairable {
       }
 
     case .replaceDateReleased:
-      return try await historicalIdentifierCorrections(git: git, backupFile: backupFile) {
+      return try await historicalIdentifierCorrections(repository: repository) {
         $0.identityRepair(.dateReleased($0.releaseDate))
       } relevantChanges: {
         // For ids with more than 1 dateReleased, use the earliest (sorted) correction.
@@ -281,7 +271,7 @@ extension Repairable {
       }
 
     case .replacePlay:
-      return try await historicalIdentifierCorrections(git: git, backupFile: backupFile) {
+      return try await historicalIdentifierCorrections(repository: repository) {
         $0.playIdentity
       } relevantChanges: {
         $0.relevantChanges()
@@ -290,16 +280,16 @@ extension Repairable {
     case .replaceDurations, .replaceComposers, .replaceComments, .replaceAlbumTitle, .replaceYear,
       .replaceTrackNumber, .replaceIdSongTitle, .replaceIdDiscCount, .replaceIdDiscNumber,
       .replaceArtist:
-      return try await gatherLibraryPatch(backupFile, git: git)
+      return try await gatherLibraryPatch(repository)
 
     case .libraryRepairs:
-      return try await Self.gatherLibraryPatches(backupFile, git: git)
+      return try await Self.gatherLibraryPatches(repository)
 
     case .historyRepairs:
-      return try await Self.gatherHistoryPatches(backupFile, git: git)
+      return try await Self.gatherHistoryPatches(repository)
 
     case .allRepairs:
-      return try await Self.gatherAllPatches(backupFile, git: git)
+      return try await Self.gatherAllPatches(repository)
     }
   }
 }
