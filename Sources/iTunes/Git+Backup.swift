@@ -49,7 +49,9 @@ extension Git {
   }
 
   fileprivate func backup(
-    _ filename: String, version: String, tagBuilder: (String?) async throws -> String,
+    _ filename: String,
+    version: String,
+    tagBuilder: (String?) async throws -> String,
     dataWriter: () async throws -> Void
   ) async throws {
     try await validateAndCheckout()
@@ -60,12 +62,13 @@ extension Git {
   }
 }
 
-func gitBackup(
-  file outputFile: URL,
-  version: String,
-  tagBuilder: (String?) async throws -> String,
-  dataWriter: () async throws -> Void
-) async throws {
-  try await Implementation.outOfProcess(directory: outputFile.parentDirectory).create().backup(
-    outputFile.filename, version: version, tagBuilder: tagBuilder, dataWriter: dataWriter)
+extension Repository {
+  func backup(
+    version: String,
+    tagBuilder: (String?) async throws -> String,
+    dataWriter: () async throws -> Void
+  ) async throws {
+    try await git.backup(
+      backupFile.filename, version: version, tagBuilder: tagBuilder, dataWriter: dataWriter)
+  }
 }
