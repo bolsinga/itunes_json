@@ -102,20 +102,8 @@ struct QueryCommand: AsyncParsableCommand {
       "Run the query on each database serially. Some SQL may ATTACH a single database, so this would be required."
   ) var serializeDatabaseQueries: Bool = false
 
-  /// Git Directory to read and write data from.
-  @Option(
-    help: "The path for the git directory to work with.",
-    transform: ({
-      let url = URL(filePath: $0, directoryHint: .isDirectory)
-      let manager = FileManager.default
-      if !manager.fileExists(atPath: url.relativePath) {
-        try manager.createDirectory(at: url, withIntermediateDirectories: true)
-      }
-
-      return url
-    })
-  )
-  var gitDirectory: URL
+  @OptionGroup var repositoryArguments: RepositoryArguments
+  var repository: Repository { repositoryArguments.repository }
 
   @Argument(help: "The SQL query to run.") var query: String = ""
 
@@ -144,6 +132,6 @@ struct QueryCommand: AsyncParsableCommand {
   }
 
   func run() async throws {
-    try await context.query(query, repository: Repository(directory: gitDirectory))
+    try await context.query(query, repository: repository)
   }
 }

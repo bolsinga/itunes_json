@@ -19,20 +19,8 @@ struct PatchCommand: AsyncParsableCommand {
   /// Input source type.
   @Flag(help: "Repairable type to build.") var repairable: Repairable = .replaceDurations
 
-  /// Git Directory to read and write data from.
-  @Option(
-    help: "The path for the git directory to work with.",
-    transform: ({
-      let url = URL(filePath: $0, directoryHint: .isDirectory)
-      let manager = FileManager.default
-      if !manager.fileExists(atPath: url.relativePath) {
-        try manager.createDirectory(at: url, withIntermediateDirectories: true)
-      }
-
-      return url
-    })
-  )
-  var gitDirectory: URL
+  @OptionGroup var repositoryArguments: RepositoryArguments
+  var repository: Repository { repositoryArguments.repository }
 
   /// Database File URL.
   @Option(help: "Database file path.", transform: ({ URL(filePath: $0) })) var databaseURL: URL?
@@ -65,7 +53,6 @@ struct PatchCommand: AsyncParsableCommand {
 
   func run() async throws {
     try await repairDestination().emit(
-      try await repairable.gather(
-        repository: Repository(directory: gitDirectory), correction: correction))
+      try await repairable.gather(repository: repository, correction: correction))
   }
 }

@@ -151,20 +151,8 @@ struct ArchiveCommand: AsyncParsableCommand {
   @Flag(help: "Lax normalized database schema table constraints")
   var laxSchema: [SchemaFlag] = []
 
-  /// Git Directory to read and write data from.
-  @Option(
-    help: "The path for the git directory to work with.",
-    transform: ({
-      let url = URL(filePath: $0, directoryHint: .isDirectory)
-      let manager = FileManager.default
-      if !manager.fileExists(atPath: url.relativePath) {
-        try manager.createDirectory(at: url, withIntermediateDirectories: true)
-      }
-
-      return url
-    })
-  )
-  var gitDirectory: URL
+  @OptionGroup var repositoryArguments: RepositoryArguments
+  var repository: Repository { repositoryArguments.repository }
 
   /// Output Directory for batch results.
   @Option(
@@ -197,7 +185,7 @@ struct ArchiveCommand: AsyncParsableCommand {
       DatabaseContext(storage: .file(outputFile), schemaOptions: laxSchema.schemaOptions))
     let archiveDB = try await format.database(tracks: [])
 
-    let databases = Repository(directory: gitDirectory).databases(
+    let databases = repository.databases(
       .flat(FlatTracksDatabaseContext(storage: .memory)))
 
     async let archiveDBPath = archiveDB.filename

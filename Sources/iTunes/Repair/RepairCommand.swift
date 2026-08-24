@@ -14,20 +14,8 @@ struct RepairCommand: AsyncParsableCommand {
   /// Input source type.
   @Flag(help: "Patchable type to build.") var patchable: Patchable = .replaceDurations
 
-  /// Git Directory to read and write data from.
-  @Option(
-    help: "The path for the git directory to work with.",
-    transform: ({
-      let url = URL(filePath: $0, directoryHint: .isDirectory)
-      let manager = FileManager.default
-      if !manager.fileExists(atPath: url.relativePath) {
-        try manager.createDirectory(at: url, withIntermediateDirectories: true)
-      }
-
-      return url
-    })
-  )
-  var gitDirectory: URL
+  @OptionGroup var repositoryArguments: RepositoryArguments
+  var repository: Repository { repositoryArguments.repository }
 
   /// Patch File URL.
   @Option(
@@ -45,7 +33,7 @@ struct RepairCommand: AsyncParsableCommand {
     let destinationBranch = destinationBranch ?? patchable.rawValue
 
     try await patch.patch(
-      repository: Repository(directory: gitDirectory),
+      repository: repository,
       branch: destinationBranch,
       version: Self.configuration.version)
   }
