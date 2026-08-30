@@ -7,7 +7,6 @@
 
 import ArgumentParser
 import Foundation
-import GitLibrary
 
 extension Batch: EnumerableFlag {}
 
