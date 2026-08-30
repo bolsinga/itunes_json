@@ -1,12 +1,11 @@
 //
-//  Git+Tracks.swift
+//  Repository+Tracks.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 11/30/24.
 //
 
 import Foundation
-import GitLibrary
 import os
 
 extension Logger {
@@ -19,9 +18,8 @@ extension Tag where Item == Data {
   }
 }
 
-extension Git {
+extension Repository {
   func transformTracks<T: Sendable>(
-    filename: String,
     transform: @escaping @Sendable (String, [Track]) async throws -> T
   ) -> AsyncThrowingStream<Tag<T>, any Error> {
     let (stream, continuation) = AsyncThrowingStream<Tag<T>, Error>.makeStream()
@@ -30,7 +28,7 @@ extension Git {
 
       do {
         try await withThrowingTaskGroup(of: Void.self) { group in
-          for try await tagData in tagDatum(filename: filename) {
+          for try await tagData in tagDatum() {
             group.addTask {
               Logger.transform.info("Transform Tag: \(tagData.tag)")
               continuation.yield(

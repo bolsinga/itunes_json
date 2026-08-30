@@ -7,7 +7,6 @@
 
 import ArgumentParser
 import Foundation
-import GitLibrary
 
 /// Enum representing how the SQL query result should be transformed.
 enum Transform: CaseIterable {
@@ -26,19 +25,6 @@ private enum TransformContext {
   case raw(DatabaseFormat)
 }
 
-extension Repository {
-  fileprivate func uniqueTracks(query: String, format: DatabaseFormat) async throws
-    -> [TaggedTracks]
-  {
-    try await git.uniqueTracks(
-      query: query, format: format, filename: backupFile.filename)
-  }
-
-  fileprivate func printOutput(query: String, format: DatabaseFormat) async throws {
-    try await git.printOutput(query: query, format: format, filename: backupFile.filename)
-  }
-}
-
 extension TransformContext {
   fileprivate func query(_ query: String, repository: Repository) async throws {
     switch self {
@@ -54,11 +40,10 @@ extension TransformContext {
   }
 }
 
-extension Git {
-  fileprivate func rowOutput(query: String, format: DatabaseFormat, filename: String) async throws
-    -> [Tag<[String]>]
+extension Repository {
+  fileprivate func rowOutput(query: String, format: DatabaseFormat) async throws -> [Tag<[String]>]
   {
-    try await transformRows(query: query, format: format, filename: filename) {
+    try await transformRows(query: query, format: format) {
       $0.flatMap { rows in
         guard !rows.isEmpty else { return [String]() }
         let columnNames = rows[0].map { $0.column }.joined(separator: "|")
@@ -70,9 +55,8 @@ extension Git {
     }
   }
 
-  fileprivate func printOutput(query: String, format: DatabaseFormat, filename: String) async throws
-  {
-    let lines = try await rowOutput(query: query, format: format, filename: filename).sorted(by: {
+  fileprivate func printOutput(query: String, format: DatabaseFormat) async throws {
+    let lines = try await rowOutput(query: query, format: format).sorted(by: {
       $0.tag < $1.tag
     }).flatMap {
       let tag = $0.tag

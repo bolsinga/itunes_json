@@ -128,14 +128,6 @@ extension Database {
   }
 }
 
-extension Repository {
-  fileprivate func databases(_ format: DatabaseFormat)
-    -> AsyncThrowingStream<Tag<Database>, any Error>
-  {
-    git.databases(format, filename: backupFile.filename)
-  }
-}
-
 struct ArchiveCommand: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "archive",

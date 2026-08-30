@@ -20,11 +20,3 @@ struct Repository {
 
   var backupFile: URL { directory.backupFile }
 }
-
-extension Repository {
-  func transformTracks<T: Sendable>(
-    transform: @escaping @Sendable (String, [Track]) async throws -> T
-  ) -> AsyncThrowingStream<Tag<T>, any Error> {
-    git.transformTracks(filename: backupFile.filename, transform: transform)
-  }
-}
