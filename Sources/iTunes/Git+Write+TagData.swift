@@ -35,7 +35,7 @@ extension Git {
 }
 
 extension Tag where Item == Data {
-  fileprivate func add(to git: Git, backupFile: URL, version: String) async throws {
+  fileprivate func add(to git: any Git, backupFile: URL, version: String) async throws {
     Logger.writeTagData.info("Add: \(tag)")
 
     // this makes memory shoot up, unexpectedly.
