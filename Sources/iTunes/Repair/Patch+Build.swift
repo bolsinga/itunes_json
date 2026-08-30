@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import GitLibrary
 
 private enum TagError: Error {
   case unstructuredTag

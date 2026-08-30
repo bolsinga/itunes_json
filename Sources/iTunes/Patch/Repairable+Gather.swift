@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import GitLibrary
 import OrderedCollections
 
 private func currentTracks() async throws -> [Track] {
