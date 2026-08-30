@@ -10,7 +10,7 @@ import GitLibrary
 
 struct Repository {
   private let directory: URL
-  let git: Git
+  let git: any Git
 
   internal init(directory: URL) {
     self.directory = directory
