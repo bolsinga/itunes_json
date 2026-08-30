@@ -14,7 +14,7 @@ struct Repository {
 
   internal init(directory: URL) {
     self.directory = directory
-    self.git = Implementation.outOfProcess(directory: directory, suppressStandardErr: true)
+    self.git = Implementation.subProcess(directory: directory, suppressStandardErr: true)
       .create()
   }
 
