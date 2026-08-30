@@ -10,11 +10,11 @@ import GitLibrary
 
 struct Repository {
   private let directory: URL
-  let git: any Git
+  let git: Git
 
   internal init(directory: URL) {
     self.directory = directory
-    self.git = Implementation.subProcess(directory: directory, suppressStandardErr: true)
+    self.git = Implementation.outOfProcess(directory: directory, suppressStandardErr: true)
       .create()
   }
 
