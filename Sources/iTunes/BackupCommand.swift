@@ -20,53 +20,12 @@ enum DestinationContext: EnumerableFlag {
   /// Emit a Flat sqlite3 database that represents the Tracks.
   case flat
 
-  func context(outputFile: URL?, schemaOptions: SchemaOptions, version: String) throws
-    -> Destination
-  {
-    enum DestinationError: Error {
-      case noDBOutputFile
-      case invalidUpdateDB
-    }
-
-    let output: Output = {
-      guard let outputFile else { return .standardOut }
-      return .file(outputFile)
-    }()
-
-    switch self {
-    case .json:
-      return .json(output)
-    case .jsonGit:
-      return .jsonGit(output, GitBackupContext(version: version))
-    case .sqlCode:
-      return .sqlCode(
-        SQLCodeContext(output: output, schemaOptions: schemaOptions, loggingToken: nil))
-    case .db:
-      switch output {
-      case .file(let outputFile):
-        return .db(
-          .normalized(
-            DatabaseContext(
-              storage: .file(outputFile), schemaOptions: schemaOptions)))
-      case .standardOut:
-        throw DestinationError.noDBOutputFile
-      }
-    case .flat:
-      switch output {
-      case .file(let outputFile):
-        return .db(.flat(FlatTracksDatabaseContext(storage: .file(outputFile))))
-      case .standardOut:
-        throw DestinationError.noDBOutputFile
-      }
-    }
-  }
-
-  func outputFile(using directory: URL, name: String?) -> URL? {
+  fileprivate func outputFile(using directory: URL, name: String?) -> URL? {
     let name = name ?? "iTunes".defaultDestinationName
-    return directory.appending(path: "\(name).\(self.filenameExtension)")
+    return directory.appending(path: "\(name).\(filenameExtension)")
   }
 
-  var filenameExtension: String {
+  fileprivate var filenameExtension: String {
     switch self {
     case .json, .jsonGit:
       "json"
@@ -138,7 +97,7 @@ struct BackupCommand: AsyncParsableCommand {
   )
   var patchURL: URL?
 
-  /// Outputfile where data will be writen, if outputDirectory is not specified.
+  /// Output-file where data will be written, if outputDirectory is not specified.
   private var outputFile: URL? {
     guard let outputDirectory else { return nil }
 
@@ -147,16 +106,21 @@ struct BackupCommand: AsyncParsableCommand {
 
   /// Validates the input matrix.
   func validate() throws {
-    if destination == .db && outputFile == nil {
-      throw ValidationError("--db requires outputDirectory to be set")
-    }
-
-    if destination == .jsonGit && outputFile == nil {
-      throw ValidationError("--json-git requires outputDirectory to be set")
+    switch destination {
+    case .db, .flat:
+      if outputFile == nil {
+        throw ValidationError("\(destination) requires an outputFile to be set")
+      }
+    case .jsonGit:
+      if outputDirectory == nil {
+        throw ValidationError("\(destination) requires an outputDirectory to be set")
+      }
+    default:
+      break
     }
   }
 
-  func tracks() async throws -> [Track] {
+  private func tracks() async throws -> [Track] {
     var tracks = try await source.gather(reduce: reduce)
     if let patchURL {
       tracks = try await tracks.backupPatch(patchURL)
@@ -164,12 +128,39 @@ struct BackupCommand: AsyncParsableCommand {
     return tracks
   }
 
+  private var output: Output {
+    guard let outputFile else { return .standardOut }
+    return .file(outputFile)
+  }
+
+  private var context: Destination {
+    switch destination {
+    case .json:
+      return .json(output)
+    case .jsonGit:
+      guard let outputDirectory else {
+        preconditionFailure(".jsonGit requires an output directory. failed validation")
+      }
+      return .jsonGit(
+        GitBackupContext(
+          repository: Repository(directory: outputDirectory), version: Self.configuration.version))
+    case .sqlCode:
+      return .sqlCode(
+        SQLCodeContext(output: output, schemaOptions: laxSchema.schemaOptions, loggingToken: nil))
+    case .db:
+      guard let outputFile else {
+        preconditionFailure(".db requires an output file. failed validation")
+      }
+      return .db(
+        .normalized(
+          DatabaseContext(storage: .file(outputFile), schemaOptions: laxSchema.schemaOptions)))
+    case .flat:
+      guard let outputFile else { fatalError(".flat requires an output file. failed validation") }
+      return .db(.flat(FlatTracksDatabaseContext(storage: .file(outputFile))))
+    }
+  }
+
   func run() async throws {
-    try await destination.context(
-      outputFile: outputFile,
-      schemaOptions: laxSchema.schemaOptions,
-      version: Self.configuration.version
-    )
-    .emit(tracks())
+    try await context.emit(tracks())
   }
 }

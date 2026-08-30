@@ -7,63 +7,46 @@
 
 import Foundation
 
-protocol DestinationFileWriting {
-  var outputFile: URL { get }
-  func write(data: Data) async throws
+extension Output {
+  fileprivate func emit(_ data: Data) throws {
+    switch self {
+    case .file(let url):
+      try data.write(to: url, options: .atomic)
+    case .standardOut:
+      print("\(try data.asUTF8String())")
+    }
+  }
 }
 
 extension Destination {
-  fileprivate func fileWriter(for outputFile: URL) -> DestinationFileWriting {
-    let fileWriter: DestinationFileWriting = FileWriter(outputFile: outputFile)
-    switch self {
-    case .jsonGit(_, let gitBackupContext):
-      return GitBackupWriter(fileWriter: fileWriter, gitBackupContext: gitBackupContext)
-    default:
-      return fileWriter
-    }
-  }
-
-  fileprivate var output: Output? {
-    switch self {
-    case .json(let output), .jsonGit(let output, _):
-      return output
-    case .sqlCode(let context):
-      return context.output
-    case .db(let context):
-      switch context.storage {
-      case .file(let url):
-        return .file(url)
-      case .memory:
-        return nil
-      }
-    }
-  }
-
   func emit(_ tracks: [Track]) async throws {
     enum DataExportError: Error {
       case noTracks
-      case noOutput
+      case noMemoryDatabase
     }
 
     guard !tracks.isEmpty else {
       throw DataExportError.noTracks
     }
 
-    guard let output else {
-      throw DataExportError.noOutput
-    }
-
     let tracks = tracks.sorted()
 
-    let dataProvider = {
-      try await self.data(for: tracks)
-    }
+    let data = try await data(for: tracks)
 
-    switch output {
-    case .file(let url):
-      try await self.fileWriter(for: url).write(data: try await dataProvider())
-    case .standardOut:
-      print("\(try await dataProvider().asUTF8String())")
+    switch self {
+    case .json(let output):
+      try output.emit(data)
+    case .jsonGit(let context):
+      try await context.write(data: data)
+    case .sqlCode(let context):
+      try context.output.emit(data)
+    case .db(let format):
+      switch format.storage {
+      case .file(let url):
+        try Output.file(url).emit(data)
+      case .memory:
+        throw DataExportError.noMemoryDatabase
+      }
     }
   }
 }
