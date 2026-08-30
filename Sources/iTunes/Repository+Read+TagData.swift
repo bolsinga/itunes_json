@@ -1,12 +1,11 @@
 //
-//  Git+Read+TagData.swift
+//  Repository+Read+TagData.swift
 //  itunes_json
 //
 //  Created by Greg Bolsinga on 11/30/24.
 //
 
 import Foundation
-import GitLibrary
 import os
 
 extension Logger {
@@ -15,24 +14,24 @@ extension Logger {
 
 private let limit = Int.max
 
-extension Git {
-  func tagDatum(filename: String) -> AsyncThrowingStream<Tag<Data>, Error> {
+extension Repository {
+  func tagDatum() -> AsyncThrowingStream<Tag<Data>, Error> {
     let (stream, continuation) = AsyncThrowingStream<Tag<Data>, Error>.makeStream()
     Task.detached {
       defer { continuation.finish() }
 
       do {
-        try await status()
+        try await git.status()
 
         var count = 0
 
-        for tag in try await tags().stampOrderedMatching {
+        for tag in try await git.tags().stampOrderedMatching {
           guard count < limit else { break }
 
           Logger.tagStream.info("tag: \(tag)")
 
           continuation.yield(
-            Tag(tag: tag, item: try await show(commit: tag, path: filename)))
+            Tag(tag: tag, item: try await git.show(commit: tag, path: backupFile.filename)))
 
           count += 1
         }
