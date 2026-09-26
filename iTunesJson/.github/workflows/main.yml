@@ -9,14 +9,14 @@ on:
 
 jobs:
   build:
-    runs-on: macos-26
+    runs-on: xcode-27
 
     steps:
     - uses: actions/checkout@v4
     - name: sw_vers
       run: sw_vers
-    - name: Switch to Xcode 26
-      run: sudo xcode-select -s "/Applications/Xcode_26.6.app"
+    - name: Switch to Xcode 27
+      run: sudo xcode-select -s "/Applications/Xcode_27.0.app"
     - name: Show SDKs
       run: xcodebuild -showsdks
     - name: Build
