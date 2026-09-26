@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-26
+    runs-on: xcode-27
 
     steps:
     - uses: actions/checkout@v7
@@ -16,8 +16,8 @@ jobs:
       run: sw_vers
     - name: Available Xcodes
       run: ls /Applications | grep Xcode
-    - name: Switch to Xcode 26
-      run: sudo xcode-select -s "/Applications/Xcode_26.6.app/Contents/Developer"
+    - name: Switch to Xcode 27
+      run: sudo xcode-select -s "/Applications/Xcode_27.0.app/Contents/Developer"
     - name: Xcode Version
       run: xcodebuild -version
     - name: Install iOS
