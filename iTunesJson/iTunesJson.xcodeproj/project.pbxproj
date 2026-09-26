@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 110;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -25,11 +25,9 @@
 /* Begin PBXFrameworksBuildPhase section */
 		FE82911A2CD28D4D00AA6AC6 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				FE8291312CD28EE500AA6AC6 /* iTunes in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -63,8 +61,6 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			fileSystemSynchronizedGroups = (
 				FE82911F2CD28D4D00AA6AC6 /* iTunesJson */,
 			);
@@ -84,7 +80,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1610;
-				LastUpgradeCheck = 1620;
+				LastUpgradeCheck = 2700;
 				TargetAttributes = {
 					FE82911C2CD28D4D00AA6AC6 = {
 						CreatedOnToolsVersion = 16.1;
@@ -103,7 +99,7 @@
 			packageReferences = (
 				FE82912F2CD28EE500AA6AC6 /* XCRemoteSwiftPackageReference "itunes_json" */,
 			);
-			preferredProjectObjectVersion = 77;
+			preferredProjectObjectVersion = 110;
 			productRefGroup = FE82911E2CD28D4D00AA6AC6 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -116,25 +112,21 @@
 /* Begin PBXResourcesBuildPhase section */
 		FE82911B2CD28D4D00AA6AC6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		FE8291192CD28D4D00AA6AC6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		FE82912A2CD28D4E00AA6AC6 /* Debug */ = {
+		FE82912A2CD28D4E00AA6AC6 /* Debug configuration for PBXProject "iTunesJson" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -192,12 +184,13 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		FE82912B2CD28D4E00AA6AC6 /* Release */ = {
+		FE82912B2CD28D4E00AA6AC6 /* Release configuration for PBXProject "iTunesJson" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -248,11 +241,12 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 			};
 			name = Release;
 		};
-		FE82912D2CD28D4E00AA6AC6 /* Debug */ = {
+		FE82912D2CD28D4E00AA6AC6 /* Debug configuration for PBXNativeTarget "iTunesJson" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = iTunesJson/iTunesJson.entitlements;
@@ -278,7 +272,7 @@
 			};
 			name = Debug;
 		};
-		FE82912E2CD28D4E00AA6AC6 /* Release */ = {
+		FE82912E2CD28D4E00AA6AC6 /* Release configuration for PBXNativeTarget "iTunesJson" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = iTunesJson/iTunesJson.entitlements;
@@ -310,19 +304,17 @@
 		FE8291182CD28D4D00AA6AC6 /* Build configuration list for PBXProject "iTunesJson" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				FE82912A2CD28D4E00AA6AC6 /* Debug */,
-				FE82912B2CD28D4E00AA6AC6 /* Release */,
+				FE82912A2CD28D4E00AA6AC6 /* Debug configuration for PBXProject "iTunesJson" */,
+				FE82912B2CD28D4E00AA6AC6 /* Release configuration for PBXProject "iTunesJson" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		FE82912C2CD28D4E00AA6AC6 /* Build configuration list for PBXNativeTarget "iTunesJson" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				FE82912D2CD28D4E00AA6AC6 /* Debug */,
-				FE82912E2CD28D4E00AA6AC6 /* Release */,
+				FE82912D2CD28D4E00AA6AC6 /* Debug configuration for PBXNativeTarget "iTunesJson" */,
+				FE82912E2CD28D4E00AA6AC6 /* Release configuration for PBXNativeTarget "iTunesJson" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
