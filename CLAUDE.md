@@ -29,7 +29,7 @@ Swift package that snapshots the Music library to JSON, commits each snapshot to
 - **MusicKit is incomplete.** It is implemented but does not fully work as expected ([#405](https://github.com/bolsinga/itunes_json/issues/405)). Treat iTunesLibrary as the reliable source.
 - **Daylight saving bug.** Dates in the data from Music are affected by a daylight saving bug, whichever source is used ([#328](https://github.com/bolsinga/itunes_json/issues/328)). Be careful with date comparisons.
 - **Repair.** It writes a new branch, bumps the tag version (`-V<n+1>-`), never pushes, and needs a clean tree. `replace-persistent-ids` changes the join key, so it is dangerous.
-- **Patch matching.** Patch and repair join on `persistentID`. `String.isSimilar` has no callers, because patch matching is by ID, not by similarity.
+- **Patch matching.** Patch and repair join on `persistentID`.
 - **History walk.** `Repository.transformTracks` starts one task per tag with no cap, and results arrive in completion order, so sort by `tag`. Only the highest `StructuredTag` per date is read.
 - **SQLite schema.**
   - `plays` stores Music's cumulative count (`itunesid, date, count`). There is no `delta` or `songid` column.

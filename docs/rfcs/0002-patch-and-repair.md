@@ -50,9 +50,9 @@ Patching is driven by `Repairable.gather`. There are two truth models.
 
 **Misc.** `.replaceIdSongTitle` always rewrites the title, with no equality check (Track+Patch.swift `apply(correction:)`).
 
-### "Similar" matching
+### Matching
 
-The current gather code matches strictly by `persistentID` (`Identifiable.id`). `String.isSimilar(to:)` (Sources/iTunes/String+Similar.swift) is the earlier heuristic. It strips a leading "The", "A" or "An", trims whitespace, removes all non-alphanumerics, then compares case- and diacritic-insensitively. It has no remaining callers in Sources/. It is dead code, though tests may cover it. Treat persistent ID as the join key. Anything that changes persistent IDs breaks matching, which is why `replace-persistent-ids` exists.
+Patch and repair match tracks strictly by `persistentID` (`Identifiable.id`). Treat persistent ID as the join key. Anything that changes persistent IDs breaks matching, which is why `replace-persistent-ids` exists.
 
 ### Play repair
 
@@ -90,6 +90,5 @@ The original branch and tags are untouched. The new tags differ by version only,
 1. **No track-count repair.** A `correct_trackcount` table exists, but `CorrectionsDBRow.trackcount` is always nil and there is no `Repairable` case for track counts. Flag names derive from the camelCase enum cases via `EnumerableFlag`.
 2. **CorrectionsDBRow bugs.** `year` and `duration` in Sources/iTunes/CorrectionsDBRow.swift read from `.trackNumber`, not `.year` / `.duration`. Writing a patch to `.db` therefore inserts NULL, and the `NOT NULL` constraint fails for those tables. The JSON path is unaffected.
 3. **Patch rows are `INSERT OR IGNORE`.** Two different corrections for one ID in one type silently keep the first.
-4. **Is `String.isSimilar` still needed**, or should it be removed?
-5. **`Patchable` duplicates `Repairable`.** `createPatch` is a switch with identical arms. Could `repair` take just a path and an optional branch name?
-6. **`Optional<Comparable>.<`** treats nil < nil as true. Is that intentional?
+4. **`Patchable` duplicates `Repairable`.** `createPatch` is a switch with identical arms. Could `repair` take just a path and an optional branch name?
+5. **`Optional<Comparable>.<`** treats nil < nil as true. Is that intentional?
