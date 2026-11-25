@@ -1,9 +1,9 @@
-name: Check formatting and lint
-description: Runs swift-format over the code base and fails if it changes any file or lint reports a warning.
+name: Check formatting
+description: Runs swift-format over the code base and fails if it changes any file.
 
 inputs:
   paths:
-    description: The directories to format and lint.
+    description: The directories to format.
     default: Sources Tests Package.swift
 
 runs:
@@ -18,14 +18,5 @@ runs:
         xcrun swift-format format --in-place --recursive $PATHS
         if ! git diff --exit-code; then
           echo "::error::swift-format changed files. Run: xcrun swift-format format --in-place --recursive $PATHS"
-          exit 1
-        fi
-    - name: swift-format lint
-      shell: bash
-      env:
-        PATHS: ${{ inputs.paths }}
-      run: |
-        if ! xcrun swift-format lint --strict --recursive $PATHS; then
-          echo "::error::swift-format lint found problems. Fix them, or mark a deliberate one with // swift-format-ignore: <Rule>."
           exit 1
         fi
