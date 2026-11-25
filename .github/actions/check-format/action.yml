@@ -1,0 +1,22 @@
+name: Check formatting
+description: Runs swift-format over the code base and fails if it changes any file.
+
+inputs:
+  paths:
+    description: The directories to format.
+    default: Sources Tests Package.swift
+
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/setup-xcode
+    - name: swift-format
+      shell: bash
+      env:
+        PATHS: ${{ inputs.paths }}
+      run: |
+        xcrun swift-format format --in-place --recursive $PATHS
+        if ! git diff --exit-code; then
+          echo "::error::swift-format changed files. Run: xcrun swift-format format --in-place --recursive $PATHS"
+          exit 1
+        fi

@@ -1,4 +1,4 @@
-name: Swift
+name: release-builds
 
 on:
   release:
@@ -7,26 +7,27 @@ on:
 
 jobs:
   build:
+    runs-on: xcode-27
 
+    strategy:
+      fail-fast: false
+      matrix:
+        destination:
+          - 'generic/platform=macOS'
+          - 'generic/platform=iOS Simulator'
+
+    steps:
+    - uses: actions/checkout@v7
+    - uses: ./.github/actions/setup-xcode
+    - name: Build / Test
+      if: matrix.destination == 'generic/platform=macOS'
+      run: swift test -v -Xswiftc -warnings-as-errors
+    - name: Build iOS / macOS
+      run: xcodebuild -verbose -skipPackagePluginValidation -scheme iTunes -destination '${{ matrix.destination }}'
+
+  format:
     runs-on: xcode-27
 
     steps:
     - uses: actions/checkout@v7
-    - name: sw_vers
-      run: sw_vers
-    - name: Available Xcodes
-      run: ls /Applications | grep Xcode
-    - name: Switch to Xcode 27
-      run: sudo xcode-select -s "/Applications/Xcode_27.0.app/Contents/Developer"
-    - name: Xcode Version
-      run: xcodebuild -version
-    - name: Install iOS
-      run: xcodebuild -downloadPlatform iOS
-    - name: Show SDKs
-      run: xcodebuild -showsdks
-    - name: Show Destinations
-      run: xcodebuild -scheme iTunes -showdestinations
-    - name: Build / Test
-      run: swift test -v -Xswiftc -warnings-as-errors
-    - name: Build iOS / macOS
-      run: xcodebuild -verbose -skipPackagePluginValidation -scheme iTunes -destination "generic/platform=iOS Simulator" -destination "generic/platform=macOS"
+    - uses: ./.github/actions/check-format
