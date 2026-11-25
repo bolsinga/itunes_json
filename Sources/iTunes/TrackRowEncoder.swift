@@ -76,9 +76,8 @@ struct TrackRowEncoder {
   var playTableBuilder: PlayTableBuilder {
     let playRows = rows.filter { $0.play != nil }
 
-    // swift-format-ignore: ReplaceForEachWithForLoop
-    playRows.duplicatePlayDates.forEach {
-      validation.duplicatePlayDate.error("\($0.debugLogInformation, privacy: .public)")
+    for playRow in playRows.duplicatePlayDates {
+      validation.duplicatePlayDate.error("\(playRow.debugLogInformation, privacy: .public)")
     }
 
     return PlayTableBuilder(tracks: playRows)
