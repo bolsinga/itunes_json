@@ -7,6 +7,11 @@
 
 import Foundation
 import MusicKit
+import os
+
+extension Logger {
+  fileprivate static let authorization = Logger(category: "musickit.authorization")
+}
 
 extension Track {
   init(section album: MusicLibrarySection<Album, Song>, song: Song) {
@@ -108,7 +113,7 @@ extension Track {
 extension Track {
   static func requestAccess() async {
     let musicAuthorizationStatus = await MusicAuthorization.request()
-    print("\(musicAuthorizationStatus)")
+    Logger.authorization.info("\(String(describing: musicAuthorizationStatus), privacy: .public)")
   }
 
   static func gatherWithMusicKit() async throws -> [Track] {
