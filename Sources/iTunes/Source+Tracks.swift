@@ -20,11 +20,10 @@ extension Source {
       #if canImport(iTunesLibrary)
         return try Track.gatherAllTracks()
       #else
-        // swift-format-ignore: TypeNamesShouldBeCapitalized
-        enum iTunesError: Error {
+        enum ITunesError: Error {
           case notAvailable
         }
-        throw iTunesError.notAvailable
+        throw ITunesError.notAvailable
       #endif
     case .musickit:
       return try await Track.gatherWithMusicKit()
