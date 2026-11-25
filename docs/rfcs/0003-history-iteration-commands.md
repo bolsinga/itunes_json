@@ -73,7 +73,7 @@ Both run the query with the tag bound as the first positional argument (`[.strin
 
 `Batch.build` calls `transformTracks`. For each tag it builds a `Destination` (`sqlCode`, `db(.normalized)`, or `db(.flat)`), always in-memory storage with logging token `batch-<tag>`. It asks the destination for `Data` and writes `<tag>.sql` or `<tag>.db` into the output directory. For `.sql` the context's output is `.standardOut` as written, but the bytes are still returned and written per tag. Writing happens serially in the consuming `for try await` loop.
 
-On the author's full history, `--db` (normalized) wrote databases for far fewer snapshots than `--flat` and `--sql`. The ones missing are the middle years, and the run reported no error and exited with status 0. `query --raw` also uses the normalized path and saw the same reduced set. The cause was not investigated.
+On the author's full history, `--db` (normalized) wrote databases for far fewer snapshots than `--flat` and `--sql`. The ones missing are the middle years, and the run reported no error and exited with status 0. `query --raw` also uses the normalized path and saw the same reduced set. The cause was not investigated ([#922](https://github.com/bolsinga/itunes_json/issues/922)).
 
 ### `query`
 
@@ -111,7 +111,7 @@ The README's Future goal: back up into a single existing database instead of man
 - The README says the test data needs a lax `plays` schema. Pass `--lax-schema` to try it.
 - The archive SQL is long, hard to review, and has no unit tests. It is rebuilt from history on each run rather than adding the latest snapshot incrementally. (The SQL itself can be re-run, because of the `EXCEPT` guards.)
 - All flat snapshot databases are held open in memory at once, then sorted. This costs memory in proportion to history length, which is acceptable for a one-time run.
-- On the author's full history, `archive` stops with `UNIQUE constraint failed: artistids.itunesid`, even with every `--lax-schema` flag. The `artistids` and `albumids` mapping tables have no lax form. The cause was not investigated.
+- On the author's full history, `archive` stops with `UNIQUE constraint failed: artistids.itunesid`, even with every `--lax-schema` flag. The `artistids` and `albumids` mapping tables have no lax form. The cause was not investigated ([#921](https://github.com/bolsinga/itunes_json/issues/921)).
 - Duplicate-date and DST handling is heuristic. Data problems in the history (the README says "needs some work to properly fix some issues") would produce wrong plays rows.
 - The `archive` path argument is interpolated into the `ATTACH` SQL string without escaping. A path containing a single quote would break it.
 
