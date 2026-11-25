@@ -11,8 +11,7 @@ import Testing
 
 let previousName = "A"
 let basicName = "B"
-// swift-format-ignore: AlwaysUseLowerCamelCase
-let SubsequentName = "C"
+let subsequentName = "C"
 
 struct GitBackupNameTests {
   @Test func noExisting() {
@@ -60,11 +59,11 @@ struct GitBackupNameTests {
     #expect(
       "B-empty"
         == Backup.noChanges.backupName(
-          baseName: basicName, existingNames: [previousName, SubsequentName]))
+          baseName: basicName, existingNames: [previousName, subsequentName]))
     #expect(
       "B.01-empty"
         == Backup.noChanges.backupName(
-          baseName: basicName, existingNames: [previousName, basicName, SubsequentName]))
+          baseName: basicName, existingNames: [previousName, basicName, subsequentName]))
   }
 
   @Test func changes_multipleExisting() {
@@ -79,11 +78,11 @@ struct GitBackupNameTests {
     #expect(
       "B"
         == Backup.changes.backupName(
-          baseName: basicName, existingNames: [previousName, SubsequentName]))
+          baseName: basicName, existingNames: [previousName, subsequentName]))
     #expect(
       "B.01"
         == Backup.changes.backupName(
-          baseName: basicName, existingNames: [previousName, basicName, SubsequentName]))
+          baseName: basicName, existingNames: [previousName, basicName, subsequentName]))
   }
 
   @Test func newstuff() {
