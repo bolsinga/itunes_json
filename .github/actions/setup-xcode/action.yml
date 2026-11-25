@@ -1,0 +1,56 @@
+name: Set up Xcode
+description: Selects the newest installed Xcode of the minimum version's major release, and fails if it is older than the minimum.
+
+inputs:
+  minimum-version:
+    description: The oldest Xcode version that can build the project.
+    default: '27.0'
+
+runs:
+  using: composite
+  steps:
+    - name: sw_vers
+      shell: bash
+      run: sw_vers
+    - name: Available Xcodes
+      shell: bash
+      run: ls /Applications | grep Xcode
+    - name: Select Xcode
+      shell: bash
+      env:
+        MINIMUM_VERSION: ${{ inputs.minimum-version }}
+      run: |
+        set -euo pipefail
+        major="${MINIMUM_VERSION%%.*}"
+        xcode="$(ls -d /Applications/Xcode_"$major".*.app 2>/dev/null | sort -V | tail -n 1 || true)"
+        if [ -z "$xcode" ]; then
+          echo "::error::No Xcode $major.x is installed."
+          exit 1
+        fi
+        echo "Selecting $xcode"
+        sudo xcode-select -s "$xcode/Contents/Developer"
+    - name: Xcode - Accept License
+      shell: bash
+      run: sudo xcodebuild -license accept
+    - name: Xcode - First Launch
+      shell: bash
+      run: xcodebuild -runFirstLaunch
+    - name: Xcode Version
+      shell: bash
+      env:
+        MINIMUM_VERSION: ${{ inputs.minimum-version }}
+      run: |
+        set -euo pipefail
+        xcodebuild -version
+        version="$(xcodebuild -version | awk '/^Xcode/ { print $2 }')"
+        oldest="$(printf '%s\n%s\n' "$MINIMUM_VERSION" "$version" | sort -V | head -n 1)"
+        if [ "$oldest" != "$MINIMUM_VERSION" ]; then
+          echo "::error::Xcode $version is older than the minimum, $MINIMUM_VERSION."
+          exit 1
+        fi
+    - name: Show SDKs
+      shell: bash
+      run: xcodebuild -showsdks
+    - name: Show Destinations
+      shell: bash
+      run: xcodebuild -scheme iTunes -showdestinations
