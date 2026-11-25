@@ -34,7 +34,6 @@ Swift package that snapshots the Music library to JSON, commits each snapshot to
 - **SQLite schema.**
   - `plays` stores Music's cumulative count (`itunesid, date, count`). There is no `delta` or `songid` column, so the README example query fails.
   - `albums.artistid INTEGER NON NULL` is a typo, so the NOT NULL is not enforced.
-  - The `tracks` view column `discount` is a typo for `disccount`, so `Track(row:)` reads nil.
   - `Track(row:)` reads `count` from the flat table, but the table column is `playcount`.
   - `--lax-schema` relaxes only the four normalized tables.
   - `foreign_keys=ON` is set per connection.
