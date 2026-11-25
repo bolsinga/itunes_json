@@ -9,8 +9,7 @@ import Testing
 
 @testable import iTunes
 
-// swift-format-ignore: AlwaysUseLowerCamelCase
-let PreviousName = "A"
+let previousName = "A"
 // swift-format-ignore: AlwaysUseLowerCamelCase
 let BasicName = "B"
 // swift-format-ignore: AlwaysUseLowerCamelCase
@@ -31,7 +30,7 @@ struct GitBackupNameTests {
         == Backup.noChanges.backupName(baseName: BasicName, existingNames: ["\(BasicName).01"]))
     #expect(
       "B-empty"
-        == Backup.noChanges.backupName(baseName: BasicName, existingNames: [PreviousName]))
+        == Backup.noChanges.backupName(baseName: BasicName, existingNames: [previousName]))
   }
 
   @Test func changes_oneExisting() {
@@ -39,53 +38,53 @@ struct GitBackupNameTests {
     #expect(
       "B.02"
         == Backup.changes.backupName(baseName: BasicName, existingNames: ["\(BasicName).01"]))
-    #expect("B" == Backup.changes.backupName(baseName: BasicName, existingNames: [PreviousName]))
+    #expect("B" == Backup.changes.backupName(baseName: BasicName, existingNames: [previousName]))
   }
 
   @Test func noChanges_multipleExisting() {
     #expect(
       "B.01-empty"
         == Backup.noChanges.backupName(
-          baseName: BasicName, existingNames: [PreviousName, BasicName]))
+          baseName: BasicName, existingNames: [previousName, BasicName]))
     #expect(
       "B.01-empty"
         == Backup.noChanges.backupName(
-          baseName: BasicName, existingNames: [PreviousName, BasicName, "\(BasicName)-empty"]))
+          baseName: BasicName, existingNames: [previousName, BasicName, "\(BasicName)-empty"]))
     #expect(
       "B.02-empty"
         == Backup.noChanges.backupName(
-          baseName: BasicName, existingNames: [PreviousName, BasicName, "\(BasicName).01-empty"]))
+          baseName: BasicName, existingNames: [previousName, BasicName, "\(BasicName).01-empty"]))
     #expect(
       "B.02-empty"
         == Backup.noChanges.backupName(
-          baseName: BasicName, existingNames: [PreviousName, BasicName, "\(BasicName).01"]))
+          baseName: BasicName, existingNames: [previousName, BasicName, "\(BasicName).01"]))
     #expect(
       "B-empty"
         == Backup.noChanges.backupName(
-          baseName: BasicName, existingNames: [PreviousName, SubsequentName]))
+          baseName: BasicName, existingNames: [previousName, SubsequentName]))
     #expect(
       "B.01-empty"
         == Backup.noChanges.backupName(
-          baseName: BasicName, existingNames: [PreviousName, BasicName, SubsequentName]))
+          baseName: BasicName, existingNames: [previousName, BasicName, SubsequentName]))
   }
 
   @Test func changes_multipleExisting() {
     #expect(
       "B.01"
         == Backup.changes.backupName(
-          baseName: BasicName, existingNames: [PreviousName, BasicName]))
+          baseName: BasicName, existingNames: [previousName, BasicName]))
     #expect(
       "B.02"
         == Backup.changes.backupName(
-          baseName: BasicName, existingNames: [PreviousName, BasicName, "\(BasicName).01"]))
+          baseName: BasicName, existingNames: [previousName, BasicName, "\(BasicName).01"]))
     #expect(
       "B"
         == Backup.changes.backupName(
-          baseName: BasicName, existingNames: [PreviousName, SubsequentName]))
+          baseName: BasicName, existingNames: [previousName, SubsequentName]))
     #expect(
       "B.01"
         == Backup.changes.backupName(
-          baseName: BasicName, existingNames: [PreviousName, BasicName, SubsequentName]))
+          baseName: BasicName, existingNames: [previousName, BasicName, SubsequentName]))
   }
 
   @Test func newstuff() {
