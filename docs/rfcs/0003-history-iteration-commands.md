@@ -42,7 +42,7 @@ A file-private `limit = Int.max` caps the tag count. It is effectively a debuggi
 
 `Repository.transformTracks(transform:)` (`Repository+Tracks.swift`) is the core primitive. Inside a detached task it iterates `tagDatum()`. For each tag it adds a child task to a throwing task group. That task decodes the data with `Track.array(from:)` (`Decodable+Array.swift`) and calls the `@Sendable` async `transform(tag, tracks)`. Results are yielded to an `AsyncThrowingStream<Tag<T>>`.
 
-All tags are therefore processed concurrently. Results arrive in completion order, not tag order. Consumers that need order sort by `tag` afterwards. Errors from the task group are caught and passed to `continuation.finish(throwing:)`. The `defer { continuation.finish() }` is a safety net.
+All tags are therefore processed concurrently. Results arrive in completion order, not tag order. Consumers that need order sort by `tag` afterwards, each on its own ([#923](https://github.com/bolsinga/itunes_json/issues/923)). Errors from the task group are caught and passed to `continuation.finish(throwing:)`. The `defer { continuation.finish() }` is a safety net.
 
 ### CPU and memory behavior
 
@@ -52,7 +52,7 @@ Observed by running the commands on the author's full history: about two decades
 - **Reading.** `tagDatum()` reads one tag at a time (one `git` subprocess at a time) into an unbounded stream, and the tasks decode and transform in parallel. Nothing makes the reader wait for the tasks.
 - **`query` and `batch`.** Peak memory is a small multiple of one snapshot and does not grow with the number of snapshots. Decoding and transforming keep up with the reads, so no backlog of raw data builds up. A normalized database or SQL costs more memory than a flat database. The tags that are read are all processed in parallel, and the results are written or printed as they arrive.
 - **`archive`.** Memory grows with the length of the history. It builds a flat in-memory database for every tag and collects all of them before applying any, because it needs them in tag order (see `archive` above). This is by design, and is acceptable because `archive` is the one-time transformation of the git history into the SQLite database. The nightly backup does not read the history.
-- **If a consumer were slower than the producers.** The result stream is also unbounded, so finished results would queue in memory. Limiting the number of tasks would not prevent this, because a finished task leaves the group at once. The producers would have to wait for the consumer. No streaming command is in this situation today.
+- **Consumers.** Only `batch` handles results as they arrive, writing a file for each one. `archive`, `patch`, `repair` and `query` collect every result and sort them by tag first, so holding them all is part of their design. If `batch`'s writes were slower than the producers, finished results would queue in the unbounded result stream. Limiting the number of tasks would not prevent that, because a finished task leaves the group at once. The producers would have to wait for the consumer. In practice `batch`'s writes kept up, even when it wrote a large amount of SQL, so no wait is needed.
 
 `Repository.databases(_ format:)` (`Repository+Databases.swift`) builds on this. Each tag becomes an open in-memory `Database` for the given `DatabaseFormat` (normalized or flat). The logging token is suffixed with the tag name so log lines can be told apart.
 
@@ -151,7 +151,7 @@ Not covered:
 
 1. After the one-time `archive` run, how should the nightly backup add only the newest snapshot to the archive? The README's Future goal says it should.
 2. What schema fixes would let `archive` run without `--lax-schema`? The README says the plays table currently needs lax constraints.
-3. Does `transformTracks` need a bound? CPU use does not need one. A bound on results waiting for a consumer is only needed if a streaming command gets a consumer slower than its producers. There is also a `limit` constant in `tagDatum` that could become a `--limit` option.
+3. Does `transformTracks` need a bound? CPU use does not need one. A bound on results waiting for a consumer is only needed if `batch`'s writes ever fall behind its producers. There is also a `limit` constant in `tagDatum` that could become a `--limit` option.
 4. Should the archive SQL be tested against fixture snapshots? The `Repository` layer could be made testable by taking a `Git` stub.
 5. Should subcommand help strings move into `Localizable.xcstrings`?
 6. Should the `ATTACH` path be bound or escaped?
