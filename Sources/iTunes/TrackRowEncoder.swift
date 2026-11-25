@@ -45,9 +45,8 @@ struct TrackRowEncoder {
   var artistTableBuilder: ArtistTableBuilder {
     let artistRows = Array(Set(rows.map { $0.artist }))
 
-    // swift-format-ignore: ReplaceForEachWithForLoop
-    artistRows.mismatchedSortableNames.forEach {
-      validation.duplicateArtist.error("\($0, privacy: .public)")
+    for artist in artistRows.mismatchedSortableNames {
+      validation.duplicateArtist.error("\(artist, privacy: .public)")
     }
 
     return ArtistTableBuilder(rows: artistRows)
