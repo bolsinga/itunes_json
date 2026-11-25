@@ -123,7 +123,7 @@ SELECT s.itunesid AS itunesid, s.name AS name, s.sortname AS sortname,
   a.name AS artist, a.sortname AS sortartist,
   al.name AS album, al.sortname AS sortalbum,
   s.tracknumber AS tracknumber, al.trackcount AS trackcount,
-  al.disccount AS discount,            -- sic: one 'c' missing
+  al.disccount AS disccount,
   al.discnumber AS discnumber, s.year AS year, s.duration AS duration,
   da.date AS dateadded, al.compilation AS compilation, s.composer AS composer,
   COALESCE(dr.date, '') AS datereleased, s.comments AS comments,
@@ -141,7 +141,7 @@ CREATE VIEW IF NOT EXISTS lastplays AS
   ) AS foo WHERE filter = 1;
 ```
 
-`tracks` yields one row per (song, play): a song with several plays (possible in the archive) appears several times, and a never-played song has NULL `playdate` and `count`. `Track(row:)` (Track+DatabaseRow.swift) maps these columns back to `Track`; it reads `count` and `disccount`, so from the view `discCount` is always nil (view says `discount`). `DatabaseRowLookup` treats empty strings as missing; `boolean` is true only for integer 1; a missing `name` or non-numeric `itunesid` makes the row nil.
+`tracks` yields one row per (song, play): a song with several plays (possible in the archive) appears several times, and a never-played song has NULL `playdate` and `count`. `Track(row:)` (Track+DatabaseRow.swift) maps these columns back to `Track`; it reads `count` and `disccount`, both of which the view provides. `DatabaseRowLookup` treats empty strings as missing; `boolean` is true only for integer 1; a missing `name` or non-numeric `itunesid` makes the row nil.
 
 ### Flat DDL
 
@@ -220,7 +220,7 @@ Usage: `tunes backup --sql-code | sqlite3 /tmp/itunes.db`; `tunes query --raw|--
 ## Open questions
 
 - **`artistid INTEGER NON NULL`**: SQLite parses this as column type `INTEGER NON` with no NOT NULL (verified with `PRAGMA table_info`: notnull=0). A NULL `artistid` inserts. Fix to `NOT NULL`? Changes DDL only, but existing DBs differ.
-- **`discount` view typo** breaks `Track(row:)` round trips for `disccount`; flat uses `playcount` while `Track(row:)` reads `count`, so flat rows also lose play counts. Rename (and bump consumers) or read both?
+- **Flat play count:** the flat table uses `playcount` while `Track(row:)` reads `count`, so flat rows lose play counts. Rename or read both?
 - **Foreign keys** are only enforced when the connection runs the pragma; the files produced by `--db` do not persist it (it is per connection), so later consumers insert/delete freely. `-1` fallback IDs and `songs.itunesid` FK on plays rely on this pragma being on.
 - **SQL code duplicates**: should `statements` de-duplicate albums like `rows`? Should the script be wrapped in `BEGIN/COMMIT` (speed, atomicity)?
 - **Indexes**: add `plays(itunesid, date)` (needed in lax), `songs(artistid)`, `songs(albumid)`, `albums(artistid)`; the archive queries and `tracks` view scan.

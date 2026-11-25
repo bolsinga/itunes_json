@@ -94,7 +94,7 @@ struct TrackRowEncoder {
       al.sortname AS sortalbum,
       s.tracknumber AS tracknumber,
       al.trackcount AS trackcount,
-      al.disccount AS discount,
+      al.disccount AS disccount,
       al.discnumber AS discnumber,
       s.year AS year,
       s.duration AS duration,
