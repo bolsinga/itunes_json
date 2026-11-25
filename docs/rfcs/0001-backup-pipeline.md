@@ -46,7 +46,7 @@ BackupCommand.run()
 `Source` has two cases, exposed as flags through `EnumerableFlag` in `BackupCommand.swift`. The flag names are derived by ArgumentParser, so the flags are `--itunes` (default) and `--musickit`.
 
 - **iTunesLibrary** (`Track+MediaItem.swift`) builds each Track from an `ITLibMediaItem`. It uses `ITLibrary(apiVersion: "1.1")` and `allMediaItems`, in `Track.gatherAllTracks()`. The whole file is under `#if canImport(iTunesLibrary)`. Where the framework is absent, `Source.gather()` throws a local `iTunesError.notAvailable`. Zero or unset numeric fields are omitted so they encode as absent.
-- **MusicKit** (`Track+Song.swift`) calls `MusicAuthorization.request()` and prints the status. It then issues a `MusicLibrarySectionedRequest<Album, Song>` and builds Tracks from the sections. Many fields are commented out because MusicKit does not provide them. MusicKit output is therefore sparser than iTunesLibrary output.
+- **MusicKit** (`Track+Song.swift`) calls `MusicAuthorization.request()` and logs the status with `Logger` (category `musickit.authorization`). It then issues a `MusicLibrarySectionedRequest<Album, Song>` and builds Tracks from the sections. Many fields are commented out because MusicKit does not provide them. MusicKit output is therefore sparser than iTunesLibrary output.
 
 After gathering, `Source.gather(reduce:)` does two things:
 
@@ -107,7 +107,6 @@ Sequence (`Git.backup` in `Git+Backup.swift`):
 - For scheduled backups, run `tunes` as a LaunchAgent.
 - Since macOS Sequoia, the process needs to be in an application bundle that has Music Library permission (the README points to bolsinga/iTunesJson). Otherwise it asks for permission on every launch.
 - A bare SwiftPM executable has no Info.plist and no entitlement, so permission prompts are not persistent. This repo does not contain the app bundle.
-- `--musickit` additionally prints the `MusicAuthorization` status to stdout. That text would end up in `--json` stdout output.
 
 ## Edge cases and gotchas
 
@@ -122,7 +121,6 @@ Sequence (`Git.backup` in `Git+Backup.swift`):
 
 - Should `main` be configurable? It is hardcoded in `Git+Backup.swift`.
 - Should `--lax-*` with a non-SQL destination be a validation error?
-- The MusicKit authorization message is printed to stdout and can pollute `--json` output. Should it go to stderr?
 - Should `--file-name` be rejected or documented as ignored for `--json-git`?
 - Should `-empty` tags exist at all, or should no-change runs skip the tag?
 - Should `Git+Write+TagData.swift` share the naming logic with `Git+Backup.swift`?
