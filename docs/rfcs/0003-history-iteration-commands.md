@@ -44,6 +44,16 @@ A file-private `limit = Int.max` caps the tag count. It is effectively a debuggi
 
 All tags are therefore processed concurrently. Results arrive in completion order, not tag order. Consumers that need order sort by `tag` afterwards. Errors from the task group are caught and passed to `continuation.finish(throwing:)`. The `defer { continuation.finish() }` is a safety net.
 
+### CPU and memory behavior
+
+Observed by running the commands on the author's full history: about two decades of snapshots, tens of thousands of tags, and snapshots of roughly 13 MB each. These are trends from one machine, not guarantees.
+
+- **CPU.** There is no cap in the code, and none is needed for CPU. Swift's cooperative thread pool is sized to the machine's CPU count, so only about that many tasks run at once, however many are queued. A run keeps most cores busy and follows the hardware on its own. A hand-picked limit would not. If a limit is ever added, it should come from `ProcessInfo.processInfo.activeProcessorCount`.
+- **Reading.** `tagDatum()` reads one tag at a time (one `git` subprocess at a time) into an unbounded stream, and the tasks decode and transform in parallel. Nothing makes the reader wait for the tasks.
+- **`query` and `batch`.** Peak memory is a small multiple of one snapshot and does not grow with the number of snapshots. Decoding and transforming keep up with the reads, so no backlog of raw data builds up. A normalized database or SQL costs more memory than a flat database. The tags that are read are all processed in parallel, and the results are written or printed as they arrive.
+- **`archive`.** Memory grows with the length of the history. It builds a flat in-memory database for every tag and collects all of them before applying any, because it needs them in tag order (see `archive` above). This is by design, and is acceptable because `archive` is the one-time transformation of the git history into the SQLite database. The nightly backup does not read the history.
+- **If a consumer were slower than the producers.** The result stream is also unbounded, so finished results would queue in memory. Limiting the number of tasks would not prevent this, because a finished task leaves the group at once. The producers would have to wait for the consumer. No streaming command is in this situation today.
+
 `Repository.databases(_ format:)` (`Repository+Databases.swift`) builds on this. Each tag becomes an open in-memory `Database` for the given `DatabaseFormat` (normalized or flat). The logging token is suffixed with the tag name so log lines can be told apart.
 
 `rows(query:format:)` picks one of two strategies using `format.serializeDatabaseQueries`:
@@ -62,6 +72,8 @@ Both run the query with the tag bound as the first positional argument (`[.strin
 - `--output-directory` is created if it is missing.
 
 `Batch.build` calls `transformTracks`. For each tag it builds a `Destination` (`sqlCode`, `db(.normalized)`, or `db(.flat)`), always in-memory storage with logging token `batch-<tag>`. It asks the destination for `Data` and writes `<tag>.sql` or `<tag>.db` into the output directory. For `.sql` the context's output is `.standardOut` as written, but the bytes are still returned and written per tag. Writing happens serially in the consuming `for try await` loop.
+
+On the author's full history, `--db` (normalized) wrote databases for far fewer snapshots than `--flat` and `--sql`. The ones missing are the middle years, and the run reported no error and exited with status 0. `query --raw` also uses the normalized path and saw the same reduced set. The cause was not investigated.
 
 ### `query`
 
@@ -93,12 +105,13 @@ The SQL is in private string constants at the top of the file. It tracks entitie
 
 ### The "Future" goal and its limits
 
-The README's Future goal: back up into a single existing database instead of many snapshots. That database would hold every play time. History reaches back to 2006-01-01. `archive` is the prototype for this. Current limitations:
+The README's Future goal: back up into a single existing database instead of many snapshots. That database would hold every play time. History reaches back to 2006-01-01. `archive` is the one-time transformation of the git history into the SQLite database. The nightly backup does not repeat that transformation. Current limitations:
 
-- It is not wired into `backup`. Nothing runs it nightly.
+- It is not wired into `backup`, and there is no incremental path for adding only the newest snapshot to the archive.
 - The README says the test data needs a lax `plays` schema. Pass `--lax-schema` to try it.
 - The archive SQL is long, hard to review, and has no unit tests. It is rebuilt from history on each run rather than adding the latest snapshot incrementally. (The SQL itself can be re-run, because of the `EXCEPT` guards.)
-- All flat snapshot databases are held open in memory at once, then sorted. This costs memory in proportion to history length.
+- All flat snapshot databases are held open in memory at once, then sorted. This costs memory in proportion to history length, which is acceptable for a one-time run.
+- On the author's full history, `archive` stops with `UNIQUE constraint failed: artistids.itunesid`, even with every `--lax-schema` flag. The `artistids` and `albumids` mapping tables have no lax form. The cause was not investigated.
 - Duplicate-date and DST handling is heuristic. Data problems in the history (the README says "needs some work to properly fix some issues") would produce wrong plays rows.
 - The `archive` path argument is interpolated into the `ATTACH` SQL string without escaping. A path containing a single quote would break it.
 
@@ -108,7 +121,7 @@ The README's Future goal: back up into a single existing database instead of man
 - `Database` is an `actor` (`Database.swift`). It wraps SQLite3. All calls to it are `await`ed except where noted.
 - `Repository` is a plain struct. The `git` property is `any Git` from `GitLibrary`.
 - Streams are produced with `AsyncThrowingStream.makeStream()` and filled by `Task.detached`. Generic callbacks are `@escaping @Sendable`.
-- `transformTracks` gives per-tag parallelism using a throwing task group, with no concurrency cap. For a long history this may mean many simultaneous in-memory databases.
+- `transformTracks` gives per-tag parallelism using a throwing task group, with no concurrency cap. The runtime's thread pool limits how many tasks run at once (see "CPU and memory behavior").
 - Commands conform to `AsyncParsableCommand`. `run()` is `async throws`.
 
 ### Logging
@@ -136,9 +149,9 @@ Not covered:
 
 ## Open questions
 
-1. Should `archive` become the primary `backup` output, with an incremental path that only applies the newest tag? The README's Future goal says yes.
+1. After the one-time `archive` run, how should the nightly backup add only the newest snapshot to the archive? The README's Future goal says it should.
 2. What schema fixes would let `archive` run without `--lax-schema`? The README says the plays table currently needs lax constraints.
-3. Should `transformTracks` cap concurrency? There is also a `limit` constant in `tagDatum` that could become a `--limit` option.
+3. Does `transformTracks` need a bound? CPU use does not need one. A bound on results waiting for a consumer is only needed if a streaming command gets a consumer slower than its producers. There is also a `limit` constant in `tagDatum` that could become a `--limit` option.
 4. Should the archive SQL be tested against fixture snapshots? The `Repository` layer could be made testable by taking a `Git` stub.
 5. Should subcommand help strings move into `Localizable.xcstrings`?
 6. Should the `ATTACH` path be bound or escaped?
