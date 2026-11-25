@@ -85,7 +85,7 @@ actor Database {
         let result =
           switch self {
           case .string(let string):
-            sqlite3_bind_text(statementHandle, Int32(index), string, -1, Self.SQLITE_TRANSIENT)
+            sqlite3_bind_text(statementHandle, Int32(index), string, -1, Self.sqliteTransient)
           case .integer(let integer):
             sqlite3_bind_int64(statementHandle, Int32(index), integer)
           case .null:
@@ -135,8 +135,7 @@ actor Database {
         }
       }
 
-      // swift-format-ignore: AlwaysUseLowerCamelCase
-      static private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+      static private let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
     }
 
     func description(_ parameterDescriptor: (Value) -> String) -> String {

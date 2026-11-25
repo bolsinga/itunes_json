@@ -45,9 +45,8 @@ struct TrackRowEncoder {
   var artistTableBuilder: ArtistTableBuilder {
     let artistRows = Array(Set(rows.map { $0.artist }))
 
-    // swift-format-ignore: ReplaceForEachWithForLoop
-    artistRows.mismatchedSortableNames.forEach {
-      validation.duplicateArtist.error("\($0, privacy: .public)")
+    for artist in artistRows.mismatchedSortableNames {
+      validation.duplicateArtist.error("\(artist, privacy: .public)")
     }
 
     return ArtistTableBuilder(rows: artistRows)
@@ -76,9 +75,8 @@ struct TrackRowEncoder {
   var playTableBuilder: PlayTableBuilder {
     let playRows = rows.filter { $0.play != nil }
 
-    // swift-format-ignore: ReplaceForEachWithForLoop
-    playRows.duplicatePlayDates.forEach {
-      validation.duplicatePlayDate.error("\($0.debugLogInformation, privacy: .public)")
+    for playRow in playRows.duplicatePlayDates {
+      validation.duplicatePlayDate.error("\(playRow.debugLogInformation, privacy: .public)")
     }
 
     return PlayTableBuilder(tracks: playRows)
