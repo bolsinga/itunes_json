@@ -29,12 +29,12 @@ extension TransformContext {
   fileprivate func query(_ query: String, repository: Repository) async throws {
     switch self {
     case .tracks(let context):
-      // swift-format-ignore: ReplaceForEachWithForLoop
-      try await repository.uniqueTracks(query: query, format: DatabaseFormat.normalized(context))
-        .forEach {
-          print($0.tag)
-          print(try $0.item.jsonData().asUTF8String())
-        }
+      let tracks = try await repository.uniqueTracks(
+        query: query, format: DatabaseFormat.normalized(context))
+      for tagged in tracks {
+        print(tagged.tag)
+        print(try tagged.item.jsonData().asUTF8String())
+      }
     case .raw(let format):
       try await repository.printOutput(query: query, format: format)
     }
