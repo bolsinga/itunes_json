@@ -1013,6 +1013,7 @@ extension Array where Element == Track {
       guard let repairs = lookup[$0.persistentID] else { return $0 }
 
       var result = $0
+      // swift-format-ignore: ReplaceForEachWithForLoop
       repairs.forEach { repair in
         result = result.apply(identityRepair: repair, tag: tag)
       }

@@ -8,6 +8,7 @@
 extension Array where Element: Sendable {
   func changes<T: Sendable>(createChange: @escaping @Sendable (Element) -> [T]) async -> [T] {
     await withTaskGroup(of: Array<T>.self) { group in
+      // swift-format-ignore: ReplaceForEachWithForLoop
       self.forEach { element in
         group.addTask { createChange(element) }
       }
