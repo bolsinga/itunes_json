@@ -63,8 +63,9 @@ extension Repository {
       let tag = $0.tag
       return $0.item.map { "\(tag)|\($0)" }
     }
-    // swift-format-ignore: ReplaceForEachWithForLoop
-    lines.forEach { print($0) }
+    for line in lines {
+      print(line)
+    }
   }
 }
 
