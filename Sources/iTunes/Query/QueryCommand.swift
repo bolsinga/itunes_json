@@ -29,6 +29,7 @@ extension TransformContext {
   fileprivate func query(_ query: String, repository: Repository) async throws {
     switch self {
     case .tracks(let context):
+      // swift-format-ignore: ReplaceForEachWithForLoop
       try await repository.uniqueTracks(query: query, format: DatabaseFormat.normalized(context))
         .forEach {
           print($0.tag)
@@ -62,6 +63,7 @@ extension Repository {
       let tag = $0.tag
       return $0.item.map { "\(tag)|\($0)" }
     }
+    // swift-format-ignore: ReplaceForEachWithForLoop
     lines.forEach { print($0) }
   }
 }

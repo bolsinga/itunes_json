@@ -13,7 +13,7 @@ Swift package that snapshots the Music library to JSON, commits each snapshot to
 
 - `swift build`
 - `swift test -v -Xswiftc -warnings-as-errors` is what CI runs, so keep the build warning-free.
-- CI also builds scheme `iTunes` with `xcodebuild` for macOS and the iOS Simulator (Xcode 27), one job per destination. A separate job fails if `swift-format` changes any file. Run `xcrun swift-format format --in-place --recursive Sources Tests Package.swift` before pushing. CI does not run `swift-format lint`. The shared steps live in `.github/actions/`. Code that uses `iTunesLibrary` must stay inside `#if canImport(iTunesLibrary)` so the iOS build compiles.
+- CI also builds scheme `iTunes` with `xcodebuild` for macOS and the iOS Simulator (Xcode 27), one job per destination. A separate job fails if `swift-format` changes any file or `swift-format lint --strict` reports anything. Run `xcrun swift-format format --in-place --recursive Sources Tests Package.swift` and `xcrun swift-format lint --strict --recursive Sources Tests Package.swift` before pushing. Each existing finding is marked `// swift-format-ignore: <Rule>` above its statement or declaration, to be fixed in groups. Mark a deliberate new one the same way. The shared steps live in `.github/actions/`. Code that uses `iTunesLibrary` must stay inside `#if canImport(iTunesLibrary)` so the iOS build compiles.
 - `swift-tools-version:6.4`, macOS 27 / iOS 27. All dependencies are pinned with `exact:`. Dependabot proposes bumps.
 
 ## Conventions

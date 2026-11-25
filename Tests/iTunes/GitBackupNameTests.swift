@@ -9,8 +9,11 @@ import Testing
 
 @testable import iTunes
 
+// swift-format-ignore: AlwaysUseLowerCamelCase
 let PreviousName = "A"
+// swift-format-ignore: AlwaysUseLowerCamelCase
 let BasicName = "B"
+// swift-format-ignore: AlwaysUseLowerCamelCase
 let SubsequentName = "C"
 
 struct GitBackupNameTests {

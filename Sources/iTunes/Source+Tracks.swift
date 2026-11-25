@@ -20,6 +20,7 @@ extension Source {
       #if canImport(iTunesLibrary)
         return try Track.gatherAllTracks()
       #else
+        // swift-format-ignore: TypeNamesShouldBeCapitalized
         enum iTunesError: Error {
           case notAvailable
         }
