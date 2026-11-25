@@ -36,8 +36,6 @@ A file-private `limit = Int.max` caps the tag count. It is effectively a debuggi
 
 `stampOrderedMatching` (`Array+TagFilter.swift`) first parses each tag name with `TagParser` into a `StructuredTag` (`root`, `version`, `stamp`, for example `iTunes-V12-2025-01-01`). Names that do not parse are dropped. Tags are grouped by `stamp` (the date part). For each date only the highest `StructuredTag` is kept. That is the highest root, then version, then stamp, as defined by `StructuredTag.<`. The result is sorted. So if a repair run has added `V13` for a date that also has `V12`, only `V13` is read. This is how `repair` rewrites history without duplicating snapshots.
 
-`TagFilter` (`ordered` / `stamped`, `TagFilter.swift`) is an `EnumerableFlag` but no command references it today. It is dead code or a planned option.
-
 `Tag<Item: Sendable>` (`Tag.swift`) pairs a tag name with a payload. It conforms to `Tagged` (`Tagged.swift`). `Array+Tagged.swift` gives `initialTag`, the lexicographically smallest tag.
 
 ### Fan-out: `transformTracks`
@@ -128,7 +126,7 @@ The README's Future goal: back up into a single existing database instead of man
 
 ### Tests
 
-`Tests/iTunes` uses Swift Testing (`@Test`) against target `iTunesTests`. The suite has ten files covering `Tag`, `StructuredTag`, `TagListExtraction` (the tag filter), git name and string helpers (`StringGitName`, `StringPruning`, `StringSimilar`), `GitBackupName`, `Play`, `SQLiteStatement` and `DatabaseRow`. Run them with `swift test`.
+`Tests/iTunes` uses Swift Testing (`@Test`) against target `iTunesTests`. The suite has nine files covering `Tag`, `StructuredTag`, `TagListExtraction` (the tag filter), git name and string helpers (`StringGitName`, `StringPruning`), `GitBackupName`, `Play`, `SQLiteStatement` and `DatabaseRow`. Run them with `swift test`.
 
 Not covered:
 
@@ -141,7 +139,6 @@ Not covered:
 1. Should `archive` become the primary `backup` output, with an incremental path that only applies the newest tag? The README's Future goal says yes.
 2. What schema fixes would let `archive` run without `--lax-schema`? The README says the plays table currently needs lax constraints.
 3. Should `transformTracks` cap concurrency? There is also a `limit` constant in `tagDatum` that could become a `--limit` option.
-4. Should `TagFilter` (`ordered` / `stamped`) be wired in or deleted? Today only the stamp-ordered behavior exists.
-5. Should the archive SQL be tested against fixture snapshots? The `Repository` layer could be made testable by taking a `Git` stub.
-6. Should subcommand help strings move into `Localizable.xcstrings`?
-7. Should the `ATTACH` path be bound or escaped?
+4. Should the archive SQL be tested against fixture snapshots? The `Repository` layer could be made testable by taking a `Git` stub.
+5. Should subcommand help strings move into `Localizable.xcstrings`?
+6. Should the `ATTACH` path be bound or escaped?

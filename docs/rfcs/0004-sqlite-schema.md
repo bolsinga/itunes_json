@@ -8,7 +8,7 @@ Status: Documented (describes existing behavior)
 
 ## Motivation
 
-README.md says the schema is "documented only in code". The README example query no longer runs (see Example queries), and `database_building_scripts/db.sh` targets an older schema. Contributors need one reference for the DDL, constraints, lax flags and known sharp edges.
+The schema lives only in Swift string literals. The README example query uses the `plays.count` column (see Example queries), and the commented-out queries in `database_building_scripts/db.sh` target an older schema. Contributors need one reference for the DDL, constraints, lax flags and known sharp edges.
 
 ## Detailed design
 
@@ -194,7 +194,7 @@ None besides primary keys and the implicit indexes behind UNIQUE constraints. No
 
 ### Example queries
 
-The README query does not work on the current schema: `SELECT s.name, a.name, p.date, p.delta FROM songs s, artists a, plays p WHERE s.artistid=a.id AND p.songid=s.id ORDER by p.date;` fails with `no such column: p.delta` (verified; `p.songid` is also gone). Same for the queries in `database_building_scripts/db.sh` (`songid`, `delta`, `songs.id`, `tracks.sid`, `newer.tracks` with song/track columns). Working equivalent:
+An older schema had `plays.songid` and `plays.delta` columns. Queries that use them, such as the commented-out ones in `database_building_scripts/db.sh` (`songid`, `delta`, `songs.id`, `tracks.sid`, `newer.tracks` with song/track columns), fail with errors like `no such column: p.delta`. A query that lists plays in order, like the one in the README, is:
 
 ```sql
 SELECT s.name AS song, a.name AS artist, p.date, p.count
@@ -227,6 +227,6 @@ Usage: `tunes backup --sql-code | sqlite3 /tmp/itunes.db`; `tunes query --raw|--
 - **STRICT tables** (SQLite 3.37+): would reject text in INTEGER columns and make `-1` sentinels vs real validation explicit. Replace the `-1` sentinels with NULL or real validation?
 - **WAL**: `journal_mode=WAL` is set for every connection including `:memory:` (no effect) and file DBs written then serialized; WAL leaves `-wal`/`-shm` files and is a poor fit for a single-file backup artifact. Use DELETE journal for `--db`?
 - **`UNIQUE(date)` on plays** is global across all songs; archive plays from different songs at the same second collide. Should it be per `itunesid`?
-- **Deltas**: add a `play_deltas` view (the LAG query); refresh README and db.sh.
+- **Deltas**: add a `play_deltas` view (the LAG query).
 - **Album identity**: `RowAlbum.selectID` omits the artist, so SQL-code output can attach songs to another artist's same-named album, unlike the `--db` path.
 

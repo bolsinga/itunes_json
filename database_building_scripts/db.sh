@@ -2,6 +2,10 @@
 
 trap "echo Exited!; exit;" SIGINT SIGTERM
 
+# The commented out queries below were written for an older schema, where plays had songid and delta
+# columns and the tracks view had song, track and sid columns. They do not run on the current schema.
+# See docs/rfcs/0004-sqlite-schema.md for the current one.
+
 # song counts
 # SELECT (SELECT COUNT(id) FROM songs), (SELECT COUNT(id) FROM plays), (SELECT SUM(delta) FROM plays);
 
@@ -129,21 +133,17 @@ trap "echo Exited!; exit;" SIGINT SIGTERM
 
 # Find changing song names
 read -d '' sql << EOF
-SELECT
+SELECT DISTINCT
   n.artist AS nartist,
   n.album AS nalbum,
-  n.song AS nsong,
+  n.name AS nsong,
   o.artist AS oartist,
   o.album AS oalbum,
-  o.song AS osong
+  o.name AS osong
 FROM newer.tracks n
   LEFT JOIN main.tracks o
-  ON (n.track=o.track AND n.artist=o.artist AND n.album=o.album)
-  LEFT JOIN newer.songs ns
-  ON (n.sid=ns.id)
-  LEFT JOIN main.songs os
-  ON (o.sid=os.id)
-  WHERE (n.song != o.song AND ns.duration=os.duration)
+  ON (n.tracknumber=o.tracknumber AND n.artist=o.artist AND n.album=o.album)
+  WHERE (n.name != o.name AND n.duration=o.duration)
   ;
 EOF
 
