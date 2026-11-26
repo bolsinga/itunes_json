@@ -104,7 +104,7 @@ struct TrackRowEncoder {
       COALESCE(dr.date, '') AS datereleased,
       s.comments AS comments,
       p.date AS playdate,
-      p.count AS count
+      p.count AS playcount
     FROM songs s
     LEFT JOIN artists a ON s.artistid=a.id
     LEFT JOIN albums al ON s.albumid=al.id

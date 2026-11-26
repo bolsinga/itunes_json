@@ -127,7 +127,7 @@ SELECT s.itunesid AS itunesid, s.name AS name, s.sortname AS sortname,
   al.discnumber AS discnumber, s.year AS year, s.duration AS duration,
   da.date AS dateadded, al.compilation AS compilation, s.composer AS composer,
   COALESCE(dr.date, '') AS datereleased, s.comments AS comments,
-  p.date AS playdate, p.count AS count
+  p.date AS playdate, p.count AS playcount
 FROM songs s
 LEFT JOIN artists a ON s.artistid=a.id
 LEFT JOIN albums al ON s.albumid=al.id
@@ -141,7 +141,7 @@ CREATE VIEW IF NOT EXISTS lastplays AS
   ) AS foo WHERE filter = 1;
 ```
 
-`tracks` yields one row per (song, play): a song with several plays (possible in the archive) appears several times, and a never-played song has NULL `playdate` and `count`. `Track(row:)` (Track+DatabaseRow.swift) maps these columns back to `Track`; it reads `count` and `disccount`, both of which the view provides. `DatabaseRowLookup` treats empty strings as missing; `boolean` is true only for integer 1; a missing `name` or non-numeric `itunesid` makes the row nil.
+`tracks` yields one row per (song, play): a song with several plays (possible in the archive) appears several times, and a never-played song has NULL `playdate` and `playcount`. `Track(row:)` (Track+DatabaseRow.swift) maps these columns back to `Track`. The flat table names the same columns, so it reads either. `DatabaseRowLookup` treats empty strings as missing; `boolean` is true only for integer 1; a missing `name` or non-numeric `itunesid` makes the row nil.
 
 ### Flat DDL
 
@@ -163,7 +163,7 @@ CREATE TABLE tracks (
 );
 ```
 
-`FlatTrackRow` supplies defaults instead of failing: missing strings become `''`, numbers 0, `disccount`/`discnumber` 1, `compilation` 0/1, `playcount` 0. Differences from the normalized view: the table is named `tracks` too (so a query written against `tracks` runs on both), but the play count column is `playcount` not `count` (`Track(row:)` reads either, preferring `count`), `disccount` is spelled correctly, and a `Track` is one row (only the latest play info Music reports).
+`FlatTrackRow` supplies defaults instead of failing: missing strings become `''`, numbers 0, `disccount`/`discnumber` 1, `compilation` 0/1, `playcount` 0. The table is named `tracks` too, and its columns are named like the normalized view's, so a query written against `tracks` runs on both. The difference is that a `Track` is one row here (only the latest play info Music reports), while the view has a row for each play.
 
 ### Strict vs lax
 
