@@ -51,11 +51,11 @@ CREATE TABLE IF NOT EXISTS artists (
   sortname TEXT NOT NULL DEFAULT '',
   CHECK(length(name) > 0),
   CHECK(name != sortname)
-);
+) STRICT;
 CREATE TABLE IF NOT EXISTS artistids (
   itunesid TEXT NOT NULL PRIMARY KEY,
   artistid INTEGER NOT NULL
-);
+) STRICT;
 CREATE TABLE IF NOT EXISTS albums (
   id INTEGER PRIMARY KEY,
   artistid INTEGER NOT NULL,
@@ -73,11 +73,11 @@ CREATE TABLE IF NOT EXISTS albums (
   CHECK(disccount > 0),
   CHECK(discnumber > 0),
   CHECK(compilation = 0 OR compilation = 1)
-);
+) STRICT;
 CREATE TABLE IF NOT EXISTS albumids (
   itunesid TEXT NOT NULL PRIMARY KEY,
   albumid INTEGER NOT NULL
-);
+) STRICT;
 CREATE TABLE IF NOT EXISTS songs (
   itunesid TEXT NOT NULL PRIMARY KEY,   -- TEXT: persistent ID is a UInt, may exceed Int64
   name TEXT NOT NULL,
@@ -97,15 +97,15 @@ CREATE TABLE IF NOT EXISTS songs (
   CHECK(tracknumber > 0),
   CHECK(year >= 0),
   CHECK(duration > 0)
-);
+) STRICT;
 CREATE TABLE IF NOT EXISTS added (
   itunesid TEXT NOT NULL PRIMARY KEY,
   date TEXT NOT NULL
-);
+) STRICT;
 CREATE TABLE IF NOT EXISTS released (
   itunesid TEXT NOT NULL PRIMARY KEY,
   date TEXT NOT NULL
-);
+) STRICT;
 CREATE TABLE IF NOT EXISTS plays (
   id INTEGER PRIMARY KEY,
   itunesid TEXT NOT NULL,
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS plays (
   FOREIGN KEY(itunesid) REFERENCES songs(itunesid),
   CHECK(length(date) > 0),
   CHECK(count > 0)
-);
+) STRICT;
 ```
 
 Notes:
@@ -189,7 +189,7 @@ CREATE TABLE tracks (
   composer TEXT NOT NULL DEFAULT '', datereleased TEXT NOT NULL DEFAULT '',
   comments TEXT NOT NULL DEFAULT '',
   playdate TEXT NOT NULL, playcount INTEGER NOT NULL
-);
+) STRICT;
 ```
 
 `FlatTrackRow` supplies defaults instead of failing: missing strings become `''`, numbers 0, `disccount`/`discnumber` 1, `compilation` 0/1, `playcount` 0. The table is named `tracks` too, and its columns are named like the normalized view's, so a query written against `tracks` runs on both. The difference is that a `Track` is one row here (only the latest play info Music reports), while the view has a row for each play.
@@ -211,15 +211,13 @@ Strict failures are mostly data placeholders: missing track number, track count,
 
 SQLite's usual column typing is flexible. A column's declared type (`INTEGER`, `TEXT`) is only an "affinity", a preference: SQLite converts a value to the declared type when it can do so without loss, and otherwise stores the value as it is, so `'seven'` goes into an `INTEGER` column as text. A STRICT table (a table declared with `STRICT` after the closing parenthesis, available since SQLite 3.37) makes SQLite enforce the declared type instead, and rejects an insert that cannot be converted. STRICT is unrelated to the strict versus lax schema flags above: those add or remove `UNIQUE` and `CHECK` constraints, while STRICT is about the kind of value a column holds. A STRICT table accepts only the column types `INT`, `INTEGER`, `REAL`, `TEXT`, `BLOB` and `ANY`.
 
-No schema uses STRICT, and that is deliberate. The cost is low and so is the gain:
+The normalized tables and the flat `tracks` table are STRICT. The `correct_*` tables of a patch `.db` are not, because that file is edited by hand and a row that cannot be read is already dropped without a message (RFC 0002). The author wants the created database to be consistent, so the database refuses a value of the wrong kind instead of storing it. The cost was low:
 
 - **It is available.** The app links the macOS system SQLite (`/usr/lib/libsqlite3.dylib`, 3.54 on the macOS 27 SDK), and the package requires macOS 27 and iOS 27. A test checks `sqlite3_libversion_number()` against 3.37.
-- **Every column is already a supported type.** The normalized tables, the flat `tracks` table and the `correct_*` tables of a patch `.db` declare only `INTEGER` and `TEXT`. Persistent IDs are `TEXT` because they can exceed `Int64`, and dates are ISO 8601 `TEXT`.
-- **The code never stores the wrong kind.** Values reach SQLite as `Database.Statement.Value`, which is only `.integer(Int64)`, `.string(String)` or `.null`, produced from Swift `Int` and `String` properties by `Statement` string interpolation. The `--db` path binds them as parameters, and the `--sql-code` path writes integers bare and strings quoted (`sourceDescription`). Foreign keys are `Int64` ids, or the `-1` fallback, which is also an integer. A test builds each kind of database from complete and incomplete tracks and checks that no column holds a value of a different kind than its declared type, and a run over four snapshots of the real history, with the lax flags, found none either. STRICT would therefore reject nothing the program writes today.
-- **The missing-data placeholders are the right kind.** `-1` and `0` are integers, and a missing name is the empty string, so STRICT would accept them. It does not help with the placeholder question below, which is about values and not about kinds, and the lax flags work the same with or without it (they do not touch column types).
-- **The risks are on the reading side.** A database file that has a STRICT table cannot be opened by a SQLite older than 3.37, and the `--sql-code` output is meant to be piped into whatever `sqlite3` is on the reader's machine. A hand-written query or a later tool that inserts text into a number column is the only thing STRICT would catch, and the author wants to be able to load whatever the data contains while learning how to normalize it.
-
-If the schema is later written by something other than this code, or an `INTEGER` column starts to receive text, STRICT is a one-word change per table, and the type test above shows which columns it would apply to.
+- **Every column is a supported type.** The tables declare only `INTEGER` and `TEXT`. Persistent IDs are `TEXT` because they can exceed `Int64`, and dates are ISO 8601 `TEXT`.
+- **The code never stores the wrong kind, so STRICT rejects nothing it writes.** Values reach SQLite as `Database.Statement.Value`, which is only `.integer(Int64)`, `.string(String)` or `.null`, produced from Swift `Int` and `String` properties by `Statement` string interpolation. The `--db` path binds them as parameters, and the `--sql-code` path writes integers bare and strings quoted (`sourceDescription`). Foreign keys are `Int64` ids, or the `-1` fallback, which is also an integer. A test builds each kind of database from complete and incomplete tracks and checks that no column holds a value of a different kind than its declared type, and a run over four snapshots of the real history, with the lax flags, found none either. None of the open data issues blocks STRICT: they concern values (a year of `0`, a missing track count, shared play dates, duplicate persistent IDs, sort-name changes), which `CHECK` and `UNIQUE` constraints catch, and not the kind of value.
+- **The missing-data placeholders are the right kind.** `-1` is an integer and a missing name is the empty string, so STRICT accepts them. The lax flags work the same with or without STRICT, since they do not touch column types.
+- **The cost is on the reading side.** A database file that has a STRICT table cannot be opened by a SQLite older than 3.37, and the `--sql-code` output is meant to be piped into whatever `sqlite3` is on the reader's machine. `INSERT OR IGNORE` still skips a row that violates a constraint, STRICT or not.
 
 ### Sort-name handling
 

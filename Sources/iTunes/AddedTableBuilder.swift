@@ -32,7 +32,7 @@ struct AddedTableBuilder: TableBuilder {
     CREATE TABLE IF NOT EXISTS added (
       itunesid TEXT NOT NULL PRIMARY KEY,
       date TEXT NOT NULL
-    );
+    ) STRICT;
     """
   }
 

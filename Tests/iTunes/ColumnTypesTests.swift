@@ -10,9 +10,9 @@ import Testing
 
 @testable import iTunes
 
-// The schemas do not use SQLite STRICT tables (see RFC 0004, "Column types"). These tests pin the
-// facts that decision rests on: STRICT is available, every column is INTEGER or TEXT, and the code
-// never stores a value of a different kind than its column declares.
+// The normalized and flat tables are SQLite STRICT tables (see RFC 0004, "Column types"). These
+// tests pin the facts that rests on: STRICT is available, every column is INTEGER or TEXT, and the
+// code never stores a value of a different kind than its column declares.
 struct ColumnTypesTests {
   private let allColumns = """
     SELECT m.name, p.name, p.type FROM sqlite_master m, pragma_table_info(m.name) p
@@ -55,7 +55,15 @@ struct ColumnTypesTests {
     return (types, bad)
   }
 
-  private func check(_ db: Database) async throws {
+  private func check(_ db: Database, strict: Bool = true) async throws {
+    let tables = try await db.execute(
+      query:
+        "SELECT name, strict FROM pragma_table_list WHERE schema = 'main' AND type = 'table' AND name NOT LIKE 'sqlite_%';",
+      arguments: [])
+    #expect(!tables[0].isEmpty)
+    for row in tables[0] where strict {
+      #expect(row[1].value.integer == 1, "\(row[0].value) is not STRICT")
+    }
     let (types, bad) = try await mismatches(in: db)
     #expect(!types.isEmpty)
     #expect(Set(types).isSubset(of: ["INTEGER", "TEXT"]), "\(Set(types))")
@@ -96,11 +104,12 @@ struct ColumnTypesTests {
   func correctionsColumns(_ repair: IdentityRepair) async throws {
     let encoder = try FlatDBEncoder(context: CorrectionsDBContext(storage: .memory))
     try await encoder.encode(items: [repair])
-    try await check(encoder.db)
+    // A patch file is edited by hand, so its tables are not STRICT.
+    try await check(encoder.db, strict: false)
   }
 
   // A STRICT table is stricter about the kind of value than an ordinary one, which stores any
-  // text in an INTEGER column. This is the difference the schemas do not use.
+  // text in an INTEGER column.
   @Test func strictTableRejectsTextInAnIntegerColumn() async throws {
     let db = try Database(context: Database.Context(storage: .memory, loggingToken: nil))
     try await db.execute("CREATE TABLE plain (n INTEGER); CREATE TABLE firm (n INTEGER) STRICT;")
