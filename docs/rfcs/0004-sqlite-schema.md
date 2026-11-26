@@ -113,6 +113,22 @@ Notes:
 - Dates are ISO 8601 strings (`Track.dateAdded`, `playDateUTC`, `releaseDate`) stored as TEXT; lexical order equals chronological order for UTC `Z` strings.
 - Booleans are integers: `compilation` is 0/1.
 
+### Foreign keys
+
+A foreign key is a column whose value must be the key of a row in another table: `albums.artistid` and `songs.artistid` refer to `artists(id)`, `songs.albumid` refers to `albums(id)`, and `plays.itunesid` refers to `songs(itunesid)`. The `FOREIGN KEY` clauses are part of the table definition, so they are in the strict and the lax forms of every table, and the lax flags do not change them.
+
+SQLite only enforces foreign keys on a connection that has run `PRAGMA foreign_keys = ON;`. The setting is off by default and it is not stored in the database file. A file keeps the declared keys (`PRAGMA foreign_key_list(songs)` lists them), but a connection that opens the file later starts with enforcement off and can insert or delete rows that break the keys. `PRAGMA foreign_key_check;` finds the broken rows at any time, whatever the setting, so it is the way to check a file that was written elsewhere.
+
+Where the setting is on:
+
+- `TracksDBEncoder` and `TracksSQLSourceEncoder` run it first, so a `--db` build and a `--sql-code` script are checked while they are written. This includes the normalized forms of `query` (`--tracks` and `--raw`), which build through `TracksDBEncoder` on an in-memory connection.
+- `--sql-code` finds ids with subselects such as `(SELECT id FROM artists WHERE name = 'X')`. A missing row makes the subselect `NULL`, which the `NOT NULL` columns reject, so that path fails whether or not the pragma is on. The pragma is the only check on a value that is not `NULL`.
+- `--db` looks ids up in the in-memory dictionaries returned by the earlier tables and writes `-1` if a lookup misses (`artistLookup[...] ?? -1` in `AlbumTableBuilder` and `SongTableBuilder`). `-1` is not `NULL`, so only the foreign key would reject it. The fallback is a guard and cannot be reached in practice: each dictionary is built from the same tracks that the dependent table is built from, so every key is present. A normalized database built from real history has no `-1` ids and `PRAGMA foreign_key_check;` finds nothing, in both the strict and the lax schema.
+
+Where it is off: the flat database, the corrections database and `query --flat` (they declare no keys), and the connection that `archive` writes with. `archive` creates the empty archive file with `TracksDBEncoder` (pragma on), but the rows are written by a separate in-memory flat connection that runs `ATTACH DATABASE ... AS archive` and writes the archive tables. The setting belongs to that second connection, so the archive is written unchecked. The archive statements are written to keep the keys consistent, and a check after building from real history finds nothing, but nothing enforces it.
+
+This is deliberate. The goal is a lenient pipeline that builds on imperfect data, and the keys are there to describe the relationships and to catch a bug in the generator, not to reject the library's data. Enforcement is therefore on while the generator writes, where a violation means a program bug, and left to the consumer afterward. A consumer that wants enforcement for its own writes runs the pragma on its own connection. `ForeignKeyTests` covers that a built file has no violations in either schema, that the file does not keep the setting, and that the declared keys let `foreign_key_check` find a broken row.
+
 ### Views
 
 Defined in `TrackRowEncoder.views`, created with `IF NOT EXISTS`.
@@ -221,7 +237,6 @@ Usage: `tunes backup --sql-code | sqlite3 /tmp/itunes.db`; `tunes query --raw|--
 
 ## Open questions
 
-- **Foreign keys** are only enforced when the connection runs the pragma; the files produced by `--db` do not persist it (it is per connection), so later consumers insert/delete freely. `-1` fallback IDs and `songs.itunesid` FK on plays rely on this pragma being on.
 - **SQL code transaction**: should the script be wrapped in `BEGIN/COMMIT` (speed, atomicity)?
 - **Indexes**: add `plays(itunesid, date)` (needed in lax), `songs(artistid)`, `songs(albumid)`, `albums(artistid)`; the archive queries and `tracks` view scan.
 - **STRICT tables** (SQLite 3.37+): would reject text in INTEGER columns and make `-1` sentinels vs real validation explicit. Replace the `-1` sentinels with NULL or real validation?
