@@ -11,7 +11,7 @@ import os
 
 enum DatabaseError: Error {
   case cannotOpen(String)
-  case cannotEnableWALJournaling(String)
+  case cannotSetJournalMode(String)
   case cannotEnableSynchrounsNormal(String)
   case cannotExecute(String)
   case cannotPrepare(String)
@@ -353,8 +353,11 @@ actor Database {
 
     self.handle = handle
 
-    guard sqlite3_exec(handle, "PRAGMA journal_mode = WAL", nil, nil, nil) == SQLITE_OK else {
-      throw DatabaseError.cannotEnableWALJournaling(handle.sqlError)
+    // The rollback journal (DELETE) keeps every committed change in the one database file, which
+    // is what a file that gets copied or serialized needs. WAL would keep recent changes in a
+    // separate -wal file. A :memory: database ignores this and stays in memory.
+    guard sqlite3_exec(handle, "PRAGMA journal_mode = DELETE", nil, nil, nil) == SQLITE_OK else {
+      throw DatabaseError.cannotSetJournalMode(handle.sqlError)
     }
     guard sqlite3_exec(handle, "PRAGMA synchronous = NORMAL", nil, nil, nil) == SQLITE_OK else {
       throw DatabaseError.cannotEnableSynchrounsNormal(handle.sqlError)
