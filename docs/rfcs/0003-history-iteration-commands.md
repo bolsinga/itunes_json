@@ -42,7 +42,7 @@ A file-private `limit = Int.max` caps the tag count. It is effectively a debuggi
 
 `Repository.transformTracks(transform:)` (`Repository+Tracks.swift`) is the core primitive. Inside a detached task it iterates `tagDatum()`. For each tag it adds a child task to a throwing task group. That task decodes the data with `Track.array(from:)` (`Decodable+Array.swift`) and calls the `@Sendable` async `transform(tag, tracks)`. Results are yielded to an `AsyncThrowingStream<Tag<T>>`.
 
-All tags are therefore processed concurrently. Results arrive in completion order, not tag order. Consumers that need order sort by `tag` afterwards, each on its own ([#923](https://github.com/bolsinga/itunes_json/issues/923)). Errors from the task group are caught and passed to `continuation.finish(throwing:)`. The `defer { continuation.finish() }` is a safety net.
+All tags are therefore processed concurrently. Results arrive in completion order, not tag order. Consumers that need order sort by `tag` afterwards, each on its own ([#923](https://github.com/bolsinga/itunes_json/issues/923)). The history is not normalized, so a tag can fail on its own: a snapshot may not decode, or the transform may reject its data. A failure in one tag does not stop the others. Each task catches its error and returns it. When every tag has run, the stream throws a `TransformError` that lists each tag that failed (the first ten in full, then a count) and its error. The results of the other tags have already been yielded, so `batch` writes every file it can and then exits with an error. Commands that collect all the results (`archive`, `patch`, `repair`, `query`) fail, instead of working from a history with snapshots missing. An error from reading the repository, as opposed to transforming a tag, stops the stream at once. The `defer { continuation.finish() }` is a safety net.
 
 ### CPU and memory behavior
 
@@ -73,7 +73,7 @@ Both run the query with the tag bound as the first positional argument (`[.strin
 
 `Batch.build` calls `transformTracks`. For each tag it builds a `Destination` (`sqlCode`, `db(.normalized)`, or `db(.flat)`), always in-memory storage with logging token `batch-<tag>`. It asks the destination for `Data` and writes `<tag>.sql` or `<tag>.db` into the output directory. For `.sql` the context's output is `.standardOut` as written, but the bytes are still returned and written per tag. Writing happens serially in the consuming `for try await` loop.
 
-On the author's full history, `--db` (normalized) wrote databases for far fewer snapshots than `--flat` and `--sql`. The ones missing are the middle years, and the run reported no error and exited with status 0. `query --raw` also uses the normalized path and saw the same reduced set. The cause was not investigated ([#922](https://github.com/bolsinga/itunes_json/issues/922)).
+On the author's full history, `--db` (normalized) cannot build a database for the many snapshots in which two library entries share one `persistentID`, because `songs` is keyed by `itunesid`. They are the middle years. `batch` writes the databases it can and then fails with a `TransformError` that lists the tags that failed. `--flat` has no key, so it is not affected, and `--sql` writes the SQL, which fails when it is loaded into SQLite. `query --raw` also uses the normalized path, so it fails the same way. The normalized database does not accept such entries, by design. They are a data issue in the history ([#924](https://github.com/bolsinga/itunes_json/issues/924)).
 
 ### `query`
 
