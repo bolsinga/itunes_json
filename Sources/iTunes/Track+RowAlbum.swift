@@ -23,19 +23,19 @@ extension Track: RowAlbumInterface {
   }
 
   func albumTrackCount(logger: Logger) -> Int {
-    guard let trackCount else {
+    guard let trackCount = trackCount.positive else {
       logger.error("\(debugLogInformation, privacy: .public)")
-      return -1
+      return .missing
     }
     return trackCount
   }
 
   var albumDiscCount: Int {
-    discCount ?? 1
+    discCount.positive ?? 1
   }
 
   var albumDiscNumber: Int {
-    discNumber ?? 1
+    discNumber.positive ?? 1
   }
 
   var albumIsCompilation: Int {

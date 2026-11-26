@@ -11,7 +11,7 @@ struct SongTableBuilder: TableBuilder {
   private let strictSchema: String = """
     CHECK(name != sortname),
     CHECK(tracknumber > 0),
-    CHECK(year >= 0),
+    CHECK(year > 0),
     CHECK(duration > 0)
     """
 

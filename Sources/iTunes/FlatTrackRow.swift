@@ -17,12 +17,12 @@ struct FlatTrackRow: FlatRow {
   fileprivate var sortartist: String { track.artistName?.sorted ?? "" }
   fileprivate var album: String { track.albumName?.name ?? "" }
   fileprivate var sortalbum: String { track.albumName?.sorted ?? "" }
-  fileprivate var tracknumber: Int { track.trackNumber ?? 0 }
-  fileprivate var trackcount: Int { track.trackCount ?? 0 }
-  fileprivate var disccount: Int { track.discCount ?? 1 }
-  fileprivate var discnumber: Int { track.discNumber ?? 1 }
-  fileprivate var year: Int { track.year ?? 0 }
-  fileprivate var duration: Int { track.totalTime ?? 0 }
+  fileprivate var tracknumber: Int { track.normalizedTrackNumber ?? .missing }
+  fileprivate var trackcount: Int { track.trackCount.positive ?? .missing }
+  fileprivate var disccount: Int { track.albumDiscCount }
+  fileprivate var discnumber: Int { track.albumDiscNumber }
+  fileprivate var year: Int { track.year.positive ?? .missing }
+  fileprivate var duration: Int { track.songDuration }
   fileprivate var dateadded: String { track.dateAddedISO8601 }
   fileprivate var compilation: Int { (track.compilation ?? false) ? 1 : 0 }
   fileprivate var composer: String { track.composer ?? "" }

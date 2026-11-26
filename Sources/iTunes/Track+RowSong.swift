@@ -31,28 +31,27 @@ extension Track: RowSongInterface {
   }
 
   var normalizedTrackNumber: Int? {
-    guard let trackNumber, trackNumber > 0 else { return nil }
-    return trackNumber
+    trackNumber.positive
   }
 
   func normalizedTrackNumber(validation: TrackValidation) -> Int {
     guard let normalizedTrackNumber else {
       validation.invalidTrackNumber.error("\(debugLogInformation, privacy: .public)")
-      return -1
+      return .missing
     }
     return normalizedTrackNumber
   }
 
   func songYear(logger: Logger) -> Int {
-    guard let year else {
+    guard let year = year.positive else {
       logger.error("\(debugLogInformation, privacy: .public)")
-      return -1
+      return .missing
     }
     return year
   }
 
   var songDuration: Int {
-    totalTime ?? -1
+    totalTime.positive ?? .missing
   }
 
   var dateAddedISO8601: String {

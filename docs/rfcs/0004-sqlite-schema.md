@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS songs (
   CHECK(length(name) > 0),
   CHECK(name != sortname),
   CHECK(tracknumber > 0),
-  CHECK(year >= 0),
+  CHECK(year > 0),
   CHECK(duration > 0)
 );
 CREATE TABLE IF NOT EXISTS added (
@@ -202,10 +202,10 @@ CREATE TABLE tracks (
 |-------|-------------|
 | artists | `UNIQUE` on name, `CHECK(length(name) > 0)`, `CHECK(name != sortname)` |
 | albums | the `UNIQUE(...)` tuple, `CHECK(length(name)>0)`, `CHECK(name != sortname)`, `CHECK(trackcount > 0)`. Keeps FK and the disccount/discnumber/compilation checks |
-| songs | `tracknumber > 0`, `year >= 0`, `duration > 0`. Keeps `length(name)>0`, `name != sortname`, UNIQUE, both FKs |
+| songs | `tracknumber > 0`, `year > 0`, `duration > 0`. Keeps `length(name)>0`, `name != sortname`, UNIQUE, both FKs |
 | plays | `UNIQUE(itunesid,date,count)`, `UNIQUE(date)`, `CHECK(count > 0)`. Keeps the FK and `length(date)>0` |
 
-Strict failures are mostly data placeholders: missing track number, track count, or year become `-1`, missing duration `-1`, missing album name the empty `SortableName` (`name=''`). These violate the strict checks, so strict generation fails on incomplete libraries; lax lets the data load for analysis. "Missing values" below explains why the placeholders are values and not NULL.
+Strict failures are mostly data placeholders: missing track number, track count, year and duration become `-1`, missing album name the empty `SortableName` (`name=''`). These violate the strict checks, so strict generation fails on incomplete libraries; lax lets the data load for analysis. "Missing values" below explains why the placeholders are values and not NULL.
 
 ### Missing values
 
@@ -213,9 +213,9 @@ A sentinel value is a made-up value that stands for "missing". The Music data is
 
 | Field | When missing it is written as | Checked in strict by |
 |-------|-------------------------------|----------------------|
-| track number | `-1` (also for a zero or negative number); logged as `invalidTrackNumber` | `CHECK(tracknumber > 0)` on songs |
+| track number | `-1`; logged as `invalidTrackNumber` | `CHECK(tracknumber > 0)` on songs |
 | track count | `-1`; logged as `noTrackCount` | `CHECK(trackcount > 0)` on albums |
-| year | `-1`; logged as `noYear`. A year of `0` is kept as `0` | `CHECK(year >= 0)` on songs, so `-1` fails and `0` passes |
+| year | `-1`; logged as `noYear` | `CHECK(year > 0)` on songs |
 | duration | `-1` (no log) | `CHECK(duration > 0)` on songs |
 | album name | the empty name (`''`); logged as `noAlbum` | `CHECK(length(name) > 0)` on albums |
 | artist name | not written: a track with no artist is dropped by `isSQLEncodable` | not reachable |
@@ -224,7 +224,7 @@ A sentinel value is a made-up value that stands for "missing". The Music data is
 | play date | `''`, only for a play row that has a count but no date; logged as `noPlayDate` | `CHECK(length(date) > 0)` on plays, kept in lax |
 | added and release date | not written (the row is skipped) | `NOT NULL` on the date column |
 
-The flat table does not use `-1`: its missing numbers are `0` and its missing strings `''`, and it has no checks, so it never fails on them.
+For the numbers, "missing" means absent, zero or negative: a zero year, track count, track number or duration is as unusable as an absent one, so all of them become `-1` (`Optional<Int>.positive` in Optional+Positive.swift). A zero or absent disc count or disc number becomes `1`. The normalized tables and the flat `tracks` table follow the same rules, so a missing value is the same number in every database the tool writes. The flat table still has no checks, so it never fails on them.
 
 The sentinel plus a strict `CHECK` is how a data problem becomes visible. A generation run on an incomplete library fails with the name of the violated constraint (`CHECK constraint failed: trackcount > 0`), and the validation log names the track. Lax removes the check, so the `-1` loads and the work can go on. The cost is that `-1` is an ordinary number in the lax database: `avg(year)` and `min(duration)` include it, so an analysis query has to filter it out. The strict failure also names the constraint but not the row, so the validation log is the way to find the track.
 
@@ -235,7 +235,7 @@ NULL would express "unknown" better in the usual SQL way, but it changes how the
 - A comparison with NULL is never true. The SQL-code path finds an album with `trackcount = <value>`, which would never match NULL, so those lookups would have to become `IS`.
 - Aggregates skip NULL, which is the good part: `avg(year)` ignores unknown years instead of being pulled down by `-1`.
 
-A NULL is also not a decision about what unknown means for a master database. Until that is decided, a failing strict build is the signal that a field needs a correction (a patch, see RFC 0002) or a deliberate choice, and the lax flags exist so that work does not wait on it. The `-1` values therefore stay. Because a sentinel is a convention, the real data should be checked for places where the convention is not applied evenly. In the author's history the audio tracks that reach the database are almost always complete: names, artists, albums, track numbers and durations are not missing in any snapshot sampled, and the track count and year are missing only in a few places. Two categories are real data problems and are tracked separately: tracks with a year of `0`, which passes the strict check that a missing year fails ([#935](https://github.com/bolsinga/itunes_json/issues/935)), and recently added tracks with no track count, which fail the strict albums check ([#936](https://github.com/bolsinga/itunes_json/issues/936)). Both are in the library data and not read from the wrong place: `Track+MediaItem.swift` leaves out a zero track count, disc count and disc number, and copies a zero year, track number and duration as they are. A disc count or disc number is absent on a large share of tracks (Music leaves them out for many single-disc albums), which is why those default to `1` instead of failing.
+A NULL is also not a decision about what unknown means for a master database. Until that is decided, a failing strict build is the signal that a field needs a correction (a patch, see RFC 0002) or a deliberate choice, and the lax flags exist so that work does not wait on it. The `-1` values therefore stay. Because a sentinel is a convention, it is applied the same way to every field. In the author's history the audio tracks that reach the database are almost always complete: names, artists, albums, track numbers and durations are not missing in any snapshot sampled, and the track count and year are missing only in a few places. Two categories are real data problems and are tracked separately: tracks with a year of `0` ([#935](https://github.com/bolsinga/itunes_json/issues/935)), which is a missing year and so fails the strict check, and recently added tracks with no track count, which fail the strict albums check ([#936](https://github.com/bolsinga/itunes_json/issues/936)). Both are in the library data and not read from the wrong place: `Track+MediaItem.swift` leaves out a zero track count, disc count and disc number, and copies a zero year, track number and duration as they are. A disc count or disc number is absent on a large share of tracks (Music leaves them out for many single-disc albums), which is why those default to `1` instead of failing.
 
 ### Sort-name handling
 
