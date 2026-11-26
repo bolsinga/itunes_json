@@ -43,6 +43,10 @@ struct TransformError: Error, CustomStringConvertible {
 extension Repository {
   /// Runs `transform` on the tracks of every tag, yielding each result as it is ready.
   ///
+  /// The results are in no defined order. The tags are processed at the same time, so a result
+  /// arrives when its tag finishes, and the order can differ from run to run. It is not tag order.
+  /// A caller that needs an order must sort the results itself.
+  ///
   /// A failure in one tag does not stop the others. Once all of them have run, the stream throws a
   /// `TransformError` that names every tag that failed. Errors from reading the repository stop
   /// the stream right away.
