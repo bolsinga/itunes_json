@@ -66,6 +66,9 @@ struct SongTableBuilder: TableBuilder {
   }
 
   var statements: [Database.Statement] {
-    tracks.map { $0.song.insert(artistID: $0.artist.selectID, albumID: $0.album.selectID) }
+    tracks.map {
+      $0.song.insert(
+        artistID: $0.artist.selectID, albumID: $0.album.selectID(artistID: $0.artist.selectID))
+    }
   }
 }

@@ -52,8 +52,10 @@ struct RowAlbum: Hashable, Sendable {
   // The following isn't referenced, but its value contributes to Hashable, which will make an album with different artists but otherwise exactly the same be different albums.
   let albumArtistName: SortableName?
 
-  var selectID: Database.Statement {
-    "(SELECT id FROM albums WHERE name = \(name.name) AND trackcount = \(trackCount) AND disccount = \(discCount) AND discnumber = \(discNumber) AND compilation = \(compilation))"
+  /// Finds this album. `artistID` is the artist the album belongs to, since albums with the same
+  /// name and counts can belong to different artists.
+  func selectID(artistID: Database.Statement) -> Database.Statement {
+    "(SELECT id FROM albums WHERE artistid = \(artistID) AND name = \(name.name) AND trackcount = \(trackCount) AND disccount = \(discCount) AND discnumber = \(discNumber) AND compilation = \(compilation))"
   }
 
   func insert(artistID: Database.Statement) -> Database.Statement {

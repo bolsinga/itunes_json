@@ -22,10 +22,10 @@ The schema lives only in Swift string literals. The README example query uses th
 
 ### SQL code vs .db file
 
-- `--sql-code` (`TracksSQLSourceEncoder`): one text stream: the pragma, then for each table its `CREATE TABLE IF NOT EXISTS` DDL followed by its INSERT statements (literals with `'` doubled, via `Statement.description`), each table's inserts sorted as strings, then the views. There is no BEGIN/COMMIT. Foreign keys are resolved with subselects, for example `(SELECT id FROM artists WHERE name = 'X')` (`RowArtist.selectID`, `RowAlbum.selectID`).
+- `--sql-code` (`TracksSQLSourceEncoder`): one text stream: the pragma, then for each table its `CREATE TABLE IF NOT EXISTS` DDL followed by its INSERT statements (literals with `'` doubled, via `Statement.description`), each table's inserts sorted as strings, then the views. There is no BEGIN/COMMIT. Foreign keys are resolved with subselects, for example `(SELECT id FROM artists WHERE name = 'X')` (`RowArtist.selectID`, `RowAlbum.selectID(artistID:)`). An album is found by its artist, name and counts.
 - `--db` (`TracksDBEncoder`): inserts use bound parameters inside one transaction per table (`Database.createTable`). Foreign keys are resolved from the in-memory `[Row: Int64]` lookups returned by earlier tables (`lastID`), falling back to `-1` if the lookup misses (which then violates the foreign key). The bytes are produced with `sqlite3_serialize` (`Database.data()`).
 - Connection setup (`Database.init`): `sqlite3_open_v2` with `SQLITE_OPEN_URI|READWRITE|CREATE`; `PRAGMA journal_mode = WAL`; `PRAGMA synchronous = NORMAL`. File storage uses `url.absoluteString` (a `file:` URI).
-- The two paths are not byte-equivalent. `AlbumTableBuilder.statements` and `SongTableBuilder.statements` emit one INSERT per track, while `rows` (used by `--db`) de-duplicates albums via `Set`. In SQL code a repeated album therefore fails `UNIQUE` under strict (the sqlite3 CLI keeps going) and becomes a duplicate row under lax albums.
+- The two paths are not byte-equivalent, but they build the same albums and songs. Both write one album row for each distinct album, and attach each song to the album of its own artist. The artist is part of an album's identity (`RowAlbum.albumArtistName` is the track's artist), so the tracks of an album all have the same artist, and a compilation with several track artists is several albums. `SQLCodeTests` loads the SQL into SQLite and compares it with the `--db` result.
 
 ### Normalized DDL
 
@@ -223,11 +223,10 @@ Usage: `tunes backup --sql-code | sqlite3 /tmp/itunes.db`; `tunes query --raw|--
 
 - **`artistid INTEGER NON NULL`**: SQLite parses this as column type `INTEGER NON` with no NOT NULL (verified with `PRAGMA table_info`: notnull=0). A NULL `artistid` inserts. Fix to `NOT NULL`? Changes DDL only, but existing DBs differ.
 - **Foreign keys** are only enforced when the connection runs the pragma; the files produced by `--db` do not persist it (it is per connection), so later consumers insert/delete freely. `-1` fallback IDs and `songs.itunesid` FK on plays rely on this pragma being on.
-- **SQL code duplicates**: should `statements` de-duplicate albums like `rows`? Should the script be wrapped in `BEGIN/COMMIT` (speed, atomicity)?
+- **SQL code transaction**: should the script be wrapped in `BEGIN/COMMIT` (speed, atomicity)?
 - **Indexes**: add `plays(itunesid, date)` (needed in lax), `songs(artistid)`, `songs(albumid)`, `albums(artistid)`; the archive queries and `tracks` view scan.
 - **STRICT tables** (SQLite 3.37+): would reject text in INTEGER columns and make `-1` sentinels vs real validation explicit. Replace the `-1` sentinels with NULL or real validation?
 - **WAL**: `journal_mode=WAL` is set for every connection including `:memory:` (no effect) and file DBs written then serialized; WAL leaves `-wal`/`-shm` files and is a poor fit for a single-file backup artifact. Use DELETE journal for `--db`?
 - **Shared play dates:** `UNIQUE(date)` is global across all songs, so it rejects a snapshot where two tracks share a date. It stays, because the shared dates are a data issue ([#929](https://github.com/bolsinga/itunes_json/issues/929)). Should the history be corrected, and should the backup keep fractional seconds?
 - **Deltas**: add a `play_deltas` view (the LAG query).
-- **Album identity**: `RowAlbum.selectID` omits the artist, so SQL-code output can attach songs to another artist's same-named album, unlike the `--db` path.
 
