@@ -209,15 +209,9 @@ Strict failures are mostly data placeholders: missing track number, track count,
 
 ### Column types and STRICT tables
 
-SQLite's usual column typing is flexible. A column's declared type (`INTEGER`, `TEXT`) is only an "affinity", a preference: SQLite converts a value to the declared type when it can do so without loss, and otherwise stores the value as it is, so `'seven'` goes into an `INTEGER` column as text. A STRICT table (a table declared with `STRICT` after the closing parenthesis, available since SQLite 3.37) makes SQLite enforce the declared type instead, and rejects an insert that cannot be converted. STRICT is unrelated to the strict versus lax schema flags above: those add or remove `UNIQUE` and `CHECK` constraints, while STRICT is about the kind of value a column holds. A STRICT table accepts only the column types `INT`, `INTEGER`, `REAL`, `TEXT`, `BLOB` and `ANY`.
+An ordinary SQLite column only has a type "affinity": `'seven'` goes into an `INTEGER` column as text. A table declared `STRICT` (SQLite 3.37 and later) rejects a value of the wrong kind instead. It is unrelated to the strict and lax schema flags, which add or remove `UNIQUE` and `CHECK` constraints.
 
-The normalized tables and the flat `tracks` table are STRICT. The `correct_*` tables of a patch `.db` are not, because that file is edited by hand and a row that cannot be read is already dropped without a message (RFC 0002). The author wants the created database to be consistent, so the database refuses a value of the wrong kind instead of storing it. The cost was low:
-
-- **It is available.** The app links the macOS system SQLite (`/usr/lib/libsqlite3.dylib`, 3.54 on the macOS 27 SDK), and the package requires macOS 27 and iOS 27. A test checks `sqlite3_libversion_number()` against 3.37.
-- **Every column is a supported type.** The tables declare only `INTEGER` and `TEXT`. Persistent IDs are `TEXT` because they can exceed `Int64`, and dates are ISO 8601 `TEXT`.
-- **The code never stores the wrong kind, so STRICT rejects nothing it writes.** Values reach SQLite as `Database.Statement.Value`, which is only `.integer(Int64)`, `.string(String)` or `.null`, produced from Swift `Int` and `String` properties by `Statement` string interpolation. The `--db` path binds them as parameters, and the `--sql-code` path writes integers bare and strings quoted (`sourceDescription`). Foreign keys are `Int64` ids, or the `-1` fallback, which is also an integer. A test builds each kind of database from complete and incomplete tracks and checks that no column holds a value of a different kind than its declared type, and a run over four snapshots of the real history, with the lax flags, found none either. None of the open data issues blocks STRICT: they concern values (a year of `0`, a missing track count, shared play dates, duplicate persistent IDs, sort-name changes), which `CHECK` and `UNIQUE` constraints catch, and not the kind of value.
-- **The missing-data placeholders are the right kind.** `-1` is an integer and a missing name is the empty string, so STRICT accepts them. The lax flags work the same with or without STRICT, since they do not touch column types.
-- **The cost is on the reading side.** A database file that has a STRICT table cannot be opened by a SQLite older than 3.37, and the `--sql-code` output is meant to be piped into whatever `sqlite3` is on the reader's machine. `INSERT OR IGNORE` still skips a row that violates a constraint, STRICT or not.
+The normalized tables and the flat `tracks` table are STRICT, so the created database stays consistent. The `correct_*` tables of a patch `.db` are not, because that file is edited by hand. Every column is `INTEGER` or `TEXT`, and the code only writes integers, strings and NULL, so STRICT rejects nothing it writes today. No open data issue blocks it: they concern values, which `CHECK` and `UNIQUE` catch, not the kind of value. The cost is that SQLite older than 3.37 cannot open the file, which matters for `--sql-code` output piped into whatever `sqlite3` the reader has.
 
 ### Sort-name handling
 
@@ -276,7 +270,7 @@ Usage: `tunes backup --sql-code | sqlite3 /tmp/itunes.db`; `tunes query --raw|--
 
 ### Tests
 
-`DatabaseRowTests` covers `Track(row:)` per column; `SQLiteStatementTests` checks `Statement` interpolation (`?` in `sql`, quote-doubled `description`). `ColumnTypesTests` builds each kind of database and checks that every column is `INTEGER` or `TEXT` and holds only that kind of value, and that a STRICT table behaves as described. `AlbumsSchemaTests` and `SQLCodeTests` also execute parts of the DDL, but most constraints are untested.
+`DatabaseRowTests` covers `Track(row:)` per column; `SQLiteStatementTests` checks `Statement` interpolation (`?` in `sql`, quote-doubled `description`). `StrictTablesTests` checks that the generated tables are STRICT. `AlbumsSchemaTests` and `SQLCodeTests` also execute parts of the DDL, but most constraints are untested.
 
 ## Open questions
 
