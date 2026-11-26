@@ -163,7 +163,7 @@ CREATE TABLE tracks (
 );
 ```
 
-`FlatTrackRow` supplies defaults instead of failing: missing strings become `''`, numbers 0, `disccount`/`discnumber` 1, `compilation` 0/1, `playcount` 0. Differences from the normalized view: the table is named `tracks` too (so a query written against `tracks` runs on both), but the play count column is `playcount` not `count`, `disccount` is spelled correctly, and a `Track` is one row (only the latest play info Music reports).
+`FlatTrackRow` supplies defaults instead of failing: missing strings become `''`, numbers 0, `disccount`/`discnumber` 1, `compilation` 0/1, `playcount` 0. Differences from the normalized view: the table is named `tracks` too (so a query written against `tracks` runs on both), but the play count column is `playcount` not `count` (`Track(row:)` reads either, preferring `count`), `disccount` is spelled correctly, and a `Track` is one row (only the latest play info Music reports).
 
 ### Strict vs lax
 
@@ -220,7 +220,6 @@ Usage: `tunes backup --sql-code | sqlite3 /tmp/itunes.db`; `tunes query --raw|--
 ## Open questions
 
 - **`artistid INTEGER NON NULL`**: SQLite parses this as column type `INTEGER NON` with no NOT NULL (verified with `PRAGMA table_info`: notnull=0). A NULL `artistid` inserts. Fix to `NOT NULL`? Changes DDL only, but existing DBs differ.
-- **Flat play count:** the flat table uses `playcount` while `Track(row:)` reads `count`, so flat rows lose play counts. Rename or read both?
 - **Foreign keys** are only enforced when the connection runs the pragma; the files produced by `--db` do not persist it (it is per connection), so later consumers insert/delete freely. `-1` fallback IDs and `songs.itunesid` FK on plays rely on this pragma being on.
 - **SQL code duplicates**: should `statements` de-duplicate albums like `rows`? Should the script be wrapped in `BEGIN/COMMIT` (speed, atomicity)?
 - **Indexes**: add `plays(itunesid, date)` (needed in lax), `songs(artistid)`, `songs(albumid)`, `albums(artistid)`; the archive queries and `tracks` view scan.

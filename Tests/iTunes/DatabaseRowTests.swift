@@ -190,4 +190,18 @@ struct DatabaseRowTests {
     #expect(Track(row: row(("count", .integer(3))))?.playCount == 3)
     #expect(Track(row: row(("count", .null)))?.playCount == nil)
   }
+
+  // The flat table names the play count column playcount.
+  @Test func playcount() async throws {
+    #expect(Track(row: row(("playcount", .string("Z"))))?.playCount == nil)
+    #expect(Track(row: row(("playcount", .string(""))))?.playCount == nil)
+    #expect(Track(row: row(("playcount", .integer(3))))?.playCount == 3)
+    #expect(Track(row: row(("playcount", .null)))?.playCount == nil)
+  }
+
+  @Test func countAndPlaycount() async throws {
+    #expect(
+      Track(row: basic + [("count", .integer(2)), ("playcount", .integer(5))])?.playCount == 2)
+    #expect(Track(row: basic + [("count", .null), ("playcount", .integer(5))])?.playCount == 5)
+  }
 }
