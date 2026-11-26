@@ -24,12 +24,13 @@ The git history of `itunes.json` is the long-lived record of listening history. 
 
 ### CI (.github/workflows)
 
-`main.yml` runs on push and PR to `main`. `release.yml` runs the same steps when a release is published. Both use the runner label `xcode-27` and select Xcode 27.0. The steps are:
+`main.yml` (`push-and-prs-on-main`) runs on push and PR to `main`. `release.yml` (`release-builds`) runs the same jobs when a release is published. Both use the runner label `xcode-27`. The shared steps are composite actions in `.github/actions`, so the two workflows do not repeat them.
 
-1. `swift test -v -Xswiftc -warnings-as-errors`. Warnings fail the build.
-2. `xcodebuild -skipPackagePluginValidation -scheme iTunes -destination "generic/platform=iOS Simulator" -destination "generic/platform=macOS"`.
+- **`build`** runs once for each destination, `generic/platform=macOS` and `generic/platform=iOS Simulator`, and one failing destination does not cancel the other (`fail-fast: false`). Each job sets up Xcode, then builds scheme `iTunes` with `xcodebuild -skipPackagePluginValidation`. The macOS job also runs `swift test -v -Xswiftc -warnings-as-errors`, so warnings fail the build.
+- **`format`** runs the `check-format` action over `Sources`, `Tests` and `Package.swift`. It formats in place with `swift-format` and fails if that changed any file, then runs `swift-format lint --strict` and fails on any finding. A deliberate finding is marked with `// swift-format-ignore: <Rule>` above its statement or declaration.
+- **`setup-xcode`** selects the newest installed Xcode of the minimum version's major release (27.0 here) and fails if it is older than the minimum. It also accepts the license, runs first launch, and prints the SDKs and destinations.
 
-The iOS build matters because the library must compile on iOS. That is why the iTunesLibrary code is wrapped in `#if canImport(iTunesLibrary)`.
+The iOS build matters because the library must compile on iOS. That is why the iTunesLibrary code is wrapped in `#if canImport(iTunesLibrary)`. Dependabot proposes updates to the actions weekly.
 
 ### Data flow
 
