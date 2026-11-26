@@ -100,7 +100,7 @@ On the author's full history, `--db` (normalized) cannot build a database for th
 
 The SQL is in private string constants at the top of the file. It tracks entities by `itunesid` (the persistent ID). It keeps `artistids` and `albumids` mapping tables so that renamed artists or albums keep one row. It uses `EXCEPT` against the archive to insert only new or changed data. `updatePlays` adds a row to `archive.plays` only when the (itunesid, date, count) differs from `archive.lastplays`. It also contains two heuristics:
 
-- For tracks on one album with the same play date, it offsets the timestamp by the earlier track's duration.
+- For tracks on one album with the same play date, it offsets the timestamp by the earlier track's duration. Most shared play dates are between tracks of different albums, which this does not cover ([#929](https://github.com/bolsinga/itunes_json/issues/929)).
 - For tracks whose date moves by a whole number of hours (less than 12), it keeps the old date. This corrects the time-zone/DST quirk that `Date+Quirk.swift` also handles.
 
 ### The "Future" goal and its limits
