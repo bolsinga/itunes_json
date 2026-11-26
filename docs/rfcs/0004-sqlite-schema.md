@@ -178,6 +178,20 @@ CREATE TABLE tracks (
 
 Strict failures are mostly data placeholders: missing track number, track count, or year become `-1`, missing duration `-1`, missing album/artist name the empty `SortableName` (`name=''`). These violate the strict checks, so strict generation fails on incomplete libraries; lax lets the data load for analysis.
 
+### Column types and STRICT tables
+
+SQLite's usual column typing is flexible. A column's declared type (`INTEGER`, `TEXT`) is only an "affinity", a preference: SQLite converts a value to the declared type when it can do so without loss, and otherwise stores the value as it is, so `'seven'` goes into an `INTEGER` column as text. A STRICT table (a table declared with `STRICT` after the closing parenthesis, available since SQLite 3.37) makes SQLite enforce the declared type instead, and rejects an insert that cannot be converted. STRICT is unrelated to the strict versus lax schema flags above: those add or remove `UNIQUE` and `CHECK` constraints, while STRICT is about the kind of value a column holds. A STRICT table accepts only the column types `INT`, `INTEGER`, `REAL`, `TEXT`, `BLOB` and `ANY`.
+
+No schema uses STRICT, and that is deliberate. The cost is low and so is the gain:
+
+- **It is available.** The app links the macOS system SQLite (`/usr/lib/libsqlite3.dylib`, 3.54 on the macOS 27 SDK), and the package requires macOS 27 and iOS 27. A test checks `sqlite3_libversion_number()` against 3.37.
+- **Every column is already a supported type.** The normalized tables, the flat `tracks` table and the `correct_*` tables of a patch `.db` declare only `INTEGER` and `TEXT`. Persistent IDs are `TEXT` because they can exceed `Int64`, and dates are ISO 8601 `TEXT`.
+- **The code never stores the wrong kind.** Values reach SQLite as `Database.Statement.Value`, which is only `.integer(Int64)`, `.string(String)` or `.null`, produced from Swift `Int` and `String` properties by `Statement` string interpolation. The `--db` path binds them as parameters, and the `--sql-code` path writes integers bare and strings quoted (`sourceDescription`). Foreign keys are `Int64` ids, or the `-1` fallback, which is also an integer. A test builds each kind of database from complete and incomplete tracks and checks that no column holds a value of a different kind than its declared type, and a run over four snapshots of the real history, with the lax flags, found none either. STRICT would therefore reject nothing the program writes today.
+- **The missing-data placeholders are the right kind.** `-1` and `0` are integers, and a missing name is the empty string, so STRICT would accept them. It does not help with the placeholder question below, which is about values and not about kinds, and the lax flags work the same with or without it (they do not touch column types).
+- **The risks are on the reading side.** A database file that has a STRICT table cannot be opened by a SQLite older than 3.37, and the `--sql-code` output is meant to be piped into whatever `sqlite3` is on the reader's machine. A hand-written query or a later tool that inserts text into a number column is the only thing STRICT would catch, and the author wants to be able to load whatever the data contains while learning how to normalize it.
+
+If the schema is later written by something other than this code, or an `INTEGER` column starts to receive text, STRICT is a one-word change per table, and the type test above shows which columns it would apply to.
+
 ### Sort-name handling
 
 `SortableName(name:sorted:)` stores `sorted` as `''` when it equals `name`, so "no special sort name" is always the empty string. This is why the schema has `sortname NOT NULL DEFAULT ''` and `CHECK(name != sortname)` (an empty sortname satisfies the check; a redundant copy does not). Artist sort name falls back `sortArtist ?? sortAlbumArtist`. Ordering (`<`) uses `sorted` if non-empty, else `name`; builders sort rows with `name` only (`$0.name < $1.name` compares the `SortableName` ordering). `artistTableBuilder` logs (`duplicateArtist`) when the same artist name appears with differing sort names; under strict that becomes a UNIQUE failure, under lax two rows share a name. `RowArtist.selectID` matches on `name` only, so SQL-code lax output can resolve to the first of duplicates. The archive SQL reconciles by filling an empty sortname from a sibling row with the same name.
@@ -217,14 +231,14 @@ Usage: `tunes backup --sql-code | sqlite3 /tmp/itunes.db`; `tunes query --raw|--
 
 ### Tests
 
-`DatabaseRowTests` covers `Track(row:)` per column; `SQLiteStatementTests` checks `Statement` interpolation (`?` in `sql`, quote-doubled `description`). No test executes the DDL, so schema regressions are untested.
+`DatabaseRowTests` covers `Track(row:)` per column; `SQLiteStatementTests` checks `Statement` interpolation (`?` in `sql`, quote-doubled `description`). `ColumnTypesTests` builds each kind of database and checks that every column is `INTEGER` or `TEXT` and holds only that kind of value, and that a STRICT table behaves as described. `AlbumsSchemaTests` and `SQLCodeTests` also execute parts of the DDL, but most constraints are untested.
 
 ## Open questions
 
 - **Foreign keys** are only enforced when the connection runs the pragma; the files produced by `--db` do not persist it (it is per connection), so later consumers insert/delete freely. `-1` fallback IDs and `songs.itunesid` FK on plays rely on this pragma being on.
 - **SQL code transaction**: should the script be wrapped in `BEGIN/COMMIT` (speed, atomicity)?
 - **Indexes**: add `plays(itunesid, date)` (needed in lax), `songs(artistid)`, `songs(albumid)`, `albums(artistid)`; the archive queries and `tracks` view scan.
-- **STRICT tables** (SQLite 3.37+): would reject text in INTEGER columns and make `-1` sentinels vs real validation explicit. Replace the `-1` sentinels with NULL or real validation?
+- **Sentinels**: should the `-1` placeholders for missing track numbers, track counts, years and durations become NULL, or be replaced by real validation?
 - **WAL**: `journal_mode=WAL` is set for every connection including `:memory:` (no effect) and file DBs written then serialized; WAL leaves `-wal`/`-shm` files and is a poor fit for a single-file backup artifact. Use DELETE journal for `--db`?
 - **Shared play dates:** `UNIQUE(date)` is global across all songs, so it rejects a snapshot where two tracks share a date. It stays, because the shared dates are a data issue ([#929](https://github.com/bolsinga/itunes_json/issues/929)). Should the history be corrected, and should the backup keep fractional seconds?
 - **Deltas**: add a `play_deltas` view (the LAG query).
