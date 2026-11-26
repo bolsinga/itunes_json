@@ -41,7 +41,7 @@ extension DatabaseContext: TracksDBEncoderContext {
 extension Array where Element == Track {
   fileprivate func database(_ context: DatabaseContext) async throws -> Database {
     let dbEncoder = try TracksDBEncoder(
-      context: context, rowEncoder: self.rowEncoder(context.loggingToken))
+      context: context, rowEncoder: try self.rowEncoder(context.loggingToken))
     do {
       try await dbEncoder.encode()
       return dbEncoder.db
@@ -74,7 +74,9 @@ extension FlatTracksDatabaseContext {
   fileprivate func flatDatabase(_ tracks: [Track]) async throws -> Database {
     let dbEncoder = try FlatDBEncoder(context: self)
     do {
-      try await dbEncoder.encode(items: tracks.encodables)
+      let encodables = tracks.encodables
+      try encodables.requireCompleteNumbers()
+      try await dbEncoder.encode(items: encodables)
       return dbEncoder.db
     } catch {
       await dbEncoder.close()

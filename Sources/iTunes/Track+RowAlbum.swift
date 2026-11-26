@@ -22,12 +22,8 @@ extension Track: RowAlbumInterface {
     return albumName
   }
 
-  func albumTrackCount(logger: Logger) -> Int {
-    guard let trackCount = trackCount.positive else {
-      logger.error("\(debugLogInformation, privacy: .public)")
-      return .missing
-    }
-    return trackCount
+  func albumTrackCount() throws -> Int {
+    try requiredNumber(\.trackCount)
   }
 
   var albumDiscCount: Int {

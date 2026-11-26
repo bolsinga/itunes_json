@@ -13,17 +13,16 @@ protocol RowSongInterface {
   var songComposer: String { get }
   var songComments: String { get }
   var songName: SortableName { get }
-  func normalizedTrackNumber(validation: TrackValidation) -> Int
-  func songYear(logger: Logger) -> Int
-  var songDuration: Int { get }
+  func songTrackNumber() throws -> Int
+  func songYear() throws -> Int
+  func songDuration() throws -> Int
 }
 
 struct RowSong: Hashable, Sendable {
-  init(_ song: RowSongInterface, validation: TrackValidation) {
-    self.init(
+  init(_ song: RowSongInterface, validation: TrackValidation) throws {
+    try self.init(
       name: song.songName, itunesid: song.songPersistentID, composer: song.songComposer,
-      trackNumber: song.normalizedTrackNumber(validation: validation),
-      year: song.songYear(logger: validation.noYear), duration: song.songDuration,
+      trackNumber: song.songTrackNumber(), year: song.songYear(), duration: song.songDuration(),
       comments: song.songComments)
   }
 

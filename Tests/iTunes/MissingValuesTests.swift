@@ -11,78 +11,79 @@ import Testing
 @testable import iTunes
 
 struct MissingValuesTests {
+  enum Kind: CaseIterable {
+    case strict, lax, flat
+  }
+
   // Absent, zero and negative numbers are all missing.
   static let numbers: [Int?] = [nil, 0, -5]
 
   private func track(
-    discCount: Int? = 1, discNumber: Int? = 1, totalTime: Int? = 1000, trackCount: Int? = 2,
-    trackNumber: Int? = 1, year: Int? = 2000
+    id: UInt = 1, discCount: Int? = 1, discNumber: Int? = 1, totalTime: Int? = 1000,
+    trackCount: Int? = 2, trackNumber: Int? = 1, year: Int? = 2000
   ) -> Track {
     Track(
       album: "Album", artist: "Artist", discCount: discCount, discNumber: discNumber,
-      name: "Song", persistentID: 1, totalTime: totalTime, trackCount: trackCount,
+      name: "Song \(id)", persistentID: id, totalTime: totalTime, trackCount: trackCount,
       trackNumber: trackNumber, year: year)
   }
 
-  private func flatRow(_ track: Track) async throws -> [String: String] {
-    let db = try await DatabaseFormat.flat(FlatTracksDatabaseContext(storage: .memory)).database(
-      tracks: [track])
-    let result = try await db.execute(
-      query:
-        "SELECT tracknumber, trackcount, disccount, discnumber, year, duration FROM tracks;",
-      arguments: [])
-    return Dictionary(
-      uniqueKeysWithValues: result[0][0].map { ($0.column, "\($0.value)") })
-  }
-
-  private func laxSongsAndAlbums(_ track: Track) async throws -> [String] {
-    let db = try await DatabaseFormat.normalized(
-      DatabaseContext(storage: .memory, schemaOptions: .laxSchema, loggingToken: nil)
-    ).database(tracks: [track])
-    let result = try await db.execute(
-      query: """
-        SELECT s.tracknumber, al.trackcount, al.disccount, al.discnumber, s.year, s.duration
-        FROM songs s JOIN albums al ON al.id = s.albumid;
-        """, arguments: [])
-    return result[0][0].map { "\($0.value)" }
-  }
-
-  @Test(arguments: numbers)
-  func missingNumbersAreMinusOne(_ number: Int?) async throws {
-    let missing = track(
-      totalTime: number, trackCount: number, trackNumber: number, year: number)
-    let flat = try await flatRow(missing)
-    #expect(flat["tracknumber"] == "\(Int.missing)")
-    #expect(flat["trackcount"] == "\(Int.missing)")
-    #expect(flat["year"] == "\(Int.missing)")
-    #expect(flat["duration"] == "\(Int.missing)")
-
-    let normalized = try await laxSongsAndAlbums(missing)
-    #expect(normalized[0] == "\(Int.missing)")  // track number
-    #expect(normalized[1] == "\(Int.missing)")  // track count
-    #expect(normalized[4] == "\(Int.missing)")  // year
-    #expect(normalized[5] == "\(Int.missing)")  // duration
-  }
-
-  @Test(arguments: numbers)
-  func missingDiscNumbersAreOne(_ number: Int?) async throws {
-    let missing = track(discCount: number, discNumber: number)
-    let flat = try await flatRow(missing)
-    #expect(flat["disccount"] == "1")
-    #expect(flat["discnumber"] == "1")
-
-    let normalized = try await laxSongsAndAlbums(missing)
-    #expect(normalized[2] == "1")
-    #expect(normalized[3] == "1")
-  }
-
-  // A missing number fails strict generation, including a year of zero.
-  @Test(arguments: [0, nil] as [Int?])
-  func strictRejectsAMissingYear(_ year: Int?) async throws {
-    await #expect(throws: (any Error).self) {
-      _ = try await DatabaseFormat.normalized(
+  private func database(_ kind: Kind, _ tracks: [Track]) async throws -> Database {
+    switch kind {
+    case .strict:
+      try await DatabaseFormat.normalized(
         DatabaseContext(storage: .memory, schemaOptions: SchemaOptions(), loggingToken: nil)
-      ).database(tracks: [track(year: year)])
+      ).database(tracks: tracks)
+    case .lax:
+      try await DatabaseFormat.normalized(
+        DatabaseContext(storage: .memory, schemaOptions: .laxSchema, loggingToken: nil)
+      ).database(tracks: tracks)
+    case .flat:
+      try await DatabaseFormat.flat(FlatTracksDatabaseContext(storage: .memory))
+        .database(tracks: tracks)
     }
+  }
+
+  // No database holds a made-up value: a track without a track number, track count, year or
+  // duration is an error, with strict, lax and flat databases.
+  @Test(arguments: Kind.allCases, numbers)
+  func missingNumbersAreRejected(_ kind: Kind, _ number: Int?) async throws {
+    let fields: [Track] = [
+      track(trackNumber: number), track(trackCount: number), track(totalTime: number),
+      track(year: number),
+    ]
+    for missing in fields {
+      await #expect(throws: MissingValuesError.self) {
+        _ = try await database(kind, [track(id: 2), missing])
+      }
+    }
+  }
+
+  @Test func errorNamesEveryTrackAndField() {
+    let tracks = [track(id: 5, trackCount: nil, year: 0), track(id: 6), track(id: 7, totalTime: 0)]
+    #expect(throws: MissingValuesError.self) { try tracks.requireCompleteNumbers() }
+    do {
+      try tracks.requireCompleteNumbers()
+    } catch let error as MissingValuesError {
+      #expect(
+        error.entries == [
+          .init(persistentID: 5, name: "Song 5", fields: ["track count", "year"]),
+          .init(persistentID: 7, name: "Song 7", fields: ["duration"]),
+        ])
+    } catch {
+      Issue.record("\(error)")
+    }
+  }
+
+  // A disc count or disc number that Music leaves out, or sets to zero, is 1.
+  @Test(arguments: Kind.allCases, numbers)
+  func missingDiscNumbersAreOne(_ kind: Kind, _ number: Int?) async throws {
+    let db = try await database(kind, [track(discCount: number, discNumber: number)])
+    let query =
+      kind == .flat
+      ? "SELECT disccount, discnumber FROM tracks;"
+      : "SELECT disccount, discnumber FROM albums;"
+    let rows = try await db.execute(query: query, arguments: [])
+    #expect(rows[0][0].map { $0.value.integer } == [1, 1])
   }
 }

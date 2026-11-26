@@ -9,6 +9,18 @@ import Foundation
 
 struct FlatTrackRow: FlatRow {
   let track: Track
+  fileprivate let tracknumber: Int
+  fileprivate let trackcount: Int
+  fileprivate let year: Int
+  fileprivate let duration: Int
+
+  init(track: Track) throws {
+    self.track = track
+    self.tracknumber = try track.requiredNumber(\.trackNumber)
+    self.trackcount = try track.requiredNumber(\.trackCount)
+    self.year = try track.requiredNumber(\.year)
+    self.duration = try track.requiredNumber(\.totalTime)
+  }
 
   fileprivate var itunesid: String { String(track.persistentID) }
   fileprivate var name: String { track.songName.name }
@@ -17,12 +29,8 @@ struct FlatTrackRow: FlatRow {
   fileprivate var sortartist: String { track.artistName?.sorted ?? "" }
   fileprivate var album: String { track.albumName?.name ?? "" }
   fileprivate var sortalbum: String { track.albumName?.sorted ?? "" }
-  fileprivate var tracknumber: Int { track.normalizedTrackNumber ?? .missing }
-  fileprivate var trackcount: Int { track.trackCount.positive ?? .missing }
   fileprivate var disccount: Int { track.albumDiscCount }
   fileprivate var discnumber: Int { track.albumDiscNumber }
-  fileprivate var year: Int { track.year.positive ?? .missing }
-  fileprivate var duration: Int { track.songDuration }
   fileprivate var dateadded: String { track.dateAddedISO8601 }
   fileprivate var compilation: Int { (track.compilation ?? false) ? 1 : 0 }
   fileprivate var composer: String { track.composer ?? "" }
@@ -38,8 +46,8 @@ struct FlatTrackRow: FlatRow {
     """
   }
 
-  static func insertStatement(_ first: Track) -> Database.Statement {
-    FlatTrackRow(track: first).insert
+  static func insertStatement(_ first: Track) throws -> Database.Statement {
+    try FlatTrackRow(track: first).insert
   }
 
   var parameters: [Database.Value] {

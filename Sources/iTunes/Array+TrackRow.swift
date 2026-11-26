@@ -8,10 +8,12 @@
 import Foundation
 
 extension Array where Element == Track {
-  func rowEncoder(_ loggingToken: String?) -> TrackRowEncoder {
+  func rowEncoder(_ loggingToken: String?) throws -> TrackRowEncoder {
     let validation = TrackValidation(loggingToken: loggingToken)
+    let encodables = self.filter { $0.isSQLEncodable }
+    try encodables.requireCompleteNumbers()
     return TrackRowEncoder(
-      rows: self.filter { $0.isSQLEncodable }.map { $0.trackRow(validation) },
+      rows: try encodables.map { try $0.trackRow(validation) },
       validation: validation)
   }
 }

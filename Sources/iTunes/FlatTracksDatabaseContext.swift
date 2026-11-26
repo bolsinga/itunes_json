@@ -24,10 +24,12 @@ struct FlatTracksDatabaseContext: FlatDBEncoderContext {
     Database.Context(storage: storage, loggingToken: loggingToken)
   }
 
-  func insertStatement(_ item: Item) -> Database.Statement { FlatTrackRow.insertStatement(item) }
+  func insertStatement(_ item: Item) throws -> Database.Statement {
+    try FlatTrackRow.insertStatement(item)
+  }
 
-  func row(for item: Track) -> FlatTrackRow {
-    FlatTrackRow(track: item)
+  func row(for item: Track) throws -> FlatTrackRow {
+    try FlatTrackRow(track: item)
   }
 
   let schema: String = """

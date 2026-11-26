@@ -205,37 +205,15 @@ CREATE TABLE tracks (
 | songs | `tracknumber > 0`, `year > 0`, `duration > 0`. Keeps `length(name)>0`, `name != sortname`, UNIQUE, both FKs |
 | plays | `UNIQUE(itunesid,date,count)`, `UNIQUE(date)`, `CHECK(count > 0)`. Keeps the FK and `length(date)>0` |
 
-Strict failures are mostly data placeholders: missing track number, track count, year and duration become `-1`, missing album name the empty `SortableName` (`name=''`). These violate the strict checks, so strict generation fails on incomplete libraries; lax lets the data load for analysis. "Missing values" below explains why the placeholders are values and not NULL.
+The `CHECK`s on track number, track count, year and duration (`> 0`) can no longer fail, because a track without such a number is rejected before a row is built ("Missing values" below). A missing album name is the empty `SortableName` (`name=''`), which fails the strict albums check; lax lets it load for analysis.
 
 ### Missing values
 
-A sentinel value is a made-up value that stands for "missing". The Music data is incomplete in places (a `Track` field is optional when the key is absent from the JSON), and the normalized columns are `NOT NULL`, so the code has to write something. What it writes depends on the field:
+The goal is a database with no made-up values: every track has a track number, track count, year and duration, each greater than zero. A track that lacks one is a data problem, so generation fails with an error naming every such track and what it lacks (`MissingValuesError`, Track+RequiredValues.swift), for the normalized tables (strict and lax), the `--sql-code` output and the flat table alike. Absent, zero and negative numbers all count as missing. Nothing is written as `-1`, and the lax flags do not change this, because they only remove `UNIQUE` and `CHECK` constraints and the check is made before any row is built. The columns are `NOT NULL`, and NULL is not used for unknown values. A `CHECK` accepts NULL and `UNIQUE` treats NULLs as distinct, so NULL would hide the problem the error exposes.
 
-| Field | When missing it is written as | Checked in strict by |
-|-------|-------------------------------|----------------------|
-| track number | `-1`; logged as `invalidTrackNumber` | `CHECK(tracknumber > 0)` on songs |
-| track count | `-1`; logged as `noTrackCount` | `CHECK(trackcount > 0)` on albums |
-| year | `-1`; logged as `noYear` | `CHECK(year > 0)` on songs |
-| duration | `-1` (no log) | `CHECK(duration > 0)` on songs |
-| album name | the empty name (`''`); logged as `noAlbum` | `CHECK(length(name) > 0)` on albums |
-| artist name | not written: a track with no artist is dropped by `isSQLEncodable` | not reachable |
-| song name | not optional in the JSON; an empty name would fail the songs check | `CHECK(length(name) > 0)` on songs |
-| disc count, disc number, compilation | `1`, `1` and `0` (deliberate defaults, no log) | disc and compilation checks, which accept the defaults |
-| play date | `''`, only for a play row that has a count but no date; logged as `noPlayDate` | `CHECK(length(date) > 0)` on plays, kept in lax |
-| added and release date | not written (the row is skipped) | `NOT NULL` on the date column |
+Music leaves out the disc count and disc number for many single-disc albums, which means `1` and `1`, so a missing or zero value is written as `1`. Compilation defaults to `0`, and composer, comments and sort names to `''`. A track with no artist is not written (`isSQLEncodable`). A missing album name is written as the empty name and fails the strict albums check (`CHECK(length(name) > 0)`). A play row with a count but no date has the date `''` and is logged as `noPlayDate`, and a track with no added or release date has no row in `added` or `released`.
 
-For the numbers, "missing" means absent, zero or negative: a zero year, track count, track number or duration is as unusable as an absent one, so all of them become `-1` (`Optional<Int>.positive` in Optional+Positive.swift). A zero or absent disc count or disc number becomes `1`. The normalized tables and the flat `tracks` table follow the same rules, so a missing value is the same number in every database the tool writes. The flat table still has no checks, so it never fails on them.
-
-The sentinel plus a strict `CHECK` is how a data problem becomes visible. A generation run on an incomplete library fails with the name of the violated constraint (`CHECK constraint failed: trackcount > 0`), and the validation log names the track. Lax removes the check, so the `-1` loads and the work can go on. The cost is that `-1` is an ordinary number in the lax database: `avg(year)` and `min(duration)` include it, so an analysis query has to filter it out. The strict failure also names the constraint but not the row, so the validation log is the way to find the track.
-
-NULL would express "unknown" better in the usual SQL way, but it changes how the constraints behave, and not in the direction this project wants:
-
-- A `CHECK` accepts NULL. With a NULL `trackcount`, `CHECK(trackcount > 0)` passes, so strict would stop surfacing the problem unless every such column also got `NOT NULL`, which would give the same failure as today with a different message.
-- `UNIQUE` treats each NULL as different from every other NULL. `UNIQUE(artistid, name, trackcount, ...)` on albums would allow two rows for one album whenever the track count is NULL.
-- A comparison with NULL is never true. The SQL-code path finds an album with `trackcount = <value>`, which would never match NULL, so those lookups would have to become `IS`.
-- Aggregates skip NULL, which is the good part: `avg(year)` ignores unknown years instead of being pulled down by `-1`.
-
-A NULL is also not a decision about what unknown means for a master database. Until that is decided, a failing strict build is the signal that a field needs a correction (a patch, see RFC 0002) or a deliberate choice, and the lax flags exist so that work does not wait on it. The `-1` values therefore stay. Because a sentinel is a convention, it is applied the same way to every field. In the author's history the audio tracks that reach the database are almost always complete: names, artists, albums, track numbers and durations are not missing in any snapshot sampled, and the track count and year are missing only in a few places. Two categories are real data problems and are tracked separately: tracks with a year of `0` ([#935](https://github.com/bolsinga/itunes_json/issues/935)), which is a missing year and so fails the strict check, and recently added tracks with no track count, which fail the strict albums check ([#936](https://github.com/bolsinga/itunes_json/issues/936)). Both are in the library data and not read from the wrong place: `Track+MediaItem.swift` leaves out a zero track count, disc count and disc number, and copies a zero year, track number and duration as they are. A disc count or disc number is absent on a large share of tracks (Music leaves them out for many single-disc albums), which is why those default to `1` instead of failing.
+Where the data lacks values, in the author's history: audio tracks are almost always complete, and names, artists, albums, track numbers and durations are missing in none of the snapshots sampled. Two groups are not. Tracks with a year of `0` ([#935](https://github.com/bolsinga/itunes_json/issues/935)) and recently added tracks with no track count ([#936](https://github.com/bolsinga/itunes_json/issues/936)) are in the library data and not read from the wrong place: `Track+MediaItem.swift` leaves out a zero track count, disc count and disc number, and copies a zero year, track number and duration as they are. Until those are corrected in the data (a patch, see RFC 0002), generation on the full history fails on them.
 
 ### Sort-name handling
 
@@ -299,7 +277,7 @@ Usage: `tunes backup --sql-code | sqlite3 /tmp/itunes.db`; `tunes query --raw|--
 ## Open questions
 
 - **SQL code transaction**: should the script be wrapped in `BEGIN/COMMIT` (speed, atomicity)?
-- **STRICT tables** (SQLite 3.37+): would reject text in INTEGER columns. The `-1` sentinels stay (see "Missing values").
+- **STRICT tables** (SQLite 3.37+): would reject text in INTEGER columns.
 - **Shared play dates:** `UNIQUE(date)` is global across all songs, so it rejects a snapshot where two tracks share a date. It stays, because the shared dates are a data issue ([#929](https://github.com/bolsinga/itunes_json/issues/929)). Should the history be corrected, and should the backup keep fractional seconds?
 - **Deltas**: add a `play_deltas` view (the LAG query).
 
