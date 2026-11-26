@@ -31,11 +31,11 @@ struct AlbumTableBuilder: TableBuilder {
       CHECK(disccount > 0),
       CHECK(discnumber > 0),
       CHECK(compilation = 0 OR compilation = 1)
-    );
+    ) STRICT;
     CREATE TABLE IF NOT EXISTS albumids (
       itunesid TEXT NOT NULL PRIMARY KEY,
       albumid INTEGER NOT NULL
-    );
+    ) STRICT;
     """
   }
 

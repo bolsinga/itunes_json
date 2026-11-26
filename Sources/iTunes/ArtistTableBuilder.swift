@@ -25,11 +25,11 @@ struct ArtistTableBuilder: TableBuilder {
     CREATE TABLE IF NOT EXISTS artists (
       id INTEGER PRIMARY KEY,
       \(constraints == .strict ? strictSchema : laxSchema)
-    );
+    ) STRICT;
     CREATE TABLE IF NOT EXISTS artistids (
       itunesid TEXT NOT NULL PRIMARY KEY,
       artistid INTEGER NOT NULL
-    );
+    ) STRICT;
     """
   }
 
