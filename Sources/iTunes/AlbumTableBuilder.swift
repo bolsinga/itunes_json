@@ -19,7 +19,7 @@ struct AlbumTableBuilder: TableBuilder {
     """
     CREATE TABLE IF NOT EXISTS albums (
       id INTEGER PRIMARY KEY,
-      artistid INTEGER NON NULL,
+      artistid INTEGER NOT NULL,
       name TEXT NOT NULL,
       sortname TEXT NOT NULL DEFAULT '',
       trackcount INTEGER NOT NULL,
