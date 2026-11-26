@@ -40,10 +40,10 @@ extension IdentityRepair.Correction {
     if case .discNumber(let v) = self { v } else { nil }
   }
   fileprivate var year: Int? {
-    if case .trackNumber(let v) = self { v } else { nil }
+    if case .year(let v) = self { v } else { nil }
   }
   fileprivate var duration: Int? {
-    if case .trackNumber(let v) = self { v } else { nil }
+    if case .duration(let v) = self { v } else { nil }
   }
   fileprivate var dateadded: String? {
     if case .dateAdded(let v) = self { v } else { nil }

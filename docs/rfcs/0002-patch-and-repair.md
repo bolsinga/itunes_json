@@ -88,7 +88,6 @@ The original branch and tags are untouched. The new tags differ by version only,
 ## Open questions
 
 1. **No track-count repair.** A `correct_trackcount` table exists, but `CorrectionsDBRow.trackcount` is always nil and there is no `Repairable` case for track counts. Flag names derive from the camelCase enum cases via `EnumerableFlag`.
-2. **CorrectionsDBRow bugs.** `year` and `duration` in Sources/iTunes/CorrectionsDBRow.swift read from `.trackNumber`, not `.year` / `.duration`. Writing a patch to `.db` therefore inserts NULL, and the `NOT NULL` constraint fails for those tables. The JSON path is unaffected.
-3. **Patch rows are `INSERT OR IGNORE`.** Two different corrections for one ID in one type silently keep the first.
-4. **`Patchable` duplicates `Repairable`.** `createPatch` is a switch with identical arms. Could `repair` take just a path and an optional branch name?
-5. **`Optional<Comparable>.<`** treats nil < nil as true. Is that intentional?
+2. **Patch rows are `INSERT OR IGNORE`.** Two different corrections for one ID in one type silently keep the first.
+3. **`Patchable` duplicates `Repairable`.** `createPatch` is a switch with identical arms. Could `repair` take just a path and an optional branch name?
+4. **`Optional<Comparable>.<`** treats nil < nil as true. Is that intentional?
