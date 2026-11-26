@@ -24,8 +24,21 @@ The schema lives only in Swift string literals. The README example query uses th
 
 - `--sql-code` (`TracksSQLSourceEncoder`): one text stream: the pragma, then for each table its `CREATE TABLE IF NOT EXISTS` DDL followed by its INSERT statements (literals with `'` doubled, via `Statement.description`), each table's inserts sorted as strings, then the views. There is no BEGIN/COMMIT. Foreign keys are resolved with subselects, for example `(SELECT id FROM artists WHERE name = 'X')` (`RowArtist.selectID`, `RowAlbum.selectID(artistID:)`). An album is found by its artist, name and counts.
 - `--db` (`TracksDBEncoder`): inserts use bound parameters inside one transaction per table (`Database.createTable`). Foreign keys are resolved from the in-memory `[Row: Int64]` lookups returned by earlier tables (`lastID`), falling back to `-1` if the lookup misses (which then violates the foreign key). The bytes are produced with `sqlite3_serialize` (`Database.data()`).
-- Connection setup (`Database.init`): `sqlite3_open_v2` with `SQLITE_OPEN_URI|READWRITE|CREATE`; `PRAGMA journal_mode = WAL`; `PRAGMA synchronous = NORMAL`. File storage uses `url.absoluteString` (a `file:` URI).
+- Connection setup (`Database.init`): `sqlite3_open_v2` with `SQLITE_OPEN_URI|READWRITE|CREATE`; `PRAGMA journal_mode = DELETE`; `PRAGMA synchronous = NORMAL`. File storage uses `url.absoluteString` (a `file:` URI). See "Journal mode and durability".
 - The two paths are not byte-equivalent, but they build the same albums and songs. Both write one album row for each distinct album, and attach each song to the album of its own artist. The artist is part of an album's identity (`RowAlbum.albumArtistName` is the track's artist), so the tracks of an album all have the same artist, and a compilation with several track artists is several albums. `SQLCodeTests` loads the SQL into SQLite and compares it with the `--db` result.
+
+### Journal mode and durability
+
+A journal is the file SQLite uses to make a transaction all-or-nothing: if the program or the machine stops part way through a commit, SQLite uses the journal to put the database back to its last complete state. SQLite has several journal modes, chosen with `PRAGMA journal_mode` (a PRAGMA is a SQLite setting command). Every connection runs `PRAGMA journal_mode = DELETE` and `PRAGMA synchronous = NORMAL` when it is opened (`Database.init`).
+
+`DELETE` is the classic rollback journal. Before a commit changes the database file, the old pages are copied to a temporary `-journal` file. When the commit finishes, the journal is deleted. Between transactions the database is exactly one file that holds every committed row. The other common mode, WAL (write-ahead log), does the reverse: it appends new pages to a separate `-wal` file and only copies them into the main file at a later checkpoint, and it keeps a `-shm` (shared memory index) file beside it. WAL lets readers and one writer work at the same time, and it makes many small commits fast. This project has neither need: each database is written by one connection in a few large transactions, and the result is read by tools that expect a single file. With WAL, a database that is still open (the `archive` command never closes its archive connection) leaves rows in `-wal`, and copying only the `.db` file silently drops them. The file format also records the mode in the file header, so a serialized or copied file would claim to be WAL and reopening it would create `-wal` and `-shm` files and need write access to the directory. `DELETE` avoids all of that, so a `.db` file is complete and self-contained as soon as the last commit returns.
+
+Where each kind of storage is used:
+
+- **File storage** is `backup --db`, `backup --flat`, `archive` and the corrections file written by `patch --database` (and the same file when `repair` reads one). The `backup` formats write into the file and then also serialize it with `sqlite3_serialize` and replace the file with those bytes, so only the file format matters, not the working journal. `archive` keeps one file open for the whole run and attaches it from each per-tag memory database. The mode is written into the file header when a connection sets it, and setting it on a file already in another mode converts that file, so a file left in WAL by another tool is returned to `DELETE` when opened here.
+- **Memory storage** is `batch --db`, `batch --flat` and `query`. A `:memory:` database has no file to journal, SQLite keeps its journal in memory whatever mode is requested, and the pragma is accepted and ignored. `sqlite3_serialize` of such a database writes a normal rollback-journal file header, so the `.db` files from `batch` are single files that need no care.
+
+`PRAGMA synchronous` sets how often SQLite forces data to the disk (an fsync) while committing. `FULL` is the default and the safest. `NORMAL` forces fewer of them. With a rollback journal, `NORMAL` leaves a small chance of a damaged file if the operating system or the power fails at exactly the wrong moment during a commit. A program crash alone is safe in every setting. It stays `NORMAL` because every database this tool writes can be rebuilt from the git history or the Music library by running the command again, so the faster setting is a reasonable trade. A database that becomes the only copy of its data should switch to `FULL`.
 
 ### Normalized DDL
 
@@ -112,6 +125,22 @@ Notes:
 - `added` and `released` are always created strict (`TracksDBEncoder` passes `.strict`). `RowRelease.date` is nil for tracks without a release date; the `INSERT OR IGNORE` silently skips the NOT NULL violation, so `released` only has rows for tracks with a date. The `tracks` view uses `COALESCE(dr.date, '')`.
 - Dates are ISO 8601 strings (`Track.dateAdded`, `playDateUTC`, `releaseDate`) stored as TEXT; lexical order equals chronological order for UTC `Z` strings.
 - Booleans are integers: `compilation` is 0/1.
+
+### Foreign keys
+
+A foreign key is a column whose value must be the key of a row in another table: `albums.artistid` and `songs.artistid` refer to `artists(id)`, `songs.albumid` refers to `albums(id)`, and `plays.itunesid` refers to `songs(itunesid)`. The `FOREIGN KEY` clauses are part of the table definition, so they are in the strict and the lax forms of every table, and the lax flags do not change them.
+
+SQLite only enforces foreign keys on a connection that has run `PRAGMA foreign_keys = ON;`. The setting is off by default and it is not stored in the database file. A file keeps the declared keys (`PRAGMA foreign_key_list(songs)` lists them), but a connection that opens the file later starts with enforcement off and can insert or delete rows that break the keys. `PRAGMA foreign_key_check;` finds the broken rows at any time, whatever the setting, so it is the way to check a file that was written elsewhere.
+
+Where the setting is on:
+
+- `TracksDBEncoder` and `TracksSQLSourceEncoder` run it first, so a `--db` build and a `--sql-code` script are checked while they are written. This includes the normalized forms of `query` (`--tracks` and `--raw`), which build through `TracksDBEncoder` on an in-memory connection.
+- `--sql-code` finds ids with subselects such as `(SELECT id FROM artists WHERE name = 'X')`. A missing row makes the subselect `NULL`, which the `NOT NULL` columns reject, so that path fails whether or not the pragma is on. The pragma is the only check on a value that is not `NULL`.
+- `--db` looks ids up in the in-memory dictionaries returned by the earlier tables and writes `-1` if a lookup misses (`artistLookup[...] ?? -1` in `AlbumTableBuilder` and `SongTableBuilder`). `-1` is not `NULL`, so only the foreign key would reject it. The fallback is a guard and cannot be reached in practice: each dictionary is built from the same tracks that the dependent table is built from, so every key is present. A normalized database built from real history has no `-1` ids and `PRAGMA foreign_key_check;` finds nothing, in both the strict and the lax schema.
+
+Where it is off: the flat database, the corrections database and `query --flat` (they declare no keys), and the connection that `archive` writes with. `archive` creates the empty archive file with `TracksDBEncoder` (pragma on), but the rows are written by a separate in-memory flat connection that runs `ATTACH DATABASE ... AS archive` and writes the archive tables. The setting belongs to that second connection, so the archive is written unchecked. The archive statements are written to keep the keys consistent, and a check after building from real history finds nothing, but nothing enforces it.
+
+This is deliberate. The goal is a lenient pipeline that builds on imperfect data, and the keys are there to describe the relationships and to catch a bug in the generator, not to reject the library's data. Enforcement is therefore on while the generator writes, where a violation means a program bug, and left to the consumer afterward. A consumer that wants enforcement for its own writes runs the pragma on its own connection. `ForeignKeyTests` covers that a built file has no violations in either schema, that the file does not keep the setting, and that the declared keys let `foreign_key_check` find a broken row.
 
 ### Views
 
@@ -206,7 +235,25 @@ The `archive` command accumulates snapshots (ArchiveCommand.swift): it loads eac
 
 ### Indexes
 
-None besides primary keys and the implicit indexes behind UNIQUE constraints. Notable: `plays.itunesid` is only indexed through `UNIQUE(itunesid,date,count)` in strict mode; lax plays has no usable index on it, and `lastplays` and the `tracks` view join on `itunesid`.
+An index is a second, sorted copy of one or more columns that lets SQLite jump to matching rows instead of reading the whole table. The cost is space, and time on every insert, because the index must be kept in step with the table. The schema declares no indexes of its own. The only ones are those SQLite creates for each primary key and each `UNIQUE` constraint. That is deliberate, and it fits how the databases are used.
+
+- **Per-tag databases are built, queried once and thrown away.** `batch`, `query` and `archive` build an in-memory database for each git tag, run their SQL, and discard it. An index only pays off when many lookups share it. A query that reads the whole library (the `tracks` view, `lastplays`, a join of `songs` to `artists`) touches every row once, so an index does not speed it up, and building the index costs about as much as the query.
+- **SQLite already covers the one join that matters.** The `tracks` view joins `plays` to `songs` on `itunesid`. In strict mode the index behind `UNIQUE(itunesid, date, count)` starts with `itunesid`, so it serves that join. With lax plays, which drops that `UNIQUE`, there is no index, and SQLite builds a temporary "automatic covering index" on `plays(itunesid)` for the length of the statement (`EXPLAIN QUERY PLAN` shows `SEARCH p USING AUTOMATIC COVERING INDEX (itunesid=?)`). This is on by default and the code never turns it off (`PRAGMA automatic_index`). So lax plays pays for an index only in the queries that need one.
+- **`lastplays` reads all of `plays` either way.** It numbers every row with a window function (`RANK() OVER (PARTITION BY itunesid ORDER BY date DESC)`) and keeps the first, so it has to scan the whole table. An index on `plays(itunesid, date)` lets SQLite skip some of the sorting, but the measured time did not change.
+- **The archive is the one persistent database, and its work is also bulk.** `archive` compares a whole snapshot against the whole archive (`EXCEPT`, `INNER JOIN` on `itunesid`, the `lastplays` comparison). The `itunesid` columns it joins on are primary keys, so they are already indexed. The columns with no index (`songs.artistid`, `songs.albumid`, `albums.artistid`, `artistids.artistid`, `albumids.albumid`) are used by whole-table joins and `NOT IN` checks, where SQLite builds what it needs on the fly.
+
+The candidates were measured on an archive built from real snapshots with all four lax flags (so `plays` has no `UNIQUE`), with and without `plays(itunesid, date)`, `songs(artistid)`, `songs(albumid)` and `albums(artistid)`. Queries over the whole library were no faster, and some were slightly slower. Queries that look up one artist, album or song went from about a millisecond to microseconds, and `EXPLAIN QUERY PLAN` changed from `SCAN` to `SEARCH` as expected, but both are far below anything noticeable on a library this size. Creating the four indexes took about as long as one whole-library query, and made the database file roughly a fifth larger. Someone who runs many point lookups against a saved archive can add them in their own `sqlite3` session:
+
+```sql
+CREATE INDEX plays_itunesid_date ON plays(itunesid, date);
+CREATE INDEX songs_artistid ON songs(artistid);
+CREATE INDEX songs_albumid ON songs(albumid);
+CREATE INDEX albums_artistid ON albums(artistid);
+```
+
+The flat table has no indexes either, for the same reason: it is read whole.
+
+Indexes on the child columns of a foreign key also speed up deletes. With `PRAGMA foreign_keys = ON`, deleting an artist or album makes SQLite look for songs or albums that still point at it, and without an index on the child column that lookup is a scan. `tunes` deletes only albums that no `albumids` row refers to (in `archive`), so this does not matter today. If a command ever deletes parent rows in bulk, that is the time to index the child columns.
 
 ### Example queries
 
@@ -235,11 +282,8 @@ Usage: `tunes backup --sql-code | sqlite3 /tmp/itunes.db`; `tunes query --raw|--
 
 ## Open questions
 
-- **Foreign keys** are only enforced when the connection runs the pragma; the files produced by `--db` do not persist it (it is per connection), so later consumers insert/delete freely. `-1` fallback IDs and `songs.itunesid` FK on plays rely on this pragma being on.
 - **SQL code transaction**: should the script be wrapped in `BEGIN/COMMIT` (speed, atomicity)?
-- **Indexes**: add `plays(itunesid, date)` (needed in lax), `songs(artistid)`, `songs(albumid)`, `albums(artistid)`; the archive queries and `tracks` view scan.
 - **Sentinels**: should the `-1` placeholders for missing track numbers, track counts, years and durations become NULL, or be replaced by real validation?
-- **WAL**: `journal_mode=WAL` is set for every connection including `:memory:` (no effect) and file DBs written then serialized; WAL leaves `-wal`/`-shm` files and is a poor fit for a single-file backup artifact. Use DELETE journal for `--db`?
 - **Shared play dates:** `UNIQUE(date)` is global across all songs, so it rejects a snapshot where two tracks share a date. It stays, because the shared dates are a data issue ([#929](https://github.com/bolsinga/itunes_json/issues/929)). Should the history be corrected, and should the backup keep fractional seconds?
 - **Deltas**: add a `play_deltas` view (the LAG query).
 
