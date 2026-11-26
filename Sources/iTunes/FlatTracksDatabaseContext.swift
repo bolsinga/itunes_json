@@ -55,6 +55,6 @@ struct FlatTracksDatabaseContext: FlatDBEncoderContext {
       comments TEXT NOT NULL DEFAULT '',
       playdate TEXT NOT NULL,
       playcount INTEGER NOT NULL
-    );
+    ) STRICT;
     """
 }

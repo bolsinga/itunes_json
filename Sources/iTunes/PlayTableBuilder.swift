@@ -31,7 +31,7 @@ struct PlayTableBuilder: TableBuilder {
       date TEXT NOT NULL,
       count INTEGER NOT NULL,
       \(constraints == .strict ? strictSchema : laxSchema)
-    );
+    ) STRICT;
     """
   }
 

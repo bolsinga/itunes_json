@@ -40,7 +40,7 @@ struct SongTableBuilder: TableBuilder {
       FOREIGN KEY(albumid) REFERENCES albums(id),
       CHECK(length(name) > 0),
       \(constraints == .strict ? strictSchema : laxSchema)
-    );
+    ) STRICT;
     """
   }
 
