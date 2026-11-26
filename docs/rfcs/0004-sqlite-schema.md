@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS artistids (
 );
 CREATE TABLE IF NOT EXISTS albums (
   id INTEGER PRIMARY KEY,
-  artistid INTEGER NON NULL,            -- sic, see pitfalls
+  artistid INTEGER NOT NULL,
   name TEXT NOT NULL,
   sortname TEXT NOT NULL DEFAULT '',
   trackcount INTEGER NOT NULL,
@@ -221,7 +221,6 @@ Usage: `tunes backup --sql-code | sqlite3 /tmp/itunes.db`; `tunes query --raw|--
 
 ## Open questions
 
-- **`artistid INTEGER NON NULL`**: SQLite parses this as column type `INTEGER NON` with no NOT NULL (verified with `PRAGMA table_info`: notnull=0). A NULL `artistid` inserts. Fix to `NOT NULL`? Changes DDL only, but existing DBs differ.
 - **Foreign keys** are only enforced when the connection runs the pragma; the files produced by `--db` do not persist it (it is per connection), so later consumers insert/delete freely. `-1` fallback IDs and `songs.itunesid` FK on plays rely on this pragma being on.
 - **SQL code transaction**: should the script be wrapped in `BEGIN/COMMIT` (speed, atomicity)?
 - **Indexes**: add `plays(itunesid, date)` (needed in lax), `songs(artistid)`, `songs(albumid)`, `albums(artistid)`; the archive queries and `tracks` view scan.
