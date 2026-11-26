@@ -13,8 +13,9 @@ Swift package that snapshots the Music library to JSON, commits each snapshot to
 
 - `swift build`
 - `swift test -v -Xswiftc -warnings-as-errors` is what CI runs, so keep the build warning-free.
-- CI also builds scheme `iTunes` with `xcodebuild` for macOS and the iOS Simulator (Xcode 27), one job per destination. A separate job fails if `swift-format` changes any file or `swift-format lint --strict` reports anything. Run `xcrun swift-format format --in-place --recursive Sources Tests Package.swift` and `xcrun swift-format lint --strict --recursive Sources Tests Package.swift` before pushing. Each existing finding is marked `// swift-format-ignore: <Rule>` above its statement or declaration, to be fixed in groups. Mark a deliberate new one the same way. The shared steps live in `.github/actions/`. Code that uses `iTunesLibrary` must stay inside `#if canImport(iTunesLibrary)` so the iOS build compiles.
-- `swift-tools-version:6.4`, macOS 27 / iOS 27. All dependencies are pinned with `exact:`. Dependabot proposes bumps.
+- Before pushing, run `xcrun swift-format format --in-place --recursive Sources Tests Package.swift` and `xcrun swift-format lint --strict --recursive Sources Tests Package.swift`. CI fails on a change or a finding. Mark a deliberate lint finding with `// swift-format-ignore: <Rule>`.
+- The CI jobs, the shared actions and the `iTunesLibrary` guard for the iOS build are in RFC 0001.
+- `swift-tools-version:6.4`, macOS 27 / iOS 27. All dependencies are pinned with `exact:`.
 
 ## Conventions
 
@@ -23,22 +24,14 @@ Swift package that snapshots the Music library to JSON, commits each snapshot to
 - Localization is minimal. `Localizable.xcstrings` has two keys, and subcommand help strings are not localized.
 - Use 2-space indentation (matches existing files).
 
-## Things that bite
+## Before you change something
 
-- **On-disk contract.** Git tags look like `iTunes-yyyy-MM-dd[.NN][-empty]` and are never overwritten. Commit messages are `<tag>\n<version>`. The backup writes `itunes.json` to a hardcoded `main` branch and pushes, so it needs a remote. Changing `Track` field order or pruning rewrites every future diff.
-- **MusicKit is incomplete.** It is implemented but does not fully work as expected ([#405](https://github.com/bolsinga/itunes_json/issues/405)). Treat iTunesLibrary as the reliable source.
-- **Daylight saving bug.** Dates in the data from Music are affected by a daylight saving bug, whichever source is used ([#328](https://github.com/bolsinga/itunes_json/issues/328)). Be careful with date comparisons.
-- **Repair.** It writes a new branch, bumps the tag version (`-V<n+1>-`), never pushes, and needs a clean tree. `replace-persistent-ids` changes the join key, so it is dangerous.
-- **Patch matching.** Patch and repair join on `persistentID`.
-- **History walk.** `Repository.transformTracks` runs one task per tag. Its result order, error reporting and memory behavior are in RFC 0003.
-- **SQLite schema.**
-  - `plays` stores Music's cumulative count (`itunesid, date, count`). There is no `delta` or `songid` column.
-  - `albums.artistid INTEGER NON NULL` is a typo, so the NOT NULL is not enforced.
-  - `Track(row:)` reads `count` from the flat table, but the table column is `playcount`.
-  - `--lax-schema` relaxes only the four normalized tables.
-  - `foreign_keys=ON` is set per connection.
-- **Corrections `.db` patches.** In `CorrectionsDBRow.swift`, `year` and `duration` read `.trackNumber` and `trackcount` is always nil, so `.db` corrections are broken for those fields. The JSON path is fine.
-- **Untested.** `Repository`, batch, query, archive, and the archive SQL have no tests.
+Read the RFC for the area first. Each lists what the code does, its known problems and its open questions.
+
+- **Backup and git history ([RFC 0001](docs/rfcs/0001-backup-pipeline.md)).** The git tags and commit messages are an on-disk contract, and changing the `Track` output rewrites every future diff. The known problems with the sources (MusicKit, the daylight saving bug) are listed there.
+- **Patch and repair ([RFC 0002](docs/rfcs/0002-patch-and-repair.md)).** Repair rewrites the history onto a new branch, and `replace-persistent-ids` is dangerous. Patch matching, the patch formats and known bugs are there.
+- **History commands ([RFC 0003](docs/rfcs/0003-history-iteration-commands.md)).** `transformTracks` has no result order, reports failures per tag, and the memory use of each command is described. It also says what `archive` is for and where it fails. Much of this layer has no tests.
+- **SQLite schema ([RFC 0004](docs/rfcs/0004-sqlite-schema.md)).** The schema has known typos and quirks. Read it before changing the schema or reading from it.
 
 ## RFCs
 
