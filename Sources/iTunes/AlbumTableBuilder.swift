@@ -59,6 +59,9 @@ struct AlbumTableBuilder: TableBuilder {
   }
 
   var statements: [Database.Statement] {
-    tracks.map { $0.album.insert(artistID: $0.artist.selectID) }
+    // One row for each album, as `rows` has. The artist is part of an album's identity, so all of
+    // the tracks of an album have the same artist.
+    Dictionary(tracks.map { ($0.album, $0.artist) }, uniquingKeysWith: { first, _ in first })
+      .map { $0.key.insert(artistID: $0.value.selectID) }
   }
 }
