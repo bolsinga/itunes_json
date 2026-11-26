@@ -192,7 +192,25 @@ The `archive` command accumulates snapshots (ArchiveCommand.swift): it loads eac
 
 ### Indexes
 
-None besides primary keys and the implicit indexes behind UNIQUE constraints. Notable: `plays.itunesid` is only indexed through `UNIQUE(itunesid,date,count)` in strict mode; lax plays has no usable index on it, and `lastplays` and the `tracks` view join on `itunesid`.
+An index is a second, sorted copy of one or more columns that lets SQLite jump to matching rows instead of reading the whole table. The cost is space, and time on every insert, because the index must be kept in step with the table. The schema declares no indexes of its own. The only ones are those SQLite creates for each primary key and each `UNIQUE` constraint. That is deliberate, and it fits how the databases are used.
+
+- **Per-tag databases are built, queried once and thrown away.** `batch`, `query` and `archive` build an in-memory database for each git tag, run their SQL, and discard it. An index only pays off when many lookups share it. A query that reads the whole library (the `tracks` view, `lastplays`, a join of `songs` to `artists`) touches every row once, so an index does not speed it up, and building the index costs about as much as the query.
+- **SQLite already covers the one join that matters.** The `tracks` view joins `plays` to `songs` on `itunesid`. In strict mode the index behind `UNIQUE(itunesid, date, count)` starts with `itunesid`, so it serves that join. With lax plays, which drops that `UNIQUE`, there is no index, and SQLite builds a temporary "automatic covering index" on `plays(itunesid)` for the length of the statement (`EXPLAIN QUERY PLAN` shows `SEARCH p USING AUTOMATIC COVERING INDEX (itunesid=?)`). This is on by default and the code never turns it off (`PRAGMA automatic_index`). So lax plays pays for an index only in the queries that need one.
+- **`lastplays` reads all of `plays` either way.** It numbers every row with a window function (`RANK() OVER (PARTITION BY itunesid ORDER BY date DESC)`) and keeps the first, so it has to scan the whole table. An index on `plays(itunesid, date)` lets SQLite skip some of the sorting, but the measured time did not change.
+- **The archive is the one persistent database, and its work is also bulk.** `archive` compares a whole snapshot against the whole archive (`EXCEPT`, `INNER JOIN` on `itunesid`, the `lastplays` comparison). The `itunesid` columns it joins on are primary keys, so they are already indexed. The columns with no index (`songs.artistid`, `songs.albumid`, `albums.artistid`, `artistids.artistid`, `albumids.albumid`) are used by whole-table joins and `NOT IN` checks, where SQLite builds what it needs on the fly.
+
+The candidates were measured on an archive built from real snapshots with all four lax flags (so `plays` has no `UNIQUE`), with and without `plays(itunesid, date)`, `songs(artistid)`, `songs(albumid)` and `albums(artistid)`. Queries over the whole library were no faster, and some were slightly slower. Queries that look up one artist, album or song went from about a millisecond to microseconds, and `EXPLAIN QUERY PLAN` changed from `SCAN` to `SEARCH` as expected, but both are far below anything noticeable on a library this size. Creating the four indexes took about as long as one whole-library query, and made the database file roughly a fifth larger. Someone who runs many point lookups against a saved archive can add them in their own `sqlite3` session:
+
+```sql
+CREATE INDEX plays_itunesid_date ON plays(itunesid, date);
+CREATE INDEX songs_artistid ON songs(artistid);
+CREATE INDEX songs_albumid ON songs(albumid);
+CREATE INDEX albums_artistid ON albums(artistid);
+```
+
+The flat table has no indexes either, for the same reason: it is read whole.
+
+Indexes on the child columns of a foreign key also speed up deletes. With `PRAGMA foreign_keys = ON`, deleting an artist or album makes SQLite look for songs or albums that still point at it, and without an index on the child column that lookup is a scan. `tunes` deletes only albums that no `albumids` row refers to (in `archive`), so this does not matter today. If a command ever deletes parent rows in bulk, that is the time to index the child columns.
 
 ### Example queries
 
@@ -223,7 +241,6 @@ Usage: `tunes backup --sql-code | sqlite3 /tmp/itunes.db`; `tunes query --raw|--
 
 - **Foreign keys** are only enforced when the connection runs the pragma; the files produced by `--db` do not persist it (it is per connection), so later consumers insert/delete freely. `-1` fallback IDs and `songs.itunesid` FK on plays rely on this pragma being on.
 - **SQL code transaction**: should the script be wrapped in `BEGIN/COMMIT` (speed, atomicity)?
-- **Indexes**: add `plays(itunesid, date)` (needed in lax), `songs(artistid)`, `songs(albumid)`, `albums(artistid)`; the archive queries and `tracks` view scan.
 - **STRICT tables** (SQLite 3.37+): would reject text in INTEGER columns and make `-1` sentinels vs real validation explicit. Replace the `-1` sentinels with NULL or real validation?
 - **WAL**: `journal_mode=WAL` is set for every connection including `:memory:` (no effect) and file DBs written then serialized; WAL leaves `-wal`/`-shm` files and is a poor fit for a single-file backup artifact. Use DELETE journal for `--db`?
 - **Shared play dates:** `UNIQUE(date)` is global across all songs, so it rejects a snapshot where two tracks share a date. It stays, because the shared dates are a data issue ([#929](https://github.com/bolsinga/itunes_json/issues/929)). Should the history be corrected, and should the backup keep fractional seconds?
