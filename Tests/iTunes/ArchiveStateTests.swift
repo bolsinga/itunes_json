@@ -164,6 +164,19 @@ struct ArchiveStateTests {
     #expect(state.lastSeen[1] == "t3")
   }
 
+  @Test func onlyMusicIsArchived() {
+    var state = ArchiveState()
+    var podcast = track(id: 2, playCount: 3, playDate: Self.feb3)
+    podcast.podcast = true
+    var noArtist = track(id: 3, artist: nil)
+    noArtist.albumArtist = nil
+    let changes = state.apply(snapshot("t1", [track(id: 1), podcast, noArtist]))
+    #expect(changes.songs.map(\.persistentID) == [1])
+    #expect(changes.plays.isEmpty)
+    #expect(changes.findings.isEmpty)
+    #expect(state.lastSeen == [1: "t1"])
+  }
+
   // MARK: Invalid tracks
 
   @Test func invalidTrackIsLeftOutAndReportedOnce() {

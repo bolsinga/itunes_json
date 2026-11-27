@@ -15,10 +15,14 @@ extension ArchiveState {
   mutating func apply(_ snapshot: Tag<[Track]>) -> SnapshotChanges {
     let tag = snapshot.tag
 
+    // Only music is archived, as for the flat databases: podcasts, voice memos, videos, books and
+    // the like are left out without a finding.
+    let music = snapshot.item.filter(\.isSQLEncodable)
+
     // A number that is invalid here but was valid before keeps its newest valid value.
-    let patched = snapshot.item.map { $0.filledFromValid(attributes[$0.persistentID]) }
+    let patched = music.map { $0.filledFromValid(attributes[$0.persistentID]) }
     let reduction = CatalogReduction(Tag(tag: tag, item: patched))
-    for track in snapshot.item {
+    for track in music {
       attributes[track.persistentID] = CatalogAttributes.newestValid(
         oldestFirst: [
           attributes[track.persistentID] ?? CatalogAttributes(), CatalogAttributes(track),
