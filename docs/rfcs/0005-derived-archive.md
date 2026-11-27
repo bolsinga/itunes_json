@@ -1,6 +1,6 @@
 # RFC 0005: A Derived Archive Database
 
-Status: Proposed (draft for discussion, nothing here is implemented)
+Status: Accepted (approved 2026-11-27; implementation is in progress, see the PRs labeled RFC 0005)
 
 ## Summary
 

@@ -45,4 +45,4 @@ Read the RFC for the area first. Each lists what the code does, its known proble
 | [0004](docs/rfcs/0004-sqlite-schema.md) | DDL, constraints, strict vs lax, SQL generation |
 | [0005](docs/rfcs/0005-derived-archive.md) | Proposal: derive the archive database from the history, without repair |
 
-RFCs 0001 to 0004 describe existing behavior (as of 2026-11-25). RFC 0005 is a proposal. Keep them in sync when changing the area they cover.
+RFCs 0001 to 0004 describe existing behavior (as of 2026-11-25). RFC 0005 is accepted and being implemented. Until each part lands, the code still behaves as RFCs 0001 to 0004 describe. Keep them in sync when changing the area they cover.
