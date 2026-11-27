@@ -59,7 +59,7 @@ Because the catalog is set from the newest data and not from a replay, there are
 
 For each song, the state is `seencount` and `seendate`: the last count and date that the fold accepted as a baseline. The cumulative play count is the `count` of the song's last row in `plays`. A snapshot gives each song an observation `(c, d)`: the `playCount` (a missing count is 0) and the `playDateUTC` (maybe empty). A count of 0 with a date is read as one play, as `Play.normalize` does today.
 
-The rule from the author's notes is that a play count only increases, and when it increases the play date moves forward, and a play date never moves back. Music does not always keep to it, because it sometimes loses a date or resets a count to zero. These are the cases, checked in order. "Forward" means `d` is later than `seendate` by more than the DST quirk. The quirk is a difference that is a whole number of hours under 12, which includes 0.
+The rule from the author's notes is that a play count only increases, and when it increases the play date moves forward, and a play date never moves back. Music does not always keep to it, because it sometimes loses a date or resets a count to zero. These are the cases, checked in order. "Forward" means `d` is later than `seendate` by more than the DST quirk. The quirk is a difference that is a whole number of hours, of any size, which includes 0. This is the rule of `Date.compareQuirk`, so the fold needs no new rule, and the 12 hour bound in the archive SQL goes away with that SQL.
 
 | # | Observation compared with the state | What the fold does | Finding |
 |---|---|---|---|
@@ -95,7 +95,7 @@ A finding is `(tag, persistentID?, code, detail)`. They are written to a `findin
 - `invalidTrack`, `duplicatePersistentID`, `sortNameConflict`, `sharedPlayDate`, `dateAddedChanged`
 - `noPlayDate`, `countUpDateNotForward`, `countReset`, `countDecreased`, `dateForwardNoCount`, `dateBackward`
 
-The same codes are the validation of the newest `itunes.json`. After `backup` writes and commits a snapshot, the checks that need no state (`invalidTrack`, `duplicatePersistentID`, `sortNameConflict`, `sharedPlayDate`) can run on that snapshot alone and be reported to the person running it. The checks that compare with the previous snapshot need the database state. A finding never stops the backup, because the JSON is the record. It is reported, and the iTunesJson app can show it, for example as a notification with a count and the first few tracks. How the app gets the list is an open question.
+The same codes are the validation of the newest `itunes.json`. After `backup` writes and commits a snapshot, the checks that need no state (`invalidTrack`, `duplicatePersistentID`, `sortNameConflict`, `sharedPlayDate`) can run on that snapshot alone and be reported to the person running it. The checks that compare with the previous snapshot need the database state. A finding never stops the backup, because the JSON is the record. Findings are kept in the database and written to the log. Showing them in the iTunesJson app, for example as a notification with a count and the first few tracks, is deferred until the archive works. It is decided not to design the app side now.
 
 ### Schema changes (amends RFC 0004)
 
@@ -195,6 +195,7 @@ Each snapshot does not become a flat database on the way to the archive. The ste
 
 ## Risks
 
+- **A play a whole number of hours after the last one is read as the quirk.** If a song is played again exactly 24 hours later, to the second, with a higher count, it is case 5. The baseline does not move, so the next good observation counts the play, a little later than it happened. It is not lost.
 - **A conservative reset rule loses plays.** Case 7 records no play when a count drops and the date does not move forward. Plays between the reset and the next observation are not counted. The findings show how often that happens, and the rule can change before the next rebuild.
 - **Case 6 can add plays that did not happen.** If a drop in the count is a glitch and not a reset, the fold adds the lower count as new plays. Each one is a `countReset` finding, so they can be listed and checked.
 - **The newest data is trusted.** An edit in Music applies to the whole history. This is the aim, and the history keeps the old values.
@@ -217,7 +218,5 @@ The rules are untested on the full history, so these come first:
 
 1. **Duplicate persistent IDs.** Do both copies record plays? If they do, keeping the original copy ignores the plays of the other. The first full run measures it (see the verification plan).
 2. **A track whose ID changes.** The design has no equivalent of `replace-persistent-ids`. Is a small hand-kept alias list worth adding, if this happens in the data? The first full run lists candidates (see the verification plan), and aliases are added only if they show up.
-3. **Quirk bound.** `Date.compareQuirk` treats any whole-hour difference as the same, and the archive SQL only under 12 hours. This RFC uses the SQL's bound. Should the Swift code change to match?
-4. **Findings in the app.** How should the iTunesJson app get the findings and show them? The app calls `Program.main()`, so it does not see structured output today.
-5. **Album identity.** An album is identified by its artist, name, counts and compilation flag (RFC 0004), so a compilation with several track artists is several albums. This RFC does not change that.
-6. **Timing.** Should the database be updated in `backup` once checked, or by a separate `archive` run?
+3. **Album identity.** An album is identified by its artist, name, counts and compilation flag (RFC 0004), so a compilation with several track artists is several albums. This RFC does not change that.
+4. **Timing.** Should the database be updated in `backup` once checked, or by a separate `archive` run?
