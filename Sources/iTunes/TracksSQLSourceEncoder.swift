@@ -26,10 +26,10 @@ struct TracksSQLSourceEncoder<Context: TracksSQLSourceEncoderContext> {
       self.rowEncoder = rowEncoder
     }
 
-    private func tableBuilders(schemaOptions: SchemaOptions) -> [(
+    private func tableBuilders(schemaOptions: SchemaOptions) throws -> [(
       any TableBuilder, SchemaConstraints
     )] {
-      [
+      try [
         (rowEncoder.artistTableBuilder, schemaOptions.artistConstraints),
         (rowEncoder.albumTableBuilder(), schemaOptions.albumConstraints),
         (rowEncoder.songTableBuilder(), schemaOptions.songConstraints),
@@ -39,8 +39,9 @@ struct TracksSQLSourceEncoder<Context: TracksSQLSourceEncoderContext> {
       ]
     }
 
-    fileprivate func sqlStatements(schemaOptions: SchemaOptions) -> String {
-      (["PRAGMA foreign_keys = ON;"]
+    fileprivate func sqlStatements(schemaOptions: SchemaOptions) throws -> String {
+      try
+        (["PRAGMA foreign_keys = ON;"]
         + tableBuilders(schemaOptions: schemaOptions).flatMap {
           var statements = [$0.schema(constraints: $1)]
           statements.append(contentsOf: $0.statements.map { "\($0)" }.sorted())
@@ -51,7 +52,7 @@ struct TracksSQLSourceEncoder<Context: TracksSQLSourceEncoderContext> {
 
   private func encode(_ tracks: [Track]) throws -> String {
     let encoder = Encoder(rowEncoder: try tracks.rowEncoder(context.loggingToken))
-    return encoder.sqlStatements(schemaOptions: context.schemaOptions)
+    return try encoder.sqlStatements(schemaOptions: context.schemaOptions)
   }
 
   func encode(_ tracks: [Track]) throws -> Data {
