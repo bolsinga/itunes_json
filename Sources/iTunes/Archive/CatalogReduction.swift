@@ -17,7 +17,7 @@ struct InvalidCatalogTrack: Hashable, Sendable {
 
 /// The required numbers of one track in one snapshot. A nil is a number that was absent, zero or
 /// negative there.
-struct CatalogAttributes: Hashable, Sendable {
+struct CatalogAttributes: Hashable, Codable, Sendable {
   var trackNumber: Int?
   var trackCount: Int?
   var year: Int?
@@ -66,6 +66,8 @@ struct CatalogReduction: Sendable {
   let invalid: [InvalidCatalogTrack]
   /// Ordered by code, then persistent ID, then detail.
   let findings: [CatalogFinding]
+  /// The entry kept for each persistent ID, valid or not, ordered by persistent ID.
+  let entries: [Track]
 
   init(_ snapshot: Tag<[Track]>) {
     var findings = [CatalogFinding]()
@@ -89,6 +91,7 @@ struct CatalogReduction: Sendable {
     }
 
     self.tag = snapshot.tag
+    self.entries = unique
     self.tracks = Self.fillSortNames(valid, findings: &findings)
     self.invalid = invalid
     self.findings = findings.sorted {

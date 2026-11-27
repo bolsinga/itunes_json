@@ -56,6 +56,7 @@ extension Database {
       try db.writeTimeline(changes)
       try db.writeFindings(changes.findings)
       try db.removeUnusedRows(tag: changes.tag)
+      try db.writeCarryOver(changes)
       try db.setArchiveState("lasttag", changes.tag)
     }
   }
@@ -64,12 +65,12 @@ extension Database {
 // MARK: - Statements
 
 extension Database {
-  fileprivate func prepare(_ sql: String) throws -> Database.PreparedStatement {
+  func prepare(_ sql: String) throws -> Database.PreparedStatement {
     try Database.PreparedStatement(string: sql, db: self)
   }
 
   @discardableResult
-  fileprivate func run(_ statement: Database.PreparedStatement, _ arguments: [Value]) throws
+  func run(_ statement: Database.PreparedStatement, _ arguments: [Value]) throws
     -> [Row]
   {
     if !arguments.isEmpty { try statement.bind(arguments: arguments) { errorString } }
@@ -84,7 +85,7 @@ extension Database {
     try run(statement, [.string(key), .string(value)])
   }
 
-  fileprivate func readArchiveState(_ key: String) throws -> String? {
+  func readArchiveState(_ key: String) throws -> String? {
     let statement = try prepare("SELECT value FROM archivestate WHERE key = ?")
     defer { statement.close() }
     return try run(statement, [.string(key)]).first?.first?.value.string
@@ -324,5 +325,31 @@ extension Database {
       try run(deleteArtist, [.integer(id)])
     }
     try writeFindings(removals)
+  }
+}
+
+// MARK: - Carry over
+
+extension ArchiveState {
+  /// The keys of `archivestate` that hold what an update needs and the tables do not have.
+  static let activeFindingsKey = "activefindings"
+  static let partialAttributesKey = "partialattributes"
+}
+
+extension Database {
+  /// Keeps the findings that the next snapshot has to compare with, and the required numbers of
+  /// the songs that have no row. See `loadArchiveState()`.
+  fileprivate func writeCarryOver(_ changes: SnapshotChanges) throws {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys]
+    try setArchiveState(
+      ArchiveState.activeFindingsKey,
+      try encoder.encode(changes.activeOtherFindings).asUTF8String())
+    try setArchiveState(
+      ArchiveState.partialAttributesKey,
+      try encoder.encode(
+        Dictionary(
+          uniqueKeysWithValues: changes.partialAttributes.map { (String($0.key), $0.value) })
+      ).asUTF8String())
   }
 }

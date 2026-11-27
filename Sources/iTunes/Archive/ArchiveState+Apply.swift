@@ -22,7 +22,7 @@ extension ArchiveState {
     // A number that is invalid here but was valid before keeps its newest valid value.
     let patched = music.map { $0.filledFromValid(attributes[$0.persistentID]) }
     let reduction = CatalogReduction(Tag(tag: tag, item: patched))
-    for track in music {
+    for track in reduction.entries {
       attributes[track.persistentID] = CatalogAttributes.newestValid(
         oldestFirst: [
           attributes[track.persistentID] ?? CatalogAttributes(), CatalogAttributes(track),
@@ -89,9 +89,14 @@ extension ArchiveState {
       }
     }
 
+    let records = record(findings, tag: tag)
     return SnapshotChanges(
       tag: tag, songs: reduction.tracks, plays: plays, playStates: changedStates,
-      added: newAdded, released: newReleased, findings: record(findings, tag: tag))
+      added: newAdded, released: newReleased, findings: records,
+      activeOtherFindings: activeOtherFindings.sorted {
+        ($0.code, $0.detail) < ($1.code, $1.detail)
+      },
+      partialAttributes: attributes.filter { lastSeen[$0.key] == nil })
   }
 
   /// Leaves out a finding that repeats the last one. A finding about a song repeats when the
