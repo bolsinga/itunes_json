@@ -44,12 +44,16 @@ struct AlbumTableBuilder: TableBuilder {
   var rows: [RowAlbum] { Array(Set(tracks.map { $0.album })) }
   var argumentBuilder: (@Sendable (Row) -> [Database.Value])?
 
-  init(tracks: [TrackRow], artistLookup: [RowArtist: Int64]?) {
+  init(tracks: [TrackRow], artistLookup: [RowArtist: Int64]?) throws {
     self.tracks = tracks.sorted(by: { $0.album.name < $1.album.name })
 
     if let artistLookup {
-      let artistIDs = self.tracks.reduce(into: [RowAlbum: Int64]()) {
-        $0[$1.album] = artistLookup[$1.artist] ?? -1
+      let artistIDs = try self.tracks.reduce(into: [RowAlbum: Int64]()) {
+        guard let artistID = artistLookup[$1.artist] else {
+          throw ForeignKeyLookupError(
+            table: "albums", row: "\($1.album.name.name)", parent: "artist \($1.artist.name.name)")
+        }
+        $0[$1.album] = artistID
       }
 
       self.argumentBuilder = {

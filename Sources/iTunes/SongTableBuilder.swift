@@ -47,16 +47,26 @@ struct SongTableBuilder: TableBuilder {
   var rows: [RowSong] { tracks.map { $0.song } }
   var argumentBuilder: (@Sendable (Row) -> [Database.Value])?
 
-  init(tracks: [TrackRow], artistLookup: [RowArtist: Int64]?, albumLookup: [RowAlbum: Int64]?) {
+  init(tracks: [TrackRow], artistLookup: [RowArtist: Int64]?, albumLookup: [RowAlbum: Int64]?)
+    throws
+  {
     self.tracks = tracks.sorted(by: { $0.song.name < $1.song.name })
 
     if let artistLookup, let albumLookup {
-      let artistIDs = self.tracks.reduce(into: [RowSong: Int64]()) {
-        $0[$1.song] = artistLookup[$1.artist] ?? -1
+      let artistIDs = try self.tracks.reduce(into: [RowSong: Int64]()) {
+        guard let artistID = artistLookup[$1.artist] else {
+          throw ForeignKeyLookupError(
+            table: "songs", row: "\($1.song.name.name)", parent: "artist \($1.artist.name.name)")
+        }
+        $0[$1.song] = artistID
       }
 
-      let albumIDs = self.tracks.reduce(into: [RowSong: Int64]()) {
-        $0[$1.song] = albumLookup[$1.album] ?? -1
+      let albumIDs = try self.tracks.reduce(into: [RowSong: Int64]()) {
+        guard let albumID = albumLookup[$1.album] else {
+          throw ForeignKeyLookupError(
+            table: "songs", row: "\($1.song.name.name)", parent: "album \($1.album.name.name)")
+        }
+        $0[$1.song] = albumID
       }
 
       self.argumentBuilder = {
