@@ -28,10 +28,19 @@ extension ComparisonResult {
 }
 
 extension Date {
-  /// Compares two dates, reading a difference of exactly one hour as `orderedSameQuirk`. Daylight
-  /// saving time starting or ending moves an unchanged date by that hour, and nothing larger.
+  /// The largest shift of an unchanged date that is read as the quirk. The history of the author's
+  /// library has shifts of 1 to 3 hours of play dates and 1 to 4 hours of dates added.
+  static let quirkLimit: TimeInterval = 4 * 60 * 60
+
+  /// Compares two dates, reading a difference of a whole number of hours, from 1 to 4, as
+  /// `orderedSameQuirk`. Daylight saving time and the shifts that come with it move an unchanged
+  /// date by whole hours. A larger difference is too likely to be a real change.
   func compareQuirk(_ other: Date) -> DateQuirkComparisonResult {
-    guard abs(self.distance(to: other)) != 60 * 60 else {
+    let distance = abs(self.distance(to: other))
+    guard
+      distance == 0 || distance > Self.quirkLimit
+        || distance.truncatingRemainder(dividingBy: 60 * 60) != 0
+    else {
       return .orderedSameQuirk
     }
 

@@ -11,7 +11,7 @@ import Testing
 @testable import iTunes
 
 struct ArchiveStateTests {
-  // Minutes and seconds vary, because a whole number of hours apart reads as the same date.
+  // Minutes and seconds vary, because dates 1 to 4 whole hours apart read as the same date.
   private static let feb3 = "2026-02-03T10:11:12Z"
   private static let mar1 = "2026-03-01T10:21:22Z"
   private static let mar9 = "2026-03-09T10:31:32Z"
