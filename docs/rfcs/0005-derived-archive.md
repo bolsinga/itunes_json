@@ -121,7 +121,7 @@ These cannot be edited in Music, and Music may reset them, so the history decide
 It is decided that no timing fidelity is lost from the source data.
 
 - **The archive stores dates verbatim.** A play date, a date added and a date released are written as the snapshot has them, as the same string. They are not parsed and written back, rounded, shifted or normalized. The quirk and the cases above only decide which observation counts. They never change a stored date.
-- **Dates are standard ISO 8601 text.** The snapshots hold UTC strings such as `2026-11-25T08:30:00Z`. That is a format SQLite reads with `datetime()` and `strftime()`, and as text it sorts in time order, so the database needs no special date handling. The fold parses the strings only to compare them for the quirk.
+- **Dates are ISO 8601 strings,** as RFC 0001 documents, and are read with that standard's definition.
 
 **The DST shift (#328) is a bug in Music, and nothing here can fix it.** An unchanged date from the library moves by whole hours when daylight saving time starts and ends. The history already recorded those values. The archive does not try to correct them. A date that moves by a whole number of hours with the same count is read as the same date (case 3), so a shift does not add a play. The stored date is the one from the first observation, verbatim, and the later shifted values stay in the history. A case 3 observation does not write a finding, because it would add one for most played songs at every change.
 
@@ -258,7 +258,7 @@ Each open issue labeled Data has a plan. They fall into four kinds.
 
 ## Risks
 
-- **A play a whole number of hours after the last one is read as the quirk.** If a song is played again exactly 24 hours later, to the second, with a higher count, it is case 5. The baseline does not move, so the next good observation counts the play, a little later than it happened. It is not lost.
+- **A play a whole number of hours after the last one is read as the quirk.** If a song is played again exactly 24 hours later with a higher count, it is case 5. The baseline does not move, so the next good observation counts the play, a little later than it happened. It is not lost.
 - **Case 7 counts no plays.** When a count drops and the date does not move forward, the fold adds no play, so any plays at the lower count are not in the total. The observation is kept in a `countDecreased` finding, and the history still has it. The findings show how often that happens, and the rule can change before the next rebuild.
 - **Case 6 can add plays that did not happen.** If a drop in the count is a glitch and not a reset, the fold adds the lower count as new plays. Each one is a `countReset` finding, so they can be listed and checked.
 - **The newest data is trusted.** An edit in Music applies to the whole history. This is the aim, and the history keeps the old values.
