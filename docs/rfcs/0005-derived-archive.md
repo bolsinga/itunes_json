@@ -35,6 +35,7 @@ The `archive` SQL is also long, has no unit tests, keeps every flat snapshot dat
 4. **The history wins for what Music cannot edit or reset.** Play counts, play dates and the date added come from the history.
 5. **A bad value is reported, never made up.** The code does not invent a year, a count or a date. It records a finding, so the author can fix the data in Music, and the database is rebuilt.
 6. **One code path for a rebuild and for an update.** Both run the same step over one snapshot.
+7. **No timing fidelity is lost.** A date is stored exactly as the snapshot recorded it. The archive never rounds, shifts or reformats one. See "Date fidelity".
 
 ## Detailed design
 
@@ -50,7 +51,9 @@ Because the catalog is set from the newest data and not from a replay, there are
 ### Catalog rules
 
 - **Newest valid value.** For each attribute, the value comes from the newest snapshot in which the track has a valid one. For a track that is in the newest snapshot, this is almost always that snapshot. The fallback only matters for a value that is invalid in the newest snapshot and was valid before. Old snapshots are never checked against the schema, so a year 0 in 2015 does not matter if the newest data has a year.
-- **Sort names.** An artist's sort name is the sort name that any of its tracks in the snapshot has. If two different non-empty sort names are found, that is a finding, and the one used is the most common, then the first alphabetically. This is what `updateArtists` does today with a sibling row, applied to one snapshot, and it removes the rename that fails in #921.
+- **Sort names.** An artist's sort name is the sort name that any of its tracks in the snapshot has. This is what `updateArtists` does today with a sibling row, applied to one snapshot, and it removes the rename that fails in #921. Two cases are logged, so they can be found and counted:
+  - **`sortNameFilled`:** some tracks of an artist have a sort name and others have none (#941). The sort name is filled in for all of them, and the finding holds the artist, the sort name used, and how many tracks had it and how many did not. This is decided. It is a report to learn from: if the cases turn out to be harmless, the report can be removed, and if they are worth fixing, the finding lists them.
+  - **`sortNameConflict`:** two different non-empty sort names are found. The one used is the most common, then the first alphabetically.
 - **Duplicate persistent IDs ([#924](https://github.com/bolsinga/itunes_json/issues/924)).** A snapshot can have two different library entries with one ID. Before anything else reads it, the snapshot is reduced to one entry per ID. The entry kept is the one with the earliest `dateAdded`, then the smallest `size`, because the original file is the most likely to be in the next snapshot too. A stable choice matters more than a recent one, because the play fold below compares each snapshot with the one before it. The dropped entry gives a `duplicatePersistentID` finding. No snapshot after 2025-02-07 has one, so the newest data is not affected.
 - **Album owner (decided).** Today an album belongs to the track's artist (`artist ?? albumArtist`), so a compilation whose tracks have different artists becomes one album for each of them. The owner of an album is now, in this order:
   1. the track's `albumArtist`, if it is not empty, with its `sortAlbumArtist` as the sort name;
@@ -113,11 +116,20 @@ These cannot be edited in Music, and Music may reset them, so the history decide
 - **`added`:** the first non-empty `dateAdded` the track had, in tag order. Later values that differ by more than the quirk are a `dateAddedChanged` finding.
 - **`released`:** the first non-empty `releaseDate` in tag order. A track with none has no row, as today.
 
+### Date fidelity
+
+It is decided that no timing fidelity is lost from the source data.
+
+- **The archive stores dates verbatim.** A play date, a date added and a date released are written as the snapshot has them, as the same string. They are not parsed and written back, rounded, shifted or normalized. The quirk and the cases above only decide which observation counts. They never change a stored date.
+- **Dates are standard ISO 8601 text.** The snapshots hold UTC strings such as `2026-11-25T08:30:00Z`. That is a format SQLite reads with `datetime()` and `strftime()`, and as text it sorts in time order, so the database needs no special date handling. The fold parses the strings only to compare them for the quirk.
+
+**The DST shift (#328) is a bug in Music, and nothing here can fix it.** An unchanged date from the library moves by whole hours when daylight saving time starts and ends. The history already recorded those values. The archive does not try to correct them. A date that moves by a whole number of hours with the same count is read as the same date (case 3), so a shift does not add a play. The stored date is the one from the first observation, verbatim, and the later shifted values stay in the history. A case 3 observation does not write a finding, because it would add one for most played songs at every change.
+
 ### Findings
 
 A finding is `(tag, persistentID?, code, detail)`. They are written to a `findings` table in the database in the same transaction as the rows that caused them. The codes above are the first set:
 
-- `invalidTrack`, `duplicatePersistentID`, `sortNameConflict`, `sharedPlayDate`, `dateAddedChanged`, `compilationNoAlbumArtist`, `artistRemoved`, `albumRemoved`
+- `invalidTrack`, `duplicatePersistentID`, `sortNameConflict`, `sharedPlayDate`, `dateAddedChanged`, `compilationNoAlbumArtist`, `sortNameFilled`, `artistRemoved`, `albumRemoved`
 - `noPlayDate`, `countUpDateNotForward`, `countReset`, `countDecreased`, `dateForwardNoCount`, `dateBackward`
 
 **Nothing is dropped without a record.** Every observation that the fold does not apply in full writes a finding. That is every case in the play table except 1, 3 and 4. Case 3 is the same as the state, so there is nothing to record.
@@ -128,7 +140,7 @@ A finding is `(tag, persistentID?, code, detail)`. They are written to a `findin
 - **Case 7 is decided to stay log-only.** A count that drops while the date does not move forward adds no play. The lower count and its date are kept in the finding, so no data is lost at this point. The history is not changed either, so a later rebuild can read the same snapshots with a different rule. The first full run shows how many case 7 findings there are before that is revisited.
 - **No repeats.** A finding is not written again when the song's last finding has the same code and the same detail apart from the tag. Without this, a song that stays in the same state would add a finding for every snapshot, which is 1,611 rows for each of the 132 tracks with year 0. The first one is kept, with the tag where it began.
 
-The same codes are the validation of the newest `itunes.json`. After `backup` writes and commits a snapshot, the checks that need no state (`invalidTrack`, `duplicatePersistentID`, `sortNameConflict`, `sharedPlayDate`, `compilationNoAlbumArtist`) can run on that snapshot alone and be reported to the person running it. The checks that compare with the previous snapshot need the database state. A finding never stops the backup, because the JSON is the record. Findings are kept in the database and written to the log. Showing them in the iTunesJson app, for example as a notification with a count and the first few tracks, is deferred until the archive works. It is decided not to design the app side now.
+The same codes are the validation of the newest `itunes.json`. After `backup` writes and commits a snapshot, the checks that need no state (`invalidTrack`, `duplicatePersistentID`, `sortNameConflict`, `sharedPlayDate`, `compilationNoAlbumArtist`, `sortNameFilled`) can run on that snapshot alone and be reported to the person running it. The checks that compare with the previous snapshot need the database state. A finding never stops the backup, because the JSON is the record. Findings are kept in the database and written to the log. Showing them in the iTunesJson app, for example as a notification with a count and the first few tracks, is deferred until the archive works. It is decided not to design the app side now.
 
 ### Schema changes (amends RFC 0004)
 
@@ -221,6 +233,21 @@ Each snapshot does not become a flat database on the way to the archive. The ste
 - **`batch` and `query`:** unchanged. They remain the way to look at the data.
 - **`backup`:** unchanged. Once the archive is trusted it may gain an option that applies the new snapshot to the database after committing it.
 
+## Plan for each Data issue
+
+Each open issue labeled Data has a plan. They fall into four kinds.
+
+| Issue | Kind | Plan |
+|---|---|---|
+| [#921](https://github.com/bolsinga/itunes_json/issues/921) `archive` fails on `artistids` | Removed by the design | No `artistids` table and no rename. Sort names come from one snapshot. |
+| [#941](https://github.com/bolsinga/itunes_json/issues/941) (closed) sort name on some tracks only | Handled and logged | The sort name is filled in from the other tracks, and each case is a `sortNameFilled` finding, to learn whether it is worth fixing. |
+| [#924](https://github.com/bolsinga/itunes_json/issues/924) duplicate persistent IDs | Handled and measured | One entry is kept, and a `duplicatePersistentID` finding is written. Whether both copies record plays is measured on the first full run. |
+| [#929](https://github.com/bolsinga/itunes_json/issues/929) shared play dates | Recorded as found | Dates are stored verbatim, and each shared date is a `sharedPlayDate` finding. |
+| [#328](https://github.com/bolsinga/itunes_json/issues/328) DST shift | Not fixable here | A bug in Music. The history has the values, and the archive reads a whole-hour shift as the same date. |
+| [#935](https://github.com/bolsinga/itunes_json/issues/935) year 0, [#936](https://github.com/bolsinga/itunes_json/issues/936) no track count | Fix it in Music | The track is excluded and reported until the next snapshot is good. |
+
+**Fix it in Music.** #935 and #936 are a class of issue whose fix is to correct the track in the Music app, so that the next snapshot is good. The archive does nothing special for them beyond the `invalidTrack` finding. The author expects the newest Music data to have them fixed already, so the first full run should report none for the newest snapshot. If it reports any, they are in this class and are fixed the same way, and an update that sees a track become valid asks for a rebuild (see "Invalid tracks").
+
 ## Alternatives considered
 
 - **Keep repairing the data.** It rewrites tags, each problem needs a repair type, and it does not decide how a reset or a lost date is treated.
@@ -249,7 +276,9 @@ The rules are untested on the full history, so these come first:
 5. List candidates for a changed ID: the same artist, album and name, where one ID stops appearing and another starts.
 6. Check that `plays.count` equals the running sum of `plays.delta` for every song.
 7. Count the compilations that get the `Various Artists` owner (`compilationNoAlbumArtist`), and the albums that still split because tracks of one disc disagree on a track count, a disc count or the compilation flag.
-8. Use fixtures that have a known problem: the Neil Young sort name from 2025-05-30 to 2025-06-01 (#921), and a duplicate ID from #924.
+8. Check that the newest snapshot gives no `invalidTrack` finding. The author expects #935 and #936 are fixed in the newest Music data.
+9. Count `sortNameFilled` findings by artist and by snapshot, to decide whether to keep the report (#941).
+10. Use fixtures that have a known problem: the Neil Young sort name from 2025-05-30 to 2025-06-01 (#921), and a duplicate ID from #924.
 
 ## Open questions
 
