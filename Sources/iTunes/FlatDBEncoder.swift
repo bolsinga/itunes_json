@@ -37,6 +37,11 @@ struct FlatDBEncoder<Context: FlatDBEncoderContext> {
     self.db = try Database(context: context.context)
   }
 
+  /// Writes `items` with one INSERT statement, prepared from the first item. Every item must
+  /// produce the same statement, as the flat `tracks` rows do. A patch file has an INSERT for each
+  /// kind of correction, so a call must only have one kind, which `Patch.writeDatabase` does by
+  /// grouping. Items of another kind would be written with the first item's INSERT, into the wrong
+  /// table, without an error.
   func encode(items: [Context.Item]) async throws {
     guard let firstItem = items.first else { throw EncodeError.errorNoItems }
 
