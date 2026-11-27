@@ -85,14 +85,28 @@ struct PlayFoldTests {
   }
 
   @Test func test_Case3Quirk() {
-    // A whole-hour shift, as at a daylight saving change, is the same date.
-    for shifted in ["2025-03-01T09:00:00Z", "2025-03-01T11:00:00Z", "2025-02-28T10:00:00Z"] {
+    // A shift of exactly one hour, as at a daylight saving change, is the same date.
+    for shifted in ["2025-03-01T09:00:00Z", "2025-03-01T11:00:00Z"] {
       let s = foldPlayObservation(Self.baseline, obs(40, shifted))
       #expect(s.state == Self.baseline)
       #expect(s.state?.seenDate == Self.mar1)
       #expect(s.play == nil)
       #expect(s.finding == nil)
     }
+  }
+
+  @Test func test_OnlyOneHourIsTheQuirk() {
+    // Other whole numbers of hours are real moves of the date.
+    let twoLater = foldPlayObservation(Self.baseline, obs(40, "2025-03-01T12:00:00Z"))
+    #expect(twoLater.finding?.code == .dateForwardNoCount)
+    let twoEarlier = foldPlayObservation(Self.baseline, obs(40, "2025-03-01T08:00:00Z"))
+    #expect(twoEarlier.finding?.code == .dateBackward)
+    let dayEarlier = foldPlayObservation(Self.baseline, obs(40, "2025-02-28T10:00:00Z"))
+    #expect(dayEarlier.finding?.code == .dateBackward)
+    // A play exactly a day later is a play.
+    let dayLater = foldPlayObservation(Self.baseline, obs(41, "2025-03-02T10:00:00Z"))
+    #expect(dayLater.play?.delta == 1)
+    #expect(dayLater.finding == nil)
   }
 
   @Test func test_Case4() {
