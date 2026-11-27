@@ -46,7 +46,7 @@ BackupCommand.run()
 
 `Source` has two cases, exposed as flags through `EnumerableFlag` in `BackupCommand.swift`. The flag names are derived by ArgumentParser, so the flags are `--itunes` (default) and `--musickit`.
 
-- **iTunesLibrary** (`Track+MediaItem.swift`) builds each Track from an `ITLibMediaItem`. It uses `ITLibrary(apiVersion: "1.1")` and `allMediaItems`, in `Track.gatherAllTracks()`. The whole file is under `#if canImport(iTunesLibrary)`. Where the framework is absent, `Source.gather()` throws a local `iTunesError.notAvailable`. Zero or unset numeric fields are omitted so they encode as absent.
+- **iTunesLibrary** (`Track+MediaItem.swift`) builds each Track from an `ITLibMediaItem`. It uses `ITLibrary(apiVersion: "1.1")` and `allMediaItems`, in `Track.gatherAllTracks()`. The whole file is under `#if canImport(iTunesLibrary)`. Where the framework is absent, `Source.gather()` throws a local `iTunesError.notAvailable`. Most zero or unset numeric fields are omitted so they encode as absent. The exceptions are `year`, `trackNumber` and `totalTime`, which are copied as they are, so a zero is in the JSON (see "Missing values" in RFC 0004).
 - **MusicKit** (`Track+Song.swift`) calls `MusicAuthorization.request()` and logs the status with `Logger` (category `musickit.authorization`). It then issues a `MusicLibrarySectionedRequest<Album, Song>` and builds Tracks from the sections. Many fields are commented out because MusicKit does not provide them. MusicKit output is therefore sparser than iTunesLibrary output.
 
 After gathering, `Source.gather(reduce:)` does two things:
