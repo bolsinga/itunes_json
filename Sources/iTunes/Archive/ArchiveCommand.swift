@@ -104,7 +104,16 @@ private let updatePlays =
   """
 
 extension Database {
+  /// Throws if any row of any table refers to a row that does not exist.
+  func requireNoForeignKeyViolations() throws {
+    let violations = try execute(query: "PRAGMA foreign_key_check;", arguments: []).flatMap { $0 }
+    if !violations.isEmpty { throw DatabaseError.foreignKeyViolations(violations.count) }
+  }
+
   func archive(into archivePath: String) async throws {
+    // The setting belongs to this connection, so the archive tables are checked while it writes.
+    // It cannot be changed inside a transaction.
+    try self.execute("PRAGMA foreign_keys = ON;")
     try self.execute("ATTACH DATABASE '\(archivePath)' AS archive;")
 
     try self.transaction { db in
@@ -189,5 +198,7 @@ struct ArchiveCommand: AsyncParsableCommand {
       Logger.archive.info("\(database.tag)")
       try await database.item.archive(into: await archiveDBPath)
     }
+
+    try await archiveDB.requireNoForeignKeyViolations()
   }
 }
