@@ -85,8 +85,11 @@ struct PlayFoldTests {
   }
 
   @Test func test_Case3Quirk() {
-    // A shift of exactly one hour, as at a daylight saving change, is the same date.
-    for shifted in ["2025-03-01T09:00:00Z", "2025-03-01T11:00:00Z"] {
+    // A shift of whole hours, as at a daylight saving change, is the same date.
+    for shifted in [
+      "2025-03-01T09:00:00Z", "2025-03-01T11:00:00Z", "2025-03-01T08:00:00Z",
+      "2025-03-01T07:00:00Z", "2025-03-01T06:00:00Z", "2025-03-01T14:00:00Z",
+    ] {
       let s = foldPlayObservation(Self.baseline, obs(40, shifted))
       #expect(s.state == Self.baseline)
       #expect(s.state?.seenDate == Self.mar1)
@@ -95,12 +98,14 @@ struct PlayFoldTests {
     }
   }
 
-  @Test func test_OnlyOneHourIsTheQuirk() {
-    // Other whole numbers of hours are real moves of the date.
-    let twoLater = foldPlayObservation(Self.baseline, obs(40, "2025-03-01T12:00:00Z"))
-    #expect(twoLater.finding?.code == .dateForwardNoCount)
-    let twoEarlier = foldPlayObservation(Self.baseline, obs(40, "2025-03-01T08:00:00Z"))
-    #expect(twoEarlier.finding?.code == .dateBackward)
+  @Test func test_OnlyOneToFourHoursIsTheQuirk() {
+    // Larger whole numbers of hours, and part hours, are real moves of the date.
+    let fiveLater = foldPlayObservation(Self.baseline, obs(40, "2025-03-01T15:00:00Z"))
+    #expect(fiveLater.finding?.code == .dateForwardNoCount)
+    let fiveEarlier = foldPlayObservation(Self.baseline, obs(40, "2025-03-01T05:00:00Z"))
+    #expect(fiveEarlier.finding?.code == .dateBackward)
+    let partHour = foldPlayObservation(Self.baseline, obs(40, "2025-03-01T11:30:00Z"))
+    #expect(partHour.finding?.code == .dateForwardNoCount)
     let dayEarlier = foldPlayObservation(Self.baseline, obs(40, "2025-02-28T10:00:00Z"))
     #expect(dayEarlier.finding?.code == .dateBackward)
     // A play exactly a day later is a play.

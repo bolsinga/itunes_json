@@ -150,7 +150,7 @@ struct PlayTests {
     #expect(
       [
         valid, valid.advanced(by: -60 * 60), valid.advanced(by: -60 * 60),
-        valid.advanced(by: 60 * 60),
+        valid.advanced(by: -2 * 60 * 60),
       ].normalize() == [valid, valid, valid, valid])
   }
 }

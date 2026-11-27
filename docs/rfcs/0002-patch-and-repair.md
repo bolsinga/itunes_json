@@ -60,7 +60,7 @@ Patch and repair match tracks strictly by `persistentID` (`Identifiable.id`). Tr
 
 Application is conditional: `Track.apply(correction:)` changes a track only if its current play equals `old` and `new` has both date and count. This makes play repairs safe to replay but exact-match only.
 
-`Date.compareQuirk` (Sources/iTunes/Date+Quirk.swift) treats two dates whose difference is exactly one hour as `orderedSameQuirk`. This hides the daylight-saving shift in play dates. Identical dates (distance 0) are `orderedSame`. RFC 0005 changed the rule from any whole number of hours to exactly one. `Optional<Comparable>.<` (Sources/iTunes/Optional+Comparable.swift) gives `IdentityRepair` a total order. Two nils compare as `lhs < rhs == true`, which is not a strict weak ordering and is only suitable for the sorting done here.
+`Date.compareQuirk` (Sources/iTunes/Date+Quirk.swift) treats two dates whose difference is 1, 2, 3 or 4 whole hours as `orderedSameQuirk`. This hides the daylight-saving shift in play dates. Identical dates (distance 0) are `orderedSame`. RFC 0005 changed the rule from any whole number of hours to those four. `Optional<Comparable>.<` (Sources/iTunes/Optional+Comparable.swift) gives `IdentityRepair` a total order. Two nils compare as `lhs < rhs == true`, which is not a strict weak ordering and is only suitable for the sorting done here.
 
 ### `--correction` and `replace-persistent-ids`
 
