@@ -52,7 +52,7 @@ Because the catalog is set from the newest data and not from a replay, there are
 - **Newest valid value.** For each attribute, the value comes from the newest snapshot in which the track has a valid one. For a track that is in the newest snapshot, this is almost always that snapshot. The fallback only matters for a value that is invalid in the newest snapshot and was valid before. Old snapshots are never checked against the schema, so a year 0 in 2015 does not matter if the newest data has a year.
 - **Sort names.** An artist's sort name is the sort name that any of its tracks in the snapshot has. If two different non-empty sort names are found, that is a finding, and the one used is the most common, then the first alphabetically. This is what `updateArtists` does today with a sibling row, applied to one snapshot, and it removes the rename that fails in #921.
 - **Duplicate persistent IDs ([#924](https://github.com/bolsinga/itunes_json/issues/924)).** A snapshot can have two different library entries with one ID. Before anything else reads it, the snapshot is reduced to one entry per ID. The entry kept is the one with the earliest `dateAdded`, then the smallest `size`, because the original file is the most likely to be in the next snapshot too. A stable choice matters more than a recent one, because the play fold below compares each snapshot with the one before it. The dropped entry gives a `duplicatePersistentID` finding. No snapshot after 2025-02-07 has one, so the newest data is not affected.
-- **Tracks that are no longer in the library.** Their rows stay, with the attributes of the last snapshot that had them. Their plays are part of the listening history.
+- **Tracks that are no longer in the library.** Their rows stay, with the attributes of the last snapshot that had them. Their plays are part of the listening history. This is decided. `songs` has a `lastseen` column, the tag of the newest snapshot that has the track, and a `removedsongs` view lists the songs whose `lastseen` is not `archivestate.lasttag`.
 - **Invalid tracks.** A track that lacks a required number (RFC 0004, "Missing values") in every snapshot that has it gets a finding (`invalidTrack`, naming what is missing). The track is left out of the catalog and the timeline. This is the 132 tracks with year 0 and the 17 with no track count in the newest snapshot. It is a data problem to fix in Music, then rebuild. This is decided: the track is excluded, not given an unknown value, and its plays appear after the fix. See "Invalid tracks" for what happens when one is fixed.
 
 ### The play fold
@@ -132,7 +132,8 @@ CREATE TABLE IF NOT EXISTS archivestate (
 ) STRICT;
 ```
 
-- **`UNIQUE(date)` is gone from `plays`.** `count` is the derived total, which can differ from Music's count where Music reset it.
+- **`UNIQUE(date)` is gone from `plays`.** `count` is the derived total, which can differ from Music's count where Music reset it. `plays` stores both `delta` and `count`, so queries that read `plays.count` keep working. They are written in the same insert, and a test checks that `count` is the running sum of `delta`. This is decided.
+- **`songs` gets `lastseen TEXT NOT NULL`**, the tag of the newest snapshot that has the track, and a `removedsongs` view.
 - **`artistids` and `albumids` are removed.**
 - **The strict and lax flags do not apply to `archive`.** The rules produce data that satisfies the strict schema, so lax is not needed.
 - **Views.** `lastplays` and `tracks` keep their meaning.
@@ -208,15 +209,15 @@ The rules are untested on the full history, so these come first:
 2. For every song with no reset finding, check that the derived `count` after the newest snapshot equals Music's `playCount`.
 3. Check that an update of one snapshot equals a rebuild.
 4. For each of the five duplicated IDs, compare the two entries' play counts and dates across the 939 snapshots. This shows whether both copies record plays, and whether the entry the rule keeps is the one that moves.
-5. Use fixtures that have a known problem: the Neil Young sort name from 2025-05-30 to 2025-06-01 (#921), and a duplicate ID from #924.
+5. List candidates for a changed ID: the same artist, album and name, where one ID stops appearing and another starts.
+6. Check that `plays.count` equals the running sum of `plays.delta` for every song.
+7. Use fixtures that have a known problem: the Neil Young sort name from 2025-05-30 to 2025-06-01 (#921), and a duplicate ID from #924.
 
 ## Open questions
 
 1. **Duplicate persistent IDs.** Do both copies record plays? If they do, keeping the original copy ignores the plays of the other. The first full run measures it (see the verification plan).
-2. **A track whose ID changes.** The design has no equivalent of `replace-persistent-ids`. Is a small hand-kept alias list worth adding, if this happens in the data?
+2. **A track whose ID changes.** The design has no equivalent of `replace-persistent-ids`. Is a small hand-kept alias list worth adding, if this happens in the data? The first full run lists candidates (see the verification plan), and aliases are added only if they show up.
 3. **Quirk bound.** `Date.compareQuirk` treats any whole-hour difference as the same, and the archive SQL only under 12 hours. This RFC uses the SQL's bound. Should the Swift code change to match?
-4. **Stored total.** `plays.count` and `plays.delta` hold the same information. Keep both, or keep `delta` and compute the total in a view?
-5. **Removed tracks.** Keep their rows and plays (recommended), or only tracks in the newest snapshot?
-6. **Findings in the app.** How should the iTunesJson app get the findings and show them? The app calls `Program.main()`, so it does not see structured output today.
-7. **Album identity.** An album is identified by its artist, name, counts and compilation flag (RFC 0004), so a compilation with several track artists is several albums. This RFC does not change that.
-8. **Timing.** Should the database be updated in `backup` once checked, or by a separate `archive` run?
+4. **Findings in the app.** How should the iTunesJson app get the findings and show them? The app calls `Program.main()`, so it does not see structured output today.
+5. **Album identity.** An album is identified by its artist, name, counts and compilation flag (RFC 0004), so a compilation with several track artists is several albums. This RFC does not change that.
+6. **Timing.** Should the database be updated in `backup` once checked, or by a separate `archive` run?
