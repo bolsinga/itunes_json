@@ -1,0 +1,23 @@
+name: push-and-prs-on-main
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: xcode-27
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: sw_vers
+      run: sw_vers
+    - name: Switch to Xcode 27
+      run: sudo xcode-select -s "/Applications/Xcode_27.0.app"
+    - name: Show SDKs
+      run: xcodebuild -showsdks
+    - name: Build
+      run: xcodebuild -verbose -skipPackagePluginValidation -scheme iTunesJson
