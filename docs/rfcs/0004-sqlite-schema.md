@@ -192,7 +192,7 @@ CREATE TABLE tracks (
 ) STRICT;
 ```
 
-`FlatTrackRow` supplies defaults instead of failing: missing strings become `''`, numbers 0, `disccount`/`discnumber` 1, `compilation` 0/1, `playcount` 0. The table is named `tracks` too, and its columns are named like the normalized view's, so a query written against `tracks` runs on both. The difference is that a `Track` is one row here (only the latest play info Music reports), while the view has a row for each play.
+`FlatTrackRow` throws `MissingValuesError` for a track without a track number, track count, year or duration, as the normalized path does ("Missing values"). Its other defaults are: missing strings become `''`, `disccount`/`discnumber` 1, `compilation` 0/1, `playcount` 0. The table is named `tracks` too, and its columns are named like the normalized view's, so a query written against `tracks` runs on both. The difference is that a `Track` is one row here (only the latest play info Music reports), while the view has a row for each play.
 
 ### Strict vs lax
 
@@ -213,7 +213,7 @@ The goal is a database with no made-up values: every track has a track number, t
 
 Music leaves out the disc count and disc number for many single-disc albums, which means `1` and `1`, so a missing or zero value is written as `1`. Compilation defaults to `0`, and composer, comments and sort names to `''`. A track with no artist is not written (`isSQLEncodable`). A missing album name is written as the empty name and fails the strict albums check (`CHECK(length(name) > 0)`). A play row with a count but no date has the date `''` and is logged as `noPlayDate`, and a track with no added or release date has no row in `added` or `released`.
 
-Where the data lacks values, in the author's history: audio tracks are almost always complete, and names, artists, albums, track numbers and durations are missing in none of the snapshots sampled. Two groups are not. Tracks with a year of `0` ([#935](https://github.com/bolsinga/itunes_json/issues/935)) and recently added tracks with no track count ([#936](https://github.com/bolsinga/itunes_json/issues/936)) are in the library data and not read from the wrong place: `Track+MediaItem.swift` leaves out a zero track count, disc count and disc number, and copies a zero year, track number and duration as they are. Until those are corrected in the data (a patch, see RFC 0002), generation on the full history fails on them.
+Where the data lacks values, in the author's history: audio tracks are almost always complete, and names, artists, albums, track numbers and durations are missing in none of the snapshots sampled. Two groups are not. Tracks with a year of `0` ([#935](https://github.com/bolsinga/itunes_json/issues/935)) and recently added tracks with no track count ([#936](https://github.com/bolsinga/itunes_json/issues/936)) are in the library data and not read from the wrong place: `Track+MediaItem.swift` leaves out a zero track count, disc count and disc number, and copies a zero year, track number and duration as they are. Until those are corrected in the data (a patch, see RFC 0002), generation on the full history fails on them. Separately, some snapshots have two library entries with one `persistentID` ([#924](https://github.com/bolsinga/itunes_json/issues/924)), which `songs` rejects because `itunesid` is its primary key.
 
 ### Column types and STRICT tables
 
@@ -278,7 +278,7 @@ Usage: `tunes backup --sql-code | sqlite3 /tmp/itunes.db`; `tunes query --raw|--
 
 ### Tests
 
-`DatabaseRowTests` covers `Track(row:)` per column; `SQLiteStatementTests` checks `Statement` interpolation (`?` in `sql`, quote-doubled `description`). `StrictTablesTests` checks that the generated tables are STRICT. `AlbumsSchemaTests` and `SQLCodeTests` also execute parts of the DDL, but most constraints are untested.
+`DatabaseRowTests` covers `Track(row:)` per column; `SQLiteStatementTests` checks `Statement` interpolation (`?` in `sql`, quote-doubled `description`). `StrictTablesTests` checks that the generated tables are STRICT. `MissingValuesTests` covers the missing-number errors and the disc defaults, `ForeignKeyTests` and `ForeignKeyLookupTests` the keys and lookup errors, and `ArchiveForeignKeysTests` the archive's pragma and final check. `AlbumsSchemaTests` and `SQLCodeTests` also execute parts of the DDL, but most constraints are untested.
 
 ## Open questions
 

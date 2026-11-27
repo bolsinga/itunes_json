@@ -108,10 +108,10 @@ The SQL is in private string constants at the top of the file. It tracks entitie
 The README's Future goal: back up into a single existing database instead of many snapshots. That database would hold every play time. History reaches back to 2006-01-01. `archive` is the one-time transformation of the git history into the SQLite database. The nightly backup does not repeat that transformation. Current limitations:
 
 - It is not wired into `backup`, and there is no incremental path for adding only the newest snapshot to the archive.
-- The README says the test data needs a lax `plays` schema. Pass `--lax-schema` to try it.
+- The history needs the lax flags and still does not archive completely (see the failure described below).
 - The archive SQL is long, hard to review, and has no unit tests. It is rebuilt from history on each run rather than adding the latest snapshot incrementally. (The SQL itself can be re-run, because of the `EXCEPT` guards.)
 - All flat snapshot databases are held open in memory at once, then sorted. This costs memory in proportion to history length, which is acceptable for a one-time run.
-- On the author's full history, `archive` stops with `UNIQUE constraint failed: artistids.itunesid`, even with every `--lax-schema` flag. The `artistids` and `albumids` mapping tables have no lax form. The cause was not investigated ([#921](https://github.com/bolsinga/itunes_json/issues/921)).
+- On the author's full history, `archive` does not finish, even with every `--lax-schema` flag. Each flat snapshot database is built first, and a snapshot with a track that lacks a track number, track count, year or duration fails (`MissingValuesError`, RFC 0004): tracks with year 0 from 2014-12-01 ([#935](https://github.com/bolsinga/itunes_json/issues/935)) and tracks with no track count from 2026-09-02 ([#936](https://github.com/bolsinga/itunes_json/issues/936)). Behind those, the archive SQL stops with `UNIQUE constraint failed: artistids.itunesid`: an artist's sort name is set on some tracks before others, and the rename in `updateArtists` lands on an artist row that already exists. The `artistids` and `albumids` mapping tables have no lax form ([#921](https://github.com/bolsinga/itunes_json/issues/921)). The snapshots that have two entries with one `persistentID` ([#924](https://github.com/bolsinga/itunes_json/issues/924)) also fail the normalized build.
 - Duplicate-date and DST handling is heuristic. Data problems in the history (the README says "needs some work to properly fix some issues") would produce wrong plays rows.
 - The `archive` path argument is interpolated into the `ATTACH` SQL string without escaping. A path containing a single quote would break it.
 
@@ -139,18 +139,18 @@ The README's Future goal: back up into a single existing database instead of man
 
 ### Tests
 
-`Tests/iTunes` uses Swift Testing (`@Test`) against target `iTunesTests`. The suite has nine files covering `Tag`, `StructuredTag`, `TagListExtraction` (the tag filter), git name and string helpers (`StringGitName`, `StringPruning`), `GitBackupName`, `Play`, `SQLiteStatement` and `DatabaseRow`. Run them with `swift test`.
+`Tests/iTunes` uses Swift Testing (`@Test`) against target `iTunesTests`. The suite covers `Tag`, `StructuredTag`, `TagListExtraction` (the tag filter), git name and string helpers (`StringGitName`, `StringPruning`), `GitBackupName`, `Play`, `TransformError`, `SQLiteStatement` and `DatabaseRow`, plus the database layer (schema, SQL code, strict tables, missing values, foreign keys, journal mode and the corrections file). `ArchiveForeignKeysTests` runs `Database.archive` on a one-track database. Run them with `swift test`.
 
 Not covered:
 
 - `Repository`, `transformTracks`, `databases` and the query transforms. They need a real git repository.
 - `Batch`, `QueryCommand` and `ArchiveCommand`.
-- The archive SQL.
+- The archive SQL beyond that one track, so renames, duplicate dates and the play heuristics are untested.
 
 ## Open questions
 
 1. After the one-time `archive` run, how should the nightly backup add only the newest snapshot to the archive? The README's Future goal says it should.
-2. What schema fixes would let `archive` run without `--lax-schema`? The README says the plays table currently needs lax constraints.
+2. What data fixes would let `archive` run on the full history without `--lax-schema`? The open Data issues (#921, #924, #929, #935, #936) are the blockers.
 3. Does `transformTracks` need a bound? CPU use does not need one. A bound on results waiting for a consumer is only needed if `batch`'s writes ever fall behind its producers. There is also a `limit` constant in `tagDatum` that could become a `--limit` option.
 4. Should the archive SQL be tested against fixture snapshots? The `Repository` layer could be made testable by taking a `Git` stub.
 5. Should subcommand help strings move into `Localizable.xcstrings`?
