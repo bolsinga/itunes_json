@@ -45,7 +45,7 @@ The `archive` SQL is also long, has no unit tests, keeps every flat snapshot dat
 | **Catalog** | `artists`, `albums`, `songs` | Each run sets every track in the snapshot to its newest attributes. A track that is not in the snapshot keeps the row it has. |
 | **Timeline** | `added`, `released`, `plays`, `playstate`, `findings` | Folded over the snapshots, oldest first. Append-only. |
 
-Because the catalog is set from the newest data and not from a replay, there are no renames to track. A renamed artist or album is just a different name on the same song. The `artistids` and `albumids` mapping tables, and all of `updateArtists` and `updateAlbums`, are not needed. After a run, an artist that no song or album refers to is deleted, and an album that no song refers to is deleted.
+Because the catalog is set from the newest data and not from a replay, there are no renames to track. A renamed artist or album is just a different name on the same song. The `artistids` and `albumids` mapping tables, and all of `updateArtists` and `updateAlbums`, are not needed. After a run, an artist that no song or album refers to is deleted, and an album that no song refers to is deleted. Each is logged before it is deleted: an `artistRemoved` or `albumRemoved` finding in the same transaction holds the whole row (for an artist its name and sort name, for an album its owner, name, sort name, counts and compilation flag), and it is also written to the log. This is decided.
 
 ### Catalog rules
 
@@ -117,7 +117,7 @@ These cannot be edited in Music, and Music may reset them, so the history decide
 
 A finding is `(tag, persistentID?, code, detail)`. They are written to a `findings` table in the database in the same transaction as the rows that caused them. The codes above are the first set:
 
-- `invalidTrack`, `duplicatePersistentID`, `sortNameConflict`, `sharedPlayDate`, `dateAddedChanged`, `compilationNoAlbumArtist`
+- `invalidTrack`, `duplicatePersistentID`, `sortNameConflict`, `sharedPlayDate`, `dateAddedChanged`, `compilationNoAlbumArtist`, `artistRemoved`, `albumRemoved`
 - `noPlayDate`, `countUpDateNotForward`, `countReset`, `countDecreased`, `dateForwardNoCount`, `dateBackward`
 
 **Nothing is dropped without a record.** Every observation that the fold does not apply in full writes a finding. That is every case in the play table except 1, 3 and 4. Case 3 is the same as the state, so there is nothing to record.
