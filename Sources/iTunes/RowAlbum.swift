@@ -10,7 +10,7 @@ import os
 
 protocol RowAlbumInterface {
   func albumName(logger: Logger) -> SortableName
-  func albumTrackCount(logger: Logger) -> Int
+  func albumTrackCount() throws -> Int
   var albumDiscCount: Int { get }
   var albumDiscNumber: Int { get }
   var albumIsCompilation: Int { get }
@@ -18,10 +18,10 @@ protocol RowAlbumInterface {
 }
 
 struct RowAlbum: Hashable, Sendable {
-  init(_ album: RowAlbumInterface, validation: TrackValidation) {
-    self.init(
+  init(_ album: RowAlbumInterface, validation: TrackValidation) throws {
+    try self.init(
       name: album.albumName(logger: validation.noAlbum),
-      trackCount: album.albumTrackCount(logger: validation.noTrackCount),
+      trackCount: album.albumTrackCount(),
       discCount: album.albumDiscCount, discNumber: album.albumDiscNumber,
       compilation: album.albumIsCompilation, albumArtistName: album.albumArtistName)
   }

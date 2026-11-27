@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS songs (
   CHECK(length(name) > 0),
   CHECK(name != sortname),
   CHECK(tracknumber > 0),
-  CHECK(year >= 0),
+  CHECK(year > 0),
   CHECK(duration > 0)
 ) STRICT;
 CREATE TABLE IF NOT EXISTS added (
@@ -202,10 +202,18 @@ CREATE TABLE tracks (
 |-------|-------------|
 | artists | `UNIQUE` on name, `CHECK(length(name) > 0)`, `CHECK(name != sortname)` |
 | albums | the `UNIQUE(...)` tuple, `CHECK(length(name)>0)`, `CHECK(name != sortname)`, `CHECK(trackcount > 0)`. Keeps FK and the disccount/discnumber/compilation checks |
-| songs | `tracknumber > 0`, `year >= 0`, `duration > 0`. Keeps `length(name)>0`, `name != sortname`, UNIQUE, both FKs |
+| songs | `tracknumber > 0`, `year > 0`, `duration > 0`. Keeps `length(name)>0`, `name != sortname`, UNIQUE, both FKs |
 | plays | `UNIQUE(itunesid,date,count)`, `UNIQUE(date)`, `CHECK(count > 0)`. Keeps the FK and `length(date)>0` |
 
-Strict failures are mostly data placeholders: missing track number, track count, or year become `-1`, missing duration `-1`, missing album/artist name the empty `SortableName` (`name=''`). These violate the strict checks, so strict generation fails on incomplete libraries; lax lets the data load for analysis.
+The `CHECK`s on track number, track count, year and duration (`> 0`) can no longer fail, because a track without such a number is rejected before a row is built ("Missing values" below). A missing album name is the empty `SortableName` (`name=''`), which fails the strict albums check; lax lets it load for analysis.
+
+### Missing values
+
+The goal is a database with no made-up values: every track has a track number, track count, year and duration, each greater than zero. A track that lacks one is a data problem, so generation fails with an error naming every such track and what it lacks (`MissingValuesError`, Track+RequiredValues.swift), for the normalized tables (strict and lax), the `--sql-code` output and the flat table alike. Absent, zero and negative numbers all count as missing. Nothing is written as `-1`, and the lax flags do not change this, because they only remove `UNIQUE` and `CHECK` constraints and the check is made before any row is built. The columns are `NOT NULL`, and NULL is not used for unknown values. A `CHECK` accepts NULL and `UNIQUE` treats NULLs as distinct, so NULL would hide the problem the error exposes.
+
+Music leaves out the disc count and disc number for many single-disc albums, which means `1` and `1`, so a missing or zero value is written as `1`. Compilation defaults to `0`, and composer, comments and sort names to `''`. A track with no artist is not written (`isSQLEncodable`). A missing album name is written as the empty name and fails the strict albums check (`CHECK(length(name) > 0)`). A play row with a count but no date has the date `''` and is logged as `noPlayDate`, and a track with no added or release date has no row in `added` or `released`.
+
+Where the data lacks values, in the author's history: audio tracks are almost always complete, and names, artists, albums, track numbers and durations are missing in none of the snapshots sampled. Two groups are not. Tracks with a year of `0` ([#935](https://github.com/bolsinga/itunes_json/issues/935)) and recently added tracks with no track count ([#936](https://github.com/bolsinga/itunes_json/issues/936)) are in the library data and not read from the wrong place: `Track+MediaItem.swift` leaves out a zero track count, disc count and disc number, and copies a zero year, track number and duration as they are. Until those are corrected in the data (a patch, see RFC 0002), generation on the full history fails on them.
 
 ### Column types and STRICT tables
 
@@ -215,7 +223,7 @@ The normalized tables and the flat `tracks` table are STRICT, so the created dat
 
 ### Sort-name handling
 
-`SortableName(name:sorted:)` stores `sorted` as `''` when it equals `name`, so "no special sort name" is always the empty string. This is why the schema has `sortname NOT NULL DEFAULT ''` and `CHECK(name != sortname)` (an empty sortname satisfies the check; a redundant copy does not). Artist sort name falls back `sortArtist ?? sortAlbumArtist`. Ordering (`<`) uses `sorted` if non-empty, else `name`; builders sort rows with `name` only (`$0.name < $1.name` compares the `SortableName` ordering). `artistTableBuilder` logs (`duplicateArtist`) when the same artist name appears with differing sort names; under strict that becomes a UNIQUE failure, under lax two rows share a name. `RowArtist.selectID` matches on `name` only, so SQL-code lax output can resolve to the first of duplicates. The archive SQL reconciles by filling an empty sortname from a sibling row with the same name.
+`SortableName(name:sorted:)` stores `sorted` as `''` when it equals `name`, so "no special sort name" is always the empty string. This is why the schema has `sortname NOT NULL DEFAULT ''` and `CHECK(name != sortname)` (an empty sortname satisfies the check; a redundant copy does not). Artist sort name falls back `sortArtist ?? sortAlbumArtist`. Ordering (`<`) uses `sorted` if non-empty, else `name`; builders sort rows with `name` only (`$0.name < $1.name` compares the `SortableName` ordering). `artistTableBuilder` logs (`duplicateArtist`) when the same artist name appears with differing sort names; under strict that becomes a UNIQUE failure, under lax two rows share a name. In the author's history this happens whenever a newly added album has no sort name until it is set in Music ([#921](https://github.com/bolsinga/itunes_json/issues/921)). `RowArtist.selectID` matches on `name` only, so SQL-code lax output can resolve to the first of duplicates. The archive SQL reconciles by filling an empty sortname from a sibling row with the same name.
 
 ### Plays and deltas
 
@@ -275,7 +283,6 @@ Usage: `tunes backup --sql-code | sqlite3 /tmp/itunes.db`; `tunes query --raw|--
 ## Open questions
 
 - **SQL code transaction**: should the script be wrapped in `BEGIN/COMMIT` (speed, atomicity)?
-- **Sentinels**: should the `-1` placeholders for missing track numbers, track counts, years and durations become NULL, or be replaced by real validation?
 - **Shared play dates:** `UNIQUE(date)` is global across all songs, so it rejects a snapshot where two tracks share a date. It stays, because the shared dates are a data issue ([#929](https://github.com/bolsinga/itunes_json/issues/929)). Should the history be corrected, and should the backup keep fractional seconds?
 - **Deltas**: add a `play_deltas` view (the LAG query).
 

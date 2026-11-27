@@ -8,10 +8,11 @@
 import Foundation
 
 extension Track {
-  func trackRow(_ validation: TrackValidation) -> TrackRow {
-    TrackRow(
+  func trackRow(_ validation: TrackValidation) throws -> TrackRow {
+    try TrackRow(
       album: RowAlbum(self, validation: validation),
-      artist: RowArtist(self, validation: validation), song: RowSong(self, validation: validation),
+      artist: RowArtist(self, validation: validation),
+      song: RowSong(self, validation: validation),
       play: RowPlay(self, validation: validation), add: RowAdd(self), release: RowRelease(self))
   }
 }

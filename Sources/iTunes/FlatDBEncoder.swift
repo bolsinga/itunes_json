@@ -19,9 +19,9 @@ protocol FlatDBEncoderContext: Sendable {
 
   var schema: String { get }
 
-  func insertStatement(_ item: Item) -> Database.Statement
+  func insertStatement(_ item: Item) throws -> Database.Statement
 
-  func row(for item: Item) -> Row
+  func row(for item: Item) throws -> Row
 }
 
 private enum EncodeError: Error {
@@ -40,13 +40,13 @@ struct FlatDBEncoder<Context: FlatDBEncoderContext> {
   func encode(items: [Context.Item]) async throws {
     guard let firstItem = items.first else { throw EncodeError.errorNoItems }
 
-    let rows = items.map { context.row(for: $0) }
+    let rows = try items.map { try context.row(for: $0) }
 
     try await db.transaction { db in
       try db.execute(context.schema)
 
       let statement = try Database.PreparedStatement(
-        sql: context.insertStatement(firstItem), db: db)
+        sql: try context.insertStatement(firstItem), db: db)
 
       try statement.executeAndClose(db) { statement, db in
         for row in rows {

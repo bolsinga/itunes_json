@@ -31,6 +31,10 @@ struct StrictTablesTests {
   @Test func flatTable() async throws {
     try await expectEveryTableIsStrict(
       try await DatabaseFormat.flat(FlatTracksDatabaseContext(storage: .memory))
-        .database(tracks: [Track(album: "Album", artist: "Artist", name: "Song", persistentID: 1)]))
+        .database(tracks: [
+          Track(
+            album: "Album", artist: "Artist", name: "Song", persistentID: 1, totalTime: 1000,
+            trackCount: 1, trackNumber: 1, year: 2000)
+        ]))
   }
 }

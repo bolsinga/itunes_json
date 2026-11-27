@@ -30,29 +30,16 @@ extension Track: RowSongInterface {
     SortableName(name: name, sorted: sortName ?? "")
   }
 
-  var normalizedTrackNumber: Int? {
-    guard let trackNumber, trackNumber > 0 else { return nil }
-    return trackNumber
+  func songTrackNumber() throws -> Int {
+    try requiredNumber(\.trackNumber)
   }
 
-  func normalizedTrackNumber(validation: TrackValidation) -> Int {
-    guard let normalizedTrackNumber else {
-      validation.invalidTrackNumber.error("\(debugLogInformation, privacy: .public)")
-      return -1
-    }
-    return normalizedTrackNumber
+  func songYear() throws -> Int {
+    try requiredNumber(\.year)
   }
 
-  func songYear(logger: Logger) -> Int {
-    guard let year else {
-      logger.error("\(debugLogInformation, privacy: .public)")
-      return -1
-    }
-    return year
-  }
-
-  var songDuration: Int {
-    totalTime ?? -1
+  func songDuration() throws -> Int {
+    try requiredNumber(\.totalTime)
   }
 
   var dateAddedISO8601: String {

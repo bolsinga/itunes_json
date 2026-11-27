@@ -49,13 +49,13 @@ struct TracksSQLSourceEncoder<Context: TracksSQLSourceEncoderContext> {
     }
   }
 
-  private func encode(_ tracks: [Track]) -> String {
-    let encoder = Encoder(rowEncoder: tracks.rowEncoder(context.loggingToken))
+  private func encode(_ tracks: [Track]) throws -> String {
+    let encoder = Encoder(rowEncoder: try tracks.rowEncoder(context.loggingToken))
     return encoder.sqlStatements(schemaOptions: context.schemaOptions)
   }
 
   func encode(_ tracks: [Track]) throws -> Data {
-    guard let data = encode(tracks).data(using: .utf8) else {
+    guard let data = try encode(tracks).data(using: .utf8) else {
       throw TracksSQLSourceEncoderError.cannotMakeData
     }
     return data
