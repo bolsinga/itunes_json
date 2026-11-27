@@ -65,6 +65,7 @@ Because the catalog is set from the newest data and not from a replay, there are
 
   - **When it is written.** Tracks are grouped by album name and disc number. A group is a split when it would become more than one album row for one of two reasons. Either the tracks have the same owner and differ in track count, disc count or compilation flag, or at least one track has the compilation flag and the tracks differ in owner. Albums with the same name by different artists are not a split, because neither has the compilation flag.
   - **What it holds.** The album name and disc number, the reason, each variant (the owner, track count, disc count and compilation flag) with how many tracks have it, and the persistent IDs of the tracks that are not in the most common variant. These are the tracks to look at in Music, and they show whether taking the most common value would be right.
+- **Only music.** The archive has the tracks that `Track.isSQLEncodable` accepts, as the flat databases do. Podcasts, voice memos, TV shows, videos, books, apps and a track with no artist are left out of the catalog and the timeline, without a finding.
 - **Tracks that are no longer in the library.** Their rows stay, with the attributes of the last snapshot that had them. Their plays are part of the listening history. This is decided. `songs` has a `lastseen` column, the tag of the newest snapshot that has the track, and a `removedsongs` view lists the songs whose `lastseen` is not `archivestate.lasttag`.
 - **Invalid tracks.** A track that lacks a required number (RFC 0004, "Missing values") in every snapshot that has it gets a finding (`invalidTrack`, naming what is missing). The track is left out of the catalog and the timeline. This is the 132 tracks with year 0 and the 17 with no track count in the newest snapshot. It is a data problem to fix in Music, then rebuild. This is decided: the track is excluded, not given an unknown value, and its plays appear after the fix. See "Invalid tracks" for what happens when one is fixed.
 
@@ -185,7 +186,7 @@ CREATE TABLE IF NOT EXISTS archivestate (
 - **`albums.artistid` is the album owner**, not the track's artist (see "Catalog rules"). `songs.artistid` stays the track's artist.
 - **`artistids` and `albumids` are removed.**
 - **The strict and lax flags do not apply to `archive`.** The rules produce data that satisfies the strict schema, so lax is not needed.
-- **Views.** `lastplays` and `tracks` keep their meaning.
+- **Views.** `lastplays` and `tracks` keep their meaning. `removedsongs` and `sharedplaydates` are new. The SQL is in `ArchiveSchema.swift`, and `Database.prepareArchive()` creates it and turns on foreign keys for the connection.
 
 ### Update and rebuild
 
