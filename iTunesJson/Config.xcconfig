@@ -1,0 +1,13 @@
+//
+//  Config.xcconfig
+//  SiteApp
+//
+//  Created by Greg Bolsinga on 9/25/23.
+//
+
+// The "?" makes this file optional to build.
+// DevelopmentTeam.xcconfig is .gitignore so it is not added to the repository.
+// It should include the line DEVELOPMENT_TEAM = YOUR_TEAM_ID
+// The project.pbxproj file had to be hand-edited (outside the UI) to add DEVELOPMENT_TEAM = "$(inherited)".
+// This allows this to build locally with signing without keeping the DEVELOPMENT_TEAM on a local git branch.
+#include? "DevelopmentTeam.xcconfig"

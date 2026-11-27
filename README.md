@@ -6,7 +6,7 @@ It can backup to a file or commit to a git repository for listening history. The
 It can also emit SQL (normalized only) or a SQLite3 database (normalized or flat). `tunes backup --sql-code | sqlite3 /tmp/itunes.db` The schema is described in [RFC 0004](docs/rfcs/0004-sqlite-schema.md). Then you can get information such as last playdates in order: `SELECT s.name, a.name, p.date, p.count FROM songs s, artists a, plays p WHERE s.artistid=a.id AND p.itunesid=s.itunesid ORDER BY p.date;` The `plays` table holds the play count Music reports, not the number of plays since the last backup.
 The normalized schema is strict by default. In order to allow work to be done while the data may be incomplete, there are options to create the tables with lax schema constraints.
 
-To have a regular backup schedule, run this as a LaunchAgent. In macOS Sequoia, it must be run in an [application bundle with permission to use the Music Library](https://github.com/bolsinga/iTunesJson), or it will re-request Music Library permission on every launch.
+To have a regular backup schedule, run this as a LaunchAgent. In macOS Sequoia, it must be run in an application bundle with permission to use the Music Library, or it will re-request Music Library permission on every launch. The `iTunesJson` directory is that application: an Xcode project that gives `tunes` a bundle identifier and `NSAppleMusicUsageDescription`, and uses this package as a local package.
 
 The json output of this program is also used as input to [web generator](https://github.com/bolsinga/web_generator), which creates [www.bolsinga.com](https://www.bolsinga.com)
 

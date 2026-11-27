@@ -10,21 +10,22 @@ jobs:
   build:
     runs-on: xcode-27
 
-    strategy:
-      fail-fast: false
-      matrix:
-        destination:
-          - 'generic/platform=macOS'
-          - 'generic/platform=iOS Simulator'
-
     steps:
     - uses: actions/checkout@v7
     - uses: ./.github/actions/setup-xcode
     - name: Build / Test
-      if: matrix.destination == 'generic/platform=macOS'
       run: swift test -v -Xswiftc -warnings-as-errors
-    - name: Build iOS / macOS
-      run: xcodebuild -verbose -skipPackagePluginValidation -scheme iTunes -destination '${{ matrix.destination }}'
+    - name: Build iOS
+      run: xcodebuild -verbose -skipPackagePluginValidation -scheme iTunes -destination 'generic/platform=iOS Simulator'
+
+  app:
+    runs-on: xcode-27
+
+    steps:
+    - uses: actions/checkout@v7
+    - uses: ./.github/actions/setup-xcode
+    - name: Build app
+      run: xcodebuild -verbose -skipPackagePluginValidation -project iTunesJson/iTunesJson.xcodeproj -scheme iTunesJson -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
 
   format:
     runs-on: xcode-27
