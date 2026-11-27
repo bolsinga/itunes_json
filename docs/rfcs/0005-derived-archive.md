@@ -142,6 +142,8 @@ CREATE TABLE IF NOT EXISTS archivestate (
 
 `archivestate.lasttag` is the newest tag applied. An update applies the newest tag in one transaction that also writes `lasttag`. It refuses a tag that is not newer than `lasttag`. A rebuild starts from an empty database and applies every tag, oldest first, in the same way. The tags are ordered by their date, as `archive` orders them today.
 
+Updates come from a separate `archive` run, and `backup` stays as it is. This is decided. A verify mode compares the database with a rebuild. Once that is trusted, `backup` can get an option that runs both in one go.
+
 A rebuild and an update must give the same database. That gives a check for the period the author wants, when the repository and the database are both updated each day: build the database again from the whole history into a temporary file and compare every table with the updated one. A difference means a bug in the rules or in the step.
 
 ### Invalid tracks
@@ -183,7 +185,7 @@ Each snapshot does not become a flat database on the way to the archive. The ste
   | `replace-persistent-ids` | No equivalent yet. A track whose ID changes is a new song with a new history. See the open questions. |
 
 - **`batch` and `query`:** unchanged. They remain the way to look at the data.
-- **`backup`:** may later gain an option to apply the new snapshot to the database after committing it.
+- **`backup`:** unchanged. Once the archive is trusted it may gain an option that applies the new snapshot to the database after committing it.
 
 ## Alternatives considered
 
@@ -212,11 +214,11 @@ The rules are untested on the full history, so these come first:
 4. For each of the five duplicated IDs, compare the two entries' play counts and dates across the 939 snapshots. This shows whether both copies record plays, and whether the entry the rule keeps is the one that moves.
 5. List candidates for a changed ID: the same artist, album and name, where one ID stops appearing and another starts.
 6. Check that `plays.count` equals the running sum of `plays.delta` for every song.
-7. Use fixtures that have a known problem: the Neil Young sort name from 2025-05-30 to 2025-06-01 (#921), and a duplicate ID from #924.
+7. Count the compilations that split into several albums because their tracks have different artists.
+8. Use fixtures that have a known problem: the Neil Young sort name from 2025-05-30 to 2025-06-01 (#921), and a duplicate ID from #924.
 
 ## Open questions
 
 1. **Duplicate persistent IDs.** Do both copies record plays? If they do, keeping the original copy ignores the plays of the other. The first full run measures it (see the verification plan).
 2. **A track whose ID changes.** The design has no equivalent of `replace-persistent-ids`. Is a small hand-kept alias list worth adding, if this happens in the data? The first full run lists candidates (see the verification plan), and aliases are added only if they show up.
-3. **Album identity.** An album is identified by its artist, name, counts and compilation flag (RFC 0004), so a compilation with several track artists is several albums. This RFC does not change that.
-4. **Timing.** Should the database be updated in `backup` once checked, or by a separate `archive` run?
+3. **Album identity.** An album is identified by its artist, name, counts and compilation flag (RFC 0004), so a compilation with several track artists is several albums. This RFC does not change that. The first full run counts how many compilations split into several albums (see the verification plan).
