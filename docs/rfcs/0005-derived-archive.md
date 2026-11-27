@@ -212,7 +212,7 @@ struct PlayStep: Sendable {
   let finding: FindingCode?
 }
 
-func step(_ state: PlayState?, _ observation: PlayObservation) -> PlayStep
+func foldPlayObservation(_ state: PlayState?, _ observation: PlayObservation) -> PlayStep
 ```
 
 A snapshot step reduces the snapshot (one entry per ID), compares each track with its state, and gives the rows to write. It holds the states of about 16,000 songs in a dictionary and writes only the rows that change. A rebuild reads one snapshot at a time, so memory no longer grows with the length of the history. The snapshots can still be decoded in parallel, but they are applied in tag order, with a small bound on how many wait.

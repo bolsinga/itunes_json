@@ -73,7 +73,7 @@ extension PlayObservation {
 }
 
 /// Fold one observation into a song's state, by the nine cases of RFC 0005, in order.
-func step(_ state: PlayState?, _ observation: PlayObservation) -> PlayStep {
+func foldPlayObservation(_ state: PlayState?, _ observation: PlayObservation) -> PlayStep {
   let seen = state ?? PlayState(seenCount: 0, seenDate: "")
   let order = observation.order(after: seen.seenDate)
   // A count of 0 with a date is read as one play.

@@ -26,7 +26,7 @@ struct PlayFoldTests {
     var total = start?.seenCount ?? 0
     var codes = [PlayFindingCode]()
     for o in observations {
-      let s = step(state, o)
+      let s = foldPlayObservation(state, o)
       total += s.play?.delta ?? 0
       state = s.state
       if let f = s.finding { codes.append(f.code) }
@@ -39,7 +39,7 @@ struct PlayFoldTests {
   }
 
   @Test func test_Case1() {
-    let s = step(nil, obs(12, Self.feb3))
+    let s = foldPlayObservation(nil, obs(12, Self.feb3))
     #expect(s.state == PlayState(seenCount: 12, seenDate: Self.feb3))
     #expect(s.play?.date == Self.feb3)
     #expect(s.play?.delta == 12)
@@ -47,7 +47,7 @@ struct PlayFoldTests {
   }
 
   @Test func test_Case2() {
-    let s = step(nil, obs(12, nil))
+    let s = foldPlayObservation(nil, obs(12, nil))
     #expect(s.state == PlayState(seenCount: 0, seenDate: ""))
     #expect(s.play == nil)
     #expect(s.finding?.code == .noPlayDate)
@@ -58,18 +58,18 @@ struct PlayFoldTests {
   }
 
   @Test func test_Case2EmptyString() {
-    #expect(step(nil, obs(12, "")).finding?.code == .noPlayDate)
+    #expect(foldPlayObservation(nil, obs(12, "")).finding?.code == .noPlayDate)
   }
 
   @Test func test_NoStateNoCountNoDate() {
-    let s = step(nil, obs(0, nil))
+    let s = foldPlayObservation(nil, obs(0, nil))
     #expect(s.state == nil)
     #expect(s.play == nil)
     #expect(s.finding == nil)
   }
 
   @Test func test_ZeroCountWithDateIsOnePlay() {
-    let s = step(nil, obs(0, Self.feb3))
+    let s = foldPlayObservation(nil, obs(0, Self.feb3))
     #expect(s.state == PlayState(seenCount: 1, seenDate: Self.feb3))
     #expect(s.play?.delta == 1)
     #expect(s.finding == nil)
@@ -77,7 +77,7 @@ struct PlayFoldTests {
 
   @Test func test_Case3() {
     for date in [nil, "", Self.mar1] {
-      let s = step(Self.baseline, obs(40, date))
+      let s = foldPlayObservation(Self.baseline, obs(40, date))
       #expect(s.state == Self.baseline)
       #expect(s.play == nil)
       #expect(s.finding == nil)
@@ -87,7 +87,7 @@ struct PlayFoldTests {
   @Test func test_Case3Quirk() {
     // A whole-hour shift, as at a daylight saving change, is the same date.
     for shifted in ["2025-03-01T09:00:00Z", "2025-03-01T11:00:00Z", "2025-02-28T10:00:00Z"] {
-      let s = step(Self.baseline, obs(40, shifted))
+      let s = foldPlayObservation(Self.baseline, obs(40, shifted))
       #expect(s.state == Self.baseline)
       #expect(s.state?.seenDate == Self.mar1)
       #expect(s.play == nil)
@@ -96,7 +96,7 @@ struct PlayFoldTests {
   }
 
   @Test func test_Case4() {
-    let s = step(Self.baseline, obs(43, Self.mar9))
+    let s = foldPlayObservation(Self.baseline, obs(43, Self.mar9))
     #expect(s.state == PlayState(seenCount: 43, seenDate: Self.mar9))
     #expect(s.play?.date == Self.mar9)
     #expect(s.play?.delta == 3)
@@ -105,7 +105,7 @@ struct PlayFoldTests {
 
   @Test func test_Case5() {
     for date in [nil, "", Self.mar1, Self.feb20] {
-      let s = step(Self.baseline, obs(43, date))
+      let s = foldPlayObservation(Self.baseline, obs(43, date))
       #expect(s.state == Self.baseline)
       #expect(s.play == nil)
       #expect(s.finding?.code == .countUpDateNotForward)
@@ -115,7 +115,7 @@ struct PlayFoldTests {
   }
 
   @Test func test_Case6() {
-    let s = step(Self.baseline, obs(3, Self.mar9))
+    let s = foldPlayObservation(Self.baseline, obs(3, Self.mar9))
     #expect(s.state == PlayState(seenCount: 3, seenDate: Self.mar9))
     #expect(s.play?.date == Self.mar9)
     #expect(s.play?.delta == 3)
@@ -127,7 +127,7 @@ struct PlayFoldTests {
   }
 
   @Test func test_Case6ZeroCountIsOnePlay() {
-    let s = step(Self.baseline, obs(0, Self.mar9))
+    let s = foldPlayObservation(Self.baseline, obs(0, Self.mar9))
     #expect(s.state == PlayState(seenCount: 1, seenDate: Self.mar9))
     #expect(s.play?.delta == 1)
     #expect(s.finding?.code == .countReset)
@@ -135,7 +135,7 @@ struct PlayFoldTests {
 
   @Test func test_Case7() {
     for date in [nil, Self.mar1] {
-      let s = step(Self.baseline, obs(3, date))
+      let s = foldPlayObservation(Self.baseline, obs(3, date))
       #expect(s.state == PlayState(seenCount: 3, seenDate: Self.mar1))
       #expect(s.play == nil)
       #expect(s.finding?.code == .countDecreased)
@@ -145,20 +145,20 @@ struct PlayFoldTests {
   }
 
   @Test func test_Case7ZeroNoDate() {
-    let s = step(Self.baseline, obs(0, nil))
+    let s = foldPlayObservation(Self.baseline, obs(0, nil))
     #expect(s.state == PlayState(seenCount: 0, seenDate: Self.mar1))
     #expect(s.finding?.code == .countDecreased)
   }
 
   @Test func test_Case8() {
-    let s = step(Self.baseline, obs(40, Self.mar9))
+    let s = foldPlayObservation(Self.baseline, obs(40, Self.mar9))
     #expect(s.state == PlayState(seenCount: 40, seenDate: Self.mar9))
     #expect(s.play == nil)
     #expect(s.finding?.code == .dateForwardNoCount)
   }
 
   @Test func test_Case9() {
-    let s = step(Self.baseline, obs(40, Self.feb20))
+    let s = foldPlayObservation(Self.baseline, obs(40, Self.feb20))
     #expect(s.state == Self.baseline)
     #expect(s.play == nil)
     #expect(s.finding?.code == .dateBackward)
@@ -166,8 +166,8 @@ struct PlayFoldTests {
 
   @Test func test_StoredDateIsVerbatim() {
     let odd = "2025-03-09T18:41:09+00:00"
-    #expect(step(Self.baseline, obs(41, odd)).play?.date == odd)
-    #expect(step(Self.baseline, obs(40, odd)).state?.seenDate == odd)
+    #expect(foldPlayObservation(Self.baseline, obs(41, odd)).play?.date == odd)
+    #expect(foldPlayObservation(Self.baseline, obs(40, odd)).state?.seenDate == odd)
   }
 
   // MARK: Worked examples, with totals
@@ -196,7 +196,7 @@ struct PlayFoldTests {
     #expect(fold(Self.baseline, [obs(43, nil)]).total == 40)
     let r = fold(Self.baseline, [obs(43, nil), obs(44, Self.mar12)])
     #expect(r.total == 44)
-    #expect(step(Self.baseline, obs(44, Self.mar12)).play?.delta == 4)
+    #expect(foldPlayObservation(Self.baseline, obs(44, Self.mar12)).play?.delta == 4)
     #expect(r.codes == [.countUpDateNotForward])
   }
 
