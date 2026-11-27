@@ -59,12 +59,12 @@ Because the catalog is set from the newest data and not from a replay, there are
 
 For each song, the state is `seencount` and `seendate`: the last count and date that the fold accepted as a baseline. The cumulative play count is the `count` of the song's last row in `plays`. A snapshot gives each song an observation `(c, d)`: the `playCount` (a missing count is 0) and the `playDateUTC` (maybe empty). A count of 0 with a date is read as one play, as `Play.normalize` does today.
 
-The rule from the author's notes is that a play count only increases, and when it increases the play date moves forward, and a play date never moves back. Music does not always keep to it, because it sometimes loses a date or resets a count to zero. These are the cases, checked in order. "Forward" means `d` is later than `seendate` by more than the DST quirk. The quirk is a difference that is a whole number of hours, of any size, which includes 0. This is the rule of `Date.compareQuirk`, so the fold needs no new rule, and the 12 hour bound in the archive SQL goes away with that SQL.
+The rule from the author's notes is that a play count only increases, and when it increases the play date moves forward, and a play date never moves back. Music does not always keep to it, because it sometimes loses a date or resets a count to zero. These are the cases, checked in order. "Forward" means `d` is later than `seendate` by more than the DST quirk. An empty `seendate` is earlier than any date. The quirk is a difference that is a whole number of hours, of any size, which includes 0. This is the rule of `Date.compareQuirk`, so the fold needs no new rule, and the 12 hour bound in the archive SQL goes away with that SQL.
 
 | # | Observation compared with the state | What the fold does | Finding |
 |---|---|---|---|
 | 1 | The song has no state yet, `c > 0`, `d` present | Add a play of `c` at `d`. Set the state to `(c, d)`. | none |
-| 2 | No state yet, `c > 0`, `d` empty | Set the state to `(c, '')`. No play. | `noPlayDate` |
+| 2 | No state yet, `c > 0`, `d` empty | No play. Set the state to `(0, '')`, so these plays are counted when a date appears. | `noPlayDate` |
 | 3 | `c == seencount`, `d` empty or equal up to the quirk | Nothing. | none |
 | 4 | `c > seencount`, `d` forward | Add a play of `c - seencount` at `d`. Advance the state to `(c, d)`. | none |
 | 5 | `c > seencount`, `d` empty or not forward | No play. The state does not change, so the next good observation counts these plays. | `countUpDateNotForward` |
@@ -73,9 +73,27 @@ The rule from the author's notes is that a play count only increases, and when i
 | 8 | `c == seencount`, `d` forward | No play. Move `seendate` to `d`. | `dateForwardNoCount` |
 | 9 | `c == seencount`, `d` back by more than the quirk | Nothing. | `dateBackward` |
 
+A song with no state, a count of 0 and no date has never been played, and gets no state. `seendate` is empty only while `seencount` is 0.
+
 Cases 4 and 6 are what `Play.normalize` already does, so the new code keeps the two interpretations the author reached while repairing plays. Case 6 is the one that existing code calls `updateCount`. It is decided that a count that drops while the date moves forward is a reset followed by plays, so the song's total keeps growing across the reset. Cases 5 and 7 are among the ones it drops with an `invalid...` check, which stops the song's fold at that observation. The difference is that here a dropped observation does not abandon the song. It either leaves the baseline alone (5, 9) or moves it down (7), so the next snapshot is compared with something real, and a reset or a lost date no longer makes the later plays invisible.
 
 A play is a delta. Snapshots are not one per play, so a song can be played several times between two of them. The row has the last known date, and the earlier plays of that delta are in the time between the previous date and this one. This is the shape the author describes, and it replaces the row-per-play shape that the finer granularity would have given.
+
+#### Worked examples
+
+Cases 3 to 9 start from a song with a baseline of 40 plays, last played Mar 1. Cases 1 and 2 start from a song the archive has not seen.
+
+| # | What the next snapshot shows | What the fold does | Total after |
+|---|---|---|---|
+| 1 | First seen, 12 plays, last played Feb 3 | Add 12 plays at Feb 3. | 12 |
+| 2 | First seen, 12 plays, no date. Later: 12 plays, Feb 3 | No play at first. When the date appears it is case 4: add 12 plays at Feb 3. | 0, then 12 |
+| 3 | 40 plays, Mar 1 (or no date) | Nothing. | 40 |
+| 4 | 43 plays, Mar 9 | Add 3 plays at Mar 9. | 43 |
+| 5 | 43 plays, no date. Later: 44 plays, Mar 12 | No play at first, and the baseline stays at 40. Later it is case 4: add 4 plays at Mar 12, which include the 3. | 40, then 44 |
+| 6 | 3 plays, Mar 9 | A reset, then 3 plays. Add 3 plays at Mar 9. The baseline becomes 3, Mar 9. | 43 |
+| 7 | 3 plays, no date (or Mar 1) | No play. The baseline becomes 3, Mar 1, and the finding keeps the 3. Later: 5 plays, Mar 12. That is case 4: add 2 plays at Mar 12. | 40, then 42 |
+| 8 | 40 plays, Mar 9 | No play. The baseline date becomes Mar 9. | 40 |
+| 9 | 40 plays, Feb 20 | Nothing. The baseline stays. | 40 |
 
 ### Shared play dates ([#929](https://github.com/bolsinga/itunes_json/issues/929))
 
@@ -95,7 +113,13 @@ A finding is `(tag, persistentID?, code, detail)`. They are written to a `findin
 - `invalidTrack`, `duplicatePersistentID`, `sortNameConflict`, `sharedPlayDate`, `dateAddedChanged`
 - `noPlayDate`, `countUpDateNotForward`, `countReset`, `countDecreased`, `dateForwardNoCount`, `dateBackward`
 
-**Nothing is dropped without a record.** Every observation that the fold does not apply in full, which is every case in the play table except 1, 3 and 4, writes a finding. Its `detail` holds what is needed to apply the observation differently later: the tag, the state before (`seencount`, `seendate`), the observation `(c, d)`, and what the fold did (the plays added, and the new state). A case 3 observation is the same as the state, so there is nothing to record. A finding is written to the log as well, at the time it is written. For example, a song with `seencount` 40 that is next seen with a count of 3 and a later date is case 6. The fold adds 3 plays at that date, and the 40 earlier plays stay in the total. The finding says `countReset`, with the state `(40, <old date>)`, the observation `(3, <new date>)`, and the 3 plays added. Cases 2, 5, 7, 8 and 9 add no play, so their findings are the only place that observation is kept. It is decided that case 7 stays log-only: a count that drops while the date does not move forward adds no play, and the lower count and its date are kept in the finding, so no data is lost at this point. The history is not changed either, so a later rebuild can read the same snapshots with a different rule. The first full run shows how many case 7 findings there are before that is revisited.
+**Nothing is dropped without a record.** Every observation that the fold does not apply in full writes a finding. That is every case in the play table except 1, 3 and 4. Case 3 is the same as the state, so there is nothing to record.
+
+- **What a finding holds:** the tag, the state before (`seencount`, `seendate`), the observation `(c, d)`, and what the fold did (the plays added, and the new state). This is what is needed to apply the observation differently later. It is also written to the log when it is written.
+- **Cases that add a play:** case 6 adds plays, and its finding says how many. In the example above, the finding says `countReset`, with the state `(40, Mar 1)`, the observation `(3, Mar 9)`, and the 3 plays added.
+- **Cases that add no play:** cases 2, 5, 7, 8 and 9 add no play, so their findings are the only place that observation is kept.
+- **Case 7 is decided to stay log-only.** A count that drops while the date does not move forward adds no play. The lower count and its date are kept in the finding, so no data is lost at this point. The history is not changed either, so a later rebuild can read the same snapshots with a different rule. The first full run shows how many case 7 findings there are before that is revisited.
+- **No repeats.** A finding is not written again when the song's last finding has the same code and the same detail apart from the tag. Without this, a song that stays in the same state would add a finding for every snapshot, which is 1,611 rows for each of the 132 tracks with year 0. The first one is kept, with the tag where it began.
 
 The same codes are the validation of the newest `itunes.json`. After `backup` writes and commits a snapshot, the checks that need no state (`invalidTrack`, `duplicatePersistentID`, `sortNameConflict`, `sharedPlayDate`) can run on that snapshot alone and be reported to the person running it. The checks that compare with the previous snapshot need the database state. A finding never stops the backup, because the JSON is the record. Findings are kept in the database and written to the log. Showing them in the iTunesJson app, for example as a notification with a count and the first few tracks, is deferred until the archive works. It is decided not to design the app side now.
 
@@ -118,7 +142,7 @@ CREATE TABLE IF NOT EXISTS plays (
 CREATE TABLE IF NOT EXISTS playstate (
   itunesid TEXT NOT NULL PRIMARY KEY,
   seencount INTEGER NOT NULL,
-  seendate TEXT NOT NULL,            -- '' when it has never been seen with a date
+  seendate TEXT NOT NULL,            -- '' while nothing has been accepted (seencount is then 0)
   FOREIGN KEY(itunesid) REFERENCES songs(itunesid)
 ) STRICT;
 CREATE TABLE IF NOT EXISTS findings (
