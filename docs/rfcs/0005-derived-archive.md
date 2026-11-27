@@ -45,13 +45,20 @@ The `archive` SQL is also long, has no unit tests, keeps every flat snapshot dat
 | **Catalog** | `artists`, `albums`, `songs` | Each run sets every track in the snapshot to its newest attributes. A track that is not in the snapshot keeps the row it has. |
 | **Timeline** | `added`, `released`, `plays`, `playstate`, `findings` | Folded over the snapshots, oldest first. Append-only. |
 
-Because the catalog is set from the newest data and not from a replay, there are no renames to track. A renamed artist or album is just a different name on the same song. The `artistids` and `albumids` mapping tables, and all of `updateArtists` and `updateAlbums`, are not needed. After a run, an artist or album that no song refers to is deleted.
+Because the catalog is set from the newest data and not from a replay, there are no renames to track. A renamed artist or album is just a different name on the same song. The `artistids` and `albumids` mapping tables, and all of `updateArtists` and `updateAlbums`, are not needed. After a run, an artist that no song or album refers to is deleted, and an album that no song refers to is deleted.
 
 ### Catalog rules
 
 - **Newest valid value.** For each attribute, the value comes from the newest snapshot in which the track has a valid one. For a track that is in the newest snapshot, this is almost always that snapshot. The fallback only matters for a value that is invalid in the newest snapshot and was valid before. Old snapshots are never checked against the schema, so a year 0 in 2015 does not matter if the newest data has a year.
 - **Sort names.** An artist's sort name is the sort name that any of its tracks in the snapshot has. If two different non-empty sort names are found, that is a finding, and the one used is the most common, then the first alphabetically. This is what `updateArtists` does today with a sibling row, applied to one snapshot, and it removes the rename that fails in #921.
 - **Duplicate persistent IDs ([#924](https://github.com/bolsinga/itunes_json/issues/924)).** A snapshot can have two different library entries with one ID. Before anything else reads it, the snapshot is reduced to one entry per ID. The entry kept is the one with the earliest `dateAdded`, then the smallest `size`, because the original file is the most likely to be in the next snapshot too. A stable choice matters more than a recent one, because the play fold below compares each snapshot with the one before it. The dropped entry gives a `duplicatePersistentID` finding. No snapshot after 2025-02-07 has one, so the newest data is not affected.
+- **Album owner (decided).** Today an album belongs to the track's artist (`artist ?? albumArtist`), so a compilation whose tracks have different artists becomes one album for each of them. The owner of an album is now, in this order:
+  1. the track's `albumArtist`, if it is not empty, with its `sortAlbumArtist` as the sort name;
+  2. otherwise, if the track has the compilation flag, the artist named `Various Artists`;
+  3. otherwise the track's artist, as today.
+
+  The `Various Artists` row is an ordinary `artists` row. A compilation that has `Various Artists` as its Album Artist in Music and one that gets it from rule 2 are the same row. A compilation that gets the owner from rule 2 writes a `compilationNoAlbumArtist` finding, so each one is listed and can be fixed by setting the Album Artist in Music. This is the only stand-in name in the design, and it is fixed and visible. A song keeps its own track artist in `songs.artistid`. Only `albums.artistid` is the owner.
+- **Album identity (decided).** An album is `(owner, name, trackcount, disccount, discnumber, compilation)`, as in RFC 0004 with the owner changed. Disc number stays in the identity, so each disc of a multi-disc album is its own album row, and the discs of one compilation are separate rows under one owner. Tracks of one disc that disagree on a count or on the compilation flag are still split, which is an open question.
 - **Tracks that are no longer in the library.** Their rows stay, with the attributes of the last snapshot that had them. Their plays are part of the listening history. This is decided. `songs` has a `lastseen` column, the tag of the newest snapshot that has the track, and a `removedsongs` view lists the songs whose `lastseen` is not `archivestate.lasttag`.
 - **Invalid tracks.** A track that lacks a required number (RFC 0004, "Missing values") in every snapshot that has it gets a finding (`invalidTrack`, naming what is missing). The track is left out of the catalog and the timeline. This is the 132 tracks with year 0 and the 17 with no track count in the newest snapshot. It is a data problem to fix in Music, then rebuild. This is decided: the track is excluded, not given an unknown value, and its plays appear after the fix. See "Invalid tracks" for what happens when one is fixed.
 
@@ -110,7 +117,7 @@ These cannot be edited in Music, and Music may reset them, so the history decide
 
 A finding is `(tag, persistentID?, code, detail)`. They are written to a `findings` table in the database in the same transaction as the rows that caused them. The codes above are the first set:
 
-- `invalidTrack`, `duplicatePersistentID`, `sortNameConflict`, `sharedPlayDate`, `dateAddedChanged`
+- `invalidTrack`, `duplicatePersistentID`, `sortNameConflict`, `sharedPlayDate`, `dateAddedChanged`, `compilationNoAlbumArtist`
 - `noPlayDate`, `countUpDateNotForward`, `countReset`, `countDecreased`, `dateForwardNoCount`, `dateBackward`
 
 **Nothing is dropped without a record.** Every observation that the fold does not apply in full writes a finding. That is every case in the play table except 1, 3 and 4. Case 3 is the same as the state, so there is nothing to record.
@@ -121,7 +128,7 @@ A finding is `(tag, persistentID?, code, detail)`. They are written to a `findin
 - **Case 7 is decided to stay log-only.** A count that drops while the date does not move forward adds no play. The lower count and its date are kept in the finding, so no data is lost at this point. The history is not changed either, so a later rebuild can read the same snapshots with a different rule. The first full run shows how many case 7 findings there are before that is revisited.
 - **No repeats.** A finding is not written again when the song's last finding has the same code and the same detail apart from the tag. Without this, a song that stays in the same state would add a finding for every snapshot, which is 1,611 rows for each of the 132 tracks with year 0. The first one is kept, with the tag where it began.
 
-The same codes are the validation of the newest `itunes.json`. After `backup` writes and commits a snapshot, the checks that need no state (`invalidTrack`, `duplicatePersistentID`, `sortNameConflict`, `sharedPlayDate`) can run on that snapshot alone and be reported to the person running it. The checks that compare with the previous snapshot need the database state. A finding never stops the backup, because the JSON is the record. Findings are kept in the database and written to the log. Showing them in the iTunesJson app, for example as a notification with a count and the first few tracks, is deferred until the archive works. It is decided not to design the app side now.
+The same codes are the validation of the newest `itunes.json`. After `backup` writes and commits a snapshot, the checks that need no state (`invalidTrack`, `duplicatePersistentID`, `sortNameConflict`, `sharedPlayDate`, `compilationNoAlbumArtist`) can run on that snapshot alone and be reported to the person running it. The checks that compare with the previous snapshot need the database state. A finding never stops the backup, because the JSON is the record. Findings are kept in the database and written to the log. Showing them in the iTunesJson app, for example as a notification with a count and the first few tracks, is deferred until the archive works. It is decided not to design the app side now.
 
 ### Schema changes (amends RFC 0004)
 
@@ -160,6 +167,7 @@ CREATE TABLE IF NOT EXISTS archivestate (
 
 - **`UNIQUE(date)` is gone from `plays`.** `count` is the derived total, which can differ from Music's count where Music reset it. `plays` stores both `delta` and `count`, so queries that read `plays.count` keep working. They are written in the same insert, and a test checks that `count` is the running sum of `delta`. This is decided.
 - **`songs` gets `lastseen TEXT NOT NULL`**, the tag of the newest snapshot that has the track, and a `removedsongs` view.
+- **`albums.artistid` is the album owner**, not the track's artist (see "Catalog rules"). `songs.artistid` stays the track's artist.
 - **`artistids` and `albumids` are removed.**
 - **The strict and lax flags do not apply to `archive`.** The rules produce data that satisfies the strict schema, so lax is not needed.
 - **Views.** `lastplays` and `tracks` keep their meaning.
@@ -240,11 +248,11 @@ The rules are untested on the full history, so these come first:
 4. For each of the five duplicated IDs, compare the two entries' play counts and dates across the 939 snapshots. This shows whether both copies record plays, and whether the entry the rule keeps is the one that moves.
 5. List candidates for a changed ID: the same artist, album and name, where one ID stops appearing and another starts.
 6. Check that `plays.count` equals the running sum of `plays.delta` for every song.
-7. Count the compilations that split into several albums because their tracks have different artists.
+7. Count the compilations that get the `Various Artists` owner (`compilationNoAlbumArtist`), and the albums that still split because tracks of one disc disagree on a track count, a disc count or the compilation flag.
 8. Use fixtures that have a known problem: the Neil Young sort name from 2025-05-30 to 2025-06-01 (#921), and a duplicate ID from #924.
 
 ## Open questions
 
 1. **Duplicate persistent IDs.** Do both copies record plays? If they do, keeping the original copy ignores the plays of the other. The first full run measures it (see the verification plan).
 2. **A track whose ID changes.** The design has no equivalent of `replace-persistent-ids`. Is a small hand-kept alias list worth adding, if this happens in the data? The first full run lists candidates (see the verification plan), and aliases are added only if they show up.
-3. **Album identity.** An album is identified by its artist, name, counts and compilation flag (RFC 0004), so a compilation with several track artists is several albums. This RFC does not change that. The first full run counts how many compilations split into several albums (see the verification plan).
+3. **Albums that still split.** With the owner fixed, tracks of one disc can still become several albums if they disagree on a track count, a disc count or the compilation flag. Should those three be taken as the most common value for the album, and not be part of its identity? The first full run counts how many albums this affects (see the verification plan).
