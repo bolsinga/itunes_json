@@ -7,13 +7,15 @@ Swift package that snapshots the Music library to JSON, commits each snapshot to
 - `Sources/iTunes/` is the library, and nearly all logic lives here. `Sources/iTunes/Program.swift` is the real root command (`backup` is the default subcommand). Subcommands live in `Backup*`, `Patch/`, `Repair/`, `Batch/`, `Query/`, `Archive/`.
 - `Sources/tunes/Program.swift` is only an `@main` shim.
 - `Tests/iTunes/` uses Swift Testing (`@Test`).
+- `iTunesJson/` is the Xcode app that wraps the package so macOS remembers the Music Library permission. Its project uses the package at the repo root as a local package (`relativePath = ..`), and `iTunesJson/iTunesJson/Program.swift` only calls `iTunes.Program.main()`.
 - `database_building_scripts/db.sh` is a helper script. Its commented-out queries use an older schema (see RFC 0004).
 
 ## Build and test
 
 - `swift build`
+- The app: `xcodebuild -skipPackagePluginValidation -project iTunesJson/iTunesJson.xcodeproj -scheme iTunesJson -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO`. CI builds it in the `app` job.
 - `swift test -v -Xswiftc -warnings-as-errors` is what CI runs, so keep the build warning-free.
-- Before pushing, run `xcrun swift-format format --in-place --recursive Sources Tests Package.swift` and `xcrun swift-format lint --strict --recursive Sources Tests Package.swift`. CI fails on a change or a finding. Mark a deliberate lint finding with `// swift-format-ignore: <Rule>`.
+- Before pushing, run `xcrun swift-format format --in-place --recursive Sources Tests Package.swift iTunesJson` and `xcrun swift-format lint --strict --recursive Sources Tests Package.swift iTunesJson`. CI fails on a change or a finding. Mark a deliberate lint finding with `// swift-format-ignore: <Rule>`.
 - The CI jobs, the shared actions and the `iTunesLibrary` guard for the iOS build are in RFC 0001.
 - `swift-tools-version:6.4`, macOS 27 / iOS 27. All dependencies are pinned with `exact:`.
 

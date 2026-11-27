@@ -97,7 +97,7 @@
 			mainGroup = FE8291142CD28D4D00AA6AC6;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				FE82912F2CD28EE500AA6AC6 /* XCRemoteSwiftPackageReference "itunes_json" */,
+				FE82912F2CD28EE500AA6AC6 /* XCLocalSwiftPackageReference ".." */,
 			);
 			preferredProjectObjectVersion = 110;
 			productRefGroup = FE82911E2CD28D4D00AA6AC6 /* Products */;
@@ -319,21 +319,17 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		FE82912F2CD28EE500AA6AC6 /* XCRemoteSwiftPackageReference "itunes_json" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/bolsinga/itunes_json";
-			requirement = {
-				kind = exactVersion;
-				version = 4.0.0;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		FE82912F2CD28EE500AA6AC6 /* XCLocalSwiftPackageReference ".." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ..;
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		FE8291302CD28EE500AA6AC6 /* iTunes */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = FE82912F2CD28EE500AA6AC6 /* XCRemoteSwiftPackageReference "itunes_json" */;
+			package = FE82912F2CD28EE500AA6AC6 /* XCLocalSwiftPackageReference ".." */;
 			productName = iTunes;
 		};
 /* End XCSwiftPackageProductDependency section */

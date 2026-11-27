@@ -4,7 +4,7 @@ description: Runs swift-format over the code base and fails if it changes any fi
 inputs:
   paths:
     description: The directories to format and lint.
-    default: Sources Tests Package.swift
+    default: Sources Tests Package.swift iTunesJson
 
 runs:
   using: composite
