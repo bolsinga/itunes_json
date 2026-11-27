@@ -18,6 +18,7 @@ enum DatabaseError: Error {
   case cannotBind(String)
   case cannotStep(String)
   case cannotSerialize
+  case foreignKeyViolations(Int)
   case noColumnName(Int)
   case unimplementedColumnType(Int)
   case noColumnText(Int)

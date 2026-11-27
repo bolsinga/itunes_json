@@ -96,7 +96,7 @@ On the author's full history, `--db` (normalized) cannot build a database for th
 1. If `--clear` is given, it deletes `<dir>/<file-name>.db`.
 2. It opens or creates the normalized database file with `format.database(tracks: [])`.
 3. It builds a flat in-memory database for every tag with `repository.databases(.flat(...))`. The results are collected and sorted by tag, oldest first.
-4. For each one, `Database.archive(into:)` runs `ATTACH DATABASE '<path>' AS archive`. It then runs six transactions of raw SQL, each in its own transaction: `updateArtists`, `updateAlbums`, `updateAdded`, `updateReleased`, `updateSongs`, `updatePlays`.
+4. For each one, `Database.archive(into:)` runs `ATTACH DATABASE '<path>' AS archive`. It turns on `PRAGMA foreign_keys` for that connection, so the archive tables are checked as they are written, and then runs six transactions of raw SQL, each in its own transaction: `updateArtists`, `updateAlbums`, `updateAdded`, `updateReleased`, `updateSongs`, `updatePlays`. After the last snapshot, `PRAGMA foreign_key_check` on the archive must find nothing, or `archive` fails.
 
 The SQL is in private string constants at the top of the file. It tracks entities by `itunesid` (the persistent ID). It keeps `artistids` and `albumids` mapping tables so that renamed artists or albums keep one row. It uses `EXCEPT` against the archive to insert only new or changed data. `updatePlays` adds a row to `archive.plays` only when the (itunesid, date, count) differs from `archive.lastplays`. It also contains two heuristics:
 
