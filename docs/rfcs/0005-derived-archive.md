@@ -53,7 +53,7 @@ Because the catalog is set from the newest data and not from a replay, there are
 - **Sort names.** An artist's sort name is the sort name that any of its tracks in the snapshot has. If two different non-empty sort names are found, that is a finding, and the one used is the most common, then the first alphabetically. This is what `updateArtists` does today with a sibling row, applied to one snapshot, and it removes the rename that fails in #921.
 - **Duplicate persistent IDs ([#924](https://github.com/bolsinga/itunes_json/issues/924)).** A snapshot can have two different library entries with one ID. Before anything else reads it, the snapshot is reduced to one entry per ID. The entry kept is the one with the earliest `dateAdded`, then the smallest `size`, because the original file is the most likely to be in the next snapshot too. A stable choice matters more than a recent one, because the play fold below compares each snapshot with the one before it. The dropped entry gives a `duplicatePersistentID` finding. No snapshot after 2025-02-07 has one, so the newest data is not affected.
 - **Tracks that are no longer in the library.** Their rows stay, with the attributes of the last snapshot that had them. Their plays are part of the listening history.
-- **Invalid tracks.** A track that lacks a required number (RFC 0004, "Missing values") in every snapshot that has it gets a finding (`invalidTrack`, naming what is missing). The track is left out of the catalog and the timeline. This is the 132 tracks with year 0 and the 17 with no track count in the newest snapshot. It is a data problem to fix in Music, then rebuild. See "Invalid tracks" for what happens when one is fixed.
+- **Invalid tracks.** A track that lacks a required number (RFC 0004, "Missing values") in every snapshot that has it gets a finding (`invalidTrack`, naming what is missing). The track is left out of the catalog and the timeline. This is the 132 tracks with year 0 and the 17 with no track count in the newest snapshot. It is a data problem to fix in Music, then rebuild. This is decided: the track is excluded, not given an unknown value, and its plays appear after the fix. See "Invalid tracks" for what happens when one is fixed.
 
 ### The play fold
 
@@ -73,7 +73,7 @@ The rule from the author's notes is that a play count only increases, and when i
 | 8 | `c == seencount`, `d` forward | No play. Move `seendate` to `d`. | `dateForwardNoCount` |
 | 9 | `c == seencount`, `d` back by more than the quirk | Nothing. | `dateBackward` |
 
-Cases 4 and 6 are what `Play.normalize` already does, so the new code keeps the two interpretations the author reached while repairing plays. Case 6 is the one that existing code calls `updateCount`. Cases 5 and 7 are among the ones it drops with an `invalid...` check, which stops the song's fold at that observation. The difference is that here a dropped observation does not abandon the song. It either leaves the baseline alone (5, 9) or moves it down (7), so the next snapshot is compared with something real, and a reset or a lost date no longer makes the later plays invisible.
+Cases 4 and 6 are what `Play.normalize` already does, so the new code keeps the two interpretations the author reached while repairing plays. Case 6 is the one that existing code calls `updateCount`. It is decided that a count that drops while the date moves forward is a reset followed by plays, so the song's total keeps growing across the reset. Cases 5 and 7 are among the ones it drops with an `invalid...` check, which stops the song's fold at that observation. The difference is that here a dropped observation does not abandon the song. It either leaves the baseline alone (5, 9) or moves it down (7), so the next snapshot is compared with something real, and a reset or a lost date no longer makes the later plays invisible.
 
 A play is a delta. Snapshots are not one per play, so a song can be played several times between two of them. The row has the last known date, and the earlier plays of that delta are in the time between the previous date and this one. This is the shape the author describes, and it replaces the row-per-play shape that the finer granularity would have given.
 
@@ -195,6 +195,7 @@ Each snapshot does not become a flat database on the way to the archive. The ste
 ## Risks
 
 - **A conservative reset rule loses plays.** Case 7 records no play when a count drops and the date does not move forward. Plays between the reset and the next observation are not counted. The findings show how often that happens, and the rule can change before the next rebuild.
+- **Case 6 can add plays that did not happen.** If a drop in the count is a glitch and not a reset, the fold adds the lower count as new plays. Each one is a `countReset` finding, so they can be listed and checked.
 - **The newest data is trusted.** An edit in Music applies to the whole history. This is the aim, and the history keeps the old values.
 - **The derived `count` is not Music's `playCount`.** They differ for a song that was reset. The `countReset` findings list them.
 - **Two copies of one ID.** The rule picks the original file. Whether both copies record plays is not known.
@@ -206,17 +207,16 @@ The rules are untested on the full history, so these come first:
 1. Run the fold with no database and count the findings by code. This shows how common each case is, and whether case 7 loses many plays.
 2. For every song with no reset finding, check that the derived `count` after the newest snapshot equals Music's `playCount`.
 3. Check that an update of one snapshot equals a rebuild.
-4. Use fixtures that have a known problem: the Neil Young sort name from 2025-05-30 to 2025-06-01 (#921), and a duplicate ID from #924.
+4. For each of the five duplicated IDs, compare the two entries' play counts and dates across the 939 snapshots. This shows whether both copies record plays, and whether the entry the rule keeps is the one that moves.
+5. Use fixtures that have a known problem: the Neil Young sort name from 2025-05-30 to 2025-06-01 (#921), and a duplicate ID from #924.
 
 ## Open questions
 
-1. **Tracks with a bad year or no track count (#935, #936).** Recommended: exclude them and report them, then fix them in Music. The other choice is to allow an explicit unknown. Is year 0 something Music can fix by hand?
-2. **Duplicate persistent IDs.** Do both copies record plays? If they do, keeping the original copy ignores the plays of the other.
-3. **A track whose ID changes.** The design has no equivalent of `replace-persistent-ids`. Is a small hand-kept alias list worth adding, if this happens in the data?
-4. **Quirk bound.** `Date.compareQuirk` treats any whole-hour difference as the same, and the archive SQL only under 12 hours. This RFC uses the SQL's bound. Should the Swift code change to match?
-5. **Count down and date forward (case 6).** It is read as a reset followed by plays, as `Play.normalize` reads it. Is that right, or should it be a plain finding?
-6. **Stored total.** `plays.count` and `plays.delta` hold the same information. Keep both, or keep `delta` and compute the total in a view?
-7. **Removed tracks.** Keep their rows and plays (recommended), or only tracks in the newest snapshot?
-8. **Findings in the app.** How should the iTunesJson app get the findings and show them? The app calls `Program.main()`, so it does not see structured output today.
-9. **Album identity.** An album is identified by its artist, name, counts and compilation flag (RFC 0004), so a compilation with several track artists is several albums. This RFC does not change that.
-10. **Timing.** Should the database be updated in `backup` once checked, or by a separate `archive` run?
+1. **Duplicate persistent IDs.** Do both copies record plays? If they do, keeping the original copy ignores the plays of the other. The first full run measures it (see the verification plan).
+2. **A track whose ID changes.** The design has no equivalent of `replace-persistent-ids`. Is a small hand-kept alias list worth adding, if this happens in the data?
+3. **Quirk bound.** `Date.compareQuirk` treats any whole-hour difference as the same, and the archive SQL only under 12 hours. This RFC uses the SQL's bound. Should the Swift code change to match?
+4. **Stored total.** `plays.count` and `plays.delta` hold the same information. Keep both, or keep `delta` and compute the total in a view?
+5. **Removed tracks.** Keep their rows and plays (recommended), or only tracks in the newest snapshot?
+6. **Findings in the app.** How should the iTunesJson app get the findings and show them? The app calls `Program.main()`, so it does not see structured output today.
+7. **Album identity.** An album is identified by its artist, name, counts and compilation flag (RFC 0004), so a compilation with several track artists is several albums. This RFC does not change that.
+8. **Timing.** Should the database be updated in `backup` once checked, or by a separate `archive` run?
