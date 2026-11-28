@@ -138,11 +138,14 @@ extension Database {
 }
 
 extension Repository {
-  /// The snapshots after `tag`, if there is one, in tag order. The tags are the ones
-  /// `tagDatum()` reads. A few are read and decoded at once, and one is applied at a time.
-  func snapshots(after tag: String?, window: Int = 4) async throws -> OrderedReads<[Track]> {
+  /// The snapshots after `tag`, if there is one, up to `last`, if there is one, in tag order. The
+  /// tags are the ones `tagDatum()` reads. A few are read and decoded at once, and one is applied
+  /// at a time.
+  func snapshots(after tag: String?, through last: String? = nil, window: Int = 4) async throws
+    -> OrderedReads<[Track]>
+  {
     try await git.status()
-    let tags = try await git.tags().stampOrderedMatching(after: tag)
+    let tags = try await git.tags().stampOrderedMatching(after: tag, through: last)
     let git = self.git
     let filename = backupFile.filename
     return OrderedReads(tags: tags, window: window) { tag in

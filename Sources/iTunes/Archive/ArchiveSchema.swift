@@ -12,6 +12,14 @@ enum ArchiveSchema {
   /// The version written to `archivestate`. Change it when the tables change.
   static let version = "1"
 
+  /// The tables that verifying compares, with the rows of each that are compared. The tool
+  /// version is not compared, because it says which build wrote the archive.
+  static let comparedTables: [(table: String, filter: String)] = [
+    ("artists", ""), ("albums", ""), ("songs", ""), ("added", ""), ("released", ""),
+    ("plays", ""), ("playstate", ""), ("findings", ""),
+    ("archivestate", "WHERE key != 'toolversion'"),
+  ]
+
   /// itunesid is TEXT since UInt is bigger than Int64 in sqlite.
   static let tables = """
     CREATE TABLE IF NOT EXISTS artists (

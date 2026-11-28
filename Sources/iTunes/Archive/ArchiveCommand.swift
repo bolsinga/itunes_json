@@ -182,6 +182,10 @@ struct ArchiveCommand: AsyncParsableCommand {
     return outputDirectory.appending(path: fileName).appendingPathExtension("db")
   }
 
+  /// Compare the archive with a rebuild of its snapshots.
+  @Flag(help: .hidden)
+  var verify: Bool = false
+
   /// Applies the snapshots after the newest one the archive has. The lax flags do not apply.
   private func runDerived() async throws {
     let db = try Database(
@@ -198,7 +202,41 @@ struct ArchiveCommand: AsyncParsableCommand {
     }
   }
 
+  /// Rebuilds every snapshot up to the newest one the archive has into a temporary file, and
+  /// compares the two. An update and a rebuild must give the same archive, so a difference is a
+  /// bug in the rules or in the step.
+  private func runVerify() async throws {
+    guard FileManager.default.fileExists(atPath: outputFile.path) else {
+      throw ValidationError("There is no archive at \(outputFile.path).")
+    }
+    let archive = try Database(
+      context: Database.Context(storage: .file(outputFile), loggingToken: nil))
+    let rebuiltFile = FileManager.default.temporaryDirectory.appending(
+      path: "\(UUID().uuidString).db")
+    let rebuilt = try Database(
+      context: Database.Context(storage: .file(rebuiltFile), loggingToken: nil))
+    defer { try? FileManager.default.removeItem(at: rebuiltFile) }
+    do {
+      guard let last = try await archive.archiveLastTag() else {
+        throw ValidationError("The archive has no snapshots.")
+      }
+      let snapshots = try await repository.snapshots(after: nil, through: last)
+      let summary = try await rebuilt.archiveSnapshots(snapshots)
+      let differences = try await archive.archiveDifferences(rebuiltAt: rebuiltFile.path)
+      guard differences.isEmpty else { throw ArchiveVerifyError(differences: differences) }
+      print(
+        "The archive is equal to a rebuild of \(summary.applied) snapshot(s), through \(last).")
+      await archive.close()
+      await rebuilt.close()
+    } catch {
+      await archive.close()
+      await rebuilt.close()
+      throw error
+    }
+  }
+
   func run() async throws {
+    if verify { return try await runVerify() }
     if clear { _ = try? FileManager.default.removeItem(at: outputFile) }
     if derived { return try await runDerived() }
 

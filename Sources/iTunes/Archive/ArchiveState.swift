@@ -44,6 +44,24 @@ struct SnapshotChanges: Sendable {
   /// The required numbers of each song that has no catalog row, because it never had all of them.
   /// A song that has a row has them in the row.
   let partialAttributes: [UInt: CatalogAttributes]
+  /// What the songs that have no row have shown so far, which is replayed when one gets a row.
+  let pending: [UInt: PendingTrack]
+}
+
+/// What a track that is not valid yet has shown, so that its history is folded once it is. See RFC
+/// 0005, "Invalid tracks".
+struct PendingTrack: Codable, Hashable, Sendable {
+  struct Observation: Codable, Hashable, Sendable {
+    let tag: String
+    let count: Int
+    let date: String?
+  }
+
+  /// The first non-empty date added and release date the track had.
+  var added: String?
+  var released: String?
+  /// The play count and play date when they changed, oldest first.
+  var observations = [Observation]()
 }
 
 /// What the archive has to know to apply the next snapshot. It holds no tracks, so it grows with
@@ -63,6 +81,8 @@ struct ArchiveState: Equatable, Sendable {
   var playDateOwners = [String: UInt]()
   /// The detail of the last finding written for a song and code.
   var lastDetails = [SongFindingKey: String]()
+  /// What each song that has no row has shown. It is empty for a song once it has a row.
+  var pending = [UInt: PendingTrack]()
   /// The findings that are not about a song, and were in the previous snapshot.
   var activeOtherFindings = Set<OtherFindingKey>()
 

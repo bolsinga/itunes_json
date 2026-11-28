@@ -21,11 +21,12 @@ enum TagOrder {
 }
 
 extension Array where Element == String {
-  /// The tags that are snapshots, one for each stamp, in tag order, and only those after `tag` if
-  /// there is one.
-  func stampOrderedMatching(after tag: String?) -> [Element] {
-    let tags = stampOrderedMatching
-    guard let tag else { return tags }
-    return tags.filter { TagOrder.isOrderedBefore(tag, $0) }
+  /// The tags that are snapshots, one for each stamp, in tag order, and only those after `tag` and
+  /// up to `last` if there are such tags.
+  func stampOrderedMatching(after tag: String?, through last: String? = nil) -> [Element] {
+    var tags = stampOrderedMatching
+    if let tag { tags = tags.filter { TagOrder.isOrderedBefore(tag, $0) } }
+    if let last { tags = tags.filter { !TagOrder.isOrderedBefore(last, $0) } }
+    return tags
   }
 }
