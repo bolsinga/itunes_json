@@ -57,6 +57,9 @@ struct AlbumFinding: Equatable, Sendable {
   let persistentID: UInt?
   let code: AlbumFindingCode
   let detail: String
+  /// The tracks that the finding is about besides `persistentID`. For a split album, the tracks
+  /// that are not in the most common variant.
+  var related: [UInt] = []
 }
 
 enum AlbumSplitReason: String, Comparable, Sendable {
@@ -125,7 +128,8 @@ extension Array where Element == Track {
         return AlbumFinding(
           persistentID: nil, code: .albumSplit,
           detail:
-            "album=\(key.name) discNumber=\(key.discNumber) reasons=\(reasonText) variants=\(variantText) outliers=\(outlierText)"
+            "album=\(key.name) discNumber=\(key.discNumber) reasons=\(reasonText) variants=\(variantText) outliers=\(outlierText)",
+          related: outliers
         )
       }
   }

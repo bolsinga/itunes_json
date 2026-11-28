@@ -11,6 +11,10 @@ import Foundation
 struct InvalidCatalogTrack: Hashable, Sendable {
   let persistentID: UInt
   let name: String
+  /// The artist and album names, which are empty if the track has none. They tell where to look in
+  /// Music.
+  let artist: String
+  let album: String
   /// What is missing, as `Track.missingRequiredFields` names it.
   let missing: [String]
 }
@@ -81,12 +85,18 @@ struct CatalogReduction: Sendable {
       if missing.isEmpty {
         valid.append(track)
       } else {
+        let artist = track.artistName?.name ?? ""
+        let album = track.album ?? ""
         invalid.append(
-          InvalidCatalogTrack(persistentID: track.persistentID, name: track.name, missing: missing))
+          InvalidCatalogTrack(
+            persistentID: track.persistentID, name: track.name, artist: artist, album: album,
+            missing: missing))
         findings.append(
           CatalogFinding(
             persistentID: track.persistentID, code: .invalidTrack,
-            detail: "\"\(track.name)\" has no \(missing.joined(separator: ", "))"))
+            detail:
+              "\"\(track.name)\" by \(artist) on \"\(album)\" has no \(missing.joined(separator: ", "))"
+          ))
       }
     }
 
@@ -122,7 +132,7 @@ struct CatalogReduction: Sendable {
   }
 
   /// An artist's sort name is the one any of its tracks has.
-  private static func fillSortNames(_ tracks: [Track], findings: inout [CatalogFinding])
+  static func fillSortNames(_ tracks: [Track], findings: inout [CatalogFinding])
     -> [Track]
   {
     var counts = [String: [String: Int]]()  // artist -> sort name -> tracks with it

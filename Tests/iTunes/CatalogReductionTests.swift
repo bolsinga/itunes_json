@@ -121,7 +121,10 @@ struct CatalogReductionTests {
     let result = reduce([track])
     #expect(result.tracks.isEmpty)
     #expect(
-      result.invalid == [InvalidCatalogTrack(persistentID: 0, name: "Song", missing: [field])])
+      result.invalid == [
+        InvalidCatalogTrack(
+          persistentID: 0, name: "Song", artist: "", album: "", missing: [field])
+      ])
     #expect(result.findings.count == 1)
     #expect(result.findings[0].code == .invalidTrack)
     #expect(result.findings[0].persistentID == 0)
