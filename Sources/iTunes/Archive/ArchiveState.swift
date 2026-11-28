@@ -38,6 +38,12 @@ struct SnapshotChanges: Sendable {
   let released: [DateRow]
   /// The findings to write, after the repeats are left out.
   let findings: [FindingRecord]
+  /// The findings that are not about a song that this snapshot had, which the next snapshot needs
+  /// for the no-repeat rule. Ordered by code, then detail.
+  let activeOtherFindings: [ArchiveState.OtherFindingKey]
+  /// The required numbers of each song that has no catalog row, because it never had all of them.
+  /// A song that has a row has them in the row.
+  let partialAttributes: [UInt: CatalogAttributes]
 }
 
 /// What the archive has to know to apply the next snapshot. It holds no tracks, so it grows with
@@ -65,7 +71,7 @@ struct ArchiveState: Equatable, Sendable {
     let code: String
   }
 
-  struct OtherFindingKey: Hashable, Sendable {
+  struct OtherFindingKey: Hashable, Codable, Sendable {
     let code: String
     let detail: String
   }

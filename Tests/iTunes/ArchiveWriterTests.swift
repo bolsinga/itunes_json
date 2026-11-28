@@ -276,6 +276,7 @@ extension SnapshotChanges {
   fileprivate func with(tag: String) -> SnapshotChanges {
     SnapshotChanges(
       tag: tag, songs: songs, plays: plays, playStates: playStates, added: added,
-      released: released, findings: findings)
+      released: released, findings: findings, activeOtherFindings: activeOtherFindings,
+      partialAttributes: partialAttributes)
   }
 }

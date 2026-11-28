@@ -194,7 +194,7 @@ CREATE TABLE IF NOT EXISTS archivestate (
 
 Updates come from a separate `archive` run, and `backup` stays as it is. This is decided. A verify mode compares the database with a rebuild. Once that is trusted, `backup` can get an option that runs both in one go.
 
-A rebuild and an update must give the same database. That gives a check for the period the author wants, when the repository and the database are both updated each day: build the database again from the whole history into a temporary file and compare every table with the updated one. A difference means a bug in the rules or in the step.
+An update reads the state it needs from the database (`Database.loadArchiveState()`). Almost all of it is in the tables: the play state, the derived totals, the first dates, `lastseen`, the owner of each play date, and the last finding of each song and code. Two things are not, and `archivestate` keeps them: the findings that are not about a song that the last snapshot had (`activefindings`), and the required numbers of a song that has no row because it never had all of them (`partialattributes`). A rebuild and an update must give the same database. That gives a check for the period the author wants, when the repository and the database are both updated each day: build the database again from the whole history into a temporary file and compare every table with the updated one. A difference means a bug in the rules or in the step.
 
 ### Invalid tracks
 
