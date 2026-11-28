@@ -12,6 +12,11 @@ extension Logger {
   fileprivate static let archiveDriver = Logger(category: "archiveDriver")
 }
 
+/// The repository has no tag that is a snapshot.
+struct GitNoSnapshots: Error, CustomStringConvertible {
+  var description: String { "The repository has no snapshots." }
+}
+
 enum ArchiveRunError: Error, CustomStringConvertible {
   /// A snapshot could not be read or decoded. The archive has every snapshot before it.
   case cannotRead(tag: String, error: any Error)
@@ -138,6 +143,17 @@ extension Database {
 }
 
 extension Repository {
+  /// The newest snapshot, which is the last tag in tag order.
+  func newestSnapshot() async throws -> Tag<[Track]> {
+    try await git.status()
+    guard let tag = try await git.tags().stampOrderedMatching.last else {
+      throw GitNoSnapshots()
+    }
+    return Tag(
+      tag: tag,
+      item: try Track.array(from: try await git.show(commit: tag, path: backupFile.filename)))
+  }
+
   /// The snapshots after `tag`, if there is one, up to `last`, if there is one, in tag order. The
   /// tags are the ones `tagDatum()` reads. A few are read and decoded at once, and one is applied
   /// at a time.

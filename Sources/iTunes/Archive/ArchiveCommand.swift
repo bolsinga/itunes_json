@@ -171,7 +171,7 @@ struct ArchiveCommand: AsyncParsableCommand {
       return url
     })
   )
-  var outputDirectory: URL
+  var outputDirectory: URL?
 
   /// Optional file name to use.
   @Option(help: "File name to use when outputDirectory is used.")
@@ -179,8 +179,13 @@ struct ArchiveCommand: AsyncParsableCommand {
 
   /// Outputfile where data will be writen, if outputDirectory is not specified.
   private var outputFile: URL {
-    return outputDirectory.appending(path: fileName).appendingPathExtension("db")
+    return (outputDirectory ?? .currentDirectory()).appending(path: fileName)
+      .appendingPathExtension("db")
   }
+
+  /// Print what is wrong in the newest snapshot, which is the data to fix in Music.
+  @Flag(help: .hidden)
+  var report: Bool = false
 
   /// Compare the archive with a rebuild of its snapshots.
   @Flag(help: .hidden)
@@ -235,7 +240,19 @@ struct ArchiveCommand: AsyncParsableCommand {
     }
   }
 
+  func validate() throws {
+    if !report && outputDirectory == nil {
+      throw ValidationError("Missing expected argument '--output-directory <output-directory>'")
+    }
+  }
+
+  private func runReport() async throws {
+    let snapshot = try await repository.newestSnapshot()
+    print(ArchiveReport(tag: snapshot.tag, tracks: snapshot.item).text)
+  }
+
   func run() async throws {
+    if report { return try await runReport() }
     if verify { return try await runVerify() }
     if clear { _ = try? FileManager.default.removeItem(at: outputFile) }
     if derived { return try await runDerived() }
