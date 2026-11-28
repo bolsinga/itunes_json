@@ -90,6 +90,12 @@ extension Database {
         state.attributes[id] = attributes
       }
     }
+    if let text = try readArchiveState(ArchiveState.pendingKey) {
+      for (key, entry) in try decoder.decode([String: PendingTrack].self, from: Data(text.utf8)) {
+        guard let id = UInt(key) else { continue }
+        state.pending[id] = entry
+      }
+    }
     return state
   }
 }

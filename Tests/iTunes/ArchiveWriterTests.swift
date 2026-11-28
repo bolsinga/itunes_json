@@ -277,6 +277,6 @@ extension SnapshotChanges {
     SnapshotChanges(
       tag: tag, songs: songs, plays: plays, playStates: playStates, added: added,
       released: released, findings: findings, activeOtherFindings: activeOtherFindings,
-      partialAttributes: partialAttributes)
+      partialAttributes: partialAttributes, pending: pending)
   }
 }

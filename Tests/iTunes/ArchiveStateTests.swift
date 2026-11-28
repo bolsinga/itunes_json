@@ -210,6 +210,76 @@ struct ArchiveStateTests {
     #expect(second.songs.first?.trackCount == 9)
   }
 
+  @Test func invalidTrackThatIsFixedGetsItsHistoryFolded() {
+    var state = ArchiveState()
+    let first = state.apply(
+      snapshot(
+        "t1",
+        [
+          track(
+            id: 1, dateAdded: "2019-01-01T00:00:01Z", releaseDate: "2001-02-03T04:05:06Z",
+            playCount: 5, playDate: Self.feb3, year: 0)
+        ]))
+    #expect(first.plays.isEmpty)
+    #expect(first.pending[1]?.observations.count == 1)
+    _ = state.apply(
+      snapshot("t2", [track(id: 1, playCount: 6, playDate: Self.mar1, year: 0)]))
+    // Fixed in Music, and the older snapshots are still as they were.
+    let fixed = state.apply(
+      snapshot(
+        "t3", [track(id: 1, dateAdded: "2021-01-01T00:07:01Z", playCount: 7, playDate: Self.mar9)]))
+    #expect(
+      fixed.plays == [
+        PlayRow(persistentID: 1, date: Self.feb3, delta: 5, count: 5, tag: "t1"),
+        PlayRow(persistentID: 1, date: Self.mar1, delta: 1, count: 6, tag: "t2"),
+        PlayRow(persistentID: 1, date: Self.mar9, delta: 1, count: 7, tag: "t3"),
+      ])
+    #expect(fixed.playStates == [1: PlayState(seenCount: 7, seenDate: Self.mar9)])
+    // The first dates are the first the track had.
+    #expect(fixed.added == [DateRow(persistentID: 1, date: "2019-01-01T00:00:01Z")])
+    #expect(fixed.released == [DateRow(persistentID: 1, date: "2001-02-03T04:05:06Z")])
+    #expect(fixed.findings.map(\.code) == ["dateAddedChanged"])
+    #expect(fixed.pending.isEmpty)
+    #expect(state.pending.isEmpty)
+  }
+
+  @Test func whatAnInvalidTrackShowsIsKeptOnlyWhenItChanges() {
+    var state = ArchiveState()
+    // Nothing is shown yet.
+    _ = state.apply(snapshot("t1", [track(id: 1, year: 0)]))
+    #expect(state.pending[1]?.observations.isEmpty == true)
+    _ = state.apply(snapshot("t2", [track(id: 1, playCount: 5, playDate: Self.feb3, year: 0)]))
+    _ = state.apply(snapshot("t3", [track(id: 1, playCount: 5, playDate: Self.feb3, year: 0)]))
+    _ = state.apply(snapshot("t4", [track(id: 1, playCount: 6, playDate: Self.mar1, year: 0)]))
+    #expect(
+      state.pending[1]?.observations == [
+        PendingTrack.Observation(tag: "t2", count: 5, date: Self.feb3),
+        PendingTrack.Observation(tag: "t4", count: 6, date: Self.mar1),
+      ])
+  }
+
+  @Test func replayedObservationsKeepTheirOwnTags() {
+    var state = ArchiveState()
+    // No play date at first, then one.
+    _ = state.apply(snapshot("t1", [track(id: 1, playCount: 5, playDate: nil, year: 0)]))
+    _ = state.apply(snapshot("t2", [track(id: 1, playCount: 5, playDate: Self.feb3, year: 0)]))
+    let fixed = state.apply(snapshot("t3", [track(id: 1, playCount: 5, playDate: Self.feb3)]))
+    #expect(
+      fixed.plays == [PlayRow(persistentID: 1, date: Self.feb3, delta: 5, count: 5, tag: "t2")])
+    let noPlayDate = fixed.findings.filter { $0.code == "noPlayDate" }
+    #expect(noPlayDate.map(\.tag) == ["t1"])
+  }
+
+  @Test func invalidTrackWithNoFixKeepsWhatItShowedAndAddsNoPlays() {
+    var state = ArchiveState()
+    let changes = state.apply(
+      snapshot("t1", [track(id: 1, playCount: 5, playDate: Self.feb3, year: 0)]))
+    #expect(changes.plays.isEmpty)
+    #expect(changes.playStates.isEmpty)
+    #expect(changes.pending.keys.sorted() == [1])
+    #expect(state.playStates.isEmpty)
+  }
+
   // MARK: Findings
 
   @Test func repeatedSongFindingIsWrittenOnce() {

@@ -334,6 +334,7 @@ extension ArchiveState {
   /// The keys of `archivestate` that hold what an update needs and the tables do not have.
   static let activeFindingsKey = "activefindings"
   static let partialAttributesKey = "partialattributes"
+  static let pendingKey = "pendingtracks"
 }
 
 extension Database {
@@ -350,6 +351,11 @@ extension Database {
       try encoder.encode(
         Dictionary(
           uniqueKeysWithValues: changes.partialAttributes.map { (String($0.key), $0.value) })
+      ).asUTF8String())
+    try setArchiveState(
+      ArchiveState.pendingKey,
+      try encoder.encode(
+        Dictionary(uniqueKeysWithValues: changes.pending.map { (String($0.key), $0.value) })
       ).asUTF8String())
   }
 }

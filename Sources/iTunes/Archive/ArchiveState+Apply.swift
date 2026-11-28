@@ -30,12 +30,17 @@ extension ArchiveState {
       )
     }
 
-    var findings = reduction.findings.map { Finding.catalog($0) }
-    findings += reduction.tracks.compilationNoAlbumArtistFindings.map { .album($0) }
-    findings += reduction.tracks.albumSplitFindings.map { .album($0) }
+    var findings = reduction.findings.map { (Finding.catalog($0), tag) }
+    findings += reduction.tracks.compilationNoAlbumArtistFindings.map { (.album($0), tag) }
+    findings += reduction.tracks.albumSplitFindings.map { (.album($0), tag) }
 
-    var plays = [PlayRow]()
-    var changedStates = [UInt: PlayState]()
+    // A track that is not valid yet is kept, until it is.
+    let invalidIDs = Set(reduction.invalid.map(\.persistentID))
+    for track in reduction.entries where invalidIDs.contains(track.persistentID) {
+      keepPending(track, tag: tag)
+    }
+
+    var folded = Folded()
     var newAdded = [DateRow]()
     var newReleased = [DateRow]()
 
@@ -43,14 +48,29 @@ extension ArchiveState {
       let id = track.persistentID
       lastSeen[id] = tag
 
+      // What the track showed while it was not valid happened first.
+      let waiting = pending.removeValue(forKey: id)
+      if let waiting {
+        if added[id] == nil, let date = waiting.added {
+          added[id] = date
+          newAdded.append(DateRow(persistentID: id, date: date))
+        }
+        if released[id] == nil, let date = waiting.released {
+          released[id] = date
+          newReleased.append(DateRow(persistentID: id, date: date))
+        }
+      }
+
       if let date = track.dateAdded, !date.isEmpty {
         if let first = added[id] {
           if first.differsBeyondQuirk(from: date) {
             findings.append(
-              .timeline(
-                TimelineFinding(
-                  persistentID: id, code: .dateAddedChanged,
-                  detail: "first \(first), now \(date)")))
+              (
+                .timeline(
+                  TimelineFinding(
+                    persistentID: id, code: .dateAddedChanged,
+                    detail: "first \(first), now \(date)")), tag
+              ))
           }
         } else {
           added[id] = date
@@ -62,50 +82,93 @@ extension ArchiveState {
         newReleased.append(DateRow(persistentID: id, date: date))
       }
 
-      let before = playStates[id]
-      let step = foldPlayObservation(
-        before, PlayObservation(count: track.playCount ?? 0, date: track.playDateUTC))
-      if step.state != before {
-        playStates[id] = step.state
-        if let state = step.state { changedStates[id] = state }
+      for observation in waiting?.observations ?? [] {
+        fold(
+          PlayObservation(count: observation.count, date: observation.date), of: id,
+          tag: observation.tag, into: &folded)
       }
-      if let play = step.play {
-        let total = playTotals[id, default: 0] + play.delta
-        playTotals[id] = total
-        plays.append(
-          PlayRow(persistentID: id, date: play.date, delta: play.delta, count: total, tag: tag))
-        if let owner = playDateOwners[play.date], owner != id {
-          findings.append(
-            .timeline(
-              TimelineFinding(
-                persistentID: id, code: .sharedPlayDate,
-                detail: "\(play.date) is also a play date of \(owner)")))
-        } else {
-          playDateOwners[play.date] = id
-        }
-      }
-      if let finding = step.finding {
-        findings.append(.play(persistentID: id, finding))
-      }
+      fold(
+        PlayObservation(count: track.playCount ?? 0, date: track.playDateUTC), of: id, tag: tag,
+        into: &folded)
     }
 
-    let records = record(findings, tag: tag)
+    let records = record(findings + folded.findings, tag: tag)
     return SnapshotChanges(
-      tag: tag, songs: reduction.tracks, plays: plays, playStates: changedStates,
+      tag: tag, songs: reduction.tracks, plays: folded.plays, playStates: folded.states,
       added: newAdded, released: newReleased, findings: records,
       activeOtherFindings: activeOtherFindings.sorted {
         ($0.code, $0.detail) < ($1.code, $1.detail)
       },
-      partialAttributes: attributes.filter { lastSeen[$0.key] == nil })
+      partialAttributes: attributes.filter { lastSeen[$0.key] == nil }, pending: pending)
+  }
+
+  /// The rows and findings that folding observations gives.
+  private struct Folded {
+    var plays = [PlayRow]()
+    var states = [UInt: PlayState]()
+    var findings = [(Finding, String)]()
+  }
+
+  /// Folds one observation of a song that was made at `tag`.
+  private mutating func fold(
+    _ observation: PlayObservation, of id: UInt, tag: String, into folded: inout Folded
+  ) {
+    let before = playStates[id]
+    let step = foldPlayObservation(before, observation)
+    if step.state != before {
+      playStates[id] = step.state
+      if let state = step.state { folded.states[id] = state }
+    }
+    if let play = step.play {
+      let total = playTotals[id, default: 0] + play.delta
+      playTotals[id] = total
+      folded.plays.append(
+        PlayRow(persistentID: id, date: play.date, delta: play.delta, count: total, tag: tag))
+      if let owner = playDateOwners[play.date], owner != id {
+        folded.findings.append(
+          (
+            .timeline(
+              TimelineFinding(
+                persistentID: id, code: .sharedPlayDate,
+                detail: "\(play.date) is also a play date of \(owner)")), tag
+          ))
+      } else {
+        playDateOwners[play.date] = id
+      }
+    }
+    if let finding = step.finding {
+      folded.findings.append((.play(persistentID: id, finding), tag))
+    }
+  }
+
+  /// Keeps what an invalid track shows, when it is different from the last time.
+  private mutating func keepPending(_ track: Track, tag: String) {
+    var entry = pending[track.persistentID] ?? PendingTrack()
+    if entry.added == nil, let date = track.dateAdded, !date.isEmpty { entry.added = date }
+    if entry.released == nil, let date = track.releaseDate, !date.isEmpty {
+      entry.released = date
+    }
+    let observation = PendingTrack.Observation(
+      tag: tag, count: track.playCount ?? 0, date: track.playDateUTC)
+    if let last = entry.observations.last {
+      if (last.count, last.date) != (observation.count, observation.date) {
+        entry.observations.append(observation)
+      }
+    } else if observation.count != 0 || !(observation.date ?? "").isEmpty {
+      entry.observations.append(observation)
+    }
+    pending[track.persistentID] = entry
   }
 
   /// Leaves out a finding that repeats the last one. A finding about a song repeats when the
   /// song's last finding with the same code has the same detail. A finding that is not about a
   /// song repeats when the previous snapshot had it.
-  private mutating func record(_ findings: [Finding], tag: String) -> [FindingRecord] {
+  private mutating func record(_ findings: [(Finding, String)], tag: String)
+    -> [FindingRecord]
+  {
     var records = [FindingRecord]()
     var other = Set<OtherFindingKey>()
-    for finding in findings {
+    for (finding, tag) in findings {
       if let id = finding.persistentID {
         let key = SongFindingKey(persistentID: id, code: finding.code)
         guard lastDetails[key] != finding.detail else { continue }

@@ -40,7 +40,7 @@ struct ArchiveReaderTests {
           track(id: 1, artist: "A", playCount: 40, playDate: Self.mar1, sortArtist: "A, The"),
           track(id: 2, artist: "A"),
           // A year of 0 in every snapshot until t3.
-          track(id: 3, artist: "B", year: 0),
+          track(id: 3, artist: "B", playCount: 5, playDate: Self.feb3, year: 0),
           // A compilation with no Album Artist.
           track(id: 4, name: "Comp", album: "Hits", artist: "C", compilation: true),
           // One ID twice.
@@ -59,7 +59,7 @@ struct ArchiveReaderTests {
         [
           track(id: 1, artist: "A", playCount: 43, playDate: Self.mar9, sortArtist: "A, The"),
           track(id: 2, artist: "A"),
-          track(id: 3, artist: "B", year: 0),
+          track(id: 3, artist: "B", playCount: 6, playDate: Self.mar1, year: 0),
           track(id: 4, name: "Comp", album: "Hits", artist: "C", compilation: true),
           track(id: 7, artist: "F", year: 0),
           track(id: 8, artist: "G", playCount: 4, playDate: Self.feb3),
@@ -71,7 +71,7 @@ struct ArchiveReaderTests {
         [
           track(id: 1, artist: "A", playCount: 43, playDate: Self.mar9, sortArtist: "A, The"),
           track(id: 2, artist: "A", sortArtist: "A, The"),
-          track(id: 3, artist: "B", playCount: 7, playDate: Self.mar1, year: 2001),
+          track(id: 3, artist: "B", playCount: 7, playDate: Self.mar9, year: 2001),
           track(id: 4, name: "Comp", album: "Hits", artist: "C", compilation: true),
           track(id: 7, artist: "F", year: 0),
         ]
@@ -83,7 +83,7 @@ struct ArchiveReaderTests {
           track(id: 1, artist: "A", playCount: 2, playDate: Self.mar20, sortArtist: "A, The"),
           // The sort name is gone again.
           track(id: 2, artist: "A", trackCount: 3),
-          track(id: 3, artist: "B", playCount: 7, playDate: Self.mar1, year: 2001),
+          track(id: 3, artist: "B", playCount: 7, playDate: Self.mar9, year: 2001),
           track(
             id: 4, name: "Comp", album: "Hits", artist: "C", compilation: true,
             dateAdded: "2022-02-02T02:22:22Z"),
