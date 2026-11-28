@@ -66,6 +66,7 @@ After gathering, `Source.gather(reduce:)` does two things:
 | `--itunes` / `--musickit` | `Source`. Default is itunes. |
 | `--json` (default), `--json-git`, `--sql-code`, `--db`, `--flat` | `DestinationContext`. |
 | `--reduce` | Minimal, music-only tracks. |
+| `--report` | Prints what is wrong in the data now (RFC 0005, `ArchiveReport`) instead of writing anything. It reads the library with the same source, `--reduce` and `--patch-url`, and ignores the destination. |
 | `--lax-artists`, `--lax-albums`, `--lax-songs`, `--lax-plays` | `[SchemaFlag]`, mapped to the `SchemaOptions` option set (`SchemaFlag.swift`, `SchemaOptions.swift`). They apply to the normalized schema only, so `--sql-code` and `--db`. `--flat` ignores them. |
 | `--output-directory <dir>` | Created (with intermediate directories) if missing. |
 | `--file-name <name>` | Defaults to `iTunes-yyyy-MM-dd` (`String+DefaultName.swift`). The extension comes from the destination: `.json`, `.sql` or `.db`. |
