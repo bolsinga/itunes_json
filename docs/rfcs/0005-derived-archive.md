@@ -277,7 +277,7 @@ The rules are untested on the full history, so these come first:
 2. For every song with no reset finding, check that the derived `count` after the newest snapshot equals Music's `playCount`.
 3. Check that an update of one snapshot equals a rebuild.
 4. For each of the five duplicated IDs, compare the two entries' play counts and dates across the 939 snapshots. This shows whether both copies record plays, and whether the entry the rule keeps is the one that moves.
-5. List candidates for a changed ID: the same artist, album and name, where one ID stops appearing and another starts.
+5. List candidates for a changed ID: the same artist, album, name and track number, where one ID stops appearing and another starts soon after (`archive --id-changes`, which reads every snapshot).
 6. Check that `plays.count` equals the running sum of `plays.delta` for every song.
 7. Count the compilations that get the `Various Artists` owner (`compilationNoAlbumArtist`), and the `albumSplit` findings, by reason. These show how many albums still split, and which tracks cause it.
 8. Check that the newest snapshot gives no `invalidTrack` finding. The author expects #935 and #936 are fixed in the newest Music data.
@@ -287,4 +287,4 @@ The rules are untested on the full history, so these come first:
 ## Open questions
 
 1. **Duplicate persistent IDs.** Do both copies record plays? If they do, keeping the original copy ignores the plays of the other. The first full run measures it (see the verification plan).
-2. **A track whose ID changes.** The design has no equivalent of `replace-persistent-ids`. Is a small hand-kept alias list worth adding, if this happens in the data? The first full run lists candidates (see the verification plan), and aliases are added only if they show up.
+2. **A track whose ID changes.** The design has no equivalent of `replace-persistent-ids`. Is a small hand-kept alias list worth adding, if this happens in the data? `archive --id-changes` lists the candidates: one ID that is gone from the newest snapshot, and a different ID with the same artist, album, name and track number that starts within 3 snapshots after it, counting only the first such successor. The first full run found 69 candidates. 66 of them are the 11 tracks of U2's "Songs of Innocence", which are removed and added again 6 times from 2015 to 2023, each time with new IDs, and none of them has plays. The other 3 are "Unwrapped, Ungiven" by Spent (the old ID had 1 play in 2009 and the new one has none), "Jane Says" by Jane's Addiction, and "Tumbling Tumbleweeds" by Michael Nesmith & The First National Band (the new ID has 1 play). No alias list is added, since an alias would join the history of one track, and this can be revisited if it happens more.

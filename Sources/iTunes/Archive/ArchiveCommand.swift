@@ -183,6 +183,10 @@ struct ArchiveCommand: AsyncParsableCommand {
       .appendingPathExtension("db")
   }
 
+  /// Print the tracks whose persistent ID may have changed, read from every snapshot.
+  @Flag(help: .hidden)
+  var idChanges: Bool = false
+
   /// Print what is wrong in the newest snapshot, which is the data to fix in Music.
   @Flag(help: .hidden)
   var report: Bool = false
@@ -241,7 +245,7 @@ struct ArchiveCommand: AsyncParsableCommand {
   }
 
   func validate() throws {
-    if !report && outputDirectory == nil {
+    if !report && !idChanges && outputDirectory == nil {
       throw ValidationError("Missing expected argument '--output-directory <output-directory>'")
     }
   }
@@ -251,7 +255,14 @@ struct ArchiveCommand: AsyncParsableCommand {
     print(ArchiveReport(tag: snapshot.tag, tracks: snapshot.item).text)
   }
 
+  private func runIDChanges() async throws {
+    let changes = try await repository.idChanges()
+    print("\(changes.count) track(s) whose persistent ID may have changed.")
+    for change in changes { print(change.text) }
+  }
+
   func run() async throws {
+    if idChanges { return try await runIDChanges() }
     if report { return try await runReport() }
     if verify { return try await runVerify() }
     if clear { _ = try? FileManager.default.removeItem(at: outputFile) }
