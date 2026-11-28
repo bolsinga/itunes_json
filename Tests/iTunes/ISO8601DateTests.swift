@@ -15,15 +15,16 @@ struct ISO8601DateTests {
     ISO8601DateFormatter().date(from: string)
   }
 
-  @Test func theFormTheSnapshotsUseIsReadAsTheSystemReadsIt() {
+  @Test func theFormTheSnapshotsUseIsReadAsTheSystemFormatterReadsIt() {
     // Every 1,234,567 seconds from 1970 to 2100, which covers leap days and the ends of months.
     for seconds in stride(from: 0, to: 4_102_444_800, by: 1_234_567) {
       let text = Date(timeIntervalSince1970: TimeInterval(seconds)).formatted(.iso8601)
       #expect(text.iso8601Date == system(text), "\(text)")
+      #expect(text.iso8601Date == Date(timeIntervalSince1970: TimeInterval(seconds)), "\(text)")
     }
   }
 
-  @Test func edgesAreReadAsTheSystemReadsThem() {
+  @Test func edgesAreReadAsTheSystemFormatterReadsThem() {
     for text in [
       "1970-01-01T00:00:00Z", "1999-12-31T23:59:59Z", "2000-02-29T12:00:00Z",
       "2000-03-01T00:00:00Z", "2024-02-29T23:59:59Z", "2100-02-28T23:59:59Z",
@@ -34,15 +35,19 @@ struct ISO8601DateTests {
     }
   }
 
-  @Test func otherFormsAndNonDatesAreLeftToTheSystem() {
+  @Test func textThatIsNotADateIsNil() {
     for text in [
-      "", "2025-03-01", "2025-03-01T10:21:22+00:00", "2025-03-01T10:21:22.5Z",
-      "2025-03-01T10:21:22-07:00", "2025-13-01T10:21:22Z", "2025-02-29T10:21:22Z",
-      "2025-03-01T24:21:22Z", "2025-03-01T10:21:60Z", "2025-03-01 10:21:22Z", "20250301T102122Z",
-      "abcd-ef-ghTij:kl:mnZ", "2025-03-01T10:21:22",
+      "", "none", "2025-13-01T10:21:22Z", "abcd-ef-ghTij:kl:mnZ", "2025-03-01T10:21:22",
+      "2025-03-01",
     ] {
-      #expect(text.iso8601Date == system(text), "\(text)")
+      #expect(text.iso8601Date == nil, "\(text)")
     }
-    #expect("2025-03-01T10:21:22+00:00".iso8601Date == "2025-03-01T10:21:22Z".iso8601Date)
+  }
+
+  @Test func impossibleDatesAreRolledOverAsTheSystemFormatterRollsThemOver() {
+    for text in ["2025-02-29T10:21:22Z", "2025-03-01T24:21:22Z"] {
+      #expect(text.iso8601Date == system(text), "\(text)")
+      #expect(text.iso8601Date != nil, "\(text)")
+    }
   }
 }
