@@ -67,6 +67,12 @@ struct BackupCommand: AsyncParsableCommand {
   )
   var laxSchema: [SchemaFlag] = []
 
+  /// Report what is wrong in the data, and do not back it up.
+  @Flag(
+    help:
+      "Print what is wrong in the library data now, as the archive finds it, and do not back it up. Uses the same Input Source, --reduce and --patch-url as a backup, and ignores the destination."
+  ) var report: Bool = false
+
   /// Optional Output Directory for output file.
   @Option(
     help:
@@ -106,6 +112,8 @@ struct BackupCommand: AsyncParsableCommand {
 
   /// Validates the input matrix.
   func validate() throws {
+    // A report writes nothing, so it has no destination to check.
+    guard !report else { return }
     switch destination {
     case .db, .flat:
       if outputFile == nil {
@@ -161,6 +169,10 @@ struct BackupCommand: AsyncParsableCommand {
   }
 
   func run() async throws {
+    if report {
+      print(ArchiveReport(tag: "live", tracks: try await tracks()).text)
+      return
+    }
     try await context.emit(tracks())
   }
 }
