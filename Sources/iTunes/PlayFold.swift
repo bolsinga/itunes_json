@@ -59,11 +59,13 @@ private enum DateOrder {
 
 extension PlayObservation {
   fileprivate func order(after seenDate: String) -> DateOrder {
-    guard let date, let new = ISO8601DateFormatter().date(from: date) else { return .empty }
+    guard let date, let new = date.iso8601Date else { return .empty }
     // An empty seen date is earlier than any date.
-    guard !seenDate.isEmpty, let seen = ISO8601DateFormatter().date(from: seenDate) else {
+    guard !seenDate.isEmpty, let seen = seenDate.iso8601Date else {
       return .forward
     }
+    // The same text is the same date.
+    if date == seenDate { return .same }
     switch seen.compareQuirk(new) {
     case .orderedAscending: return .forward
     case .orderedSame, .orderedSameQuirk: return .same

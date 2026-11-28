@@ -180,7 +180,7 @@ extension Track {
 
   /// A missing or unreadable date sorts after every real one.
   private var dateAddedValue: Date {
-    guard let dateAdded, let date = ISO8601DateFormatter().date(from: dateAdded) else {
+    guard let dateAdded, let date = dateAdded.iso8601Date else {
       return .distantFuture
     }
     return date
