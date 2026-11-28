@@ -141,9 +141,9 @@ extension String {
   /// Two dates differ when they are not the same instant up to the DST quirk. A date that cannot be
   /// read differs if the text differs.
   fileprivate func differsBeyondQuirk(from other: String) -> Bool {
-    let formatter = ISO8601DateFormatter()
-    guard let lhs = formatter.date(from: self), let rhs = formatter.date(from: other) else {
-      return self != other
+    if self == other { return false }
+    guard let lhs = iso8601Date, let rhs = other.iso8601Date else {
+      return true
     }
     switch lhs.compareQuirk(rhs) {
     case .orderedSame, .orderedSameQuirk: return false
