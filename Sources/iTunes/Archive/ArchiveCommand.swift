@@ -147,6 +147,10 @@ struct ArchiveCommand: AsyncParsableCommand {
   @Flag(help: "Pass true if the archive database should be emptied before running.")
   var clear: Bool = false
 
+  /// Build the archive with the derived archive of RFC 0005, which will replace the SQL below.
+  @Flag(help: .hidden)
+  var derived: Bool = false
+
   /// Lax normalized database schema table constraints.
   @Flag(help: "Lax normalized database schema table constraints")
   var laxSchema: [SchemaFlag] = []
@@ -178,8 +182,25 @@ struct ArchiveCommand: AsyncParsableCommand {
     return outputDirectory.appending(path: fileName).appendingPathExtension("db")
   }
 
+  /// Applies the snapshots after the newest one the archive has. The lax flags do not apply.
+  private func runDerived() async throws {
+    let db = try Database(
+      context: Database.Context(storage: .file(outputFile), loggingToken: nil))
+    do {
+      try await db.prepareArchive()
+      let snapshots = try await repository.snapshots(after: try await db.archiveLastTag())
+      let summary = try await db.archiveSnapshots(snapshots)
+      print(summary.text)
+      await db.close()
+    } catch {
+      await db.close()
+      throw error
+    }
+  }
+
   func run() async throws {
     if clear { _ = try? FileManager.default.removeItem(at: outputFile) }
+    if derived { return try await runDerived() }
 
     let format = DatabaseFormat.normalized(
       DatabaseContext(storage: .file(outputFile), schemaOptions: laxSchema.schemaOptions))
