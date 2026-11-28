@@ -117,7 +117,7 @@ Two songs can have one date. The fold stores the dates as they are. Moving a dat
 
 These cannot be edited in Music, and Music may reset them, so the history decides (RFC 0002 reaches the same rule for repair).
 
-- **`added`:** the first non-empty `dateAdded` the track had, in tag order. Later values that differ by more than the quirk are a `dateAddedChanged` finding.
+- **`added`:** the first non-empty `dateAdded` the track had, in tag order. Later values that differ by more than the quirk are a `dateAddedChanged` finding. The same change is not written again while the date is the last one written up to the quirk, because Music moves every date by an hour at a daylight saving change and the change would be written at each one.
 - **`released`:** the first non-empty `releaseDate` in tag order. A track with none has no row, as today.
 
 ### Date fidelity

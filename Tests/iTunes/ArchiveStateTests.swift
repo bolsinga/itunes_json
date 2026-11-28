@@ -128,6 +128,27 @@ struct ArchiveStateTests {
     #expect(state.added[1] == "2020-01-01T00:00:01Z")
   }
 
+  @Test func dateAddedChangeIsNotWrittenAgainAtADaylightSavingChange() {
+    var state = ArchiveState()
+    func written(_ tag: String, _ dateAdded: String) -> [String] {
+      state.apply(snapshot(tag, [track(id: 1, dateAdded: dateAdded)])).findings.map(\.detail)
+    }
+    let first = "2020-01-01T00:00:01Z"
+    #expect(written("t1", first).isEmpty)
+    // A real change.
+    let changed = "2021-06-01T00:07:01Z"
+    #expect(written("t2", changed) == ["first \(first), now \(changed)"])
+    // The daylight saving changes move it by an hour, back and forth, and it is the same change.
+    #expect(written("t3", "2021-06-01T01:07:01Z").isEmpty)
+    #expect(written("t4", changed).isEmpty)
+    #expect(written("t5", "2021-05-31T23:07:01Z").isEmpty)
+    // Seconds are a different change, and so is a day.
+    #expect(written("t6", "2021-06-01T01:07:05Z").count == 1)
+    #expect(written("t7", "2021-06-02T01:07:05Z").count == 1)
+    // And it is written once for the new date.
+    #expect(written("t8", "2021-06-02T02:07:05Z").isEmpty)
+  }
+
   @Test func dateAddedMovedByWholeHoursIsNotAFinding() {
     var state = ArchiveState()
     _ = state.apply(snapshot("t1", [track(id: 1, dateAdded: "2020-01-01T00:00:01Z")]))

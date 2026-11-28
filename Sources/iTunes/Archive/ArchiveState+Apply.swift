@@ -63,7 +63,7 @@ extension ArchiveState {
 
       if let date = track.dateAdded, !date.isEmpty {
         if let first = added[id] {
-          if first.differsBeyondQuirk(from: date) {
+          if first.differsBeyondQuirk(from: date), isNewDateAddedChange(date, of: id) {
             findings.append(
               (
                 .timeline(
@@ -139,6 +139,16 @@ extension ArchiveState {
     if let finding = step.finding {
       folded.findings.append((.play(persistentID: id, finding), tag))
     }
+  }
+
+  /// Whether a date added that differs from the first one is not the change that was last
+  /// written for the song. Music moves every date by an hour at a daylight saving change, so the
+  /// same change is seen again with a date that is the last one up to the quirk, and is not new.
+  private func isNewDateAddedChange(_ date: String, of id: UInt) -> Bool {
+    let key = SongFindingKey(
+      persistentID: id, code: TimelineFindingCode.dateAddedChanged.rawValue)
+    guard let last = lastDetails[key], let range = last.range(of: ", now ") else { return true }
+    return String(last[range.upperBound...]).differsBeyondQuirk(from: date)
   }
 
   /// Keeps what an invalid track shows, when it is different from the last time.
