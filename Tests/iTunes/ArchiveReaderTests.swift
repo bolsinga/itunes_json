@@ -90,6 +90,19 @@ struct ArchiveReaderTests {
           track(id: 7, artist: "F", year: 0),
         ]
       ),
+      (
+        // A daylight saving change moves the date added of a track by an hour again.
+        "t5",
+        [
+          track(id: 1, artist: "A", playCount: 2, playDate: Self.mar20, sortArtist: "A, The"),
+          track(id: 2, artist: "A", trackCount: 3),
+          track(id: 3, artist: "B", playCount: 7, playDate: Self.mar9, year: 2001),
+          track(
+            id: 4, name: "Comp", album: "Hits", artist: "C", compilation: true,
+            dateAdded: "2022-02-02T03:22:22Z"),
+          track(id: 7, artist: "F", year: 0),
+        ]
+      ),
     ]
   }
 
